@@ -571,7 +571,7 @@ class EnhancedShutterCard extends HTMLElement {
 
 }
 
-customElements.define("shutter-card", EnhancedShutterCard);
+customElements.define("enhanced-shutter-card", EnhancedShutterCard);
 
 //###########################################
 
