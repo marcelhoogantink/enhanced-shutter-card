@@ -160,60 +160,60 @@ class EnhancedShutterCard extends HTMLElement {
       shutter.dataset.max_closing_position = max_closing_position;
 
       shutter.innerHTML = `
-        <div class="sc-shutter-top">
-          <div class="sc-shutter-label"></div>
-          <div class="sc-shutter-position">
+        <div class="${shutter.className}-top">
+          <div class="${shutter.className}-label"></div>
+          <div class="${shutter.className}-position">
           </div>
         </div>
-        <div class="sc-shutter-middle" style="flex-flow: ${ (buttonsInRow ? 'column': 'row') + (buttonsContainerReversed ? '-reverse' : '') } nowrap;">
-          <div class="sc-shutter-buttons" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
-            `+(partial?`<ha-icon-button label="Partially close (${partial}%)" class="sc-shutter-button sc-shutter-button-partial" data-command="${SHUTTER_PARTIAL}" data-position="${partial}"><ha-icon icon="mdi:arrow-expand-vertical"></ha-icon></ha-icon-button>`:``)+`
+        <div class="${shutter.className}-middle" style="flex-flow: ${ (buttonsInRow ? 'column': 'row') + (buttonsContainerReversed ? '-reverse' : '') } nowrap;">
+          <div class="${shutter.className}-buttons" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
+            `+(partial?`<ha-icon-button label="Partially close (${partial}%)" class="${shutter.className}-button ${shutter.className}-button-partial" data-command="${SHUTTER_PARTIAL}" data-position="${partial}"><ha-icon icon="mdi:arrow-expand-vertical"></ha-icon></ha-icon-button>`:``)+`
             ` + (tilt?`
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.open_tilt_cover`) +`" class="sc-shutter-button sc-shutter-button-tilt-open" data-command="${SHUTTER_TILT_OPEN}"><ha-icon icon="mdi:arrow-top-right"></ha-icon></ha-icon-button>
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.close_tilt_cover`) +`"class="sc-shutter-button sc-shutter-button-tilt-down" data-command="${SHUTTER_TILT_DOWN}"><ha-icon icon="mdi:arrow-bottom-left"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.open_tilt_cover`) +`" class="${shutter.className}-button ${shutter.className}-button-tilt-open" data-command="${SHUTTER_TILT_OPEN}"><ha-icon icon="mdi:arrow-top-right"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.close_tilt_cover`) +`"class="${shutter.className}-button ${shutter.className}-button-tilt-down" data-command="${SHUTTER_TILT_DOWN}"><ha-icon icon="mdi:arrow-bottom-left"></ha-icon></ha-icon-button>
             `:``) + `
           </div>
-          <div class="sc-shutter-buttons" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.open_cover`) +`" class="sc-shutter-button sc-shutter-button-up" data-command="${SHUTTER_UP}"><ha-icon icon="mdi:arrow-up"></ha-icon></ha-icon-button>
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.stop_cover`) +`"class="sc-shutter-button sc-shutter-button-stop" data-command="${SHUTTER_STOP}"><ha-icon icon="mdi:stop"></ha-icon></ha-icon-button>
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.close_cover`) +`" class="sc-shutter-button sc-shutter-button-down" data-command="${SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
+          <div class="${shutter.className}-buttons" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.open_cover`) +`" class="${shutter.className}-button ${shutter.className}-button-up" data-command="${SHUTTER_UP}"><ha-icon icon="mdi:arrow-up"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.stop_cover`) +`"class="${shutter.className}-button ${shutter.className}-button-stop" data-command="${SHUTTER_STOP}"><ha-icon icon="mdi:stop"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.close_cover`) +`" class="${shutter.className}-button ${shutter.className}-button-down" data-command="${SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
           </div>
-          <div class="sc-shutter-selector">
-            <div class="sc-shutter-selector-picture" style="background-image: url(${esc_view_image})";>
+          <div class="${shutter.className}-selector">
+            <div class="${shutter.className}-selector-picture" style="background-image: url(${esc_view_image})";>
               <img src= "${esc_window_image}" style="width: ${esc_window_width}px; height: ${esc_window_height}px">
-              <div class="sc-shutter-selector-slide" style="height: ${min_closing_position}px; background-image: url(${esc_slide_image});">
+              <div class="${shutter.className}-selector-slide" style="height: ${min_closing_position}px; background-image: url(${esc_slide_image});">
                 <img src="${esc_slide_bottom_image}"; style="width: 100%; position: absolute; bottom: 0";>
               </div>
-              <div class="sc-shutter-selector-picker" style="top: ${shutter.dataset.min_closing_position-this.picker_overlap}px;"></div>`+
+              <div class="${shutter.className}-selector-picker" style="top: ${shutter.dataset.min_closing_position-this.picker_overlap}px;"></div>`+
               (partial&&!offset?
-                `<div class="sc-shutter-selector-partial" style="top:${this.calculatePositionFromPercent(partial, invertPercentage, offset, shutter.dataset)}px"></div>`:``
+                `<div class="${shutter.className}-selector-partial" style="top:${this.calculatePositionFromPercent(partial, invertPercentage, offset, shutter.dataset)}px"></div>`:``
               ) + `
-              <div class="sc-shutter-movement-overlay">
-                <ha-icon class="sc-shutter-movement-open" icon="mdi:arrow-up"></ha-icon>
-                <ha-icon class="sc-shutter-movement-close" icon="mdi:arrow-down"></ha-icon>
+              <div class="${shutter.className}-movement-overlay">
+                <ha-icon class="${shutter.className}-movement-open" icon="mdi:arrow-up"></ha-icon>
+                <ha-icon class="${shutter.className}-movement-close" icon="mdi:arrow-down"></ha-icon>
               </div>
             </div>
           </div>
         </div>
-        <div class="sc-shutter-bottom">
-          <div class="sc-shutter-label"></div>
-          <div class="sc-shutter-position"></div>
+        <div class="${shutter.className}-bottom">
+          <div class="${shutter.className}-label"></div>
+          <div class="${shutter.className}-position"></div>
         </div>
       `;
 
-      let picture = shutter.querySelector('.sc-shutter-selector-picture');
+      let picture = shutter.querySelector(`.${shutter.className}-selector-picture`);
 
-      let slide = shutter.querySelector('.sc-shutter-selector-slide');
-      let picker = shutter.querySelector('.sc-shutter-selector-picker');
-      let labels = shutter.querySelectorAll('.sc-shutter-label');
+      let slide = shutter.querySelector(`.${shutter.className}-selector-slide`);
+      let picker = shutter.querySelector(`.${shutter.className}-selector-picker`);
+      let labels = shutter.querySelectorAll(`.${shutter.className}-label`);
 
       if (entity.title_position){
         const reverse_position={
           'top' : 'bottom',
           'bottom' : 'top',
         }
-        let title =shutter.querySelector(`.sc-shutter-${entity.title_position}`);
-        let no_title =shutter.querySelector(`.sc-shutter-${reverse_position[entity.title_position]}`);
+        let title =shutter.querySelector(`.${shutter.className}-${entity.title_position}`);
+        let no_title =shutter.querySelector(`.${shutter.className}-${reverse_position[entity.title_position]}`);
         if (title) title.style.display = "block";
         if (no_title) no_title.style.display = "none";
       }
@@ -286,7 +286,7 @@ class EnhancedShutterCard extends HTMLElement {
       picker.addEventListener('pointerdown', mouseDown);
 
       //Manage click on buttons
-      shutter.querySelectorAll('.sc-shutter-button').forEach( (button) =>{
+      shutter.querySelectorAll(`.${shutter.className}-button`).forEach( (button) =>{
 
         button.onclick = function () {
 
@@ -314,16 +314,16 @@ class EnhancedShutterCard extends HTMLElement {
     const style = document.createElement('style');
     style.textContent = `
       .sc-shutters { padding: 16px; }
-        .sc-shutter { margin-top: 1rem; overflow: visible; }
-        .sc-shutter:first-child { margin-top: 0; }
-        .sc-shutter-middle { display: flex; width: fit-content; max-width: 100%; margin: auto; }
-          .sc-shutter-buttons { flex: 1; text-align: center; margin-top: 0.4rem; display: flex; max-width: 100% }
-          .sc-shutter-buttons ha-icon-button { display: block; width: min-content }
-          .sc-shutter-selector {
+        .${shutter.className} { margin-top: 1rem; overflow: visible; }
+        .${shutter.className}:first-child { margin-top: 0; }
+        .${shutter.className}-middle { display: flex; width: fit-content; max-width: 100%; margin: auto; }
+          .${shutter.className}-buttons { flex: 1; text-align: center; margin-top: 0.4rem; display: flex; max-width: 100% }
+          .${shutter.className}-buttons ha-icon-button { display: block; width: min-content }
+          .${shutter.className}-selector {
               flex: 1;
               }
-            .sc-shutter-selector-partial { position: absolute; top:0; left: 0px; width: 100%; height: 1px; background-color: gray; }
-            .sc-shutter-selector-picture {
+            .${shutter.className}-selector-partial { position: absolute; top:0; left: 0px; width: 100%; height: 1px; background-color: gray; }
+            .${shutter.className}-selector-picture {
               z-index: 1;
               position: relative;
               margin: auto;
@@ -334,7 +334,7 @@ class EnhancedShutterCard extends HTMLElement {
               max-height: 2000px;
               line-height: 0;
             }
-            .sc-shutter-selector-window
+            .${shutter.className}-selector-window
             {
               z-index: 2;
               position: absolute;
@@ -342,7 +342,7 @@ class EnhancedShutterCard extends HTMLElement {
               width: 100%;
               height: 100%;
             }
-            .sc-shutter-selector-slide
+            .${shutter.className}-selector-slide
             {
               z-index: -1;
               position: absolute;
@@ -351,7 +351,7 @@ class EnhancedShutterCard extends HTMLElement {
               top: 0;
               width: 100%;
             }
-            .sc-shutter-selector-picker
+            .${shutter.className}-selector-picker
             {
               z-index: 30;
               position: absolute;
@@ -364,17 +364,17 @@ class EnhancedShutterCard extends HTMLElement {
               border-color: black;
               border-style: solid;
             }
-            .sc-shutter-movement-overlay {
+            .${shutter.className}-movement-overlay {
               display: none;
               position: absolute; top: 19px; left: 0%; width: 100%; height: 118px;
               background-color: rgba(0,0,0,0.3); text-align: center; --mdc-icon-size: 60px
             }
-              .sc-shutter-movement-open {display: none}
-              .sc-shutter-movement-close {display: none}
-        .sc-shutter-top { text-align: center; margin-bottom: 1rem; }
-        .sc-shutter-bottom { text-align: center; margin-top: 1rem; display:none}
-          .sc-shutter-label { display: inline-block; font-size: 20px; vertical-align: middle; cursor: pointer;}
-          .sc-shutter-position { display: inline-block; vertical-align: middle; padding: 0 6px; margin-left: 1rem; border-radius: 2px; background-color: var(--secondary-background-color); }
+              .${shutter.className}-movement-open {display: none}
+              .${shutter.className}-movement-close {display: none}
+        .${shutter.className}-top { text-align: center; margin-bottom: 1rem; }
+        .${shutter.className}-bottom { text-align: center; margin-top: 1rem; display:none}
+          .${shutter.className}-label { display: inline-block; font-size: 20px; vertical-align: middle; cursor: pointer;}
+          .${shutter.className}-position { display: inline-block; vertical-align: middle; padding: 0 6px; margin-left: 1rem; border-radius: 2px; background-color: var(--secondary-background-color); }
     `;
     this.appendChild(style);
 
@@ -387,8 +387,8 @@ class EnhancedShutterCard extends HTMLElement {
       let entityId = entity.entity ? entity.entity : entity;
 
       const shutter = this.card.querySelector('div[data-shutter="' + entityId +'"]');
-      const slide = shutter.querySelector('.sc-shutter-selector-slide');
-      const picker = shutter.querySelector('.sc-shutter-selector-picker');
+      const slide = shutter.querySelector(`.${shutter.className}-selector-slide`);
+      const picker = shutter.querySelector(`.${shutter.className}-selector-picker`);
       const dataset = shutter.dataset;
       const state = hass.states[entityId];
       const friendlyName = entity.name ? entity.name : state ? state.attributes.friendly_name : 'unknown';
@@ -400,12 +400,12 @@ class EnhancedShutterCard extends HTMLElement {
       let alwaysPercentage = entity.always_percentage ? entity.always_percentage : false;
       let disableEnd = entity.disable_end_buttons ? entity.disable_end_buttons : false;
 
-      shutter.querySelectorAll('.sc-shutter-label').forEach((shutterLabel) =>{
+      shutter.querySelectorAll(`.${shutter.className}-label`).forEach((shutterLabel) =>{
           shutterLabel.innerHTML = friendlyName;
       })
 
       if (!this.isUpdating) {
-        shutter.querySelectorAll('.sc-shutter-position').forEach( (shutterPosition) =>{
+        shutter.querySelectorAll(`.${shutter.className}-position`).forEach( (shutterPosition) =>{
           let visiblePosition;
           let positionText;
           if (invertPercentage) {
@@ -441,26 +441,26 @@ class EnhancedShutterCard extends HTMLElement {
 
   changeButtonState(shutter, percent, inverted) {
     if (percent == 0) {
-      shutter.querySelectorAll('.sc-shutter-button-up').forEach((button) =>{
+      shutter.querySelectorAll(`.${shutter.className}-button-up`).forEach((button) =>{
         button.disabled = inverted;
       });
-      shutter.querySelectorAll('.sc-shutter-button-down').forEach((button) =>{
+      shutter.querySelectorAll(`.${shutter.className}-button-down`).forEach((button) =>{
         button.disabled = !inverted;
       });
     }
     else if (percent == 100) {
-      shutter.querySelectorAll('.sc-shutter-button-up').forEach((button) =>{
+      shutter.querySelectorAll(`.${shutter.className}-button-up`).forEach((button) =>{
         button.disabled = !inverted;
       });
-      shutter.querySelectorAll('.sc-shutter-button-down').forEach((button) =>{
+      shutter.querySelectorAll(`.${shutter.className}-button-down`).forEach((button) =>{
         button.disabled = inverted;
       }) ;
     }
     else {
-      shutter.querySelectorAll('.sc-shutter-button-up').forEach((button) =>{
+      shutter.querySelectorAll(`.${shutter.className}-button-up`).forEach((button) =>{
         button.disabled = false;
       });
-      shutter.querySelectorAll('.sc-shutter-button-down').forEach((button) =>{
+      shutter.querySelectorAll(`.${shutter.className}-button-down`).forEach((button) =>{
         button.disabled = false;
       }) ;
     }
@@ -508,18 +508,18 @@ class EnhancedShutterCard extends HTMLElement {
   setMovement(movement, shutter) {
     if (movement == "opening" || movement == "closing") {
       let opening = movement == "opening"
-      shutter.querySelectorAll(".sc-shutter-movement-overlay").forEach(
+      shutter.querySelectorAll(`.${shutter.className}-movement-overlay`).forEach(
         (overlay) => overlay.style.display = "block"
       )
-      shutter.querySelectorAll(".sc-shutter-movement-open").forEach(
+      shutter.querySelectorAll(`.${shutter.className}-movement-open`).forEach(
         (overlay) => overlay.style.display = opening?"block":"none"
       )
-      shutter.querySelectorAll(".sc-shutter-movement-close").forEach(
+      shutter.querySelectorAll(`.${shutter.className}-movement-close`).forEach(
         (overlay) => overlay.style.display = opening?"none":"block"
       )
     }
     else {
-      shutter.querySelectorAll(".sc-shutter-movement-overlay").forEach(
+      shutter.querySelectorAll(`.${shutter.className}-movement-overlay`).forEach(
         (overlay) => overlay.style.display = "none"
       )
     }
