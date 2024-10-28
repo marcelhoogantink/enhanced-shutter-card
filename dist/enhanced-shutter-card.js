@@ -1,4 +1,4 @@
-const SHUTTER_BASE_CLASS = 'sc-shutter';
+const SHUTTER_BASE_CLASS = 'esc-shutter';
 
 const SHUTTER_UP = 'open_cover';
 const SHUTTER_DOWN = 'close_cover';
