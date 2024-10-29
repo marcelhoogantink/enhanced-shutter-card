@@ -5,7 +5,7 @@
 
 
 This card allows to open, close or set a shutter to the opening rate you want.
-It is a follow-up of [Deeiayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters. I started with a simple change for the motion of the shutters, but soon it became a great update. Due to the inactivity of this card, I decided to add this one also to HACS as Enhanced Sutter Card.
+It is a follow-up of [Deejayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters. I started with a simple change for the motion of the shutters, but soon it became a great update. Due to the inactivity of this card, I decided to add this one also to HACS as Enhanced Sutter Card.
 
 It supports all options of the original Card, but also graphical options like different backrounds, windows an shutters.
 Also the sizes of every shuter can be altered:
