@@ -5,13 +5,31 @@
 
 
 This card allows to open, close or set a shutter to the opening rate you want.
-It is a follow-up of [Deejayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters. I started with a simple change for the motion of the shutters, but soon it became a great update. Due to the inactivity of this card, I decided to add this one also to HACS as Enhanced Sutter Card.
+It is a follow-up of [Deejayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters.
+I started with a simple change for the motion of the shutters, but soon it became a great update.
+Due to the inactivity of this Shutter Card, I decided to add this one as 'Enhanced Shutter Card' to HACS.
 
 It supports all options of the original Card, but also graphical options like different backrounds, windows an shutters.
-Also the sizes of every shuter can be altered:
+Also the sizes of every shutter can be altered:
 
 ![Enhanced Shutter Card](EnhancedShutterCard.gif)
 
+By default the card has 3 colored windows and shuuters, ands two background view.
+
+| color | window-image | shutter-slat image | sutter-bottom image | default
+| -| - | - | - | -
+| grey | esc-window.png | esc-shutter-slat.png | esc-shutter-bottom.png | yes
+| brown | esc-window2.png | esc-shutter-slat2.png | esc-shutter-bottom2.png | no
+| green | esc-window3.png | esc-shutter-slat3.png | esc-shutter-bottom3.png | no
+
+These ar the avialable background views:
+
+| view filename | default
+|-|-
+| esc-back-view.png | yes
+| esc-back-view2.png | no
+
+These colors/files can be combined like in the example above.
 ## Configuration
 
 ### General
@@ -23,8 +41,8 @@ Also the sizes of every shuter can be altered:
 
 ### Entities
 
-| Name | Type | Required | Default | Description
-| ---- | ---- | -------- | ------- | -----------
+| Name | Type | Required | Default | Description | a
+| ---- | ---- | -------- | ------- | ----------- | -
 | entity | string | True | - | The shutter entity ID
 | name | string | False | _Friendly name of the entity_ | Name to display for the shutter
 | buttons_position | string | False | `left` | Set buttons on `left`, `right`, `top` or `bottom` of the shutter
@@ -42,8 +60,9 @@ _Remark : you can also just give the entity ID (without to specify `entity:`) if
 ### Sample
 
 ```yaml
-type: 'custom:shutter-card'
-title: My shutters
+type: 'enhanced-custom:shutter-card'
+title: Enhanced Shutters
+
 entities:
   - entity: cover.left_living_shutter
     name: Left shutter
