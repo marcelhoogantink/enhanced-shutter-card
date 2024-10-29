@@ -1,11 +1,11 @@
 const SHUTTER_BASE_CLASS = 'esc-shutter';
 
-const SHUTTER_UP = 'open_cover';
-const SHUTTER_DOWN = 'close_cover';
-const SHUTTER_STOP = 'stop_cover';
-const SHUTTER_PARTIAL = 'set_cover_position';
-const SHUTTER_TILT_OPEN = 'open_cover_tilt';
-const SHUTTER_TILT_DOWN = 'close_cover_tilt';
+const SERVICE_SHUTTER_UP = 'open_cover';
+const SERVICE_SHUTTER_DOWN = 'close_cover';
+const SERVICE_SHUTTER_STOP = 'stop_cover';
+const SERVICE_SHUTTER_PARTIAL = 'set_cover_position';
+const SERVICE_SHUTTER_TILT_OPEN = 'open_cover_tilt';
+const SERVICE_SHUTTER_TILT_DOWN = 'close_cover_tilt';
 
 const ESC_IMAGE_MAP = "/local/community/hass-shutter-card/images";
 
@@ -21,7 +21,7 @@ const ESC_IMAGE_SHUTTER_SLAT = 'esc-shutter-slat.png';
 const ESC_IMAGE_SHUTTER_BOTTOM = 'esc-shutter-bottom.png';
 const ESC_IMAGE_WINDOW = 'esc-window.png';
 
-const IMAGES =
+const ESC_IMAGES =
 {
   [WINDOW_IMAGE]: ESC_IMAGE_WINDOW,
   [VIEW_IMAGE]: ESC_IMAGE_BACK_VIEW,
@@ -76,14 +76,14 @@ class EnhancedShutterCard extends HTMLElement {
       IMAGE_TYPES.forEach((image_type) =>
       {
         let images={};
-        let base_image = config[image_type] ? defImagePath(base_image_map,config[image_type]) : `${ESC_IMAGE_MAP}/${IMAGES[image_type]}`;
+        let base_image = config[image_type] ? defImagePath(base_image_map,config[image_type]) : `${ESC_IMAGE_MAP}/${ESC_IMAGES[image_type]}`;
         entities.forEach((entity) =>
         {
           base_image_map = entity.image_map || config.image_map || ESC_IMAGE_MAP;
           let entityId = entity.entity ? entity.entity : entity;
 
           let image = entity[image_type] ? this.defImagePath(base_image_map,entity[image_type]) : base_image;
-          let src = image || `${ESC_IMAGE_MAP}/${IMAGES[image_type]}`;
+          let src = image || `${ESC_IMAGE_MAP}/${ESC_IMAGES[image_type]}`;
           images[entityId]={entityId,src};
 
         });
@@ -169,16 +169,16 @@ class EnhancedShutterCard extends HTMLElement {
         </div>
         <div class="${SHUTTER_BASE_CLASS}-middle" style="flex-flow: ${ (buttonsInRow ? 'column': 'row') + (buttonsContainerReversed ? '-reverse' : '') } nowrap;">
           <div class="${SHUTTER_BASE_CLASS}-buttons" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
-            `+(partial?`<ha-icon-button label="Partially close (${partial}%)" class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-partial" data-command="${SHUTTER_PARTIAL}" data-position="${partial}"><ha-icon icon="mdi:arrow-expand-vertical"></ha-icon></ha-icon-button>`:``)+`
+            `+(partial?`<ha-icon-button label="Partially close (${partial}%)" class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-partial" data-command="${SERVICE_SHUTTER_PARTIAL}" data-position="${partial}"><ha-icon icon="mdi:arrow-expand-vertical"></ha-icon></ha-icon-button>`:``)+`
             ` + (tilt?`
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.open_tilt_cover`) +`" class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-tilt-open" data-command="${SHUTTER_TILT_OPEN}"><ha-icon icon="mdi:arrow-top-right"></ha-icon></ha-icon-button>
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.close_tilt_cover`) +`"class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-tilt-down" data-command="${SHUTTER_TILT_DOWN}"><ha-icon icon="mdi:arrow-bottom-left"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.open_tilt_cover`) +`" class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-tilt-open" data-command="${SERVICE_SHUTTER_TILT_OPEN}"><ha-icon icon="mdi:arrow-top-right"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.close_tilt_cover`) +`"class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-tilt-down" data-command="${SERVICE_SHUTTER_TILT_DOWN}"><ha-icon icon="mdi:arrow-bottom-left"></ha-icon></ha-icon-button>
             `:``) + `
           </div>
           <div class="${SHUTTER_BASE_CLASS}-buttons" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.open_cover`) +`" class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-up" data-command="${SHUTTER_UP}"><ha-icon icon="mdi:arrow-up"></ha-icon></ha-icon-button>
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.stop_cover`) +`"class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-stop" data-command="${SHUTTER_STOP}"><ha-icon icon="mdi:stop"></ha-icon></ha-icon-button>
-            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.close_cover`) +`" class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-down" data-command="${SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.open_cover`) +`" class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-up" data-command="${SERVICE_SHUTTER_UP}"><ha-icon icon="mdi:arrow-up"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.stop_cover`) +`"class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-stop" data-command="${SERVICE_SHUTTER_STOP}"><ha-icon icon="mdi:stop"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.dialogs.more_info_control.cover.close_cover`) +`" class="${SHUTTER_BASE_CLASS}-button ${SHUTTER_BASE_CLASS}-button-down" data-command="${SERVICE_SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
           </div>
           <div class="${SHUTTER_BASE_CLASS}-selector">
             <div class="${SHUTTER_BASE_CLASS}-selector-picture" style="background-image: url(${esc_view_image})";>
@@ -294,12 +294,12 @@ class EnhancedShutterCard extends HTMLElement {
 
           const command = this.dataset.command;
           const services ={
-            [SHUTTER_UP] : {'args': ''},
-            [SHUTTER_DOWN] : {'args': ''},
-            [SHUTTER_STOP] : {'args': ''},
-            [SHUTTER_PARTIAL] : {'args': {position: this.dataset.position}},
-            [SHUTTER_TILT_OPEN] : {'args': ''},
-            [SHUTTER_TILT_DOWN] : {'args': ''},
+            [SERVICE_SHUTTER_UP] : {'args': ''},
+            [SERVICE_SHUTTER_DOWN] : {'args': ''},
+            [SERVICE_SHUTTER_STOP] : {'args': ''},
+            [SERVICE_SHUTTER_PARTIAL] : {'args': {position: this.dataset.position}},
+            [SERVICE_SHUTTER_TILT_OPEN] : {'args': ''},
+            [SERVICE_SHUTTER_TILT_DOWN] : {'args': ''},
           }
 
           hass.callService('cover', command, {
@@ -546,7 +546,7 @@ class EnhancedShutterCard extends HTMLElement {
   updateShutterPosition(hass, entityId, position,invertPercentage) {
     let shutterPosition = Math.round(invertPercentage ?position: 100 - position);
 
-    hass.callService('cover', SHUTTER_PARTIAL, {
+    hass.callService('cover', SERVICE_SHUTTER_PARTIAL, {
       entity_id: entityId,
       position: shutterPosition
     });

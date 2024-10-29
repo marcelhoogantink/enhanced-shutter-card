@@ -1,11 +1,11 @@
-# Shutter card
+# Enhanced Shutter card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
-[![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://www.buymeacoffee.com/Deejayfool)
+[![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
 
-**Note : Be careful, since version 2021.11.0 of Home Assistant, there is a breaking change in the icon buttons. So install v1.3.0 of this card only if you have at least the version 2021.11.0 of Home Assistant**
 
 This card allows to open, close or set a shutter to the opening rate you want.
+It is a follow-up of [Deeiayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters. I started with a simple change for the motion of the shutters, but soon it became a great update. Due to the inactivity of this card, I decided to add this one also to HACS as Enhanced Sutter Card.
 
 ![Shutter card](https://raw.githubusercontent.com/Deejayfool/hass-shutter-card/master/images/shutter-card.gif)
 
