@@ -395,7 +395,7 @@ class EnhancedShutterCard extends HTMLElement {
       const state = hass.states[entityId];
       const friendlyName = entity.name ? entity.name : state ? state.attributes.friendly_name : 'unknown';
       const currentPosition = state ? state.attributes.current_position : 'unknown';
-      const movementState = state? state.state : 'unknown';
+      const movementState = state? state.state : 'Demo';
 
       let invertPercentage = entity.invert_percentage ?  entity.invert_percentage : false;
       let offset  = entity.offset_closed_percentage ? Math.max(0,Math.min(100,entity.offset_closed_percentage)) : 0;
@@ -406,7 +406,7 @@ class EnhancedShutterCard extends HTMLElement {
           shutterLabel.innerHTML = friendlyName;
       })
 
-      if (!this.isUpdating) {
+//      if (!this.isUpdating) {
         shutter.querySelectorAll(`.${SHUTTER_BASE_CLASS}-position`).forEach( (shutterPosition) =>{
           let visiblePosition;
           let positionText;
@@ -437,7 +437,7 @@ class EnhancedShutterCard extends HTMLElement {
 
 
         this.setMovement(movementState, shutter);
-      }
+ //     }
     });
   }
 

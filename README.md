@@ -1,4 +1,4 @@
-# Enhanced Shutter card
+# Enhanced Shutter Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
@@ -7,7 +7,10 @@
 This card allows to open, close or set a shutter to the opening rate you want.
 It is a follow-up of [Deeiayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters. I started with a simple change for the motion of the shutters, but soon it became a great update. Due to the inactivity of this card, I decided to add this one also to HACS as Enhanced Sutter Card.
 
-![Shutter card](https://raw.githubusercontent.com/Deejayfool/hass-shutter-card/master/images/shutter-card.gif)
+It supports all options of the original Card, but also graphical options like different backrounds, windows an shutters.
+Also the sizes of every shuter can be altered:
+
+![Enhanced Shutter Card](EnhancedShutterCard.gif)
 
 ## Configuration
 
