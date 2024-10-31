@@ -1,9 +1,3 @@
-const LEFT = 'left';
-const RIGHT = 'right';
-const BOTTOM = 'bottom';
-const TOP = 'top';
-const POSITIONS =[LEFT,RIGHT,TOP,BOTTOM];
-
 const SHUTTER_BASE_CLASS = 'esc-shutter';
 
 const SERVICE_SHUTTER_UP = 'open_cover';
@@ -13,7 +7,7 @@ const SERVICE_SHUTTER_PARTIAL = 'set_cover_position';
 const SERVICE_SHUTTER_TILT_OPEN = 'open_cover_tilt';
 const SERVICE_SHUTTER_TILT_DOWN = 'close_cover_tilt';
 
-const ESC_IMAGE_MAP = "/local/community/hass-shutter-card/images";
+const ESC_IMAGE_MAP = "/local/community/enhanced-shutter-card/images";
 
 const WINDOW_IMAGE  = 'window_image';
 const VIEW_IMAGE = 'view_image';
@@ -35,18 +29,7 @@ const ESC_IMAGES =
   [SLIDE_BOTTON_IMAGE]: ESC_IMAGE_SHUTTER_BOTTOM
 };
 
-const ESC_DEFAULT_BUTTON_POSITION = LEFT;
-const ESC_DEFAULT_TITLE_POSITION = TOP;
-const ESC_DEFAULT_INVERT_PERCENTAGE = false;
-const ESC_DEFAULT_CAN_TILT = false;
-const ESC_DEFAULT_PARTIAL_CLOSE_PCT = 0;
-const ESC_DEFAULT_OFFSET_CLOSED_PCT = 0;
-const ESC_DEFAULT_SHUTTER_WIDTH_PX = 153; // ?? needed for compitability.....??
-const ECS_DEFAULT_ALWAYS_PCT = false;
-const ESC_DEFAULT_DISABLE_END_BUTTONS = false;
-
-
-const ESC_BASE_WIDTH_PX = 100;
+const ESC_BASE_WIDTH_PX =100;
 const ESC_BASE_HEIGHT_PX = 100;
 
 const ESC_RESIZE_WIDTH_PCT =100;
@@ -56,8 +39,18 @@ const ESC_MIN_CLOSING_POSITION = 0;
 const ESC_MAX_CLOSING_POSITION = 100; //??
 
 
+const ESC_PARTIAL = 0;
+const ESC_OFFSET = 0;
+const ESC_TILT = false
 
+const LEFT = 'left';
+const RIGHT = 'right';
+const BOTTOM = 'bottom';
+const TOP = 'top';
 
+const POSITIONS =[LEFT,RIGHT,TOP,BOTTOM];
+
+const ESC_INVERT_PERCENTAGE = false;
 
 class EnhancedShutterCard extends HTMLElement {
 
@@ -147,16 +140,16 @@ class EnhancedShutterCard extends HTMLElement {
       let buttonsPosition
         = (entity.buttons_position && !POSITIONS.includes(entity.buttons_position.toLowerCase()))
         ? entity.buttons_position.toLowerCase()
-        : ESC_DEFAULT_BUTTON_POSITION;
+        : LEFT;
       let invertPercentage = entity.invert_percentage ?  entity.invert_percentage : ESC_INVERT_PERCENTAGE;
 
-      let partial = entity.partial_close_percentage ? this.boundary(entity.partial_close_percentage) : ESC_DEFAULT_PARTIAL_CLOSE_PCT;
-      let offset  = entity.offset_closed_percentage ? this.boundary(entity.offset_closed_percentage) : ESC_DEFAULT_OFFSET_CLOSED_PCT;
+      let partial = entity.partial_close_percentage ? this.boundary(entity.partial_close_percentage) : ESC_PARTIAL;
+      let offset  = entity.offset_closed_percentage ? this.boundary(entity.offset_closed_percentage) : ESC_OFFSET;
 
       let min_closing_position = entity.min_closing_position ? Math.round(this.boundary(entity.min_closing_position)/100*esc_window_height) : ESC_MIN_CLOSING_POSITION;
       let max_closing_position = entity.max_closing_position ? Math.round(this.boundary(entity.max_closing_position)/100*esc_window_height) : esc_window_height;
 
-      let tilt = entity.can_tilt ? entity.can_tilt : ESC_DEFAULT_CAN_TILT;
+      let tilt = entity.can_tilt ? entity.can_tilt : ESC_TILT;
 
       const buttonsInRow = buttonsPosition == 'top' || buttonsPosition == 'bottom';
       const buttonsContainerReversed = buttonsPosition == 'bottom' || buttonsPosition == 'right';
