@@ -214,7 +214,7 @@ class EnhancedShutterCard extends HTMLElement {
               </div>
               <div class="${ESC_BASE_CLASS_NAME}-selector-picker" style="top: ${cfg.min_closing_position-this.picker_overlap}px;"></div>`+
               (cfg.partial&&!cfg.offset?
-                `<div class="${ESC_BASE_CLASS_NAME}-selector-partial" style="top:${this.calculatePositionFromPercent(cfg,cfg.partial)}px"></div>`:``
+                `<div class="${ESC_BASE_CLASS_NAME}-selector-partial" style="top:${this.calculateScreenPositionFromPercent(cfg,cfg.partial)}px"></div>`:``
               ) + `
               <div class="${ESC_BASE_CLASS_NAME}-movement-overlay">
                 <ha-icon class="${ESC_BASE_CLASS_NAME}-movement-open" icon="mdi:arrow-up"></ha-icon>
@@ -266,13 +266,13 @@ class EnhancedShutterCard extends HTMLElement {
 
         this.isUpdating = true;
 
-        this.document.addEventListener('mousemove', mouseMove);
-        this.document.addEventListener('touchmove', mouseMove);
-        this.document.addEventListener('pointermove', mouseMove);
+        document.addEventListener('mousemove', mouseMove);
+        document.addEventListener('touchmove', mouseMove);
+        document.addEventListener('pointermove', mouseMove);
 
-        this.document.addEventListener('mouseup', mouseUp);
-        this.document.addEventListener('touchend', mouseUp);
-        this.document.addEventListener('pointerup', mouseUp);
+        document.addEventListener('mouseup', mouseUp);
+        document.addEventListener('touchend', mouseUp);
+        document.addEventListener('pointerup', mouseUp);
       };
 
       let mouseMove = (event) =>{
@@ -285,6 +285,7 @@ class EnhancedShutterCard extends HTMLElement {
         this.setPickerPositionScreen(cfg,newPosition, picker, slide);
 
         let percentagePosition = (newPosition - min) * (100-cfg.offset) / (max - min);
+        percentagePosition = Math.round(cfg.invert_percentage ?percentagePosition: 100 - percentagePosition);
 
         shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-position`).forEach( (shutterPosition) =>{
           this.setShutterPositionText(hass,cfg,shutter,shutterPosition, percentagePosition);
@@ -302,20 +303,20 @@ class EnhancedShutterCard extends HTMLElement {
         let max = cfg.max_closing_position;
 
         this.isUpdating = false;
-        let newPosition = event.pageY - pickPoint;
+        let newPosition = this.boundary(event.pageY - pickPoint,min,max);
 
         newPosition = this.boundary(newPosition,min,max);
         let percentagePosition = (newPosition - min) * (100-cfg.offset) / (max - min);
 
-        this.updateShutterPosition(hass, cfg,entityId, percentagePosition);
+        this.sendShutterPosition(hass, cfg,entityId, percentagePosition);
 
-        this.document.removeEventListener('mousemove', mouseMove);
-        this.document.removeEventListener('touchmove', mouseMove);
-        this.document.removeEventListener('pointermove', mouseMove);
+        document.removeEventListener('mousemove', mouseMove);
+        document.removeEventListener('touchmove', mouseMove);
+        document.removeEventListener('pointermove', mouseMove);
 
-        this.document.removeEventListener('mouseup', mouseUp);
-        this.document.removeEventListener('touchend', mouseUp);
-        this.document.removeEventListener('pointerup', mouseUp);
+        document.removeEventListener('mouseup', mouseUp);
+        document.removeEventListener('touchend', mouseUp);
+        document.removeEventListener('pointerup', mouseUp);
       };
 
       //Manage slider update
@@ -524,7 +525,7 @@ class EnhancedShutterCard extends HTMLElement {
     return Math.round(percent) + ' %';
   }
 
-  calculatePositionFromPercent(cfg,percent) {
+  calculateScreenPositionFromPercent(cfg,percent) {
     let visiblePosition;
     let min = cfg.min_closing_position;
     let max = cfg.max_closing_position;
@@ -572,7 +573,7 @@ class EnhancedShutterCard extends HTMLElement {
   }
 
   setPickerPositionPercentage(cfg,percentage, picker, slide) {
-    let realPosition = this.calculatePositionFromPercent(cfg,percentage);
+    let realPosition = this.calculateScreenPositionFromPercent(cfg,percentage);
 
     this.setPickerPositionScreen(cfg,realPosition, picker, slide);
   }
@@ -587,7 +588,7 @@ class EnhancedShutterCard extends HTMLElement {
     slide.style.height = (position ) + 'px';
   }
 
-  updateShutterPosition(hass, cfg,entityId, position) {
+  sendShutterPosition(hass, cfg,entityId, position) {
     let shutterPosition = Math.round(cfg.invert_percentage ?position: 100 - position);
 
     this.callHassCoverService(hass,SERVICE_SHUTTER_PARTIAL, { position: shutterPosition });
