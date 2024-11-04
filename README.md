@@ -20,18 +20,21 @@ By default the card has 3 colored windows and shutter images, ands two backgroun
 
 | color | window-image | shutter-slat image | shutter-bottom-bar image | default
 | -| - | - | - | -
-| grey | esc-window.png   | esc-shutter-slat.png  | esc-shutter-bottom-bar.png | yes
-| brown | esc-window2.png | esc-shutter-slat2.png | esc-shutter-bottom-bar2.png | no
-| green | esc-window3.png | esc-shutter-slat3.png | esc-shutter-bottom-bar3.png | no
+| grey | esc-window.png   | esc-shutter-slat.png  | esc-shutter-bottom.png | yes
+| brown | esc-window2.png | esc-shutter-slat2.png | esc-shutter-bottom2.png | no
+| green | esc-window3.png | esc-shutter-slat3.png | esc-shutter-bottom3.png | no
 
 These are the avialable background views:
 
 | view filename | default
 |-|-
-| esc-back-view.png | yes
-| esc-back-view2.png | no
+| esc-view.png | yes
+| esc-view2.png | no
 
-These colors/files can be combined like in the example above.
+These files can be combined like in the example above. For the location of the images a setting 'image_map" does exits.
+The default map-setting can be found in the Configuration-info below.
+It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is condiderd to include a full path.
+
 ## Configuration
 
 ### General
@@ -40,8 +43,8 @@ These colors/files can be combined like in the example above.
 | ---- | ---- | -------- | ------- | -----------
 | type | string | True | - | Must be "custom:shutter-card"
 | title | string | False | - | Title of the card
-| image_map | string | No | /local/community/enhanced-shutter-card/images | ma of the images
-| window_image | string | No | esc-window.png | image of the window/shuuter
+| image_map | string | No | /local/community/enhanced-shutter-card/images | map of the images
+| window_image | string | No | esc-window.png | image of the window/shutter
 | view_image | string | No | esc-back-view.png | background-image trough the window.
 | shutter_slat_image | string | No | esc-shutter-slat.png | Image of one slat of the shutter.
 | shutter_bottom_bar_image | string | No | esc-shutter-bottom.png | the bottom bar of the shutter.

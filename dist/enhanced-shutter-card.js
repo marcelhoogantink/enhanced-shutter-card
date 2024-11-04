@@ -266,13 +266,13 @@ class EnhancedShutterCard extends HTMLElement {
 
         this.isUpdating = true;
 
-        this.card.addEventListener('mousemove', mouseMove);
-        this.card.addEventListener('touchmove', mouseMove);
-        this.card.addEventListener('pointermove', mouseMove);
+        this.document.addEventListener('mousemove', mouseMove);
+        this.document.addEventListener('touchmove', mouseMove);
+        this.document.addEventListener('pointermove', mouseMove);
 
-        this.card.addEventListener('mouseup', mouseUp);
-        this.card.addEventListener('touchend', mouseUp);
-        this.card.addEventListener('pointerup', mouseUp);
+        this.document.addEventListener('mouseup', mouseUp);
+        this.document.addEventListener('touchend', mouseUp);
+        this.document.addEventListener('pointerup', mouseUp);
       };
 
       let mouseMove = (event) =>{
@@ -309,13 +309,13 @@ class EnhancedShutterCard extends HTMLElement {
 
         this.updateShutterPosition(hass, cfg,entityId, percentagePosition);
 
-        this.card.removeEventListener('mousemove', mouseMove);
-        this.card.removeEventListener('touchmove', mouseMove);
-        this.card.removeEventListener('pointermove', mouseMove);
+        this.document.removeEventListener('mousemove', mouseMove);
+        this.document.removeEventListener('touchmove', mouseMove);
+        this.document.removeEventListener('pointermove', mouseMove);
 
-        this.card.removeEventListener('mouseup', mouseUp);
-        this.card.removeEventListener('touchend', mouseUp);
-        this.card.removeEventListener('pointerup', mouseUp);
+        this.document.removeEventListener('mouseup', mouseUp);
+        this.document.removeEventListener('touchend', mouseUp);
+        this.document.removeEventListener('pointerup', mouseUp);
       };
 
       //Manage slider update
@@ -488,18 +488,18 @@ class EnhancedShutterCard extends HTMLElement {
   changeButtonState(shutter, percent, cfg) {
     if (percent == 0) {
       shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-button-up`).forEach((button) =>{
-        button.disabled = cfg.inverted;
+        button.disabled = cfg.invert_percentage;
       });
       shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-button-down`).forEach((button) =>{
-        button.disabled = !cfg.inverted;
+        button.disabled = !cfg.invert_percentage;
       });
     }
     else if (percent == 100) {
       shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-button-up`).forEach((button) =>{
-        button.disabled = !cfg.inverted;
+        button.disabled = !cfg.invert_percentage;
       });
       shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-button-down`).forEach((button) =>{
-        button.disabled = cfg.inverted;
+        button.disabled = cfg.invert_percentage;
       }) ;
     }
     else {
@@ -515,10 +515,10 @@ class EnhancedShutterCard extends HTMLElement {
   positionPercentToText(percent, cfg, hass) {
     if (!cfg.always_percentage) {
       if (percent == 100) {
-        return hass.localize(cfg.inverted?'ui.components.logbook.messages.was_closed':'ui.components.logbook.messages.was_opened');
+        return hass.localize(cfg.invert_percentage?'ui.components.logbook.messages.was_closed':'ui.components.logbook.messages.was_opened');
       }
       else if (percent == 0) {
-        return hass.localize(cfg.inverted?'ui.components.logbook.messages.was_opened':'ui.components.logbook.messages.was_closed');
+        return hass.localize(cfg.invert_percentage?'ui.components.logbook.messages.was_opened':'ui.components.logbook.messages.was_closed');
       }
     }
     return Math.round(percent) + ' %';
@@ -529,14 +529,14 @@ class EnhancedShutterCard extends HTMLElement {
     let min = cfg.min_closing_position;
     let max = cfg.max_closing_position;
 
-    if (cfg.inverted) {
+    if (cfg.invert_percentage) {
       visiblePosition = cfg.offset ? Math.min(100, Math.round(percent / cfg.offset * 100 )) : percent;
     }
     else  {
       visiblePosition = cfg.offset ? Math.max(0, Math.round((percent - cfg.offset) / (100-cfg.offset) * 100 )) : percent;
     }
 
-    let position =(max - min) * (cfg.inverted?visiblePosition:100-visiblePosition) / 100 + min;
+    let position =(max - min) * (cfg.invert_percentage?visiblePosition:100-visiblePosition) / 100 + min;
 
     return position;
   }
