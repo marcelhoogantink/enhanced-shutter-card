@@ -68,12 +68,7 @@ class EnhancedShutterCard extends HTMLElement {
     const config = this.config
     const entities = config.entities;
 
-    console.log('******* START EnhancedShutterCard');
-    console.log(new Date().toLocaleTimeString());
-
-
     //Init the card
-    //console.log('Build cardReady: ',this.cardReady);
     if (!this.card) {
       this.cardReady=false;
       const card = document.createElement('ha-card');
@@ -111,16 +106,13 @@ class EnhancedShutterCard extends HTMLElement {
       Promise.all(promisesForImageSizes)
           .then(results => {
             const imageDimensions = Object.assign({}, ...results);
-            console.log('dimensions:', imageDimensions);
             this.processConfig(hass,imageDimensions);
             this.buildShutters(hass,config,imageDimensions);
             this.cardReady = true;
             this.updateShutters(hass, config);
-            //console.log('after  buidShutters cardReady:', this.cardReady);
           })
           .catch(error => console.error(error));
     }
-    //console.log('Update cardReady: ',this.cardReady);
 
     //Update the shutters UI
     if (this.cardReady) this.updateShutters(hass,config);
@@ -172,14 +164,12 @@ class EnhancedShutterCard extends HTMLElement {
 
       this.entityCfg[entityId] = cfg;
     });
-    console.log('entityCfg: ', this.entityCfg);
 
   }
 
   buildShutters(hass,config,imageDimensions)
   {
     const entities = config.entities;
-    //console.log('Build shutters');
     let allShutters = document.createElement('div');
     allShutters.className = `${ESC_BASE_CLASS_NAME}s`;
     let pickPoint = -1;
@@ -188,7 +178,6 @@ class EnhancedShutterCard extends HTMLElement {
     {
       let entityId = entity.entity ? entity.entity : entity;
       let cfg = this.entityCfg[entityId];
-      //console.log('Build shutters, entity',entityId);
 
       const buttonsInRow = cfg.buttons_position == TOP || cfg.buttons_position == BOTTOM;
       const buttonsContainerReversed = cfg.buttons_position == BOTTOM || cfg.buttons_position == RIGHT;
@@ -272,7 +261,6 @@ class EnhancedShutterCard extends HTMLElement {
         }
 
         if (event.pageY === undefined) return;
-        console.log('Mouse Down EnhancedShutterCard');
 
         pickPoint = event.pageY - parseInt(slide.style.height);
 
@@ -300,7 +288,6 @@ class EnhancedShutterCard extends HTMLElement {
 
         shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-position`).forEach( (shutterPosition) =>{
           this.setShutterPositionText(hass,cfg,shutter,shutterPosition, percentagePosition);
-          console.log('mouseMove, shutterPosition=', shutterPosition);
         })
 
         //let entity = this.entity[entityId];
@@ -310,7 +297,7 @@ class EnhancedShutterCard extends HTMLElement {
       let mouseUp = (event) => {
 
         if (event.pageY === undefined) return;
-        console.log('Enhanced ShutterCard Mous Up');
+
         let min = cfg.min_closing_position;
         let max = cfg.max_closing_position;
 
@@ -339,7 +326,7 @@ class EnhancedShutterCard extends HTMLElement {
       //Manage click on buttons
       shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-button`).forEach( (button) =>{
 
-        button.onclick = function () {
+        button.onclick =  ()=> {
 
           const command = this.dataset.command;
           const services ={
@@ -350,11 +337,7 @@ class EnhancedShutterCard extends HTMLElement {
             [SERVICE_SHUTTER_TILT_OPEN] : {'args': ''},
             [SERVICE_SHUTTER_TILT_CLOSE] : {'args': ''},
           }
-
-//          hass.callService('cover', command, {
-//            entity_id: entityId,
-//            ...services[command].args
-//          });
+          this.callHassCoverService(hass,command,services[command].args);
         };
       });
 
@@ -374,7 +357,7 @@ class EnhancedShutterCard extends HTMLElement {
               flex: 1;
               }
             .${ESC_BASE_CLASS_NAME}-selector-partial {
-              z-index: 3;
+              z-index: 2;
               position: absolute;
               top: 0;
               left: 0px;
@@ -412,16 +395,13 @@ class EnhancedShutterCard extends HTMLElement {
             }
             .${ESC_BASE_CLASS_NAME}-selector-picker
             {
-              z-index: 30;
+              z-index: 3;
               position: absolute;
-              top: 7px;
+              top: 20px;
               left: 0%;
               width: 100%;
               cursor: pointer;
-              height: 30px;
-              border-width: 1px;
-              border-color: black;
-              border-style: solid;
+              height: 40px;
             }
             .${ESC_BASE_CLASS_NAME}-movement-overlay {
               display: none;
@@ -440,13 +420,11 @@ class EnhancedShutterCard extends HTMLElement {
   }
   updateShutters(hass,config)
   {
-    //console.log('Enhanced ShutterCard: Update shutters');
     const entities = config.entities;
     entities.forEach((entity) =>
     {
       let entityId = entity.entity ? entity.entity : entity;
       let cfg = this.entityCfg[entityId];
-      //console.log('Update shutters, entity',entityId);
 
       const shutter = this.card.querySelector('div[data-shutter="' + entityId +'"]');
       const slide = shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-selector-slide`);
@@ -462,7 +440,6 @@ class EnhancedShutterCard extends HTMLElement {
       })
 
       if (!this.isUpdating) {
-        //console.log('is NOT Updating');
         shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-position`).forEach( (shutterPosition) =>{
           this.setShutterPositionText(hass,cfg,shutter,shutterPosition, currentPosition);
         })
@@ -470,8 +447,6 @@ class EnhancedShutterCard extends HTMLElement {
 
 
         this.setMovement(movementState, shutter);
-      }else{
-        //console.log('is Updating');
       }
     });
   }
@@ -480,7 +455,6 @@ class EnhancedShutterCard extends HTMLElement {
   {
     let visiblePosition;
     let positionText;
-    //console.log('cfg.offset=', cfg.offset);
 
     if (cfg.invert_percentage) {
       visiblePosition = cfg.offset ? Math.min(100, Math.round(currentPosition / cfg.offset * 100)) : currentPosition;
@@ -608,7 +582,6 @@ class EnhancedShutterCard extends HTMLElement {
     let min = cfg.min_closing_position;
     let max = cfg.max_closing_position;
     position = this.boundary(position, min, max);
-    //console.log('position,min,max', position, min, max);
 
     picker.style.top = (position - this.picker_overlap) + 'px';
     slide.style.height = (position ) + 'px';
@@ -617,14 +590,9 @@ class EnhancedShutterCard extends HTMLElement {
   updateShutterPosition(hass, cfg,entityId, position) {
     let shutterPosition = Math.round(cfg.invert_percentage ?position: 100 - position);
 
-//    hass.callService('cover', SERVICE_SHUTTER_PARTIAL, {
-//      entity_id: entityId,
-//      position: shutterPosition
-//    });
+    this.callHassCoverService(hass,SERVICE_SHUTTER_PARTIAL, { position: shutterPosition });
   }
-
   setConfig(config) {
-    console.log('EnhancedShutterCard config');
     if (!config.entities) {
       throw new Error('You need to define entities');
     }
@@ -641,6 +609,23 @@ class EnhancedShutterCard extends HTMLElement {
   }
   boundary(value,min=0,max=100){
     return Math.max(min,Math.min(max,value));
+  }
+  callHassCoverService(hass,command,args='')
+  {
+    if (this.checkServiceAvailability(hass,'cover', command)) {
+      hass.callService('cover', command, {
+        entity_id: entityId,
+        ...args
+      });
+    } else {
+      console.warn(`Service 'cover'-'${command}' not available`);
+    }
+
+  }
+  checkServiceAvailability(hass,serviceDomain, serviceName) {
+    const services = hass.services;
+    let check = services[serviceDomain]?.[serviceName] !== undefined;
+    return check;
   }
   defImagePath(image_map,image)
   {
