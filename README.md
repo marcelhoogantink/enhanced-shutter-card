@@ -101,23 +101,22 @@ The sample below are the settings of the image above.
 ```yaml
 type: custom:enhanced-shutter-card
 entities:
-  - entity: cover.shutter1
-    view_image: esc-back-view2.png
-    name: Shutter 1
-    slide_image: esc-shutter-slat2.png
+  - entity: cover.demo1
+    view_image: esc-view2.png
+    name: Demo Shutter 1
+    shutter_slat_image: esc-shutter-slat2.png
     base_height_px: 200
-  - entity: cover.shutter2
-    name: Shutter 2
+  - entity: cover.demo2
+    name: Demo Shutter 2
     window_image: esc-window2.png
-    slide_image: esc-shutter-slat3.png
-    slide_bottom_image: esc-shutter-bottom3.png
-  - entity: cover.rl_computerkame3
-    name: cover.shutter3
+    shutter_slat_image: esc-shutter-slat3.png
+    shutter_bottom_image: esc-shutter-bottom3.png
+  - entity: cover.demo3
+    name: Demo Shutter 3
     base_height_px: 200
     base_width_px: 200
-    resize_height_pct: 75
     window_image: esc-window3.png
-    slide_bottom_image: esc-shutter-bottom2.png
+    shutter_bottom_image: esc-shutter-bottom2.png
 ```
 
 ## Install

@@ -68,6 +68,10 @@ class EnhancedShutterCard extends HTMLElement {
     const config = this.config
     const entities = config.entities;
 
+    console.log('*** START Enhanced ShutterCard');
+    console.log(new Date().toLocaleTimeString());
+    console.log('cardReady:', this.cardReady);
+
     //Init the card
     if (!this.card) {
       this.cardReady=false;
@@ -130,8 +134,16 @@ class EnhancedShutterCard extends HTMLElement {
 
       let cfg = {};
 
+
       const state = hass.states[entityId];
       cfg.friendly_name = entity.name ? entity.name : state ? state.attributes.friendly_name : 'unknown';
+
+      cfg.invert_percentage = entity.invert_percentage ||  config.invert_percentage || ESC_INVERT_PERCENTAGE;
+      cfg.current_position = state ? state.attributes.current_position : 0;
+      cfg.current_position = Math.round(cfg.invert_percentage ? cfg.current_position : 100 - cfg.current_position);
+      cfg.previous_position = cfg.current_position;
+
+      console.log('cover; current_position:',entityId,cfg.current_position);
 
       cfg.esc_window_image       = this.allImages[WINDOW_IMAGE_TYPE][entityId].src;
       cfg.esc_view_image         = this.allImages[VIEW_IMAGE_TYPE][entityId].src;
@@ -145,8 +157,6 @@ class EnhancedShutterCard extends HTMLElement {
       let resize_width_pct  = entity.resize_width_pct   || config.resize_width_pct || ESC_RESIZE_WIDTH_PCT;
       cfg.esc_window_height = Math.round(this.boundary(resize_height_pct)/100*base_height);
       cfg.esc_window_width  = Math.round(this.boundary(resize_width_pct) /100*base_width);
-
-      cfg.invert_percentage = entity.invert_percentage ||  config.invert_percentage || ESC_INVERT_PERCENTAGE;
 
       cfg.partial = this.boundary(entity.partial_close_percentage || config.partial_close_percentage || ESC_PARTIAL_CLOSE_PCT);
       cfg.offset  = this.boundary(entity.offset_closed_percentage || config.offset_closed_percentage || ESC_OFFSET_CLOSED_PCT);
@@ -286,6 +296,7 @@ class EnhancedShutterCard extends HTMLElement {
 
         let percentagePosition = (newPosition - min) * (100-cfg.offset) / (max - min);
         percentagePosition = Math.round(cfg.invert_percentage ?percentagePosition: 100 - percentagePosition);
+        cfg.current_position = percentagePosition;
 
         shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-position`).forEach( (shutterPosition) =>{
           this.setShutterPositionText(hass,cfg,shutter,shutterPosition, percentagePosition);
@@ -327,9 +338,10 @@ class EnhancedShutterCard extends HTMLElement {
       //Manage click on buttons
       shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-button`).forEach( (button) =>{
 
-        button.onclick =  ()=> {
+        button.onclick =  (event) =>{
 
-          const command = this.dataset.command;
+          const command = event.target.parentElement.dataset.command;
+
           const services ={
             [SERVICE_SHUTTER_UP] : {'args': ''},
             [SERVICE_SHUTTER_DOWN] : {'args': ''},
@@ -405,12 +417,21 @@ class EnhancedShutterCard extends HTMLElement {
               height: 40px;
             }
             .${ESC_BASE_CLASS_NAME}-movement-overlay {
+              z-index: -1;
               display: none;
-              position: absolute; top: 19px; left: 0%; width: 100%; height: 118px;
+              position: absolute; top: 0; width: 100%; height: 100%;
               background-color: rgba(0,0,0,0.3); text-align: center; --mdc-icon-size: 60px
             }
-              .${ESC_BASE_CLASS_NAME}-movement-open {display: none}
-              .${ESC_BASE_CLASS_NAME}-movement-close {display: none}
+              .${ESC_BASE_CLASS_NAME}-movement-open {
+                z-index: 3 !important;
+                position: absolute;
+                display: none;
+              }
+              .${ESC_BASE_CLASS_NAME}-movement-close {
+                z-index: 3 !important;
+                position: absolute;
+                display: none;
+                }
         .${ESC_BASE_CLASS_NAME}-top { text-align: center; margin-bottom: 1rem; }
         .${ESC_BASE_CLASS_NAME}-bottom { text-align: center; margin-top: 1rem; display:none}
           .${ESC_BASE_CLASS_NAME}-label { display: inline-block; font-size: 20px; vertical-align: middle; cursor: pointer;}
@@ -427,14 +448,21 @@ class EnhancedShutterCard extends HTMLElement {
       let entityId = entity.entity ? entity.entity : entity;
       let cfg = this.entityCfg[entityId];
 
+
       const shutter = this.card.querySelector('div[data-shutter="' + entityId +'"]');
       const slide = shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-selector-slide`);
       const picker = shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-selector-picker`);
 
       const state = hass.states[entityId];
-      const currentPosition = state ? state.attributes.current_position : 100;
+      const statePosition = state ? state.attributes.current_position : cfg.current_position;
+      const currentPosition = (cfg.current_position!=cfg.previous_position) ? cfg.current_position : statePosition;
       const movementState = state? state.state : 'Demo';
       const labels = shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-label`);
+
+      console.log('Update: cover; cfg.previous_position: ', entityId, cfg.previous_position);
+      console.log('Update: cover; cfg.current_position: ', entityId, cfg.current_position);
+      console.log('Update: cover; state.position  : ', entityId, state ? state.attributes.current_position : 'Not Set');
+      console.log('Update: cover; result : ', currentPosition);
 
       labels.forEach((shutterLabel) =>{
           shutterLabel.innerHTML = cfg.friendly_name;
@@ -445,8 +473,6 @@ class EnhancedShutterCard extends HTMLElement {
           this.setShutterPositionText(hass,cfg,shutter,shutterPosition, currentPosition);
         })
         this.setPickerPositionPercentage(cfg,currentPosition, picker, slide);
-
-
         this.setMovement(movementState, shutter);
       }
     });
