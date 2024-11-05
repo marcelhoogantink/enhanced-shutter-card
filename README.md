@@ -23,6 +23,9 @@ By default the card has 3 colored windows and shutter images, ands two backgroun
 | grey | esc-window.png   | esc-shutter-slat.png  | esc-shutter-bottom.png | yes
 | brown | esc-window2.png | esc-shutter-slat2.png | esc-shutter-bottom2.png | no
 | green | esc-window3.png | esc-shutter-slat3.png | esc-shutter-bottom3.png | no
+| grey | esc-window.png   | esc-shutter-slat.png  | esc-shutter-bottom.png | yes
+| brown | esc-window2.png | esc-shutter-slat2.png | esc-shutter-bottom2.png | no
+| green | esc-window3.png | esc-shutter-slat3.png | esc-shutter-bottom3.png | no
 
 These are the avialable background views:
 
@@ -30,6 +33,10 @@ These are the avialable background views:
 |-|-
 | esc-view.png | yes
 | esc-view2.png | no
+
+These files can be combined like in the example above. For the location of the images a setting 'image_map" does exits.
+The default map-setting can be found in the Configuration-info below.
+It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is condiderd to include a full path.
 
 These files can be combined like in the example above. For the location of the images a setting 'image_map" does exits.
 The default map-setting can be found in the Configuration-info below.
