@@ -588,9 +588,9 @@ class EnhancedShutterCard extends HTMLElement {
     slide.style.height = (position ) + 'px';
   }
 
-  sendShutterPosition(hass, cfg,entityId, position) {
+  sendShutterPosition(hass, cfg,entityId, position)
+  {
     let shutterPosition = Math.round(cfg.invert_percentage ?position: 100 - position);
-
     this.callHassCoverService(hass,entityId,SERVICE_SHUTTER_PARTIAL, { position: shutterPosition });
   }
   setConfig(config) {
