@@ -459,10 +459,11 @@ class EnhancedShutterCard extends HTMLElement {
       const movementState = state? state.state : 'Demo';
       const labels = shutter.querySelectorAll(`.${ESC_BASE_CLASS_NAME}-label`);
 
-      console.log('Update: cover; cfg.previous_position: ', entityId, cfg.previous_position);
-      console.log('Update: cover; cfg.current_position: ', entityId, cfg.current_position);
-      console.log('Update: cover; state.position  : ', entityId, state ? state.attributes.current_position : 'Not Set');
-      console.log('Update: cover; result : ', currentPosition);
+      console.log('Update: cover; state: ', entityId, state);
+      //console.log('Update: cover; cfg.previous_position: ', entityId, cfg.previous_position);
+      //console.log('Update: cover; cfg.current_position: ', entityId, cfg.current_position);
+      //console.log('Update: cover; state.position  : ', entityId, state ? state.attributes.current_position : 'Not Set');
+      //console.log('Update: cover; result : ', currentPosition);
 
       labels.forEach((shutterLabel) =>{
           shutterLabel.innerHTML = cfg.friendly_name;
