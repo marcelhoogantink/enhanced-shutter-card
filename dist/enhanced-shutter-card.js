@@ -338,7 +338,7 @@ class EnhancedShutterCard extends HTMLElement {
             [SERVICE_SHUTTER_TILT_OPEN] : {'args': ''},
             [SERVICE_SHUTTER_TILT_CLOSE] : {'args': ''},
           }
-          this.callHassCoverService(hass,command,services[command].args);
+          this.callHassCoverService(hass,entityId,command,services[command].args);
         };
       });
 
@@ -591,7 +591,7 @@ class EnhancedShutterCard extends HTMLElement {
   sendShutterPosition(hass, cfg,entityId, position) {
     let shutterPosition = Math.round(cfg.invert_percentage ?position: 100 - position);
 
-    this.callHassCoverService(hass,SERVICE_SHUTTER_PARTIAL, { position: shutterPosition });
+    this.callHassCoverService(hass,entityId,SERVICE_SHUTTER_PARTIAL, { position: shutterPosition });
   }
   setConfig(config) {
     if (!config.entities) {
@@ -611,7 +611,7 @@ class EnhancedShutterCard extends HTMLElement {
   boundary(value,min=0,max=100){
     return Math.max(min,Math.min(max,value));
   }
-  callHassCoverService(hass,command,args='')
+  callHassCoverService(hass,entityId,command,args='')
   {
     if (this.checkServiceAvailability(hass,'cover', command)) {
       hass.callService('cover', command, {
