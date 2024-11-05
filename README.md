@@ -97,7 +97,7 @@ _Remark : you can also just give the entity ID (without to specify `entity:`) if
 
 ### Sample
 
-The sample below are the settings of the image above.
+The sample below are the settings of the example image above.
 ```yaml
 type: custom:enhanced-shutter-card
 entities:
