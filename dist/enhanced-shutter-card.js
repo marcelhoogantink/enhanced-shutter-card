@@ -628,10 +628,14 @@ class EnhancedShutterCard extends HTMLElement {
     if (!config.entities) {
       throw new Error('You need to define entities');
     }
+    console.log('setConfig() ....');
     this.config = config;
     this.picker_overlap = 7;
     this.cardReady= false;
     this.isUpdating = false;
+  }
+  render(){
+    console.log('Render()....');
   }
 
   // The height of your card. Home Assistant uses this to automatically
