@@ -72,6 +72,10 @@ class EnhancedShutterCard extends HTMLElement {
     console.log(new Date().toLocaleTimeString());
     console.log('cardReady:', this.cardReady);
 
+    console.log('*** START Enhanced ShutterCard');
+    console.log(new Date().toLocaleTimeString());
+    console.log('cardReady:', this.cardReady);
+
     //Init the card
     if (!this.card) {
       this.cardReady=false;
