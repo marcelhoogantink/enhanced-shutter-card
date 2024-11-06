@@ -44,8 +44,8 @@ const ESC_BASE_HEIGHT_PX = 100;
 const ESC_RESIZE_WIDTH_PCT =100;
 const ESC_RESIZE_HEIGHT_PCT =100;
 
-const ESC_MIN_CLOSING_POSITION = 0;
-const ESC_MAX_CLOSING_POSITION = 100; //??
+const ESC_MIN_CLOSING_POSITION_PCT = 0;
+const ESC_MAX_CLOSING_POSITION_PCT = 100; //??
 
 const ESC_CAN_TILT = false; // OK
 
@@ -68,13 +68,9 @@ class EnhancedShutterCard extends HTMLElement {
     const config = this.config
     const entities = config.entities;
 
-    console.log('*** START Enhanced ShutterCard');
-    console.log(new Date().toLocaleTimeString());
+    console.log(new Date().toLocaleTimeString(),' *** START Enhanced ShutterCard');
     console.log('cardReady:', this.cardReady);
 
-    console.log('*** START Enhanced ShutterCard');
-    console.log(new Date().toLocaleTimeString());
-    console.log('cardReady:', this.cardReady);
 
     //Init the card
     if (!this.card) {
@@ -128,6 +124,8 @@ class EnhancedShutterCard extends HTMLElement {
   // end main
 
   processConfig(hass,imageDimensions) {
+    console.log('processConfig() ....');
+
     this.entityCfg = [];
     const config = this.config
     const entities = config.entities;
@@ -154,19 +152,19 @@ class EnhancedShutterCard extends HTMLElement {
       cfg.esc_slide_image        = this.allImages[SHUTTER_SLAT_IMAGE_TYPE][entityId].src;
       cfg.esc_slide_bottom_image = this.allImages[SHUTTER_BOTTON_IMAGE_TYPE][entityId].src;
 
-      let base_height = entity.base_height_px || config.base_height_px || imageDimensions[entityId]?.height || ESC_BASE_HEIGHT_PX;
-      let base_width  = entity.base_width_px  || config.base_width_px  || imageDimensions[entityId]?.width  || ESC_BASE_WIDTH_PX;
+      let base_height_px = entity.base_height_px || config.base_height_px || imageDimensions[entityId]?.height || ESC_BASE_HEIGHT_PX;
+      let base_width_px  = entity.base_width_px  || config.base_width_px  || imageDimensions[entityId]?.width  || ESC_BASE_WIDTH_PX;
 
       let resize_height_pct = entity.resize_height_pct || config.resize_height_pct || ESC_RESIZE_HEIGHT_PCT;
       let resize_width_pct  = entity.resize_width_pct   || config.resize_width_pct || ESC_RESIZE_WIDTH_PCT;
-      cfg.esc_window_height = Math.round(this.boundary(resize_height_pct)/100*base_height);
-      cfg.esc_window_width  = Math.round(this.boundary(resize_width_pct) /100*base_width);
+      cfg.esc_window_height_px = Math.round(this.boundary(resize_height_pct)/100*base_height_px);
+      cfg.esc_window_width_px  = Math.round(this.boundary(resize_width_pct) /100*base_width_px);
 
       cfg.partial = this.boundary(entity.partial_close_percentage || config.partial_close_percentage || ESC_PARTIAL_CLOSE_PCT);
       cfg.offset  = this.boundary(entity.offset_closed_percentage || config.offset_closed_percentage || ESC_OFFSET_CLOSED_PCT);
 
-      cfg.min_closing_position = Math.round(this.boundary(entity.min_closing_position || config.min_closing_position || ESC_MIN_CLOSING_POSITION)/100*cfg.esc_window_height);
-      cfg.max_closing_position = Math.round(this.boundary(entity.max_closing_position || config.max_closing_position || ESC_MAX_CLOSING_POSITION)/100*cfg.esc_window_height);
+      cfg.min_closing_position_px = Math.round(this.boundary(entity.min_closing_position_pct || config.min_closing_position_pct || ESC_MIN_CLOSING_POSITION_PCT)/100*cfg.esc_window_height_px);
+      cfg.max_closing_position_px = Math.round(this.boundary(entity.max_closing_position_pct || config.max_closing_position_pct || ESC_MAX_CLOSING_POSITION_PCT)/100*cfg.esc_window_height_px);
 
       cfg.tilt = entity.can_tilt || config.can_tilt || ESC_CAN_TILT;
 
@@ -178,11 +176,13 @@ class EnhancedShutterCard extends HTMLElement {
 
       this.entityCfg[entityId] = cfg;
     });
+    console.log(' .... cfg: ',this.entityCfg);
 
   }
 
   buildShutters(hass,config,imageDimensions)
   {
+    console.log('buildShutters() ....');
     const entities = config.entities;
     let allShutters = document.createElement('div');
     allShutters.className = `${ESC_BASE_CLASS_NAME}s`;
@@ -221,16 +221,16 @@ class EnhancedShutterCard extends HTMLElement {
             <ha-icon-button label="` + hass.localize(`ui.card.cover.close_cover`) +`" class="${ESC_BASE_CLASS_NAME}-button ${ESC_BASE_CLASS_NAME}-button-down" data-command="${SERVICE_SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
           </div>
           <div class="${ESC_BASE_CLASS_NAME}-selector">
-            <div class="${ESC_BASE_CLASS_NAME}-selector-picture" style="width: ${cfg.esc_window_width}px; height: ${cfg.esc_window_height}px; background-image: url(${cfg.esc_view_image})";>
+            <div class="${ESC_BASE_CLASS_NAME}-selector-picture" style="width: ${cfg.esc_window_width_px}px; height: ${cfg.esc_window_height_px}px; background-image: url(${cfg.esc_view_image})";>
               <img src= "${cfg.esc_window_image}" style="width: 100%; height: 100%">
-              <div class="${ESC_BASE_CLASS_NAME}-selector-slide" style="height: ${cfg.min_closing_position}px; background-image: url(${cfg.esc_slide_image});">
+              <div class="${ESC_BASE_CLASS_NAME}-selector-slide" style="height: ${cfg.min_closing_position_px}px; background-image: url(${cfg.esc_slide_image});">
                 <img src="${cfg.esc_slide_bottom_image}"; style="width: 100%; position: absolute; bottom: 0";>
               </div>
-              <div class="${ESC_BASE_CLASS_NAME}-selector-picker" style="top: ${cfg.min_closing_position-this.picker_overlap}px;"></div>`+
+              <div class="${ESC_BASE_CLASS_NAME}-selector-picker" style="top: ${cfg.min_closing_position_px-this.picker_overlap_px}px;"></div>`+
               (cfg.partial&&!cfg.offset?
                 `<div class="${ESC_BASE_CLASS_NAME}-selector-partial" style="top:${this.calculateScreenPositionFromPercent(cfg,cfg.partial)}px"></div>`:``
               ) + `
-              <div class="${ESC_BASE_CLASS_NAME}-movement-overlay">
+              <div class="${ESC_BASE_CLASS_NAME}-movement-overlay" style="top: ${cfg.min_closing_position_px}px; height: ${cfg.max_closing_position_px - cfg.min_closing_position_px}px;">
                 <ha-icon class="${ESC_BASE_CLASS_NAME}-movement-open" icon="mdi:arrow-up"></ha-icon>
                 <ha-icon class="${ESC_BASE_CLASS_NAME}-movement-close" icon="mdi:arrow-down"></ha-icon>
               </div>
@@ -292,8 +292,8 @@ class EnhancedShutterCard extends HTMLElement {
       let mouseMove = (event) =>{
         if (event.pageY === undefined) return;
 
-        let min = cfg.min_closing_position;
-        let max = cfg.max_closing_position;
+        let min = cfg.min_closing_position_px;
+        let max = cfg.max_closing_position_px;
         let newPosition = this.boundary(event.pageY - pickPoint,min,max);
 
         this.setPickerPositionScreen(cfg,newPosition, picker, slide);
@@ -314,8 +314,8 @@ class EnhancedShutterCard extends HTMLElement {
 
         if (event.pageY === undefined) return;
 
-        let min = cfg.min_closing_position;
-        let max = cfg.max_closing_position;
+        let min = cfg.min_closing_position_px;
+        let max = cfg.max_closing_position_px;
 
         this.isUpdating = false;
         let newPosition = this.boundary(event.pageY - pickPoint,min,max);
@@ -424,16 +424,16 @@ class EnhancedShutterCard extends HTMLElement {
               z-index: -1;
               display: none;
               position: absolute; top: 0; width: 100%; height: 100%;
-              background-color: rgba(0,0,0,0.3); text-align: center; --mdc-icon-size: 60px
+              background-color: rgba(0,0,0,0.3); text-align: center; --mdc-icon-size: 60px;
             }
               .${ESC_BASE_CLASS_NAME}-movement-open {
                 z-index: 3 !important;
-                position: absolute;
+                position: relatve;
                 display: none;
               }
               .${ESC_BASE_CLASS_NAME}-movement-close {
                 z-index: 3 !important;
-                position: absolute;
+                position: relatve;
                 display: none;
                 }
         .${ESC_BASE_CLASS_NAME}-top { text-align: center; margin-bottom: 1rem; }
@@ -447,6 +447,7 @@ class EnhancedShutterCard extends HTMLElement {
   updateShutters(hass,config)
   {
     const entities = config.entities;
+    console.log('updateShutters() ....');
     entities.forEach((entity) =>
     {
       let entityId = entity.entity ? entity.entity : entity;
@@ -558,8 +559,8 @@ class EnhancedShutterCard extends HTMLElement {
 
   calculateScreenPositionFromPercent(cfg,percent) {
     let visiblePosition;
-    let min = cfg.min_closing_position;
-    let max = cfg.max_closing_position;
+    let min = cfg.min_closing_position_px;
+    let max = cfg.max_closing_position_px;
 
     if (cfg.invert_percentage) {
       visiblePosition = cfg.offset ? Math.min(100, Math.round(percent / cfg.offset * 100 )) : percent;
@@ -611,11 +612,11 @@ class EnhancedShutterCard extends HTMLElement {
 
   setPickerPositionScreen(cfg,position, picker, slide) {
 
-    let min = cfg.min_closing_position;
-    let max = cfg.max_closing_position;
+    let min = cfg.min_closing_position_px;
+    let max = cfg.max_closing_position_px;
     position = this.boundary(position, min, max);
 
-    picker.style.top = (position - this.picker_overlap) + 'px';
+    picker.style.top = (position - this.picker_overlap_px) + 'px';
     slide.style.height = (position ) + 'px';
   }
 
@@ -630,7 +631,7 @@ class EnhancedShutterCard extends HTMLElement {
     }
     console.log('setConfig() ....');
     this.config = config;
-    this.picker_overlap = 7;
+    this.picker_overlap_px = 20; // obsoletee ???
     this.cardReady= false;
     this.isUpdating = false;
   }
