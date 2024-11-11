@@ -303,10 +303,9 @@ class EnhancedShutterCard extends HTMLElement {
   {
     const config = this.config
     const entities = config.entities;
-
+    console.log('Starting Hass');
     //Init the card
     if (!this.card) {
-      this.cardReady=false;
       const card = document.createElement('ha-card');
 
       if (this.config.title) {
@@ -341,6 +340,7 @@ class EnhancedShutterCard extends HTMLElement {
 
       Promise.all(promisesForImageSizes)
           .then(results => {
+            this.cardReady = false;
             const imageDimensions = Object.assign({}, ...results);
             this.buildShutters(hass,config,imageDimensions);
             this.updateShutters(hass, config);
@@ -452,12 +452,12 @@ class EnhancedShutterCard extends HTMLElement {
 
         this.isUpdating = true;
 
-        //document.addEventListener('mousemove', mouseMove);
-        //document.addEventListener('touchmove', mouseMove);
+        document.addEventListener('mousemove', mouseMove);
+        document.addEventListener('touchmove', mouseMove);
         document.addEventListener('pointermove', mouseMove);
 
-        //document.addEventListener('mouseup', mouseUp);
-        //document.addEventListener('touchend', mouseUp);
+        document.addEventListener('mouseup', mouseUp);
+        document.addEventListener('touchend', mouseUp);
         document.addEventListener('pointerup', mouseUp);
       };
 
@@ -487,18 +487,18 @@ class EnhancedShutterCard extends HTMLElement {
 
         this.sendShutterPosition(hass, cfg,entityId, position);
 
-        //document.removeEventListener('mousemove', mouseMove);
-        //document.removeEventListener('touchmove', mouseMove);
+        document.removeEventListener('mousemove', mouseMove);
+        document.removeEventListener('touchmove', mouseMove);
         document.removeEventListener('pointermove', mouseMove);
 
-        //document.removeEventListener('mouseup', mouseUp);
-        //document.removeEventListener('touchend', mouseUp);
+        document.removeEventListener('mouseup', mouseUp);
+        document.removeEventListener('touchend', mouseUp);
         document.removeEventListener('pointerup', mouseUp);
       };
 
       //Manage slider update
-      //picker.addEventListener('mousedown', mouseDown);
-      //picker.addEventListener('touchstart', mouseDown);
+      picker.addEventListener('mousedown', mouseDown);
+      picker.addEventListener('touchstart', mouseDown);
       picker.addEventListener('pointerdown', mouseDown);
 
       //Manage click on buttons
@@ -615,6 +615,7 @@ class EnhancedShutterCard extends HTMLElement {
   }
   updateShutters(hass,config)
   {
+    console.log('updateShutters() ....');
     const entities = config.entities;
     entities.forEach((entity) =>
     {
@@ -763,7 +764,7 @@ class EnhancedShutterCard extends HTMLElement {
       throw new Error('You need to define entities');
     }
     this.config = config;
-    this.picker_overlap_px = 20; // obsoletee ???
+    this.picker_overlap_px = 20; // obsolete ???
     this.cardReady= false;
     this.isUpdating = false;
   }

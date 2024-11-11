@@ -3,20 +3,21 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
 
+#### (Attention: This card is in Beta)
 
 This card allows besides opening, closing or setting a shutter to the opening rate you want, also many options to design your shutter by combining sizes and images you want.
 
 It is a follow-up of [Deejayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters.
-I started with a simple change for the motion of the shutters, but soon it became a great update.
-Due to the inactivity of this Shutter Card, I decided to add this one as 'Enhanced Shutter Card' to HACS.
+I started with a simple change for the motion of the shutters, but soon it became a huge update.
+Due to the inactivity of the Shutter Card, I decided to add this one as 'Enhanced Shutter Card' to HACS.
 
 It supports all options of the original Card, but also graphical options like different backrounds, windows an shutters.
 Also the sizes of every shutter can be altered:
 
 ![Enhanced Shutter Card](EnhancedShutterCard.gif)
-Find below the yaml for this example.
+(_find below the yaml for this example._)
 
-By default the card has 3 colored windows and shutter images, ands two background view.
+By default the card has 3 colored windows and shutter images, ands two background views in the package:
 
 | color | window-image | shutter-slat image | shutter-bottom-bar image | default
 | -| - | - | - | -
@@ -34,11 +35,7 @@ These are the avialable background views:
 | esc-view.png | yes
 | esc-view2.png | no
 
-These files can be combined like in the example above. For the location of the images a setting 'image_map" does exits.
-The default map-setting can be found in the Configuration-info below.
-It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is condiderd to include a full path.
-
-These files can be combined like in the example above. For the location of the images a setting 'image_map" does exits.
+These filimages can be combined like in the example above. For the location of the images a setting 'image_map" does exits.
 The default map-setting can be found in the Configuration-info below.
 It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is condiderd to include a full path.
 
@@ -54,7 +51,7 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | window_image | string | No | esc-window.png | image of the window/shutter
 | view_image | string | No | esc-back-view.png | background-image trough the window.
 | shutter_slat_image | string | No | esc-shutter-slat.png | Image of one slat of the shutter.
-| shutter_bottom_bar_image | string | No | esc-shutter-bottom.png | the bottom bar of the shutter.
+| shutter_bottom_image | string | No | esc-shutter-bottom.png | the bottom bar of the shutter.
 | base_height_px | int | No | _height of image_ | height of image in pixels
 | base_width_px | int | No | _width of image_ | witdh of image in pixels
 | resize_height_pct | int | No | 100 | rezise of the base height in percent
@@ -80,7 +77,7 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | window_image | string | No | global item setting, see under _General_ | see under _General_
 | view_image | string | No | global item setting, see under _General_ | see under _General_
 | shutter_slat_image | string | No | global item setting, see under _General_ | see under _General_
-| shutter_bottom_bar_image | string | No |global item setting, see under _General_ | see under _General_
+| shutter_bottom_image | string | No |global item setting, see under _General_ | see under _General_
 | base_height_px | int | No | global item setting, see under _General_ | see under _General_
 | base_width_px | int | No | global item setting, see under _General_ | see under _General_
 | resize_height_pct | int | No | global item setting, see under _General_ | see under _General_
@@ -132,6 +129,6 @@ If you use HACS, the resources will automatically be configured with the needed 
 If you don't use HACS, you can download js file from [latest releases](https://github.com/marcelhoogantink/enhanced-shutter-card/releases). Drop it then in `www` folder in your `config` directory. Next add the following entry in lovelace configuration (`config/www` points to `local`):
 ```yaml
 resources:
-  - url: /local/hass-shutter-card.js
+  - url: /local/enhanced-shutter-card.js
     type: module
 ```
