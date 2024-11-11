@@ -343,8 +343,8 @@ class EnhancedShutterCard extends HTMLElement {
           .then(results => {
             const imageDimensions = Object.assign({}, ...results);
             this.buildShutters(hass,config,imageDimensions);
-            this.cardReady = true;
             this.updateShutters(hass, config);
+            this.cardReady = true;
           })
           .catch(error => console.error(error));
     }
@@ -616,7 +616,6 @@ class EnhancedShutterCard extends HTMLElement {
   updateShutters(hass,config)
   {
     const entities = config.entities;
-    console.log('updateShutters() ....');
     entities.forEach((entity) =>
     {
       let entityId = entity.entity ? entity.entity : entity;
