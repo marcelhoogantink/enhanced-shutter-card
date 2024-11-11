@@ -59,6 +59,8 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | base_width_px | int | No | _width of image_ | witdh of image in pixels
 | resize_height_pct | int | No | 100 | rezise of the base height in percent
 | resise_width_pct | int | No | 100 | rezise of the base width in percent
+| top_offset_pct | int | No | 0 | space between top image/window and top shutter
+| bottom_offset_pct | int | No | 0 | space between bottom image/window and bottom shutter
 | buttons_position | string | No | `left` | Set buttons on `left`, `right`, `top` or `bottom` of the shutter
 | title_position | string | No | `top` | Set title on `top` or on `bottom` of the shutter
 | invert_percentage | boolean | No | `false` | Set it to `true` if your shutter is 100% when it is closed, and 0% when it is opened
@@ -83,6 +85,8 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | base_width_px | int | No | global item setting, see under _General_ | see under _General_
 | resize_height_pct | int | No | global item setting, see under _General_ | see under _General_
 | resise_width_pct | int | No | global item setting, see under _General_ | see under _General_
+| top_offset_pct | int | No | global item setting, see under _General_ | see under _General_
+| bottom_offset_pct | int | No | global item setting, see under _General_ | see under _General_
 | buttons_position | string | No | global item setting, see under _General_ | see under _General_
 | title_position | string | No | global item setting, see under _General_ | see under _General_
 | invert_percentage | boolean | No | global item setting, see under _General_ | see under _General_
@@ -100,6 +104,8 @@ _Remark : you can also just give the entity ID (without to specify `entity:`) if
 The sample below are the settings of the example image above.
 ```yaml
 type: custom:enhanced-shutter-card
+top_offset_pct: 13
+bottom_offset_pct: 2
 entities:
   - entity: cover.demo1
     view_image: esc-view2.png
