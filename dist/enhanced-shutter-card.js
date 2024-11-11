@@ -356,6 +356,7 @@ class EnhancedShutterCard extends HTMLElement {
 
   buildShutters(hass,config,imageDimensions)
   {
+    console.log('buildShutters() ....');
     const entities = config.entities;
     let allShutters = document.createElement('div');
     allShutters.className = `${ESC_CLASS_SHUTTERS}`;
@@ -615,6 +616,7 @@ class EnhancedShutterCard extends HTMLElement {
   updateShutters(hass,config)
   {
     const entities = config.entities;
+    console.log('updateShutters() ....');
     entities.forEach((entity) =>
     {
       let entityId = entity.entity ? entity.entity : entity;
