@@ -15,6 +15,7 @@ It supports all options of the original Card, but also graphical options like di
 Also the sizes of every shutter can be altered:
 
 ![Enhanced Shutter Card](EnhancedShutterCard.gif)
+
 (_find below the yaml for this example._)
 
 By default the card has 3 colored windows and shutter images, ands two background views in the package:
@@ -124,11 +125,7 @@ entities:
 
 ## Install
 
-If you use HACS, the resources will automatically be configured with the needed file.
+Use HACS, search for Enhancd Shutter Card, the resources will automatically be configured with the needed files.
 
-If you don't use HACS, you can download js file from [latest releases](https://github.com/marcelhoogantink/enhanced-shutter-card/releases). Drop it then in `www` folder in your `config` directory. Next add the following entry in lovelace configuration (`config/www` points to `local`):
-```yaml
-resources:
-  - url: /local/enhanced-shutter-card.js
-    type: module
-```
+As long as this card is not a default one in HACS (PR is awaiting aproval), you need to add this repository as a Custom Repository.
+See for installing Custom Repositories this [hacs-custom-repositories](https://www.hacs.xyz/docs/faq/custom_repositories/) page.

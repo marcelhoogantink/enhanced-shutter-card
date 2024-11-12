@@ -92,210 +92,6 @@ const ESC_DISABLE_END_BUTTONS = false;
 
 //const UNKNOWN =999;
 
-class shutterCfg {
-
-  #friendly_name;
-  #buttons_position;
-  #disable_end_buttons;
-  #invert_percentage;
-  #current_position;
-//  #previous_position;
-  #window_image;
-  #view_image;
-  #slide_image;
-  #slide_bottom_image;
-
-  #window_height_px;
-  #window_width_px;
-  #partial;
-  #offset;
-  #top_offset_px;
-  #bottom_offset_px;
-  #tilt;
-  #title_position;
-  #always_percentage;
-
-
-
-  constructor(hass,entity, config,imageDimensions,allImages)
-  {
-      let entityId = entity.entity ? entity.entity : entity;
-
-      const state = hass.states[entityId];
-      this.friendlyName(entity.name ? entity.name : (state && state.attributes) ? state.attributes.friendly_name : 'unknown');
-
-      this.invertPercentage(entity.invert_percentage ||  config.invert_percentage || ESC_INVERT_PERCENTAGE);
-
-      this.currentPosition((state && state.attributes) ? state.attributes.current_position : 0);
-      //this.previousPosition(UNKNOWN);
-
-      this.windowImage(allImages[WINDOW_IMAGE_TYPE][entityId].src);
-      this.viewImage(allImages[VIEW_IMAGE_TYPE][entityId].src);
-      this.slideImage(allImages[SHUTTER_SLAT_IMAGE_TYPE][entityId].src);
-      this.slideBottomImage(allImages[SHUTTER_BOTTON_IMAGE_TYPE][entityId].src);
-
-      let base_height_px = entity.base_height_px || config.base_height_px || imageDimensions[entityId]?.height || ESC_BASE_HEIGHT_PX;
-      let base_width_px  = entity.base_width_px  || config.base_width_px  || imageDimensions[entityId]?.width  || ESC_BASE_WIDTH_PX;
-
-      let resize_height_pct = entity.resize_height_pct || config.resize_height_pct || ESC_RESIZE_HEIGHT_PCT;
-      let resize_width_pct  = entity.resize_width_pct  || config.resize_width_pct  || ESC_RESIZE_WIDTH_PCT;
-      this.windowHeightPx(Math.round(boundary(resize_height_pct,ESC_MIN_RESIZE_HEIGHT_PCT,ESC_MAX_RESIZE_HEIGHT_PCT) / 100 * base_height_px));
-      this.windowWidthPx(Math.round(boundary(resize_width_pct, ESC_MIN_RESIZE_WIDTH_PCT ,ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
-
-      this.partial(boundary(entity.partial_close_percentage || config.partial_close_percentage || ESC_PARTIAL_CLOSE_PCT));
-      this.offset(boundary(entity.offset_closed_percentage || config.offset_closed_percentage || ESC_OFFSET_CLOSED_PCT));
-
-      this.topOffsetPx(Math.round(boundary(entity.top_offset_pct || config.top_offset_pct || ESC_TOP_OFFSET_PCT)/ 100 * this.windowHeightPx()));
-      this.bottomOffsetPx(Math.round(boundary(entity.bottom_offset_pct || config.bottom_offset_pct || ESC_BOTTOM_OFFSET_PCT)/ 100 * this.windowHeightPx()));
-
-      this.tilt(entity.can_tilt || config.can_tilt || ESC_CAN_TILT);
-
-      this.defButtonPosition(config,entity);
-      this.titlePosition(entity.title_position || config.title_position || ESC_TITLE_POSITION);
-
-      this.alwaysPercentage(entity.always_percentage || config.always_percentage || ESC_ALWAYS_PCT);
-      this.disableEndButtons(entity.disable_end_buttons || config.disable_end_buttons || ESC_DISABLE_END_BUTTONS);
-
-      Object.preventExtensions(this);
-  }
-  /*
-   ** getters/setters
-   */
-  buttonPosition(buttonPosition = null){
-    if (buttonPosition) this.#buttons_position= buttonPosition;
-    return this.#buttons_position;
-  }
-  disableEndButtons(value = null){
-    if (value!==null) this.#disable_end_buttons= value;
-    return this.#disable_end_buttons;
-  }
-  invertPercentage(value = null){
-    if (value!==null) this.#invert_percentage= value;
-    return this.#invert_percentage;
-  }
-  friendlyName(value = null){
-    if (value!==null) this.#friendly_name= value;
-    return this.#friendly_name;
-  }
-  currentPosition(value = null){
-    if (value!==null) this.#current_position= value;
-    return this.#current_position;
-  }
-/*
-  previousPosition(value = null){
-    if (value!==null) this.#previous_position= value;
-    return this.#previous_position;
-  }
-*/
-  windowImage(value = null){
-    if (value!==null) this.#window_image= value;
-    return this.#window_image;
-  }
-  viewImage(value = null){
-    if (value!==null) this.#view_image= value;
-    return this.#view_image;
-  }
-  slideImage(value = null){
-    if (value!==null) this.#slide_image= value;
-    return this.#slide_image;
-  }
-  slideBottomImage(value = null){
-    if (value!==null) this.#slide_bottom_image= value;
-    return this.#slide_bottom_image;
-  }
-
-  windowHeightPx(value = null){
-    if (value!==null) this.#window_height_px= value;
-    return this.#window_height_px;
-  }
-  windowWidthPx(value = null){
-    if (value!==null) this.#window_width_px= value;
-    return this.#window_width_px;
-  }
-  partial(value = null){
-    if (value!==null) this.#partial= value;
-    return this.#partial;
-  }
-  offset(value = null){
-    if (value!==null) this.#offset= value;
-    return this.#offset;
-  }
-  topOffsetPx(value = null){
-    if (value!==null) this.#top_offset_px= value;
-    return this.#top_offset_px;
-  }
-  bottomOffsetPx(value = null){
-    if (value!==null) this.#bottom_offset_px= value;
-    return this.#bottom_offset_px;
-  }
-  tilt(value = null){
-    if (value!==null) this.#tilt= value;
-    return this.#tilt;
-  }
-  titlePosition(value = null){
-    if (value!==null) this.#title_position= value;
-    return this.#title_position;
-  }
-  alwaysPercentage(value = null){
-    if (value!==null) this.#always_percentage= value;
-    return this.#always_percentage;
-  }
-
-  /*
-  ** end getters/setters
-  */
-  defButtonPosition(config,entity) {
-    let buttonsPosition = entity.buttons_position || config.buttons_position || ESC_BUTTONS_POSITION;
-    buttonsPosition
-      = (buttonsPosition && POSITIONS.includes(buttonsPosition.toLowerCase()))
-      ? buttonsPosition.toLowerCase()
-      : ESC_BUTTONS_POSITION;
-
-      this.buttonPosition(buttonsPosition);
-  }
-  // test
-  testLog(text,value){
-    console.log(`${text}: value=${value} cfg = `,this);
-  }
-
-  defPercentagPositionFromScreenposition(screenPosition){
-    let percentagePosition = Math.round((screenPosition - this.topOffsetPx()) / this.coverHeightPx() * (100-this.offset()));
-    percentagePosition = this.getDisplayedPctPosition(percentagePosition);
-    return percentagePosition;
-  }
-  getDisplayedPctPosition(position=this.current_position){
-    let pctPosition = Math.round(this.invert_percentage ? position : 100 - position);
-    return pctPosition;
-  }
-  updatePosition(percentagePosition){
-    //this.previousPosition(this.currentPosition());
-    this.currentPosition(percentagePosition);
-  }
-  defScreenPositionFromPercent(position_pct) {
-    let visiblePosition;
-    if (this.invertPercentage()) {
-      visiblePosition = this.offset() ? Math.min(100, Math.round(position_pct / this.offset() * 100 )) : position_pct;
-    }
-    else  {
-      visiblePosition = this.offset() ? Math.max(0, Math.round((position_pct - this.offset()) / (100-this.offset()) * 100 )) : position_pct;
-    }
-
-    let position =this.coverHeightPx() * (this.invertPercentage()?visiblePosition:100-visiblePosition) / 100 + this.topOffsetPx();
-
-    return position;
-
-  }
-  coverHeightPx(){
-    return this.windowHeightPx()-this.bottomOffsetPx() - this.topOffsetPx();
-  }
-  coverTopPx(){
-    return this.topOffsetPx();
-  }
-  coverBottomPx(){
-    return this.windowHeightPx()-this.bottomOffsetPx();
-  }
-
-}
 
 class EnhancedShutterCard extends HTMLElement {
 
@@ -660,23 +456,28 @@ class EnhancedShutterCard extends HTMLElement {
     let visiblePosition;
     let positionText;
 
+    this.changeButtonState(shutter, position_pct, cfg);
+
+
     if (cfg.invertPercentage()) {//invert
-      visiblePosition = cfg.offset() ? Math.min(100, Math.round(position_pct / cfg.offset() * 100)) : position_pct;
-      positionText = this.positionPercentToText(visiblePosition, cfg, hass);
+      visiblePosition = cfg.offset() ? Math.min(100, Math.round(       (position_pct)           /( cfg.offset())     * 100)) : position_pct;
+    }
+    else { //invert
+      visiblePosition = cfg.offset() ? Math.max(  0, Math.round((position_pct - cfg.offset()) / (100 - cfg.offset()) * 100)) : position_pct;
+    }
+    positionText = this.positionPercentToText(visiblePosition, cfg, hass);
+
+    if (cfg.invertPercentage()) {//invert
       if (visiblePosition == 100 && cfg.offset()) {
         positionText += ' (' + (100 - Math.round(Math.abs(position_pct - visiblePosition) / cfg.offset() * 100)) + ' %)';
       }
     }
     else { //invert
-      visiblePosition = cfg.offset() ? Math.max(0, Math.round((position_pct - cfg.offset()) / (100 - cfg.offset()) * 100)) : position_pct;
-      positionText = this.positionPercentToText(visiblePosition, cfg, hass);
-
       if (visiblePosition == 0 && cfg.offset()) {
         positionText += ' (' + (100 - Math.round(Math.abs(position_pct - visiblePosition) / cfg.offset() * 100)) + ' %)';
       }
     }
     shutterPosition.innerHTML = positionText;
-    this.changeButtonState(shutter, position_pct, cfg);
   }
 
   changeButtonState(shutter, percent, cfg)
@@ -800,6 +601,211 @@ class EnhancedShutterCard extends HTMLElement {
 customElements.define("enhanced-shutter-card", EnhancedShutterCard);
 
 //###########################################
+class shutterCfg {
+
+  #friendly_name;
+  #buttons_position;
+  #disable_end_buttons;
+  #invert_percentage;
+  #current_position;
+//  #previous_position;
+  #window_image;
+  #view_image;
+  #slide_image;
+  #slide_bottom_image;
+
+  #window_height_px;
+  #window_width_px;
+  #partial;
+  #offset;
+  #top_offset_px;
+  #bottom_offset_px;
+  #tilt;
+  #title_position;
+  #always_percentage;
+
+
+
+  constructor(hass,entity, config,imageDimensions,allImages)
+  {
+      let entityId = entity.entity ? entity.entity : entity;
+
+      const state = hass.states[entityId];
+      this.friendlyName(entity.name ? entity.name : (state && state.attributes) ? state.attributes.friendly_name : 'unknown');
+
+      this.invertPercentage(entity.invert_percentage ||  config.invert_percentage || ESC_INVERT_PERCENTAGE);
+
+      this.currentPosition((state && state.attributes) ? state.attributes.current_position : 0);
+      //this.previousPosition(UNKNOWN);
+
+      this.windowImage(allImages[WINDOW_IMAGE_TYPE][entityId].src);
+      this.viewImage(allImages[VIEW_IMAGE_TYPE][entityId].src);
+      this.slideImage(allImages[SHUTTER_SLAT_IMAGE_TYPE][entityId].src);
+      this.slideBottomImage(allImages[SHUTTER_BOTTON_IMAGE_TYPE][entityId].src);
+
+      let base_height_px = entity.base_height_px || config.base_height_px || imageDimensions[entityId]?.height || ESC_BASE_HEIGHT_PX;
+      let base_width_px  = entity.base_width_px  || config.base_width_px  || imageDimensions[entityId]?.width  || ESC_BASE_WIDTH_PX;
+
+      let resize_height_pct = entity.resize_height_pct || config.resize_height_pct || ESC_RESIZE_HEIGHT_PCT;
+      let resize_width_pct  = entity.resize_width_pct  || config.resize_width_pct  || ESC_RESIZE_WIDTH_PCT;
+      this.windowHeightPx(Math.round(boundary(resize_height_pct,ESC_MIN_RESIZE_HEIGHT_PCT,ESC_MAX_RESIZE_HEIGHT_PCT) / 100 * base_height_px));
+      this.windowWidthPx(Math.round(boundary(resize_width_pct, ESC_MIN_RESIZE_WIDTH_PCT ,ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
+
+      this.partial(boundary(entity.partial_close_percentage || config.partial_close_percentage || ESC_PARTIAL_CLOSE_PCT));
+      this.offset(boundary(entity.offset_closed_percentage || config.offset_closed_percentage || ESC_OFFSET_CLOSED_PCT));
+
+      this.topOffsetPx(Math.round(boundary(entity.top_offset_pct || config.top_offset_pct || ESC_TOP_OFFSET_PCT)/ 100 * this.windowHeightPx()));
+      this.bottomOffsetPx(Math.round(boundary(entity.bottom_offset_pct || config.bottom_offset_pct || ESC_BOTTOM_OFFSET_PCT)/ 100 * this.windowHeightPx()));
+
+      this.tilt(entity.can_tilt || config.can_tilt || ESC_CAN_TILT);
+
+      this.defButtonPosition(config,entity);
+      this.titlePosition(entity.title_position || config.title_position || ESC_TITLE_POSITION);
+
+      this.alwaysPercentage(entity.always_percentage || config.always_percentage || ESC_ALWAYS_PCT);
+      this.disableEndButtons(entity.disable_end_buttons || config.disable_end_buttons || ESC_DISABLE_END_BUTTONS);
+
+      Object.preventExtensions(this);
+  }
+  /*
+   ** getters/setters
+   */
+  buttonPosition(buttonPosition = null){
+    if (buttonPosition) this.#buttons_position= buttonPosition;
+    return this.#buttons_position;
+  }
+  disableEndButtons(value = null){
+    if (value!==null) this.#disable_end_buttons= value;
+    return this.#disable_end_buttons;
+  }
+  invertPercentage(value = null){
+    if (value!==null) this.#invert_percentage= value;
+    return this.#invert_percentage;
+  }
+  friendlyName(value = null){
+    if (value!==null) this.#friendly_name= value;
+    return this.#friendly_name;
+  }
+  currentPosition(value = null){
+    if (value!==null) this.#current_position= value;
+    return this.#current_position;
+  }
+/*
+  previousPosition(value = null){
+    if (value!==null) this.#previous_position= value;
+    return this.#previous_position;
+  }
+*/
+  windowImage(value = null){
+    if (value!==null) this.#window_image= value;
+    return this.#window_image;
+  }
+  viewImage(value = null){
+    if (value!==null) this.#view_image= value;
+    return this.#view_image;
+  }
+  slideImage(value = null){
+    if (value!==null) this.#slide_image= value;
+    return this.#slide_image;
+  }
+  slideBottomImage(value = null){
+    if (value!==null) this.#slide_bottom_image= value;
+    return this.#slide_bottom_image;
+  }
+
+  windowHeightPx(value = null){
+    if (value!==null) this.#window_height_px= value;
+    return this.#window_height_px;
+  }
+  windowWidthPx(value = null){
+    if (value!==null) this.#window_width_px= value;
+    return this.#window_width_px;
+  }
+  partial(value = null){
+    if (value!==null) this.#partial= value;
+    return this.#partial;
+  }
+  offset(value = null){
+    if (value!==null) this.#offset= value;
+    return this.#offset;
+  }
+  topOffsetPx(value = null){
+    if (value!==null) this.#top_offset_px= value;
+    return this.#top_offset_px;
+  }
+  bottomOffsetPx(value = null){
+    if (value!==null) this.#bottom_offset_px= value;
+    return this.#bottom_offset_px;
+  }
+  tilt(value = null){
+    if (value!==null) this.#tilt= value;
+    return this.#tilt;
+  }
+  titlePosition(value = null){
+    if (value!==null) this.#title_position= value;
+    return this.#title_position;
+  }
+  alwaysPercentage(value = null){
+    if (value!==null) this.#always_percentage= value;
+    return this.#always_percentage;
+  }
+
+  /*
+  ** end getters/setters
+  */
+  defButtonPosition(config,entity) {
+    let buttonsPosition = entity.buttons_position || config.buttons_position || ESC_BUTTONS_POSITION;
+    buttonsPosition
+      = (buttonsPosition && POSITIONS.includes(buttonsPosition.toLowerCase()))
+      ? buttonsPosition.toLowerCase()
+      : ESC_BUTTONS_POSITION;
+
+      this.buttonPosition(buttonsPosition);
+  }
+  // test
+  testLog(text,value){
+    console.log(`${text}: value=${value} cfg = `,this);
+  }
+
+  defPercentagPositionFromScreenposition(screenPosition){
+    let percentagePosition = Math.round((screenPosition - this.topOffsetPx()) / this.coverHeightPx() * (100-this.offset()));
+    percentagePosition = this.getDisplayedPctPosition(percentagePosition);
+    return percentagePosition;
+  }
+  getDisplayedPctPosition(position=this.current_position){
+    let pctPosition = Math.round(this.invert_percentage ? position : 100 - position);
+    return pctPosition;
+  }
+  updatePosition(percentagePosition){
+    //this.previousPosition(this.currentPosition());
+    this.currentPosition(percentagePosition);
+  }
+  defScreenPositionFromPercent(position_pct) {
+    let visiblePosition;
+    if (this.invertPercentage()) {
+      visiblePosition = this.offset() ? Math.min(100, Math.round(position_pct / this.offset() * 100 )) : position_pct;
+    }
+    else  {
+      visiblePosition = this.offset() ? Math.max(0, Math.round((position_pct - this.offset()) / (100-this.offset()) * 100 )) : position_pct;
+    }
+
+    let position =this.coverHeightPx() * (this.invertPercentage()?visiblePosition:100-visiblePosition) / 100 + this.topOffsetPx();
+
+    return position;
+
+  }
+  coverHeightPx(){
+    return this.windowHeightPx()-this.bottomOffsetPx() - this.topOffsetPx();
+  }
+  coverTopPx(){
+    return this.topOffsetPx();
+  }
+  coverBottomPx(){
+    return this.windowHeightPx()-this.bottomOffsetPx();
+  }
+
+}
+//####################################
 
 function getPromiseForImageSize(image)
 {
