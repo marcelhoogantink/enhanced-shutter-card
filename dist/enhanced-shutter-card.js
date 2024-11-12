@@ -24,7 +24,6 @@ const ESC_CLASS_SELECTOR = `${ESC_BASE_CLASS_NAME}-selector`;
 const ESC_CLASS_SELECTOR_PICTURE = `${ESC_BASE_CLASS_NAME}-selector-picture`;
 const ESC_CLASS_SELECTOR_SLIDE = `${ESC_BASE_CLASS_NAME}-selector-slide`;
 const ESC_CLASS_SELECTOR_PICKER = `${ESC_BASE_CLASS_NAME}-selector-picker`;
-const ESC_CLASS_SELECTOR_WINDOW = `${ESC_BASE_CLASS_NAME}-selector-window`; // ?? not used
 const ESC_CLASS_SELECTOR_PARTIAL = `${ESC_BASE_CLASS_NAME}-selector-partial`;
 const ESC_CLASS_MOVEMENT_OVERLAY = `${ESC_BASE_CLASS_NAME}-movement-overlay`;
 const ESC_CLASS_MOVEMENT_OPEN = `${ESC_BASE_CLASS_NAME}-movement-open`;
@@ -194,7 +193,7 @@ class EnhancedShutterCard extends HTMLElement {
             <div class="${ESC_CLASS_SELECTOR_PICTURE} " style="width: ${cfg.windowWidthPx()}px; height: ${cfg.windowHeightPx()}px; background-image: url(${cfg.viewImage()})";>
               <img src= "${cfg.windowImage()}" style="width: 100%; height: 100%">
               <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${cfg.topOffsetPx()}px; background-image: url(${cfg.slideImage()});">
-                <img src="${cfg.slideBottomImage()}"; style="width: 100%; position: absolute; bottom: 0";>
+                <img src="${cfg.slideBottomImage()}"; style="width: 100%; position: absolute; bottom: 0; left: 0">
               </div>
               <div class="${ESC_CLASS_SELECTOR_PICKER}" style="top: ${cfg.topOffsetPx()-this.picker_overlap_px}px;"></div>`+
               (cfg.partial()&&!cfg.offset()?
@@ -358,14 +357,6 @@ class EnhancedShutterCard extends HTMLElement {
               line-height: 0;
               ooverflow: auto;
             }
-            .${ESC_CLASS_SELECTOR_WINDOW}
-            {
-              z-index: 2;
-              position: absolute;
-              background-size: 100% 100%;
-              width: 100%;
-              height: 100%;
-            }
             .${ESC_CLASS_SELECTOR_SLIDE}
             {
               z-index: -1;
@@ -425,7 +416,6 @@ class EnhancedShutterCard extends HTMLElement {
       const shutter = this.card.querySelector('div[data-shutter="' + entityId +'"]');
       this.setMovement(movementState, shutter);
 
-      //if (statePosition != cfg.currentPosition() || cfg.previousPosition() == UNKNOWN)
       if (statePosition != cfg.currentPosition() || !this.cardReady)
       {
         cfg.updatePosition(statePosition);
@@ -608,7 +598,6 @@ class shutterCfg {
   #disable_end_buttons;
   #invert_percentage;
   #current_position;
-//  #previous_position;
   #window_image;
   #view_image;
   #slide_image;
@@ -636,7 +625,6 @@ class shutterCfg {
       this.invertPercentage(entity.invert_percentage ||  config.invert_percentage || ESC_INVERT_PERCENTAGE);
 
       this.currentPosition((state && state.attributes) ? state.attributes.current_position : 0);
-      //this.previousPosition(UNKNOWN);
 
       this.windowImage(allImages[WINDOW_IMAGE_TYPE][entityId].src);
       this.viewImage(allImages[VIEW_IMAGE_TYPE][entityId].src);
@@ -690,12 +678,6 @@ class shutterCfg {
     if (value!==null) this.#current_position= value;
     return this.#current_position;
   }
-/*
-  previousPosition(value = null){
-    if (value!==null) this.#previous_position= value;
-    return this.#previous_position;
-  }
-*/
   windowImage(value = null){
     if (value!==null) this.#window_image= value;
     return this.#window_image;
@@ -777,7 +759,6 @@ class shutterCfg {
     return pctPosition;
   }
   updatePosition(percentagePosition){
-    //this.previousPosition(this.currentPosition());
     this.currentPosition(percentagePosition);
   }
   defScreenPositionFromPercent(position_pct) {
