@@ -3,8 +3,6 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
 
-#### (Attention: This card is in Beta)
-
 This card allows besides opening, closing or setting a shutter to the opening rate you want, also many options to design your shutter by combining sizes and images you want.
 
 It is a follow-up of [Deejayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters.
