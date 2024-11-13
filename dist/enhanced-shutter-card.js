@@ -1,4 +1,4 @@
-
+const CARD_NAME = "enhanced-shutter-card";
 
 const LEFT = 'left';
 const RIGHT = 'right';
@@ -31,7 +31,7 @@ const ESC_CLASS_MOVEMENT_CLOSE = `${ESC_BASE_CLASS_NAME}-movement-close`;
 
 const POSITIONS =[LEFT,RIGHT,TOP,BOTTOM];
 
-const ESC_IMAGE_MAP = "/local/community/enhanced-shutter-card/images";
+const ESC_IMAGE_MAP = `/local/community/${CARD_NAME}/images`;
 
 const WINDOW_IMAGE_TYPE  = 'window_image';
 const VIEW_IMAGE_TYPE = 'view_image';
@@ -91,18 +91,16 @@ const ESC_DISABLE_END_BUTTONS = false;
 
 //const UNKNOWN =999;
 
-
 class EnhancedShutterCard extends HTMLElement {
 
   set hass(hass)
   {
     const config = this.config
     const entities = config.entities;
-    console.log('Starting Hass');
+    console.info('Starting Enhanced Shutter Card');
     //Init the card
     if (!this.card) {
       const card = document.createElement('ha-card');
-
       if (this.config.title) {
           card.header = this.config.title;
       }
@@ -130,7 +128,6 @@ class EnhancedShutterCard extends HTMLElement {
         this.allImages[image_type]=images;
       });
 
-
       const promisesForImageSizes = getPromisesForImageSizes(this.allImages[WINDOW_IMAGE_TYPE]);
 
       Promise.all(promisesForImageSizes)
@@ -143,7 +140,6 @@ class EnhancedShutterCard extends HTMLElement {
           })
           .catch(error => console.error(error));
     }
-
     //Update the shutters UI
     if (this.cardReady) this.updateShutters(hass,config);
   }
@@ -440,7 +436,6 @@ class EnhancedShutterCard extends HTMLElement {
       }
     });
   }
-
   setShutterPositionText(hass,cfg,position_pct,shutter,shutterPosition)
   {
     let visiblePosition;
@@ -469,7 +464,6 @@ class EnhancedShutterCard extends HTMLElement {
     }
     shutterPosition.innerHTML = positionText;
   }
-
   changeButtonState(shutter, percent, cfg)
   { //invert
     if (cfg.disableEndButtons()) {
@@ -588,7 +582,7 @@ class EnhancedShutterCard extends HTMLElement {
   }
 }
 
-customElements.define("enhanced-shutter-card", EnhancedShutterCard);
+customElements.define(CARD_NAME, EnhancedShutterCard);
 
 //###########################################
 class shutterCfg {
