@@ -184,7 +184,7 @@ class EnhancedShutterCard extends HTMLElement {
             <div class="${ESC_CLASS_SELECTOR_PICTURE} " style="width: ${cfg.windowWidthPx()}px; height: ${cfg.windowHeightPx()}px; background-image: url(${cfg.viewImage()})";>
               <img src= "${cfg.windowImage()}" style="width: 100%; height: 100%">
               <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${cfg.topOffsetPx()}px; background-image: url(${cfg.slideImage()});">
-                <img src="${cfg.slideBottomImage()}"; style="max-width: 100%; width: 100%; position: absolute; bottom: 0; left: 0">
+                <img src="${cfg.slideBottomImage()}"; style="width: 100%; position: absolute; bottom: 0; left: 0">
               </div>
               <div class="${ESC_CLASS_SELECTOR_PICKER}" style="top: ${cfg.topOffsetPx()-this.picker_overlap_px}px;"></div>`+
               (cfg.partial()&&!cfg.offset()?
@@ -342,9 +342,8 @@ class EnhancedShutterCard extends HTMLElement {
         margin: auto;
         background-size: cover;
         background-position: center;
-        min-width: 10px;
-        max-width: 100%;
         min-height: 10px;
+        min-width: 10px;
         max-height: 2000px;
         line-height: 0;
         ooverflow: auto;
