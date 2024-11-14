@@ -168,7 +168,7 @@ class EnhancedShutterCard extends HTMLElement {
           <div class="${ESC_CLASS_POSITION}"></div>
         </div>
         <div class="${ESC_CLASS_MIDDLE}" style="
-          flex-flow: ${ (buttonsInRow ? 'column': 'row') + (buttonsContainerReversed ? '-reverse' : '') } nowrap;">
+        flex-flow: ${ (buttonsInRow ? 'column': 'row') + (buttonsContainerReversed ? '-reverse' : '') } nowrap;">
           <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
             `+(cfg.partial()?`<ha-icon-button label="Partially close (${cfg.partial()}%)" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_PARTIAL} " data-command="${SERVICE_SHUTTER_PARTIAL}" data-position="${cfg.partial()}"><ha-icon icon="mdi:arrow-expand-vertical"></ha-icon></ha-icon-button>`:``)+`
             ` + (cfg.tilt()?`
@@ -365,9 +365,9 @@ class EnhancedShutterCard extends HTMLElement {
         line-height: 0;
         ooverflow: auto;
       }
-      .${ESC_CLASS_SELECTOR_PICTURE} img {
+      .${ESC_CLASS_SELECTOR_PICTURE}>img {
         width: 100%;
-        height: auto;
+        height: 100%;
       }
       .${ESC_CLASS_SELECTOR_SLIDE} {
         z-index: -1;
@@ -376,7 +376,8 @@ class EnhancedShutterCard extends HTMLElement {
         overflow: hidden;
         top: 0;
         width: 100%;
-      .${ESC_CLASS_SELECTOR_SLIDE} img {
+      }
+      .${ESC_CLASS_SELECTOR_SLIDE}>img {
         width: 100%;
         position: absolute;
         bottom: 0;
