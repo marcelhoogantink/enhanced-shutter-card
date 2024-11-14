@@ -167,7 +167,8 @@ class EnhancedShutterCard extends HTMLElement {
           <div class="${ESC_CLASS_LABEL}"></div>
           <div class="${ESC_CLASS_POSITION}"></div>
         </div>
-        <div class="${ESC_CLASS_MIDDLE}" style="flex-flow: ${ (buttonsInRow ? 'column': 'row') + (buttonsContainerReversed ? '-reverse' : '') } nowrap;">
+        <div class="${ESC_CLASS_MIDDLE}" style="
+          flex-flow: ${ (buttonsInRow ? 'column': 'row') + (buttonsContainerReversed ? '-reverse' : '') } nowrap;">
           <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
             `+(cfg.partial()?`<ha-icon-button label="Partially close (${cfg.partial()}%)" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_PARTIAL} " data-command="${SERVICE_SHUTTER_PARTIAL}" data-position="${cfg.partial()}"><ha-icon icon="mdi:arrow-expand-vertical"></ha-icon></ha-icon-button>`:``)+`
             ` + (cfg.tilt()?`
@@ -181,10 +182,13 @@ class EnhancedShutterCard extends HTMLElement {
             <ha-icon-button label="` + hass.localize(`ui.card.cover.close_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_DOWN} " data-command="${SERVICE_SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
           </div>
           <div class="${ESC_CLASS_SELECTOR}">
-            <div class="${ESC_CLASS_SELECTOR_PICTURE} " style="width: ${cfg.windowWidthPx()}px; height: ${cfg.windowHeightPx()}px; background-image: url(${cfg.viewImage()})";>
-              <img src= "${cfg.windowImage()}" style="width: 100%; height: 100%">
+            <div class="${ESC_CLASS_SELECTOR_PICTURE} " style="
+                width: ${cfg.windowWidthPx()}px;
+                height: ${cfg.windowHeightPx()}px;
+                background-image: url(${cfg.viewImage()});">
+              <img src= "${cfg.windowImage()}">
               <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${cfg.topOffsetPx()}px; background-image: url(${cfg.slideImage()});">
-                <img src="${cfg.slideBottomImage()}"; style="width: 100%; position: absolute; bottom: 0; left: 0">
+                <img src="${cfg.slideBottomImage()}">
               </div>
               <div class="${ESC_CLASS_SELECTOR_PICKER}" style="top: ${cfg.topOffsetPx()-this.picker_overlap_px}px;"></div>`+
               (cfg.partial()&&!cfg.offset()?
@@ -312,9 +316,16 @@ class EnhancedShutterCard extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = `
-      .${ESC_CLASS_SHUTTERS} { padding: 16px; }
-      .${ESC_BASE_CLASS_NAME} { margin-top: 1rem; overflow: visible; }
-      .${ESC_BASE_CLASS_NAME}:first-child { margin-top: 0; }
+      .${ESC_CLASS_SHUTTERS} {
+        padding: 16px;
+      }
+      .${ESC_BASE_CLASS_NAME} {
+        margin-top: 1rem;
+        overflow: visible;
+      }
+      .${ESC_BASE_CLASS_NAME}:first-child {
+        margin-top: 0;
+      }
       .${ESC_CLASS_MIDDLE} {
         display: flex;
         width: fit-content;
@@ -322,8 +333,17 @@ class EnhancedShutterCard extends HTMLElement {
         margin: auto;
         overflow: hidden;
       }
-      .${ESC_CLASS_BUTTONS} { flex: 1; text-align: center; margin-top: 0.4rem; display: flex; max-width: 100% }
-      .${ESC_CLASS_BUTTONS} ha-icon-button { display: block; width: min-content }
+      .${ESC_CLASS_BUTTONS} {
+        flex: 1;
+        text-align: center;
+        margin-top: 0.4rem;
+        display: flex;
+        max-width: 100%;
+      }
+      .${ESC_CLASS_BUTTONS} ha-icon-button {
+        display: block;
+        width: min-content;
+      }
       .${ESC_CLASS_SELECTOR} {
         flex: 1;
       }
@@ -342,19 +362,25 @@ class EnhancedShutterCard extends HTMLElement {
         margin: auto;
         background-size: cover;
         background-position: center;
-        min-height: 10px;
-        min-width: 10px;
-        max-height: 2000px;
         line-height: 0;
         ooverflow: auto;
       }
-        .${ESC_CLASS_SELECTOR_SLIDE} {
-          z-index: -1;
-          position: absolute;
-          background-position: bottom;
-          overflow: hidden;
-          top: 0;
-          width: 100%;
+      .${ESC_CLASS_SELECTOR_PICTURE} img {
+        width: 100%;
+        height: auto;
+      }
+      .${ESC_CLASS_SELECTOR_SLIDE} {
+        z-index: -1;
+        position: absolute;
+        background-position: bottom;
+        overflow: hidden;
+        top: 0;
+        width: 100%;
+      .${ESC_CLASS_SELECTOR_SLIDE} img {
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
       }
       .${ESC_CLASS_SELECTOR_PICKER} {
         z-index: 3;
@@ -368,8 +394,13 @@ class EnhancedShutterCard extends HTMLElement {
       .${ESC_CLASS_MOVEMENT_OVERLAY} {
         z-index: -1;
         display: block;
-        position: absolute; top: 0; width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.3); text-align: center; --mdc-icon-size: 60px;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.3);
+        text-align: center;
+        --mdc-icon-size: 60px;
       }
       .${ESC_CLASS_MOVEMENT_OPEN} {
         z-index: 3 !important;
@@ -381,10 +412,29 @@ class EnhancedShutterCard extends HTMLElement {
         position: relatve;
         display: none;
       }
-      .${ESC_CLASS_TOP} { text-align: center; margin-bottom: 1rem; }
-      .${ESC_CLASS_BOTTOM} { text-align: center; margin-top: 1rem; display:none}
-      .${ESC_CLASS_LABEL} { display: inline-block; font-size: 20px; vertical-align: middle; cursor: pointer;}
-      .${ESC_CLASS_POSITION} { display: inline-block; vertical-align: middle; padding: 0 6px; margin-left: 1rem; border-radius: 2px; background-color: var(--secondary-background-color); }
+      .${ESC_CLASS_TOP} {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      .${ESC_CLASS_BOTTOM} {
+        text-align: center;
+        margin-top: 1rem;
+        display:none;
+      }
+      .${ESC_CLASS_LABEL} {
+        display: inline-block;
+        font-size: 20px;
+        vertical-align: middle;
+        cursor: pointer;
+      }
+      .${ESC_CLASS_POSITION} {
+        display: inline-block;
+        vertical-align: middle;
+        padding: 0 6px;
+        margin-left: 1rem;
+        border-radius: 2px;
+        background-color: var(--secondary-background-color);
+      }
     `;
     this.appendChild(style);
 
