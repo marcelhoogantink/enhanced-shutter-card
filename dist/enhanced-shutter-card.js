@@ -186,12 +186,12 @@ class EnhancedShutterCard extends HTMLElement {
           <div class="${ESC_CLASS_SELECTOR}">
             <div class="${ESC_CLASS_SELECTOR_PICTURE} "
               style="
+                width: ${cfg.windowWidthPx()}${UNITY};
+                height: ${cfg.windowHeightPx()}${UNITY};
                 background-image: url(${cfg.viewImage()});
               ">
               <img src= "${cfg.windowImage() } "
               style="
-                width: ${cfg.windowWidthPx()}${UNITY};
-                height: ${cfg.windowHeightPx()}${UNITY};
               ">
               <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${cfg.topOffsetPx()}${UNITY}; background-image: url(${cfg.slideImage()});">
                 <img src="${cfg.slideBottomImage()}">
@@ -221,7 +221,6 @@ class EnhancedShutterCard extends HTMLElement {
           [TOP] : BOTTOM,
           [BOTTOM] : TOP,
         }
-      
       shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${cfg.titlePosition()}`).style.display = "block";
       shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${reverse_position[cfg.titlePosition()]}`).style.display = "none";
 
