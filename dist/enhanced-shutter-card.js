@@ -5,6 +5,7 @@ const LEFT = 'left';
 const RIGHT = 'right';
 const BOTTOM = 'bottom';
 const TOP = 'top';
+const NONE = 'none';
 
 const ESC_BASE_CLASS_NAME = 'esc-shutter';
 const ESC_CLASS_SHUTTERS = `${ESC_BASE_CLASS_NAME}s`;
@@ -30,7 +31,7 @@ const ESC_CLASS_MOVEMENT_OVERLAY = `${ESC_BASE_CLASS_NAME}-movement-overlay`;
 const ESC_CLASS_MOVEMENT_OPEN = `${ESC_BASE_CLASS_NAME}-movement-open`;
 const ESC_CLASS_MOVEMENT_CLOSE = `${ESC_BASE_CLASS_NAME}-movement-close`;
 
-const POSITIONS =[LEFT,RIGHT,TOP,BOTTOM];
+const POSITIONS =[LEFT,RIGHT,TOP,BOTTOM,NONE];
 
 const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}/images`;
 
@@ -61,7 +62,7 @@ const SERVICE_SHUTTER_PARTIAL = 'set_cover_position';
 const SERVICE_SHUTTER_TILT_OPEN = 'open_cover_tilt';
 const SERVICE_SHUTTER_TILT_CLOSE = 'close_cover_tilt';
 
-
+const UNITY= 'px';
 
 const ESC_BASE_WIDTH_PX =100;
 const ESC_BASE_HEIGHT_PX = 100;
@@ -154,6 +155,7 @@ class EnhancedShutterCard extends HTMLElement {
     {
       let entityId = entity.entity ? entity.entity : entity;
       let cfg = this.entityCfg[entityId] = new shutterCfg(hass,entity,config,imageDimensions,this.allImages);
+      cfg.testLog();
       const buttonsInRow = cfg.buttonPosition() == TOP || cfg.buttonPosition() == BOTTOM;
       const buttonsContainerReversed = cfg.buttonPosition() == BOTTOM || cfg.buttonPosition() == RIGHT;
 
@@ -182,21 +184,23 @@ class EnhancedShutterCard extends HTMLElement {
             <ha-icon-button label="` + hass.localize(`ui.card.cover.close_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_DOWN} " data-command="${SERVICE_SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
           </div>
           <div class="${ESC_CLASS_SELECTOR}">
-            <div class="${ESC_CLASS_SELECTOR_PICTURE} " style="
+            <div class="${ESC_CLASS_SELECTOR_PICTURE} "
+              style="
                 background-image: url(${cfg.viewImage()});
-                ">
-              <img src= "${cfg.windowImage() }" style="
-                width: ${cfg.windowWidthPx()}px;
-                height: ${cfg.windowHeightPx()}px;
               ">
-              <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${cfg.topOffsetPx()}px; background-image: url(${cfg.slideImage()});">
+              <img src= "${cfg.windowImage() } "
+              style="
+                width: ${cfg.windowWidthPx()}${UNITY};
+                height: ${cfg.windowHeightPx()}${UNITY};
+              ">
+              <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${cfg.topOffsetPx()}${UNITY}; background-image: url(${cfg.slideImage()});">
                 <img src="${cfg.slideBottomImage()}">
               </div>
-              <div class="${ESC_CLASS_SELECTOR_PICKER}" style="top: ${cfg.topOffsetPx()-this.picker_overlap_px}px;"></div>`+
+              <div class="${ESC_CLASS_SELECTOR_PICKER}" style="top: ${cfg.topOffsetPx()-this.picker_overlap_px}${UNITY};"></div>`+
               (cfg.partial()&&!cfg.offset()?
-                `<div class="${ESC_CLASS_SELECTOR_PARTIAL}" style="top:${cfg.defScreenPositionFromPercent(cfg.partial())}px"></div>`:``
+                `<div class="${ESC_CLASS_SELECTOR_PARTIAL}" style="top:${cfg.defScreenPositionFromPercent(cfg.partial())}${UNITY}"></div>`:``
               ) + `
-              <div class="${ESC_CLASS_MOVEMENT_OVERLAY}" style="top: ${cfg.topOffsetPx()-7}px; height: ${cfg.coverHeightPx() + 7}px;">
+              <div class="${ESC_CLASS_MOVEMENT_OVERLAY}" style="top: ${cfg.topOffsetPx()-7}${UNITY}; height: ${cfg.coverHeightPx() + 7}${UNITY};">
                 <ha-icon class="${ESC_CLASS_MOVEMENT_OPEN}" icon="mdi:arrow-up"></ha-icon>
                 <ha-icon class="${ESC_CLASS_MOVEMENT_CLOSE}" icon="mdi:arrow-down"></ha-icon>
               </div>
@@ -217,6 +221,7 @@ class EnhancedShutterCard extends HTMLElement {
           [TOP] : BOTTOM,
           [BOTTOM] : TOP,
         }
+      
       shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${cfg.titlePosition()}`).style.display = "block";
       shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${reverse_position[cfg.titlePosition()]}`).style.display = "none";
 
@@ -321,6 +326,10 @@ class EnhancedShutterCard extends HTMLElement {
       .${ESC_CLASS_SHUTTERS} {
         padding: 16px;
       }
+      .${ESC_CLASS_BUTTON} {
+        height: 36px;
+        width: 36px;
+      }
       .${ESC_BASE_CLASS_NAME} {
         margin-top: 1rem;
         overflow: visible;
@@ -365,6 +374,11 @@ class EnhancedShutterCard extends HTMLElement {
         background-size: cover;
         background-position: center;
         line-height: 0;
+        ooverflow: auto;
+      }
+      .${ESC_CLASS_SELECTOR_PICTURE}>img {
+        width: 100%;
+        height: 100%;
       }
       .${ESC_CLASS_SELECTOR_SLIDE} {
         z-index: -1;
@@ -577,8 +591,8 @@ class EnhancedShutterCard extends HTMLElement {
 
     screenPosition = boundary(screenPosition, cfg.coverTopPx(), cfg.coverBottomPx());
 
-    slide.style.height = (screenPosition ) + 'px';
-    picker.style.top = (screenPosition - this.picker_overlap_px) + 'px';
+    slide.style.height = (screenPosition ) + `${UNITY}`;
+    picker.style.top = (screenPosition - this.picker_overlap_px) + `${UNITY}`;
   }
 
   sendShutterPosition(hass, cfg,entityId, position)
@@ -778,7 +792,7 @@ class shutterCfg {
       this.buttonPosition(buttonsPosition);
   }
   // test
-  testLog(text,value){
+  testLog(text='çfg',value=""){
     console.log(`${text}: value=${value} cfg = `,this);
   }
 
