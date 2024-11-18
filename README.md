@@ -64,7 +64,6 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | partial_close_percentage | int | No | `0` | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.
 | offset_closed_percentage | int | No | `0` | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.
 | always_percentage | boolean | No | `false` | If set to `true`, the end states (opened/closed) will be also as numbers (0 / 100 % ) instead of a text
-| shutter_width_px? | int | No | `153` | Set shutter visualization width in px. You can make it thicker or narrower to fit your layout.
 | disable_end_buttons | boolean | No | `false` | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button
 ### Entities
 
@@ -90,7 +89,6 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | partial_close_percentage | int | No | global item setting, see under _General_ | see under _General_
 | offset_closed_percentage | int | No | global item setting, see under _General_ | see under _General_
 | always_percentage | boolean | No | global item setting, see under _General_ | see under _General_
-| shutter_width_px ?| int | No | global item setting, see under _General_ | see under _General_
 | disable_end_buttons | boolean | No | global item setting, see under _General_ | see under _General_
 
 _Remark : you can also just give the entity ID (without to specify `entity:`) if you don't need to specify the other configurations._
