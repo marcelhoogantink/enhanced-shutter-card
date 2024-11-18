@@ -15,6 +15,10 @@ const ESC_CLASS_BOTTOM = `${ESC_BASE_CLASS_NAME}-${BOTTOM}`;
 const ESC_CLASS_LABEL = `${ESC_BASE_CLASS_NAME}-label`;
 const ESC_CLASS_POSITION = `${ESC_BASE_CLASS_NAME}-position`;
 const ESC_CLASS_BUTTONS = `${ESC_BASE_CLASS_NAME}-buttons`;
+const ESC_CLASS_BUTTONS_TOP = `${ESC_CLASS_BUTTONS}-${TOP}`;
+const ESC_CLASS_BUTTONS_BOTTOM = `${ESC_CLASS_BUTTONS}-${BOTTOM}`;
+const ESC_CLASS_BUTTONS_LEFT = `${ESC_CLASS_BUTTONS}-${LEFT}`;
+const ESC_CLASS_BUTTONS_RIGHT = `${ESC_CLASS_BUTTONS}-${RIGHT}`;
 const ESC_CLASS_BUTTON = `${ESC_BASE_CLASS_NAME}-button`;
 const ESC_CLASS_BUTTON_UP = `${ESC_BASE_CLASS_NAME}-button-up`;
 const ESC_CLASS_BUTTON_STOP = `${ESC_BASE_CLASS_NAME}-button-stop`;
@@ -169,16 +173,15 @@ class EnhancedShutterCard extends HTMLElement {
           <div class="${ESC_CLASS_LABEL}"></div>
           <div class="${ESC_CLASS_POSITION}"></div>
         </div>
+        <div class="${ESC_CLASS_BUTTONS} ${ESC_CLASS_BUTTONS_TOP}" style="display: ${cfg.buttonPosition()==TOP?'flex':'none'};">
+          <ha-icon-button label="` + hass.localize(`ui.card.cover.open_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_UP} " data-command="${SERVICE_SHUTTER_UP}"><ha-icon icon="mdi:arrow-up"></ha-icon></ha-icon-button>
+          <ha-icon-button label="` + hass.localize(`ui.card.cover.stop_cover`) +`"class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_STOP} " data-command="${SERVICE_SHUTTER_STOP}"><ha-icon icon="mdi:stop"></ha-icon></ha-icon-button>
+          <ha-icon-button label="` + hass.localize(`ui.card.cover.close_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_DOWN} " data-command="${SERVICE_SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
+        </div>
         <div class="${ESC_CLASS_MIDDLE}" style="
-        flex-flow: ${ (buttonsInRow ? 'column': 'row') + (buttonsContainerReversed ? '-reverse' : '') } nowrap;">
-          <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
-            `+(cfg.partial()?`<ha-icon-button label="Partially close (${cfg.partial()}%)" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_PARTIAL} " data-command="${SERVICE_SHUTTER_PARTIAL}" data-position="${cfg.partial()}"><ha-icon icon="mdi:arrow-expand-vertical"></ha-icon></ha-icon-button>`:``)+`
-            ` + (cfg.tilt()?`
-            <ha-icon-button label="` + hass.localize(`ui.card.cover.open_tilt_cover`)  +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_TILT_OPEN} " data-command="${SERVICE_SHUTTER_TILT_OPEN}"><ha-icon icon="mdi:arrow-top-right"></ha-icon></ha-icon-button>
-            <ha-icon-button label="` + hass.localize(`ui.card.cover.close_tilt_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_TILT_DOWN} " data-command="${SERVICE_SHUTTER_TILT_CLOSE}"><ha-icon icon="mdi:arrow-bottom-left"></ha-icon></ha-icon-button>
-            `:``) + `
-          </div>
-          <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ` + (buttonsInRow ? 'row': 'column') + ` wrap;">
+          ">
+          <div class="${ESC_CLASS_BUTTONS}  ${ESC_CLASS_BUTTONS_LEFT}" style="display: ${cfg.buttonPosition()==LEFT?'flex':'none'};
+            ">
             <ha-icon-button label="` + hass.localize(`ui.card.cover.open_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_UP} " data-command="${SERVICE_SHUTTER_UP}"><ha-icon icon="mdi:arrow-up"></ha-icon></ha-icon-button>
             <ha-icon-button label="` + hass.localize(`ui.card.cover.stop_cover`) +`"class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_STOP} " data-command="${SERVICE_SHUTTER_STOP}"><ha-icon icon="mdi:stop"></ha-icon></ha-icon-button>
             <ha-icon-button label="` + hass.localize(`ui.card.cover.close_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_DOWN} " data-command="${SERVICE_SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
@@ -206,6 +209,17 @@ class EnhancedShutterCard extends HTMLElement {
               </div>
             </div>
           </div>
+          <div class="${ESC_CLASS_BUTTONS} ${ESC_CLASS_BUTTONS_RIGHT}" style="display: ${cfg.buttonPosition()==RIGHT?'flex':'none'};">
+            <ha-icon-button label="` + hass.localize(`ui.card.cover.open_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_UP} " data-command="${SERVICE_SHUTTER_UP}"><ha-icon icon="mdi:arrow-up"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.card.cover.stop_cover`) +`"class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_STOP} " data-command="${SERVICE_SHUTTER_STOP}"><ha-icon icon="mdi:stop"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.card.cover.close_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_DOWN} " data-command="${SERVICE_SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
+        </div>
+
+        </div>
+        <div class="${ESC_CLASS_BUTTONS} ${ESC_CLASS_BUTTONS_BOTTOM}" style="display: ${cfg.buttonPosition()==BOTTOM?'flex':'none'};">
+            <ha-icon-button label="` + hass.localize(`ui.card.cover.open_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_UP} " data-command="${SERVICE_SHUTTER_UP}"><ha-icon icon="mdi:arrow-up"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.card.cover.stop_cover`) +`"class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_STOP} " data-command="${SERVICE_SHUTTER_STOP}"><ha-icon icon="mdi:stop"></ha-icon></ha-icon-button>
+            <ha-icon-button label="` + hass.localize(`ui.card.cover.close_cover`) +`" class="${ESC_CLASS_BUTTON} ${ESC_CLASS_BUTTON_DOWN} " data-command="${SERVICE_SHUTTER_DOWN}"><ha-icon icon="mdi:arrow-down"></ha-icon></ha-icon-button>
         </div>
         <div class="${ESC_CLASS_BOTTOM}">
           <div class="${ESC_CLASS_LABEL}"></div>
@@ -221,9 +235,14 @@ class EnhancedShutterCard extends HTMLElement {
           [TOP] : BOTTOM,
           [BOTTOM] : TOP,
         }
-      shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${cfg.titlePosition()}`).style.display = "block";
-      shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${reverse_position[cfg.titlePosition()]}`).style.display = "none";
+      if (cfg.titlePosition()=='none'){
+        shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${TOP}`).style.display = "none";
+        shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${BOTTOM}`).style.display = "none";
 
+      }else{
+        shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${cfg.titlePosition()}`).style.display = "block";
+        shutter.querySelector(`.${ESC_BASE_CLASS_NAME}-${reverse_position[cfg.titlePosition()]}`).style.display = "none";
+      }
       let hassDetailPopup = (event) =>{
           let e = new Event('hass-more-info', { composed: true });
           e.detail = {
@@ -338,6 +357,9 @@ class EnhancedShutterCard extends HTMLElement {
       }
       .${ESC_CLASS_MIDDLE} {
         display: flex;
+        flex-flow: row;
+        justify-content: center;
+        align-items: center;
         width: fit-content;
         max-width: 100%;
         margin: auto;
@@ -345,17 +367,32 @@ class EnhancedShutterCard extends HTMLElement {
       }
       .${ESC_CLASS_BUTTONS} {
         flex: 1;
-        text-align: center;
-        margin-top: 0.4rem;
+        justify-content: center;
+        align-items: center;
+        margin: 0.4rem;
         display: flex;
         max-width: 100%;
       }
+      .${ESC_CLASS_BUTTONS_TOP} {
+        flex-flow: row;
+      }
+      .${ESC_CLASS_BUTTONS_BOTTOM} {
+        flex-flow: row;
+      }
+      .${ESC_CLASS_BUTTONS_LEFT} {
+        flex-flow: column;
+      }
+      .${ESC_CLASS_BUTTONS_RIGHT} {
+        flex-flow: column;
+      }
       .${ESC_CLASS_BUTTONS} ha-icon-button {
-        display: block;
+        display: inline-block;
         width: min-content;
       }
       .${ESC_CLASS_SELECTOR} {
         flex: 1;
+        justify-content: center;
+        align-items: center;
       }
       .${ESC_CLASS_SELECTOR_PARTIAL} {
         z-index: 2;
@@ -368,6 +405,7 @@ class EnhancedShutterCard extends HTMLElement {
       }
       .${ESC_CLASS_SELECTOR_PICTURE} {
         z-index: 1;
+        justify-content: center;
         position: relative;
         margin: auto;
         background-size: cover;
@@ -376,6 +414,8 @@ class EnhancedShutterCard extends HTMLElement {
         ooverflow: auto;
       }
       .${ESC_CLASS_SELECTOR_PICTURE}>img {
+        justify-content: center;
+        margin: auto;
         width: 100%;
         height: 100%;
       }
@@ -474,7 +514,6 @@ class EnhancedShutterCard extends HTMLElement {
         const picker = shutter.querySelector(`.${ESC_CLASS_SELECTOR_PICKER}`);
 
         const labels = shutter.querySelectorAll(`.${ESC_CLASS_LABEL}`);
-
         labels.forEach((shutterLabel) =>{
             shutterLabel.innerHTML = cfg.friendlyName();
         })
@@ -829,6 +868,9 @@ class shutterCfg {
   }
   coverBottomPx(){
     return this.windowHeightPx()-this.bottomOffsetPx();
+  }
+  setButtonsDisplay(shutter,position){
+
   }
 
 }
