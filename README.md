@@ -23,9 +23,6 @@ By default the card has 3 colored windows and shutter images, ands two backgroun
 | grey | esc-window.png   | esc-shutter-slat.png  | esc-shutter-bottom.png | yes
 | brown | esc-window2.png | esc-shutter-slat2.png | esc-shutter-bottom2.png | no
 | green | esc-window3.png | esc-shutter-slat3.png | esc-shutter-bottom3.png | no
-| grey | esc-window.png   | esc-shutter-slat.png  | esc-shutter-bottom.png | yes
-| brown | esc-window2.png | esc-shutter-slat2.png | esc-shutter-bottom2.png | no
-| green | esc-window3.png | esc-shutter-slat3.png | esc-shutter-bottom3.png | no
 
 These are the avialable background views:
 
