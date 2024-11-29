@@ -410,7 +410,7 @@ class EnhancedShutterCard extends HTMLElement {
 
       const movementState = state ? state.state : 'Demo';
       const shutter = this.card.querySelector('div[data-shutter="' + entityId +'"]');
-      this.setMovement(movementState, shutter);
+      this.setMovement(movementState, cfg, shutter);
 
       if (statePosition != cfg.currentPosition() || !this.cardReady)
       {
@@ -494,6 +494,18 @@ class EnhancedShutterCard extends HTMLElement {
     }
   }
 
+  changeButtonStateForMovement(shutter, cfg, movement) {
+    shutter.querySelectorAll(`.${ESC_CLASS_BUTTON_STOP} `).forEach(function (button) {
+      button.disabled = cfg.stopDisabledStates().includes(movement);
+    });
+    shutter.querySelectorAll(`.${ESC_CLASS_BUTTON_UP} `).forEach(function (button) {
+      button.disabled = cfg.upDisabledStates().includes(movement);
+    });
+    shutter.querySelectorAll(`.${ESC_CLASS_BUTTON_DOWN} `).forEach(function (button) {
+      button.disabled = cfg.downDisabledStates().includes(movement);
+    });
+  }
+
   positionPercentToText(percent, cfg, hass) {
     if (!cfg.alwaysPercentage()) {
       if (percent == 100) {
@@ -506,7 +518,7 @@ class EnhancedShutterCard extends HTMLElement {
     return Math.round(percent) + ' %';
   }
 
-  setMovement(movement, shutter) {
+  setMovement(movement, cfg, shutter) {
     if (movement == "opening" || movement == "closing") {
       let opening = (movement == "opening");
       shutter.querySelectorAll(`.${ESC_CLASS_MOVEMENT_OVERLAY}`).forEach(
@@ -523,6 +535,10 @@ class EnhancedShutterCard extends HTMLElement {
       shutter.querySelectorAll(`.${ESC_CLASS_MOVEMENT_OVERLAY}`).forEach(
         (overlay) => overlay.style.display = "none"
       )
+    }
+
+    if (!cfg.disableEndButtons()) {
+      this.changeButtonStateForMovement(shutter, cfg, movement);
     }
   }
 
@@ -590,6 +606,10 @@ class shutterCfg {
   #friendly_name;
   #buttons_position;
   #disable_end_buttons;
+  #state_disable;
+  #stop_disabled_states;
+  #up_disabled_states;
+  #down_disabled_states;
   #invert_percentage;
   #current_position;
   #window_image;
@@ -647,6 +667,11 @@ class shutterCfg {
       this.alwaysPercentage(entity.always_percentage || config.always_percentage || ESC_ALWAYS_PCT);
       this.disableEndButtons(entity.disable_end_buttons || config.disable_end_buttons || ESC_DISABLE_END_BUTTONS);
 
+      this.stateDisable(entity.stop_disabled_states !==null || entity.up_disabled_states !==null || entity.down_disabled_states !==null);
+      this.stopDisabledStates(entity.stop_disabled_states ? entity.stop_disabled_states : []);
+      this.upDisabledStates(entity.up_disabled_states ? entity.up_disabled_states : []);
+      this.downDisabledStates(entity.down_disabled_states ? entity.down_disabled_states : []);
+
       Object.preventExtensions(this);
   }
   /*
@@ -659,6 +684,22 @@ class shutterCfg {
   disableEndButtons(value = null){
     if (value!==null) this.#disable_end_buttons= value;
     return this.#disable_end_buttons;
+  }
+  stateDisable(value = null){
+    if (value!==null) this.#state_disable= value;
+    return this.#state_disable;
+  }
+  stopDisabledStates(value = null){
+    if (value!==null) this.#stop_disabled_states= value;
+    return this.#stop_disabled_states;
+  }
+  upDisabledStates(value = null){
+    if (value!==null) this.#up_disabled_states= value;
+    return this.#up_disabled_states;
+  }
+  downDisabledStates(value = null){
+    if (value!==null) this.#down_disabled_states= value;
+    return this.#down_disabled_states;
   }
   invertPercentage(value = null){
     if (value!==null) this.#invert_percentage= value;

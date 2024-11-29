@@ -92,6 +92,9 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | always_percentage | boolean | No | global item setting, see under _General_ | see under _General_
 | shutter_width_px ?| int | No | global item setting, see under _General_ | see under _General_
 | disable_end_buttons | boolean | No | global item setting, see under _General_ | see under _General_
+| up_disabled_states | string list | False | empty list | Any state strings ('opening', 'open', etc.) added will disable the 'up' button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other *_disabled_states options.
+| down_disabled_states | string list | False | empty list | Any state strings ('closing', 'closed', etc.) added will disable the 'down' button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other *_disabled_states options.
+| stop_disabled_states | string list | False | empty list | Any state strings ('open', 'closed', etc.) added will disable the 'stop' button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other *_disabled_states options.
 
 _Remark : you can also just give the entity ID (without to specify `entity:`) if you don't need to specify the other configurations._
 
