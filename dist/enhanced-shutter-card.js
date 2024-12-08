@@ -169,13 +169,11 @@ const SHUTTER_CSS =`
         width: fit-content;
         max-width: 100%;
         margin: auto;
-        overflow: hidden;
       }
       .${ESC_CLASS_BUTTONS} {
         flex: 1;
         justify-content: center;
         align-items: center;
-        margin: 0.4rem;
         display: flex;
         max-width: 100%;
       }
@@ -217,7 +215,7 @@ const SHUTTER_CSS =`
         background-size: cover;
         background-position: center;
         line-height: 0;
-        ooverflow: auto;
+        overflow: hidden;
       }
       .${ESC_CLASS_SELECTOR_PICTURE}>img {
         justify-content: center;
@@ -261,13 +259,19 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_MOVEMENT_OPEN} {
         z-index: 3 !important;
-        position: relatve;
-        display: none;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute;
+        display: block;
       }
       .${ESC_CLASS_MOVEMENT_CLOSE} {
         z-index: 3 !important;
-        position: relatve;
-        display: none;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute;
+        display: block;
       }
       .${ESC_CLASS_HA_ICON} {
         padding-bottom: 10px;
@@ -287,6 +291,7 @@ const SHUTTER_CSS =`
         font-size: 20px;
         vertical-align: middle;
         cursor: pointer;
+        padding: 0 16px 0 0;
       }
       .${ESC_CLASS_LABEL_DISABLED} {
         color: var(--secondary-text-color);
@@ -297,8 +302,7 @@ const SHUTTER_CSS =`
       .${ESC_CLASS_POSITION} {
         display: inline-block;
         vertical-align: middle;
-        padding: 0 6px;
-        margin-left: 1rem;
+        padding: 0 0 0 6px;
         border-radius: 2px;
         background-color: var(--secondary-background-color);
       }
@@ -496,13 +500,13 @@ class EnhancedShutterCardNew extends LitElement{
 
     // HA basic szies for calculations:
 
-    let haCardPadding= 32;
+    let haCardPadding= 14; // 1rem
     let haCardTitleFontHeight= 24;
     let haTitleHeightPx = 76;
     let haTitleFont = 'Roboto, Noto, sans-serif';
 
     let haButtonSize= 48;
-    let haButtonMargin =11;
+    let haButtonMargin =0; // TODO to be deleted
 
     let haGridPxHeight =65;
     let haGridPxWidthMin  =27;
@@ -527,99 +531,118 @@ class EnhancedShutterCardNew extends LitElement{
 
       Object.keys(this.localCfgs).forEach(key =>{
 
-
+        let localHeightPx=0;
+        let localWidthPx =0;
         let cfg= this.localCfgs[key];
         /*
         * Size shutter title
         */
         if (!cfg.titleDisabled()){
           let titleSize = getTextSize(cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
-          let pctSize = getTextSize(cfg.currentPosition()+'%',haTitleFont,14);
-          totalHeightPx+=titleSize.height + 14; // ??
-          totalWidthPx=Math.max(totalWidthPx,titleSize.width +14+pctSize.width);
+          let pctSize = getTextSize(cfg.currentPosition()+' %',haTitleFont,14);
+          let partHeightPx = titleSize.height + 14;
+          let partWidthPx = titleSize.width + 16 + 6 + pctSize.width;
+          localHeightPx += partHeightPx;
+          localWidthPx = Math.max(totalWidthPx,partWidthPx);
+          console_log('part size B*H',partWidthPx,partHeightPx,'after title and open%');
+          console_log('size B*H',localWidthPx,localHeightPx,'after title and open%');
         }
         /*
         * size image
         */
-        let localWidthPx=cfg.windowWidthPx();
-        let localHeightPx=cfg.windowHeightPx();
+        let partHeightPx = cfg.windowHeightPx();
+        let partWidthPx = cfg.windowWidthPx();
+        localHeightPx += partHeightPx;
+        localWidthPx=Math.max(localWidthPx,partWidthPx);
+        console_log('part size B*H',partWidthPx,partHeightPx,'after image');
         console_log('size B*H',localWidthPx,localHeightPx,'after image');
+
         if (cfg.buttonsInRow()){
           console_log('Buttons Naast shutter');
-          /*
-          * size tilt-buttons
-          */
-          if (cfg.canTilt()) {
-            localWidthPx+=haButtonSize;
-            localHeightPx = Math.max(localHeightPx,haButtonSize*2+haButtonMargin);
-          }
-          localWidthPx+=haButtonMargin;
-          console_log('size B*H',localWidthPx,localHeightPx,'after tilt');
-
           /*
           * size standard-buttons
           */
           if (!cfg.disableStandardButtons()) {
-            localWidthPx+=haButtonSize;
-            localHeightPx = Math.max(localHeightPx,haButtonSize*3+haButtonMargin);
-          }
-          localWidthPx+=haButtonMargin;
-          console_log('size B*H',localWidthPx,localHeightPx,'after std buttons');
+            let partHeightPx = haButtonSize*3+haButtonMargin;
+            let partWidthPx = haButtonSize;
+            localHeightPx = Math.max(localHeightPx,partHeightPx);
+            localWidthPx+=partWidthPx;
+            console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
+            console_log('size B*H',localWidthPx,localHeightPx);
+            }
+
+          /*
+          * size tilt-buttons
+          */
+          if (cfg.canTilt()) {
+            let partHeightPx = haButtonSize*2+haButtonMargin;
+            let partWidthPx = haButtonSize;
+            localHeightPx = Math.max(localHeightPx,partHeightPx);
+            localWidthPx+=partWidthPx;
+            console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
+            console_log('size B*H',localWidthPx,localHeightPx,);
+            }
 
           /*
           * size partial-open-buttons
           */
           if (!cfg.disablePartialOpenButtons()) {
-            localWidthPx+=haButtonSize*2;
-            localHeightPx = Math.max(localHeightPx,haButtonSize*3+haButtonMargin);
+            let partHeightPx = haButtonSize*3+haButtonMargin;
+            let partWidthPx = haButtonSize*2;
+            localHeightPx = Math.max(localHeightPx,partHeightPx);
+            localWidthPx+=partWidthPx;
+            console_log('part size B*H',partWidthPx,partHeightPx,'after partail buttons');
+            console_log('size B*H',localWidthPx,localHeightPx);
           }
-          localWidthPx+=haButtonMargin*2;
-          console_log('size B*H',localWidthPx,localHeightPx,'after partail buttons');
 
-          /*
-          * total size shutter
-          */
-          totalWidthPx  = Math.max(totalWidthPx,localWidthPx);
-          totalHeightPx += localHeightPx;
 
         }else{
           console_log('Buttons boven/onder shutter');
           /*
-          * size tilt-buttons
-          */
-          if (cfg.canTilt()) {
-            localWidthPx=Math.max(localWidthPx,haButtonSize*2);
-            localHeightPx += haButtonSize+haButtonMargin;
-          }
-          localWidthPx+=haButtonMargin;
-          console_log('size B*H',localWidthPx,localHeightPx,'after tilt');
-
-          /*
           * size standard-buttons
           */
           if (!cfg.disableStandardButtons()) {
-            localWidthPx=Math.max(localWidthPx,haButtonSize*3);
-            localHeightPx += haButtonSize+haButtonMargin;
-          }
-          localWidthPx+=haButtonMargin;
-          console_log('size B*H',localWidthPx,localHeightPx,'after std buttons');
+            let partHeightPx = haButtonSize+haButtonMargin
+            let partWidthPx = haButtonSize*3 + haButtonMargin
+            localHeightPx += partHeightPx;
+            localWidthPx=Math.max(localWidthPx,partWidthPx);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
+            console_log('size B*H',localWidthPx,localHeightPx);
+            }
+          /*
+          * size tilt-buttons
+          */
+          if (cfg.canTilt()) {
+            let partHeightPx = haButtonSize+haButtonMargin
+            let partWidthPx = haButtonSize*2 + haButtonMargin
+            localHeightPx += partHeightPx;
+            localWidthPx=Math.max(localWidthPx,partWidthPx);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
+            console_log('size B*H',localWidthPx,localHeightPx);
+            }
+
 
           /*
           * size partial-open-buttons
           */
           if (!cfg.disablePartialOpenButtons()) {
-            localWidthPx=Math.max(localWidthPx,haButtonSize*3);
-            localHeightPx += haButtonSize*2+haButtonMargin;
-          }
-          localWidthPx+=haButtonMargin;
-          console_log('size B*H',localWidthPx,localHeightPx,'after partail buttons');
+            let partHeightPx = haButtonSize*2 + haButtonMargin
+            let partWidthPx =  haButtonSize*3 + haButtonMargin
+            localHeightPx += partHeightPx;
+            localWidthPx=Math.max(localWidthPx,partWidthPx);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after partail buttons');
+            console_log('size B*H',localWidthPx,localHeightPx);
+            }
 
-          totalWidthPx  = Math.max(totalWidthPx,localWidthPx);
-          totalHeightPx += localHeightPx;
         }
-        console_log('size totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+        localHeightPx+=haCardPadding*2;
+        console_log(`Endsize ${key} B*H`,localWidthPx,localHeightPx);
+
+        totalWidthPx  = Math.max(totalWidthPx,localWidthPx);
+        totalHeightPx += localHeightPx;
 
       });
+      console_log('size totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
     }
     let nbRows= Math.ceil(totalHeightPx/haGridPxHeight);
     let nbColsMin= Math.ceil(totalWidthPx/haGridPxWidthMax);
@@ -645,18 +668,13 @@ class EnhancedShutterCardNew extends LitElement{
 }
 
 
-class EnhancedShutter extends LitElement{
-  slide;
-  shutter;
-  //isShutterConfigLoaded = false;
-
+class EnhancedShutter extends LitElement
+{
   //reactive properties
   static get properties() {
     return {
       hass: {},
-      config: {state: true},
       cfg: {type: Object},
-      isShutterConfigLoaded: {type: Boolean},
       screenPosition: {state: true},
 //      positionText: {state: true}
     };
@@ -664,12 +682,9 @@ class EnhancedShutter extends LitElement{
   constructor(){
     console_log('Shutter constructor');
     super(); //  mandetory
-    //console.log('***** EnhancedShutter constructor');
-    //this.isShutterConfigLoaded = false;
     this.screenPosition=-1;
     this.positionText ='';
     this.action = '#';
-    //console.log('Shutter constructor, isShutterConfigLoaded',this.isShutterConfigLoaded);
     console_log('Shutter constructor ready');
 
   }
@@ -682,16 +697,8 @@ class EnhancedShutter extends LitElement{
 
 //    return changedProperties.has('prop1');
   }
-  willUpdate(changedProperties){
-    console_log('Shutter willUpdate');
-    console_log('Shutter willUpdate ready');
-
-  }
   update(changedProperties) {
     console_log('Shutter Update');
-    //console.log('');
-    //console.log('-------------------------');
-    //console.log('EnhancedShutter',this.cfg.entityId());
     console_log('Shutter update, isShutterConfigLoaded',this.isShutterConfigLoaded);
     console_log('Shutter update changedProperties',changedProperties);
     changedProperties.forEach((oldValue, prop) => {
@@ -699,8 +706,6 @@ class EnhancedShutter extends LitElement{
 
     });
     super.update(changedProperties);
-    //console.log('In update EnhancedShutter{}: render EnhancedShutter',new Date().toString(),this.cfg);
-    //console.log('  entityId',this.cfg.entityId());
     console_log('Shutter Update ready');
   }
   updated(changedProperties) {
@@ -710,46 +715,22 @@ class EnhancedShutter extends LitElement{
     this.action='cover';
     console_log('Shutter Updated ready');
   }
-  firstUpdated() {
-    console_log('Shutter firstUpdated');
-    // You can safely access this.data or perform actions after the element is rendered
-    //console.log('Element EnhancedShutter is rendered and data is:');
-    console_log('Shutter firstUpdated ready');
-  }
   render()
   {
     console_log('Shutter Render',this.cfg.entityId());
     console_log('Shutter Render,isShutterConfigLoaded',this.isShutterConfigLoaded);
-    //console.log('In render EnhancedShutter{}: render EnhancedShutter',new Date().toString(),this.cfg);
     let entityId = this.cfg.entityId();
-    //console.log('In render EnhancedShutter{}: render EnhancedShutter',new Date().toString(),entityId);
-    //console.log('cfg=',this.cfg);
-    //console.log('this.positionText=',this.positionText);
-    //console.log('this.screenPosition =',this.screenPosition );
-    //console.log('=====> this.action =',this.action);
     let positionText;
     let screenPosition;
 
     if (this.action=='user-drag'){
       positionText =  this.positionText;
       screenPosition = this.screenPosition
-
     }else{
       positionText =  this.computePositionText();
       screenPosition =  this.cfg.defScreenPositionFromPercent();
-
     }
-/*
-    console.log('In EnhancedShutter{} (2),hass',this.hass);
-    console.log('In EnhancedShutter{} (2) config', this.config);
-    console.log('slide',this.slide);
-    console.log('picker',this.picker);
-    console.log('shutter',this.shutter);
-    console.log('entityId',this.entityId);
-    console.log('data',this.data);
-    console.log('positionText',positionText);
-*/
-    //console.log('Render: screenPosition',screenPosition);
+
     console_log('Shutter Render ready');
     return html`
       <div class=${ESC_BASE_CLASS_NAME} data-shutter="${entityId}">
@@ -783,15 +764,13 @@ class EnhancedShutter extends LitElement{
                 </ha-icon-button>` : ''}
           </div>
           <div class="${ESC_CLASS_SELECTOR}">
-            <div class="${ESC_CLASS_SELECTOR_PICTURE} "
+            <div class="${ESC_CLASS_SELECTOR_PICTURE}"
               style="
                 width: ${this.cfg.windowWidthPx()}${UNITY};
                 height: ${this.cfg.windowHeightPx()}${UNITY};
                 background-image: url(${this.cfg.viewImage()});
               ">
-              <img src= "${this.cfg.windowImage() } "
-              style="
-              ">
+              <img src= "${this.cfg.windowImage() } ">
               <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${screenPosition}${UNITY}; background-image: url(${this.cfg.shutterSlatImage()});">
                 <img src="${this.cfg.shutterBottomImage()}">
               </div>
@@ -846,17 +825,26 @@ doDetailOpen(entityIdValue) {
   e.detail= { entityId : entityIdValue};
   this.dispatchEvent(e);
 }
+getPickPoint(event){
+  let siblings = Array.from(event.target.parentElement.children);
+  let slide = siblings.find(sibling => sibling.classList.contains(ESC_CLASS_SELECTOR_SLIDE));
+  this.pickPoint = event.pageY - parseInt(slide.style.height);
+}
+getShutterPosition(newScreenPosition){
+  let shutterPosition = (newScreenPosition - this.cfg.topOffsetPct()) * (100-this.cfg.offset()) / this.cfg.coverHeightPx();
+  shutterPosition = Math.round(this.cfg.invertPercentage() ?shutterPosition: 100 - shutterPosition);
+  return shutterPosition;
+}
 mouseDown = (event) =>{
-    if (event.pageY === undefined) return;
+  console_log('mouseDown:',event.type);
+  if (event.pageY === undefined) return;
     if (event.cancelable) {
       //Disable default drag event
       event.preventDefault();
     }
     this.action='user-drag';
 
-    this.shutter = event.target.parentElement.parentElement.parentElement.parentNode;
-    this.slide  = this.shutter.querySelector(`.${ESC_CLASS_SELECTOR_SLIDE}`);
-    this.pickPoint = event.pageY - parseInt(this.slide.style.height);
+    this.getPickPoint(event);
 
     document.addEventListener('mousemove', this.mouseMove);
     document.addEventListener('touchmove', this.mouseMove);
@@ -868,30 +856,21 @@ mouseDown = (event) =>{
   };
 
   mouseMove = (event) =>{
+    console_log('mouseMove:',event.type);
     if (event.pageY === undefined) return;
     this.action='user-drag';
 
     let newScreenPosition = Math.round(boundary(event.pageY - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
     this.screenPosition = newScreenPosition; // triggers refresh
 
-    let shutterPosition = (newScreenPosition - this.cfg.topOffsetPct()) * (100-this.cfg.offset()) / this.cfg.coverHeightPx();
-    shutterPosition = Math.round(this.cfg.invertPercentage() ?shutterPosition: 100 - shutterPosition);
-    let positionText = this.computePositionText(shutterPosition);
-    this.positionText = positionText;
-    //console.log('mouseMove:',this.screenPosition);
+    let shutterPosition = this.getShutterPosition(newScreenPosition);
+    this.positionText = this.computePositionText(shutterPosition);
   };
 
   mouseUp = (event) => {
+    console_log('mouseUp:',event.type);
     if (event.pageY === undefined) return;
 
-    this.action='user-drag';
-
-    let newScreenPosition = Math.round(boundary(event.pageY - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
-    let shutterPosition = (newScreenPosition - this.cfg.topOffsetPct()) * (100-this.cfg.offset()) / this.cfg.coverHeightPx();
-    shutterPosition = Math.round(this.cfg.invertPercentage() ?shutterPosition: 100 - shutterPosition);
-
-
-    //console.log('MouseUp: ShutterPosition=',shutterPosition);
     document.removeEventListener('mousemove', this.mouseMove);
     document.removeEventListener('touchmove', this.mouseMove);
     document.removeEventListener('pointermove', this.mouseMove);
@@ -899,9 +878,12 @@ mouseDown = (event) =>{
     document.removeEventListener('mouseup', this.mouseUp);
     document.removeEventListener('touchend', this.mouseUp);
     document.removeEventListener('pointerup', this.mouseUp);
-    //this.screenPosition=-1;
+
+    this.action='user-drag';
+    let newScreenPosition = Math.round(boundary(event.pageY - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
+    let shutterPosition = this.getShutterPosition(newScreenPosition);
     this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
-    //this.cfg.currentPosition(shutterPosition);
+
   };
   doOnclick(entityId, command, position) {
 
@@ -1274,7 +1256,11 @@ function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
   // Measure and return the width of the text
   let data = context.measureText(text);
   let width = Math.ceil(data.width);
-  let height = Math.ceil(data.fontBoundingBoxAscent + data.fontBoundingBoxDescent);
+  let height =  Math.ceil(data.fontBoundingBoxAscent + data.fontBoundingBoxDescent);
+  let fontHeightData =        data.fontBoundingBoxAscent + data.fontBoundingBoxDescent;
+  let actualHeight =      data.actualBoundingBoxAscent + data.actualBoundingBoxDescent;
+  console_log("Text data:",text,data);
+  console_log("Text fontHeightData actualHeight:",fontHeightData,actualHeight);
   console_log("Text sizes w*h:",text,width,height);
   return {width,height};
 
