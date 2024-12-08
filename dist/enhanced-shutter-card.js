@@ -473,9 +473,8 @@ class EnhancedShutterCardNew extends LitElement{
 
 
   }
-// The height of your card. Home Assistant uses this to automatically
-  // distribute all cards over the available columns.
   getCardSize() {
+    console_log('Card getCardSize');
     return this.config.entities.length + 1;
   }
 
@@ -506,7 +505,6 @@ class EnhancedShutterCardNew extends LitElement{
     let haTitleFont = 'Roboto, Noto, sans-serif';
 
     let haButtonSize= 48;
-    let haButtonMargin =0; // TODO to be deleted
 
     let haGridPxHeight =65;
     let haGridPxWidthMin  =27;
@@ -563,7 +561,7 @@ class EnhancedShutterCardNew extends LitElement{
           * size standard-buttons
           */
           if (!cfg.disableStandardButtons()) {
-            let partHeightPx = haButtonSize*3+haButtonMargin;
+            let partHeightPx = haButtonSize*3;
             let partWidthPx = haButtonSize;
             localHeightPx = Math.max(localHeightPx,partHeightPx);
             localWidthPx+=partWidthPx;
@@ -575,10 +573,10 @@ class EnhancedShutterCardNew extends LitElement{
           * size tilt-buttons
           */
           if (cfg.canTilt()) {
-            let partHeightPx = haButtonSize*2+haButtonMargin;
+            let partHeightPx = haButtonSize*2;
             let partWidthPx = haButtonSize;
             localHeightPx = Math.max(localHeightPx,partHeightPx);
-            localWidthPx+=partWidthPx;
+            localWidthPx += partWidthPx;
             console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
             console_log('size B*H',localWidthPx,localHeightPx,);
             }
@@ -587,7 +585,7 @@ class EnhancedShutterCardNew extends LitElement{
           * size partial-open-buttons
           */
           if (!cfg.disablePartialOpenButtons()) {
-            let partHeightPx = haButtonSize*3+haButtonMargin;
+            let partHeightPx = haButtonSize*3;
             let partWidthPx = haButtonSize*2;
             localHeightPx = Math.max(localHeightPx,partHeightPx);
             localWidthPx+=partWidthPx;
@@ -602,8 +600,8 @@ class EnhancedShutterCardNew extends LitElement{
           * size standard-buttons
           */
           if (!cfg.disableStandardButtons()) {
-            let partHeightPx = haButtonSize+haButtonMargin
-            let partWidthPx = haButtonSize*3 + haButtonMargin
+            let partHeightPx = haButtonSize;
+            let partWidthPx = haButtonSize*3 ;
             localHeightPx += partHeightPx;
             localWidthPx=Math.max(localWidthPx,partWidthPx);
             console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
@@ -613,10 +611,10 @@ class EnhancedShutterCardNew extends LitElement{
           * size tilt-buttons
           */
           if (cfg.canTilt()) {
-            let partHeightPx = haButtonSize+haButtonMargin
-            let partWidthPx = haButtonSize*2 + haButtonMargin
+            let partHeightPx = haButtonSize;
+            let partWidthPx = haButtonSize*2;
             localHeightPx += partHeightPx;
-            localWidthPx=Math.max(localWidthPx,partWidthPx);
+            localWidthPx = Math.max(localWidthPx,partWidthPx);
             console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
             console_log('size B*H',localWidthPx,localHeightPx);
             }
@@ -626,8 +624,8 @@ class EnhancedShutterCardNew extends LitElement{
           * size partial-open-buttons
           */
           if (!cfg.disablePartialOpenButtons()) {
-            let partHeightPx = haButtonSize*2 + haButtonMargin
-            let partWidthPx =  haButtonSize*3 + haButtonMargin
+            let partHeightPx = haButtonSize*2;
+            let partWidthPx =  haButtonSize*3;
             localHeightPx += partHeightPx;
             localWidthPx=Math.max(localWidthPx,partWidthPx);
             console_log('part size B*H',partWidthPx,partHeightPx,'after partail buttons');
@@ -775,8 +773,6 @@ class EnhancedShutter extends LitElement
                 <img src="${this.cfg.shutterBottomImage()}">
               </div>
               <div class="${ESC_CLASS_SELECTOR_PICKER}"
-                @mousedown="${this.mouseDown}"
-                @touchstart="${this.mouseDown}"
                 @pointerdown="${this.mouseDown}"
                 style="top: ${screenPosition-this.cfg.pickerOverlapPx()}${UNITY};">
               </div>
@@ -835,6 +831,10 @@ getShutterPosition(newScreenPosition){
   shutterPosition = Math.round(this.cfg.invertPercentage() ?shutterPosition: 100 - shutterPosition);
   return shutterPosition;
 }
+getScreenPosition(pickPoint){
+  let newScreenPosition = Math. round(boundary(pickPoint - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
+  return newScreenPosition;
+}
 mouseDown = (event) =>{
   console_log('mouseDown:',event.type);
   if (event.pageY === undefined) return;
@@ -845,13 +845,7 @@ mouseDown = (event) =>{
     this.action='user-drag';
 
     this.getPickPoint(event);
-
-    document.addEventListener('mousemove', this.mouseMove);
-    document.addEventListener('touchmove', this.mouseMove);
     document.addEventListener('pointermove', this.mouseMove);
-
-    document.addEventListener('mouseup', this.mouseUp);
-    document.addEventListener('touchend', this.mouseUp);
     document.addEventListener('pointerup', this.mouseUp);
   };
 
@@ -860,10 +854,9 @@ mouseDown = (event) =>{
     if (event.pageY === undefined) return;
     this.action='user-drag';
 
-    let newScreenPosition = Math.round(boundary(event.pageY - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
-    this.screenPosition = newScreenPosition; // triggers refresh
+    this.screenPosition = this.getScreenPosition(event.pageY); // triggers refresh
+    let shutterPosition = this.getShutterPosition(this.screenPosition);
 
-    let shutterPosition = this.getShutterPosition(newScreenPosition);
     this.positionText = this.computePositionText(shutterPosition);
   };
 
@@ -871,17 +864,15 @@ mouseDown = (event) =>{
     console_log('mouseUp:',event.type);
     if (event.pageY === undefined) return;
 
-    document.removeEventListener('mousemove', this.mouseMove);
-    document.removeEventListener('touchmove', this.mouseMove);
     document.removeEventListener('pointermove', this.mouseMove);
 
-    document.removeEventListener('mouseup', this.mouseUp);
-    document.removeEventListener('touchend', this.mouseUp);
     document.removeEventListener('pointerup', this.mouseUp);
 
     this.action='user-drag';
-    let newScreenPosition = Math.round(boundary(event.pageY - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
+
+    let newScreenPosition = this.getScreenPosition(event.pageY);
     let shutterPosition = this.getShutterPosition(newScreenPosition);
+
     this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
 
   };
