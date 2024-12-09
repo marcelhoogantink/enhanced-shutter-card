@@ -15,30 +15,31 @@ const BOTTOM = 'bottom';
 const TOP = 'top';
 const NONE = 'none';
 
-const ESC_BASE_CLASS_NAME = 'esc-shutter';
-const ESC_CLASS_SHUTTERS = `${ESC_BASE_CLASS_NAME}s`;
-const ESC_CLASS_TOP = `${ESC_BASE_CLASS_NAME}-${TOP}`;
-const ESC_CLASS_MIDDLE = `${ESC_BASE_CLASS_NAME}-middle`;
-const ESC_CLASS_BOTTOM = `${ESC_BASE_CLASS_NAME}-${BOTTOM}`;
-const ESC_CLASS_LABEL = `${ESC_BASE_CLASS_NAME}-label`;
+const ESC_CLASS_BASE_NAME = 'esc-shutter';
+const ESC_CLASS_SHUTTERS = `${ESC_CLASS_BASE_NAME}s`;
+const ESC_CLASS_TOP = `${ESC_CLASS_BASE_NAME}-${TOP}`;
+const ESC_CLASS_MIDDLE = `${ESC_CLASS_BASE_NAME}-middle`;
+const ESC_CLASS_BOTTOM = `${ESC_CLASS_BASE_NAME}-${BOTTOM}`;
+const ESC_CLASS_LABEL = `${ESC_CLASS_BASE_NAME}-label`;
 const ESC_CLASS_LABEL_DISABLED = `${ESC_CLASS_LABEL}-disabled`;
-const ESC_CLASS_TITLE_DISABLED = `${ESC_BASE_CLASS_NAME}-title-disabled`
-const ESC_CLASS_POSITION = `${ESC_BASE_CLASS_NAME}-position`;
-const ESC_CLASS_BUTTONS = `${ESC_BASE_CLASS_NAME}-buttons`;
+const ESC_CLASS_TITLE_DISABLED = `${ESC_CLASS_BASE_NAME}-title-disabled`
+const ESC_CLASS_POSITION = `${ESC_CLASS_BASE_NAME}-position`;
+const ESC_CLASS_BUTTONS = `${ESC_CLASS_BASE_NAME}-buttons`;
 const ESC_CLASS_BUTTONS_TOP = `${ESC_CLASS_BUTTONS}-${TOP}`;
 const ESC_CLASS_BUTTONS_BOTTOM = `${ESC_CLASS_BUTTONS}-${BOTTOM}`;
 const ESC_CLASS_BUTTONS_LEFT = `${ESC_CLASS_BUTTONS}-${LEFT}`;
 const ESC_CLASS_BUTTONS_RIGHT = `${ESC_CLASS_BUTTONS}-${RIGHT}`;
-const ESC_CLASS_BUTTON = `${ESC_BASE_CLASS_NAME}-button`;
-const ESC_CLASS_SELECTOR = `${ESC_BASE_CLASS_NAME}-selector`;
-const ESC_CLASS_SELECTOR_PICTURE = `${ESC_BASE_CLASS_NAME}-selector-picture`;
-const ESC_CLASS_SELECTOR_SLIDE = `${ESC_BASE_CLASS_NAME}-selector-slide`;
-const ESC_CLASS_SELECTOR_PICKER = `${ESC_BASE_CLASS_NAME}-selector-picker`;
-const ESC_CLASS_SELECTOR_PARTIAL = `${ESC_BASE_CLASS_NAME}-selector-partial`;
-const ESC_CLASS_MOVEMENT_OVERLAY = `${ESC_BASE_CLASS_NAME}-movement-overlay`;
-const ESC_CLASS_MOVEMENT_OPEN = `${ESC_BASE_CLASS_NAME}-movement-open`;
-const ESC_CLASS_MOVEMENT_CLOSE = `${ESC_BASE_CLASS_NAME}-movement-close`;
-const ESC_CLASS_HA_ICON = `${ESC_BASE_CLASS_NAME}-ha-icon`;
+const ESC_CLASS_BUTTON = `${ESC_CLASS_BASE_NAME}-button`;
+const ESC_CLASS_SELECTOR = `${ESC_CLASS_BASE_NAME}-selector`;
+const ESC_CLASS_SELECTOR_PICTURE = `${ESC_CLASS_BASE_NAME}-selector-picture`;
+const ESC_CLASS_SELECTOR_SLIDE = `${ESC_CLASS_BASE_NAME}-selector-slide`;
+const ESC_CLASS_SELECTOR_PICKER = `${ESC_CLASS_BASE_NAME}-selector-picker`;
+const ESC_CLASS_SELECTOR_PARTIAL = `${ESC_CLASS_BASE_NAME}-selector-partial`;
+const ESC_CLASS_MOVEMENT_OVERLAY = `${ESC_CLASS_BASE_NAME}-movement-overlay`;
+const ESC_CLASS_MOVEMENT_OPEN = `${ESC_CLASS_BASE_NAME}-movement-open`;
+const ESC_CLASS_MOVEMENT_CLOSE = `${ESC_CLASS_BASE_NAME}-movement-close`;
+const ESC_CLASS_HA_ICON = `${ESC_CLASS_BASE_NAME}-ha-icon`;
+const ESC_CLASS_HA_ICON_LOCK = `${ESC_CLASS_HA_ICON}-lock`;
 
 const POSITIONS =[LEFT,RIGHT,TOP,BOTTOM,NONE];
 
@@ -57,6 +58,7 @@ const CONFIG_HEIGHT_PX = 'height_px';
 const CONFIG_WIDTH_PX = 'width_px';
 
 const CONFIG_NAME = 'name';
+const CONFIG_PASSIVE_MODE = 'passive_mode';
 const CONFIG_IMAGE_MAP = 'image_map';
 const CONFIG_WINDOW_IMAGE = 'windows_image';
 const CONFIG_VIEW_IMAGE = 'view_image';
@@ -70,7 +72,9 @@ const CONFIG_TOP_OFFSET_PCT = 'top_offset_pct';
 const CONFIG_BOTTOM_OFFSET_PCT = 'bottom_offset_pct';
 const CONFIG_BUTTONS_POSITION = 'buttons_position';
 const CONFIG_TITLE_POSITION = 'title_position';
+const CONFIG_OPENING_POSITION = 'opening_position';
 const CONFIG_TITLE_DISABLED = 'title_disabled';
+const CONFIG_OPENING_DISABLED = 'opening_disabled';
 const CONFIG_INVERT_PCT = 'invert_percentage';
 const CONFIG_CAN_TILT = 'can_tilt';
 const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
@@ -85,6 +89,7 @@ const CONFIG_CURRENT_POSITION = 'current_position';
 const ESC_ENTITY_ID = null;
 
 const ESC_NAME = null;
+const ESC_PASSIVE_MODE = false;
 const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}/images`;
 const ESC_IMAGE_WINDOW = 'esc-window.png';
 const ESC_IMAGE_VIEW = 'esc-view.png';
@@ -100,6 +105,8 @@ const ESC_BOTTOM_OFFSET_PCT = 0;
 const ESC_BUTTONS_POSITION = LEFT;
 const ESC_TITLE_POSITION = TOP;
 const ESC_TITLE_DISABLED = false;
+const ESC_OPENING_POSITION = null;
+const ESC_OPENING_DISABLED = null;
 const ESC_INVERT_PCT = false;
 const ESC_CAN_TILT = false;
 const ESC_PARTIAL_CLOSE_PCT = 0;
@@ -120,6 +127,7 @@ const CONFIG_DEFAULT ={
   [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
 
   [CONFIG_NAME]: ESC_NAME,
+  [CONFIG_PASSIVE_MODE]: ESC_PASSIVE_MODE,
   [CONFIG_IMAGE_MAP]: ESC_IMAGE_MAP,
   [CONFIG_WINDOW_IMAGE]: ESC_IMAGE_WINDOW,
   [CONFIG_VIEW_IMAGE]: ESC_IMAGE_VIEW,
@@ -134,6 +142,8 @@ const CONFIG_DEFAULT ={
   [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
   [CONFIG_TITLE_POSITION]: ESC_TITLE_POSITION,
   [CONFIG_TITLE_DISABLED]: ESC_TITLE_DISABLED,
+  [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION,
+  [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,
   [CONFIG_INVERT_PCT]: ESC_INVERT_PCT,
   [CONFIG_CAN_TILT]: ESC_CAN_TILT,
   [CONFIG_PARTIAL_CLOSE_PCT]: ESC_PARTIAL_CLOSE_PCT,
@@ -156,9 +166,7 @@ const SHUTTER_CSS =`
         height: 36px;
         width: 36px;
       }
-      .${ESC_BASE_CLASS_NAME} {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+      .${ESC_CLASS_BASE_NAME} {
         overflow: visible;
       }
       .${ESC_CLASS_MIDDLE} {
@@ -276,6 +284,10 @@ const SHUTTER_CSS =`
       .${ESC_CLASS_HA_ICON} {
         padding-bottom: 10px;
       }
+      .${ESC_CLASS_HA_ICON_LOCK} {
+        padding-bottom: 10px;
+        --mdc-icon-size: 10px;
+      }
 
       .${ESC_CLASS_TOP} {
         text-align: center;
@@ -284,14 +296,13 @@ const SHUTTER_CSS =`
       .${ESC_CLASS_BOTTOM} {
         text-align: center;
         margin-top: 1rem;
-        display:none;
       }
       .${ESC_CLASS_LABEL} {
-        display: inline-block;
+        display: block;
         font-size: 20px;
+        height: 30px;
         vertical-align: middle;
         cursor: pointer;
-        padding: 0 16px 0 0;
       }
       .${ESC_CLASS_LABEL_DISABLED} {
         color: var(--secondary-text-color);
@@ -301,8 +312,8 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_POSITION} {
         display: inline-block;
-        vertical-align: middle;
-        padding: 0 0 0 6px;
+        font-size: 14px;
+        height: 20px;
         border-radius: 2px;
         background-color: var(--secondary-background-color);
       }
@@ -405,7 +416,10 @@ class EnhancedShutterCardNew extends LitElement{
   connectedCallback() {
     console_log('Card connectedCallback: isShutterConfigLoaded:',this.isShutterConfigLoaded);
     super.connectedCallback();
-    if (!this.isShutterConfigLoaded) this.#defAllShutterConfig();
+    if (!this.isShutterConfigLoaded) {
+      this.#defAllShutterConfig();
+      console_log("def configs",this.globalCfg, this.localCfgs);
+    }
     console_log('Card connectedCallback ready');
 
   }
@@ -529,7 +543,7 @@ class EnhancedShutterCardNew extends LitElement{
 
       Object.keys(this.localCfgs).forEach(key =>{
 
-        let localHeightPx=0;
+        let localHeightPx=0; //padding
         let localWidthPx =0;
         let cfg= this.localCfgs[key];
         /*
@@ -537,13 +551,24 @@ class EnhancedShutterCardNew extends LitElement{
         */
         if (!cfg.titleDisabled()){
           let titleSize = getTextSize(cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
-          let pctSize = getTextSize(cfg.currentPosition()+' %',haTitleFont,14);
-          let partHeightPx = titleSize.height + 14;
-          let partWidthPx = titleSize.width + 16 + 6 + pctSize.width;
+          let partHeightPx = 30;
+          let partWidthPx = titleSize.width;
           localHeightPx += partHeightPx;
           localWidthPx = Math.max(totalWidthPx,partWidthPx);
-          console_log('part size B*H',partWidthPx,partHeightPx,'after title and open%');
-          console_log('size B*H',localWidthPx,localHeightPx,'after title and open%');
+          console_log('part size B*H',partWidthPx,partHeightPx,'after title');
+          console_log('size B*H',localWidthPx,localHeightPx);
+        }
+        /*
+        * Size shutter opening
+        */
+        if (!cfg.openingDisabled()){
+          let pctSize = getTextSize(cfg.currentPosition()+' %',haTitleFont,14);
+          let partHeightPx = 20;
+          let partWidthPx = pctSize.width;
+          localHeightPx += partHeightPx;
+          localWidthPx = Math.max(totalWidthPx,partWidthPx);
+          console_log('part size B*H',partWidthPx,partHeightPx,'after open%');
+          console_log('size B*H',localWidthPx,localHeightPx);
         }
         /*
         * size image
@@ -553,7 +578,7 @@ class EnhancedShutterCardNew extends LitElement{
         localHeightPx += partHeightPx;
         localWidthPx=Math.max(localWidthPx,partWidthPx);
         console_log('part size B*H',partWidthPx,partHeightPx,'after image');
-        console_log('size B*H',localWidthPx,localHeightPx,'after image');
+        console_log('size B*H',localWidthPx,localHeightPx);
 
         if (cfg.buttonsInRow()){
           console_log('Buttons Naast shutter');
@@ -731,12 +756,19 @@ class EnhancedShutter extends LitElement
 
     console_log('Shutter Render ready');
     return html`
-      <div class=${ESC_BASE_CLASS_NAME} data-shutter="${entityId}">
-        <div class="${ESC_CLASS_TOP}" style="display: ${(this.cfg.titlePosition() == BOTTOM || this.cfg.titleDisabled()) ? 'none' : 'block'}">
-          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}" @click="${() => this.doDetailOpen(entityId)}" >
+      <div class=${ESC_CLASS_BASE_NAME} data-shutter="${entityId}">
+
+
+        <div class="${ESC_CLASS_TOP}">
+
+          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
+            @click="${() => this.doDetailOpen(entityId)}"
+            style="display: ${(this.cfg.titlePosition() != TOP || this.cfg.titleDisabled()) ? 'none' : 'block'}">
             ${this.cfg.friendlyName()}
+            ${this.cfg.passiveMode() ? html`<sup><ha-icon class="${ESC_CLASS_HA_ICON_LOCK}" icon="mdi:lock"></ha-icon></sup>`:''}
           </div>
-          <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
+          <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
+            style="display: ${(this.cfg.openingPosition() != TOP || this.cfg.openingDisabled()) ? 'none' : 'inline-block'}">
             ${positionText}
           </div>
         </div>
@@ -802,12 +834,15 @@ class EnhancedShutter extends LitElement
             </div>
           `:''}
         </div>
-        <div class="${ESC_CLASS_BOTTOM}" style="display: ${(this.cfg.titlePosition() == TOP || this.cfg.titleDisabled()) ? 'none' : 'block'}">
+        <div class="${ESC_CLASS_BOTTOM}">
 
-          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}" @click="${() => this.doDetailOpen(entityId)}" >
+          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}" @click="${() => this.doDetailOpen(entityId)}"
+            style="display: ${(this.cfg.titlePosition() != BOTTOM || this.cfg.titleDisabled()) ? 'none' : 'block'}">
             ${this.cfg.friendlyName()}
+            ${this.cfg.passiveMode() ? html`<sup><ha-icon class="${ESC_CLASS_HA_ICON_LOCK}" icon="mdi:lock"></ha-icon></sup>`:''}
           </div>
-          <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
+          <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
+            style="display: ${(this.cfg.openingPosition() != BOTTOM || this.cfg.openingDisabled()) ? 'none' : 'inline-block'}">
             ${positionText}
           </div>
         </div>
@@ -817,9 +852,26 @@ class EnhancedShutter extends LitElement
 
 //##########################################
 doDetailOpen(entityIdValue) {
-  let e = new Event('hass-more-info', { composed: true});
-  e.detail= { entityId : entityIdValue};
-  this.dispatchEvent(e);
+  if (this.cfg.passiveMode()){
+    console.warn('Passive mode, no action');
+  }else{
+    let e = new Event('hass-more-info', { composed: true});
+    e.detail= { entityId : entityIdValue};
+    this.dispatchEvent(e);
+  }
+}
+doOnclick(entityId, command, position) {
+
+  this.action='user-click';
+  const services ={
+    [SERVICE_SHUTTER_UP] : {'args': ''},
+    [SERVICE_SHUTTER_DOWN] : {'args': ''},
+    [SERVICE_SHUTTER_STOP] : {'args': ''},
+    [SERVICE_SHUTTER_PARTIAL] : {'args': {position: position}},
+    [SERVICE_SHUTTER_TILT_OPEN] : {'args': ''},
+    [SERVICE_SHUTTER_TILT_CLOSE] : {'args': ''},
+  }
+  this.callHassCoverService(entityId,command,services[command].args);
 }
 getPickPoint(event){
   let siblings = Array.from(event.target.parentElement.children);
@@ -876,31 +928,20 @@ mouseDown = (event) =>{
     this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
 
   };
-  doOnclick(entityId, command, position) {
-
-    this.action='user-click';
-
-    const services ={
-      [SERVICE_SHUTTER_UP] : {'args': ''},
-      [SERVICE_SHUTTER_DOWN] : {'args': ''},
-      [SERVICE_SHUTTER_STOP] : {'args': ''},
-      [SERVICE_SHUTTER_PARTIAL] : {'args': {position: position}},
-      [SERVICE_SHUTTER_TILT_OPEN] : {'args': ''},
-      [SERVICE_SHUTTER_TILT_CLOSE] : {'args': ''},
-    }
-    this.callHassCoverService(entityId,command,services[command].args);
-
-  }
   callHassCoverService(entityId,command,args='')
   {
-    const domain= 'cover';
-    if (this.checkServiceAvailability(domain, command)) {
-      this.hass.callService(domain, command, {
-        entity_id: entityId,
-        ...args
-      });
-    } else {
-      console.warn(`Service '${domain}'-'${command}' not available`);
+    if (this.cfg.passiveMode()){
+      console.warn('Passive mode, no action');
+    }else{
+        const domain= 'cover';
+      if (this.checkServiceAvailability(domain, command)) {
+        this.hass.callService(domain, command, {
+          entity_id: entityId,
+          ...args
+        });
+      } else {
+        console.warn(`Service '${domain}'-'${command}' not available`);
+      }
     }
   }
   checkServiceAvailability(serviceDomain, serviceName) {
@@ -985,6 +1026,7 @@ class shutterCfg {
       this.state(hass.states[entityId]);
       this.friendlyName(config[CONFIG_NAME] ? config[CONFIG_NAME] : this.stateAttributes() ? this.stateAttributes().friendly_name : 'Unkown');
       this.invertPercentage(config[CONFIG_INVERT_PCT]);
+      this.passiveMode(config[CONFIG_PASSIVE_MODE]);
 
       this.windowImage(allImages[CONFIG_WINDOW_IMAGE][entityId].src);
       this.viewImage(allImages[CONFIG_VIEW_IMAGE][entityId].src);
@@ -1010,6 +1052,8 @@ class shutterCfg {
       this.defButtonPosition(config);
       this.titlePosition(config[CONFIG_TITLE_POSITION]);
       this.titleDisabled(config[CONFIG_TITLE_DISABLED]);
+      this.openingPosition(config[CONFIG_OPENING_POSITION]);
+      this.openingDisabled(config[CONFIG_OPENING_DISABLED]);
 
       this.alwaysPercentage(!!config[CONFIG_ALWAYS_PCT]);
       this.disableEndButtons(!!config[CONFIG_DISABLE_END_BUTTONS]);
@@ -1035,14 +1079,17 @@ class shutterCfg {
   state(value = null){
     return this.getState(CONFIG_STATE,value);
   }
+  passiveMode(value = null){
+    return this.getCfg(CONFIG_PASSIVE_MODE,value);
+  }
   friendlyName(value = null){
     return this.getCfg(CONFIG_NAME,value);
   }
   entityId(value = null){
     return this.getCfg(CONFIG_ENTITY_ID,value);
   }
-  titleDisabled(value = null){
-    return this.getCfg(CONFIG_TITLE_DISABLED,value);
+  openingDisabled(value = null){
+    return this.getCfg(CONFIG_OPENING_DISABLED,value);
   }
   disableStandardButtons(value = null){
     return this.getCfg(CONFIG_DISABLE_STANDARD_BUTTONS,value);
@@ -1092,8 +1139,31 @@ class shutterCfg {
   canTilt(value = null){
     return this.getCfg(CONFIG_CAN_TILT,value);
   }
+  titleDisabled(value = null){
+    return this.getCfg(CONFIG_TITLE_DISABLED,value);
+  }
   titlePosition(value = null){
     return this.getCfg(CONFIG_TITLE_POSITION,value);
+  }
+  openingDisabled(value = null){
+    let disabled;
+    if (!value && !this.getCfg(CONFIG_OPENING_DISABLED,value))
+    {
+      disabled=this.getCfg(CONFIG_TITLE_DISABLED,value);
+    }else{
+      disabled=this.getCfg(CONFIG_OPENING_DISABLED,value);
+    }
+    return disabled;
+  }
+  openingPosition(value = null){
+    let position;
+    if (!value && !this.getCfg(CONFIG_OPENING_POSITION,value))
+    {
+      position=this.getCfg(CONFIG_TITLE_POSITION,value);
+    }else{
+      position=this.getCfg(CONFIG_OPENING_POSITION,value);
+    }
+    return position;
   }
   alwaysPercentage(value = null){
     return this.getCfg(CONFIG_ALWAYS_PCT,value);
