@@ -71,9 +71,10 @@ const CONFIG_RESIZE_WIDTH_PCT = 'resize_width_pct';
 const CONFIG_TOP_OFFSET_PCT = 'top_offset_pct';
 const CONFIG_BOTTOM_OFFSET_PCT = 'bottom_offset_pct';
 const CONFIG_BUTTONS_POSITION = 'buttons_position';
-const CONFIG_TITLE_POSITION = 'title_position';
+const CONFIG_TITLE_POSITION = 'title_position';  // deprecated
+const CONFIG_NAME_POSITION = 'name_position';
+const CONFIG_NAME_DISABLED = 'name_disabled';
 const CONFIG_OPENING_POSITION = 'opening_position';
-const CONFIG_TITLE_DISABLED = 'title_disabled';
 const CONFIG_OPENING_DISABLED = 'opening_disabled';
 const CONFIG_INVERT_PCT = 'invert_percentage';
 const CONFIG_CAN_TILT = 'can_tilt';
@@ -85,6 +86,11 @@ const CONFIG_DISABLE_STANDARD_BUTTONS = 'disable_standard_buttons';
 const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons';
 const CONFIG_PICKER_OVERLAP_PX = 'picker_overlap_px';
 const CONFIG_CURRENT_POSITION = 'current_position';
+
+const CONFIG_STATE_DISABLE = 'state_disable';
+const CONFIG_STOP_DISABLED_STATES = 'stop_disabled_states';
+const CONFIG_UP_DISABLED_STATES = 'up_disabled_states';
+const CONFIG_DOWN_DISABLED_STATES = 'down_disabled_states';
 
 const ESC_ENTITY_ID = null;
 
@@ -103,8 +109,9 @@ const ESC_RESIZE_WIDTH_PCT  = 100;
 const ESC_TOP_OFFSET_PCT = 0;
 const ESC_BOTTOM_OFFSET_PCT = 0;
 const ESC_BUTTONS_POSITION = LEFT;
-const ESC_TITLE_POSITION = TOP;
-const ESC_TITLE_DISABLED = false;
+const ESC_NAME_POSITION =TOP;
+const ESC_TITLE_POSITION = null;  // deprecated
+const ESC_NAME_DISABLED = false;
 const ESC_OPENING_POSITION = null;
 const ESC_OPENING_DISABLED = null;
 const ESC_INVERT_PCT = false;
@@ -123,6 +130,11 @@ const ESC_MAX_RESIZE_WIDTH_PCT  = 200;
 const ESC_MIN_RESIZE_HEIGHT_PCT =  50;
 const ESC_MAX_RESIZE_HEIGHT_PCT = 200;
 
+const ESC_STATE_DISABLE = false;
+const ESC_STOP_DISABLED_STATES = [];
+const ESC_UP_DISABLED_STATES = [];
+const ESC_DOWN_DISABLED_STATES = [];
+
 const CONFIG_DEFAULT ={
   [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
 
@@ -140,8 +152,9 @@ const CONFIG_DEFAULT ={
   [CONFIG_TOP_OFFSET_PCT]: ESC_TOP_OFFSET_PCT,
   [CONFIG_BOTTOM_OFFSET_PCT]: ESC_BOTTOM_OFFSET_PCT,
   [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
-  [CONFIG_TITLE_POSITION]: ESC_TITLE_POSITION,
-  [CONFIG_TITLE_DISABLED]: ESC_TITLE_DISABLED,
+  [CONFIG_TITLE_POSITION]: ESC_TITLE_POSITION,  // deprecated
+  [CONFIG_NAME_POSITION]: ESC_NAME_POSITION,
+  [CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,
   [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION,
   [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,
   [CONFIG_INVERT_PCT]: ESC_INVERT_PCT,
@@ -158,6 +171,11 @@ const CONFIG_DEFAULT ={
 
   [CONFIG_HEIGHT_PX]: ESC_BASE_HEIGHT_PX,
   [CONFIG_WIDTH_PX]: ESC_BASE_WIDTH_PX,
+
+  [CONFIG_STOP_DISABLED_STATES]: ESC_STOP_DISABLED_STATES,
+  [CONFIG_UP_DISABLED_STATES]: ESC_UP_DISABLED_STATES,
+  [CONFIG_DOWN_DISABLED_STATES]: ESC_DOWN_DISABLED_STATES,
+  [CONFIG_STATE_DISABLE]: ESC_STATE_DISABLE,
 
 };
 const IMAGE_TYPES = [CONFIG_WINDOW_IMAGE,CONFIG_VIEW_IMAGE,CONFIG_SHUTTER_SLAT_IMAGE,CONFIG_SHUTTER_BOTTOM_IMAGE];
@@ -374,9 +392,20 @@ class EnhancedShutterCardNew extends LitElement{
     if (typeof configSub !== 'object' || configSub === null){
       configSub={[CONFIG_ENTITY_ID]: configSub};
     }
+
     let config={};
-    Object.keys(configMain).forEach(key =>{
-      config[key] = (typeof configSub[key] === 'undefined' || configSub[key]=== null || configSub[key]==='null') ? configMain[key] : configSub[key];
+    Object.keys(configMain).forEach(keyMain =>{
+      // handle deprecations ....
+      let keySub = keyMain;
+      if (keyMain == CONFIG_TITLE_POSITION && configSub[keyMain]){
+        if (!configSub[CONFIG_NAME_POSITION]) {
+          keySub = CONFIG_NAME_POSITION;
+        }
+      }
+      // check already defined by deprecation handling ...
+      if (!config[keySub]) {
+        config[keySub] = (typeof configSub[keyMain] === 'undefined' || configSub[keyMain]=== null || configSub[keyMain]==='null') ? configMain[keyMain] : configSub[keyMain];
+      }
     });
     return config;
   }
@@ -549,7 +578,7 @@ class EnhancedShutterCardNew extends LitElement{
         /*
         * Size shutter title
         */
-        if (!cfg.titleDisabled()){
+        if (!cfg.nameDisabled()){
           let titleSize = getTextSize(cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
           let partHeightPx = 30;
           let partWidthPx = titleSize.width;
@@ -763,7 +792,7 @@ class EnhancedShutter extends LitElement
 
           <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
             @click="${() => this.doDetailOpen(entityId)}"
-            style="display: ${(this.cfg.titlePosition() != TOP || this.cfg.titleDisabled()) ? 'none' : 'block'}">
+            style="display: ${(this.cfg.namePosition() != TOP || this.cfg.nameDisabled()) ? 'none' : 'block'}">
             ${this.cfg.friendlyName()}
             ${this.cfg.passiveMode() ? html`<sup><ha-icon class="${ESC_CLASS_HA_ICON_LOCK}" icon="mdi:lock"></ha-icon></sup>`:''}
           </div>
@@ -774,15 +803,43 @@ class EnhancedShutter extends LitElement
         </div>
         <div class="${ESC_CLASS_MIDDLE}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;">
           <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
-            ${!this.cfg.disableStandardButtons() ? html`
-                <ha-icon-button label="${this.hass.localize('ui.card.cover.open_cover')}"  .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_UP}`)} ><ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-up"></ha-icon></ha-icon-button>
-                <ha-icon-button label="${this.hass.localize('ui.card.cover.stop_cover')}"  .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_STOP}`)}><ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:stop"></ha-icon></ha-icon-button>
-                <ha-icon-button label="${this.hass.localize('ui.card.cover.close_cover')}" .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_DOWN}`)} ><ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-down"></ha-icon></ha-icon-button>
+              ${!this.cfg.disableStandardButtons() && !this.cfg.upDisabledStates().includes(this.cfg.movementState()) ? html`
+                <ha-icon-button
+                  label="${this.hass.localize('ui.card.cover.open_cover')}"
+                  .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()}
+                  @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_UP}`)} >
+                  <ha-icon
+                    class="${ESC_CLASS_HA_ICON}"
+                    icon="mdi:arrow-up">
+                  </ha-icon>
+                </ha-icon-button>
+              ` : ''}
+              ${!this.cfg.disableStandardButtons() && !this.cfg.stopDisabledStates().includes(this.cfg.movementState())? html`
+                <ha-icon-button
+                  label="${this.hass.localize('ui.card.cover.stop_cover')}"
+                  .disabled=${this.cfg.disabledGlobaly()}
+                  @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_STOP}`)}>
+                  <ha-icon
+                    class="${ESC_CLASS_HA_ICON}"
+                    icon="mdi:stop">
+                  </ha-icon>
+                </ha-icon-button>
+              ` : ''}
+              ${!this.cfg.disableStandardButtons() && !this.cfg.downDisabledStates().includes(this.cfg.movementState())? html`
+                <ha-icon-button
+                  label="${this.hass.localize('ui.card.cover.close_cover')}"
+                  .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()}
+                  @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_DOWN}`)} >
+                  <ha-icon
+                    class="${ESC_CLASS_HA_ICON}"
+                    icon="mdi:arrow-down">
+                  </ha-icon>
+                </ha-icon-button>
               ` : ''}
           </div>
           <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
             ${this.cfg.partial() ? html`
-                <ha-icon-button label="Partially close"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, partial)}" >
+                <ha-icon-button label="Partially close (${100-this.cfg.partial()}%)"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, this.cfg.partial() )}" >
                     <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
                 </ha-icon-button>` : ''}
             ${this.cfg.canTilt() ? html`
@@ -823,21 +880,21 @@ class EnhancedShutter extends LitElement
           ${!this.cfg.disablePartialOpenButtons() ? html`
             <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
 
-              <ha-icon-button label="Partially close" .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 100)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z"></ha-icon-button>
-              <ha-icon-button label="Partially close" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 75)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z"></ha-icon-button>
-              <ha-icon-button label="Partially close" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 50)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z"></ha-icon-button>
+              <ha-icon-button label="Full opened" .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 100)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z"></ha-icon-button>
+              <ha-icon-button label="Partially close (${25}%)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 75)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z"></ha-icon-button>
+              <ha-icon-button label="Partially close (${50}%)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 50)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z"></ha-icon-button>
             </div>
             <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
-              <ha-icon-button label="Partially close" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 25)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z"></ha-icon-button>
-              <ha-icon-button label="Partially close" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 10)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z"></ha-icon-button>
-              <ha-icon-button label="Partially close" .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 0)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z"></ha-icon-button>
+              <ha-icon-button label="Partially close (${75}%)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 25)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z"></ha-icon-button>
+              <ha-icon-button label="Partially close (${90}%)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 10)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z"></ha-icon-button>
+              <ha-icon-button label="Full closed" .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 0)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z"></ha-icon-button>
             </div>
           `:''}
         </div>
         <div class="${ESC_CLASS_BOTTOM}">
 
           <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}" @click="${() => this.doDetailOpen(entityId)}"
-            style="display: ${(this.cfg.titlePosition() != BOTTOM || this.cfg.titleDisabled()) ? 'none' : 'block'}">
+            style="display: ${(this.cfg.namePosition() != BOTTOM || this.cfg.nameDisabled()) ? 'none' : 'block'}">
             ${this.cfg.friendlyName()}
             ${this.cfg.passiveMode() ? html`<sup><ha-icon class="${ESC_CLASS_HA_ICON_LOCK}" icon="mdi:lock"></ha-icon></sup>`:''}
           </div>
@@ -850,46 +907,59 @@ class EnhancedShutter extends LitElement
     `;
   }
 
-//##########################################
-doDetailOpen(entityIdValue) {
-  if (this.cfg.passiveMode()){
-    console.warn('Passive mode, no action');
-  }else{
-    let e = new Event('hass-more-info', { composed: true});
-    e.detail= { entityId : entityIdValue};
-    this.dispatchEvent(e);
-  }
-}
-doOnclick(entityId, command, position) {
+  //##########################################
 
-  this.action='user-click';
-  const services ={
-    [SERVICE_SHUTTER_UP] : {'args': ''},
-    [SERVICE_SHUTTER_DOWN] : {'args': ''},
-    [SERVICE_SHUTTER_STOP] : {'args': ''},
-    [SERVICE_SHUTTER_PARTIAL] : {'args': {position: position}},
-    [SERVICE_SHUTTER_TILT_OPEN] : {'args': ''},
-    [SERVICE_SHUTTER_TILT_CLOSE] : {'args': ''},
+  changeButtonStateForMovement(shutter, cfg, movement) {
+    shutter.querySelectorAll(`.${ESC_CLASS_BUTTON_STOP} `).forEach(function (button) {
+      button.disabled = cfg.stopDisabledStates().includes(movement);
+    });
+    shutter.querySelectorAll(`.${ESC_CLASS_BUTTON_UP} `).forEach(function (button) {
+      button.disabled = cfg.upDisabledStates().includes(movement);
+    });
+    shutter.querySelectorAll(`.${ESC_CLASS_BUTTON_DOWN} `).forEach(function (button) {
+      button.disabled = cfg.downDisabledStates().includes(movement);
+    });
   }
-  this.callHassCoverService(entityId,command,services[command].args);
-}
-getPickPoint(event){
-  let siblings = Array.from(event.target.parentElement.children);
-  let slide = siblings.find(sibling => sibling.classList.contains(ESC_CLASS_SELECTOR_SLIDE));
-  this.pickPoint = event.pageY - parseInt(slide.style.height);
-}
-getShutterPosition(newScreenPosition){
-  let shutterPosition = (newScreenPosition - this.cfg.topOffsetPct()) * (100-this.cfg.offset()) / this.cfg.coverHeightPx();
-  shutterPosition = Math.round(this.cfg.invertPercentage() ?shutterPosition: 100 - shutterPosition);
-  return shutterPosition;
-}
-getScreenPosition(pickPoint){
-  let newScreenPosition = Math. round(boundary(pickPoint - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
-  return newScreenPosition;
-}
-mouseDown = (event) =>{
-  console_log('mouseDown:',event.type);
-  if (event.pageY === undefined) return;
+  doDetailOpen(entityIdValue) {
+    if (this.cfg.passiveMode()){
+      console.warn('Passive mode, no action');
+    }else{
+      let e = new Event('hass-more-info', { composed: true});
+      e.detail= { entityId : entityIdValue};
+      this.dispatchEvent(e);
+    }
+  }
+  doOnclick(entityId, command, position) {
+
+    this.action='user-click';
+    const services ={
+      [SERVICE_SHUTTER_UP] : {'args': ''},
+      [SERVICE_SHUTTER_DOWN] : {'args': ''},
+      [SERVICE_SHUTTER_STOP] : {'args': ''},
+      [SERVICE_SHUTTER_PARTIAL] : {'args': {position: position}},
+      [SERVICE_SHUTTER_TILT_OPEN] : {'args': ''},
+      [SERVICE_SHUTTER_TILT_CLOSE] : {'args': ''},
+    }
+    this.callHassCoverService(entityId,command,services[command].args);
+  }
+  getPickPoint(event){
+    let siblings = Array.from(event.target.parentElement.children);
+    let slide = siblings.find(sibling => sibling.classList.contains(ESC_CLASS_SELECTOR_SLIDE));
+    this.pickPoint = event.pageY - parseInt(slide.style.height);
+  }
+  getShutterPosition(newScreenPosition){
+    let shutterPosition = (newScreenPosition - this.cfg.topOffsetPct()) * (100-this.cfg.offset()) / this.cfg.coverHeightPx();
+    shutterPosition = Math.round(this.cfg.invertPercentage() ?shutterPosition: 100 - shutterPosition);
+    return shutterPosition;
+  }
+  getScreenPosition(pickPoint){
+    let newScreenPosition = Math. round(boundary(pickPoint - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
+    return newScreenPosition;
+  }
+  mouseDown = (event) =>{
+    console_log('mouseDown:',event.type);
+    if (event.pageY === undefined) return;
+
     if (event.cancelable) {
       //Disable default drag event
       event.preventDefault();
@@ -1050,8 +1120,11 @@ class shutterCfg {
       this.canTilt(!!config[CONFIG_CAN_TILT]);
 
       this.defButtonPosition(config);
-      this.titlePosition(config[CONFIG_TITLE_POSITION]);
-      this.titleDisabled(config[CONFIG_TITLE_DISABLED]);
+
+      this.titlePosition(config[CONFIG_TITLE_POSITION]);  //deprecated
+      this.namePosition(config[CONFIG_NAME_POSITION]);
+
+      this.nameDisabled(config[CONFIG_NAME_DISABLED]);
       this.openingPosition(config[CONFIG_OPENING_POSITION]);
       this.openingDisabled(config[CONFIG_OPENING_DISABLED]);
 
@@ -1060,6 +1133,11 @@ class shutterCfg {
       this.pickerOverlapPx(ESC_PICKER_OVERLAP_PX);
       this.disableStandardButtons(config[CONFIG_DISABLE_STANDARD_BUTTONS]);
       this.disablePartialOpenButtons(config[CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]);
+
+      this.stateDisable(config[CONFIG_STOP_DISABLED_STATES] !==null || config[CONFIG_UP_DISABLED_STATES] !==null || config[CONFIG_DOWN_DISABLED_STATES] !==null); // TODO not used ??
+      this.stopDisabledStates(config[CONFIG_STOP_DISABLED_STATES]  ? config[CONFIG_STOP_DISABLED_STATES] : ESC_STOP_DISABLED_STATES);
+      this.upDisabledStates(config[CONFIG_UP_DISABLED_STATES]  ? config[CONFIG_UP_DISABLED_STATES] : ESC_UP_DISABLED_STATES);
+      this.downDisabledStates(config[CONFIG_DOWN_DISABLED_STATES]  ? config[CONFIG_DOWN_DISABLED_STATES] : ESC_DOWN_DISABLED_STATES);
 
       //console.log ('constuct cfg: ',this);
       Object.preventExtensions(this);
@@ -1139,17 +1217,37 @@ class shutterCfg {
   canTilt(value = null){
     return this.getCfg(CONFIG_CAN_TILT,value);
   }
-  titleDisabled(value = null){
-    return this.getCfg(CONFIG_TITLE_DISABLED,value);
+  nameDisabled(value = null){
+    return this.getCfg(CONFIG_NAME_DISABLED,value);
   }
+  stateDisable(value = null){
+    return this.getCfg(CONFIG_STATE_DISABLE,value);
+  }
+  stopDisabledStates(value = null){
+    return this.getCfg(CONFIG_STOP_DISABLED_STATES,value);
+  }
+  upDisabledStates(value = null){
+    return this.getCfg(CONFIG_UP_DISABLED_STATES,value);
+  }
+  downDisabledStates(value = null){
+    return this.getCfg(CONFIG_DOWN_DISABLED_STATES,value);
+  }
+
+
+  // deprecated
   titlePosition(value = null){
-    return this.getCfg(CONFIG_TITLE_POSITION,value);
+    console.warn("Enhanced Shutter Card: 'title_position'-setting is deprecated, use 'name_position' !!");
+    return this.getCfg(CONFIG_NAME_POSITION,value);
+  }
+
+  namePosition(value = null){
+    return this.getCfg(CONFIG_NAME_POSITION,value);
   }
   openingDisabled(value = null){
     let disabled;
     if (!value && !this.getCfg(CONFIG_OPENING_DISABLED,value))
     {
-      disabled=this.getCfg(CONFIG_TITLE_DISABLED,value);
+      disabled=this.getCfg(CONFIG_NAME_DISABLED,value);
     }else{
       disabled=this.getCfg(CONFIG_OPENING_DISABLED,value);
     }

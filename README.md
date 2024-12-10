@@ -48,8 +48,8 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | view_image | string | No | esc-back-view.png | background-image trough the window.
 | shutter_slat_image | string | No | esc-shutter-slat.png | Image of one slat of the shutter.
 | shutter_bottom_image | string | No | esc-shutter-bottom.png | the bottom bar of the shutter.
-| base_height_px | int | No | _height of image_ | height of image in pixels
-| base_width_px | int | No | _width of image_ | witdh of image in pixels
+| base_height_px | int | No | 150 | height of image in pixels
+| base_width_px | int | No | 150 | witdh of image in pixels
 | resize_height_pct | int | No | 100 | rezise of the base height in percent
 | resise_width_pct | int | No | 100 | rezise of the base width in percent
 | top_offset_pct | int | No | 0 | space between top image/window and top shutter
@@ -62,6 +62,10 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | offset_closed_percentage | int | No | `0` | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.
 | always_percentage | boolean | No | `false` | If set to `true`, the end states (opened/closed) will be also as numbers (0 / 100 % ) instead of a text
 | disable_end_buttons | boolean | No | `false` | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button
+| up_disabled_states | string list | False | empty list | Entered state strings ('opening', 'open','close' or 'closing') added will disable the 'up' button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other *_disabled_states options.
+| down_disabled_states | string list | False | empty list | Entered state strings ('opening', 'open','close' or 'closing') added will disable the 'down' button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other *_disabled_states options.
+| stop_disabled_states | string list | False | empty list | Entered state strings ('opening', 'open','close' or 'closing') added will disable the 'stop' button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other *_disabled_states options.
+
 ### Entities
 
 | Name | Type | Required | Default | Description |
@@ -87,6 +91,10 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | offset_closed_percentage | int | No | global item setting, see under _General_ | see under _General_
 | always_percentage | boolean | No | global item setting, see under _General_ | see under _General_
 | disable_end_buttons | boolean | No | global item setting, see under _General_ | see under _General_
+| up_disabled_states | string list | No | global item setting, see under _General_ | see under _General_
+| down_disabled_states | string list | No | global item setting, see under _General_ | see under _General_
+| stop_disabled_states | string list | No | global item setting, see under _General_ | see under _General_
+
 
 _Remark : you can also just give the entity ID (without to specify `entity:`) if you don't need to specify the other configurations._
 
