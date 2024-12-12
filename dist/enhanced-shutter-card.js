@@ -752,7 +752,6 @@ class EnhancedShutterCardNew extends LitElement{
       }]
     };
   }
-
 }
 
 
@@ -1117,7 +1116,6 @@ class EnhancedShutter extends LitElement
     return css`${unsafeCSS(SHUTTER_CSS)}
     `
   }
-
 }
 customElements.define(HA_CARD_NAME, EnhancedShutterCardNew);
 customElements.define(HA_SHUTTER_NAME, EnhancedShutter);
