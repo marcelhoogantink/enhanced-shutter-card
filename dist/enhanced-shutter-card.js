@@ -404,6 +404,7 @@ class EnhancedShutterCardNew extends LitElement{
       // handle deprecations ....
       let keySub = keyMain;
       if (keyMain == CONFIG_TITLE_POSITION && configSub[keyMain]){
+        console.warn("Enhanced Shutter Card: 'title_position'-setting is deprecated, use 'name_position' !!");
         if (!configSub[CONFIG_NAME_POSITION]) {
           keySub = CONFIG_NAME_POSITION;
         }
@@ -1258,7 +1259,6 @@ class shutterCfg {
 
   // deprecated
   titlePosition(value = null){
-    console.warn("Enhanced Shutter Card: 'title_position'-setting is deprecated, use 'name_position' !!");
     return this.getCfg(CONFIG_NAME_POSITION,value);
   }
 
