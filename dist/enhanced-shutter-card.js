@@ -739,6 +739,19 @@ class EnhancedShutterCardNew extends LitElement{
     console_log('Card firstUpdated isShutterConfigLoaded',this.isShutterConfigLoaded);
     console_log('Card firstUpdated ready');
   }
+  static getStubConfig(hass, unusedEntities, allEntities) {
+    //Search for a cover entity unused first then in all entities.
+    let entity = unusedEntities.find((eid) => eid.split(".")[0] === "cover");
+    if (!entity) {
+      entity = allEntities.find((eid) => eid.split(".")[0] === "cover");
+    }
+    return {
+      "entities": [{
+        "entity": entity,
+        "name": "My Enhanced Shutter"
+      }]
+    };
+  }
 
 }
 

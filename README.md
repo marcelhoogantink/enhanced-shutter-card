@@ -57,10 +57,10 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | bottom_offset_pct | int | No | 0 | space between bottom image/window and bottom shutter
 | buttons_position | string | No | `left` | Set buttons on `left`, `right`, `top` or `bottom` of the shutter
 | title_position | string | No | `top` | Set title on `top` or on `bottom` of the shutter | deprecated, use `name_position`|
-| name_position |string | No | `top` | Set title/name shutter on `top` or on `bottom` of the shutter| new in v1.1.0 |
+| name_position |string | No | `top` | Set title/name shutter on `top` or on `bottom` of the shutter image.| new in v1.1.0 |
 | name_disabled | boolean| No | false| hide title/name of shutter | new in v1.1.0 |
-| opening_position | string | No | _name_position_| set position info on `top` or `bottom` of the shutter image.| new in v1.1.0 |
-| opening_disabled |boolean| No | false| hide title/name of shutter | new in v1.1.0 |
+| opening_position | string | No | _name_position_| set position info of shutter on `top` or `bottom` of the shutter image.| new in v1.1.0 |
+| opening_disabled |boolean| No | false| hide position info of shutter | new in v1.1.0 |
 | invert_percentage | boolean | No | `false` | Set it to `true` if your shutter is 100% when it is closed, and 0% when it is opened
 | can_tilt | boolean | No | `false` | Set it to `true` if your shutters support tilting.
 | partial_close_percentage | int | No | `0` | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.
@@ -69,9 +69,9 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | disable_end_buttons | boolean | No | `false` | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button
 | disable_standard_buttons | boolean | No | false | Show or hide the default up, down and stop buttons | new in v1.1.0 |
 | disable_partial_open_buttons | boolean | No | true | Show or hide the partail open buttons. | new in v1.1.0 |
-| button_up_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other `*_hide_states` options. | new in v1.1.0 |
-| button_stop_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other `*_hide_states` options. | new in v1.1.0 |
-| button_down_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states.  This is instead of the disable_end_buttons option and can be combined with other `*_hide_states` options. | new in v1.1.0 |
+| button_up_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
+| button_stop_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
+| button_down_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
 
 ### Entities
 
