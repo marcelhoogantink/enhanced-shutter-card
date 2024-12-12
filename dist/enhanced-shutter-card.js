@@ -520,8 +520,6 @@ class EnhancedShutterCardNew extends LitElement{
       throw new Error('You need to define entities');
     }
     this.config = config;
-
-
   }
   getCardSize() {
     console_log('Card getCardSize');
@@ -716,7 +714,6 @@ class EnhancedShutterCardNew extends LitElement{
 
         totalWidthPx  = Math.max(totalWidthPx,localWidthPx);
         totalHeightPx += localHeightPx;
-
       });
       totalHeightPx += 16; // include bottom padding
       console_log('Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
@@ -763,7 +760,6 @@ class EnhancedShutter extends LitElement
     this.positionText ='';
     this.action = '#';
     console_log('Shutter constructor ready');
-
   }
   shouldUpdate(changedProperties) {
     // Only update element if isShutterConfigLoaded changed   = true

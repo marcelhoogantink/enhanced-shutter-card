@@ -31,7 +31,7 @@ These are the avialable background views:
 | esc-view.png | yes
 | esc-view2.png | no
 
-These images can be combined like in the example above. For (optinal) defintion the location of the images, a setting 'image_map" does exits.
+These images can be combined like in the example above. For (optinal) defintion of the location of the images, a setting 'image_map" does exits.
 The default map-setting can be found in the Configuration-info below.
 It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is considerd to include a full path.
 
