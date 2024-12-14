@@ -404,6 +404,7 @@ class EnhancedShutterCardNew extends LitElement{
       // handle deprecations ....
       let keySub = keyMain;
       if (keyMain == CONFIG_TITLE_POSITION && configSub[keyMain]){
+        console.warn("Enhanced Shutter Card: 'title_position'-setting is deprecated, use 'name_position' !!");
         if (!configSub[CONFIG_NAME_POSITION]) {
           keySub = CONFIG_NAME_POSITION;
         }
@@ -416,37 +417,67 @@ class EnhancedShutterCardNew extends LitElement{
     return config;
   }
 /*
-* OVERRIDE FUNCTIONS
+* OVERRIDE FUNCTIONS LIT ELEMENT
 */
   shouldUpdate(changedProperties) {
     // Only update element if prop1 changed.
     console_log('Card shouldUpdate');
-    super.shouldUpdate();
     console_log('Card shouldUpdate: isShutterConfigLoaded:',this.isShutterConfigLoaded);
-    console_log('Card shouldUpdate ready');
-    return this.isShutterConfigLoaded;
+    let doUpdate =false;
 
+    if (this.isShutterConfigLoaded){
+
+      changedProperties.forEach((oldValue, propName) => {
+        let newCoverStates;
+        if (propName=='hass'){
+
+            const statesNew = Object.values(this[propName].states);
+            newCoverStates = statesNew.filter(entity => entity.entity_id.startsWith('cover.'));
+
+            Object.keys(this.localCfgs).forEach(entityId =>{
+              const entity = Object.values(newCoverStates).find(states => states.entity_id === entityId);
+              if (entity) {
+                let shutterState = `${entity.state}-${entity.attributes.current_position}`;
+                if (shutterState != this.localCfgs[entityId].shutterState){
+                  this.localCfgs[entityId].shutterState = shutterState;
+                  doUpdate =true;
+                }
+              }
+            });
+
+        }else{
+          doUpdate =true;
+        }
+      });
+    }
+    console_log('Card shouldUpdate ready: doUpdate=',doUpdate);
+    return doUpdate;
+  //    return changedProperties.has('prop1');
   }
   willUpdate(changedProperties){
-    console_log('Card willUpdate');
+    //console_log('Card willUpdate');
     super.willUpdate();
-    console_log('Card willUpdate: isShutterConfigLoaded:',this.isShutterConfigLoaded);
-    console_log('Card willUpdate ready');
+    //console_log('Card willUpdate: isShutterConfigLoaded:',this.isShutterConfigLoaded);
+    //console_log('Card willUpdate ready');
   }
   update(changedProperties)
   {
-    console_log('Card Update');
+    //console_log('Card Update');
     super.update(changedProperties);
-    changedProperties.forEach((oldValue, prop) => {
-      console_log(`Card Update, Property `,prop,` changed from`,oldValue,` to `,this[prop]);
-    });
-    super.update(changedProperties);
-    console_log('Card Update ready');
+    //changedProperties.forEach((oldValue, prop) => {
+    //  console_log(`Card Update, Property `,prop,` changed from`,oldValue,` to `,this[prop]);
+    //});
+    //console_log('Card Update ready');
   }
   updated(changedProperties) {
-    console_log('Card Updated');
+    //console_log('Card Updated');
     super.updated(changedProperties);
-    console_log('Card Updated ready');
+    //console_log('Card Updated ready');
+  }
+  firstUpdated() {
+    //console_log('Card firstUpdated');
+    //console_log('Card firstUpdated isShutterConfigLoaded',this.isShutterConfigLoaded);
+    //console_log('Card firstUpdated ready');
   }
   connectedCallback() {
     console_log('Card connectedCallback: isShutterConfigLoaded:',this.isShutterConfigLoaded);
@@ -465,7 +496,7 @@ class EnhancedShutterCardNew extends LitElement{
  */
   render() {
     console_log('Card Render');
-    console_log('Card Render,isShutterConfigLoaded',this.isShutterConfigLoaded);
+    //console_log('Card Render,isShutterConfigLoaded',this.isShutterConfigLoaded);
     if (!this.config || !this.hass || !this.isShutterConfigLoaded) {
       console.warn('ShutterCard  .. no content ..');
       return html`Waiting ...`;
@@ -473,21 +504,12 @@ class EnhancedShutterCardNew extends LitElement{
     let htmlout = html`
         <ha-card .header=${this.config.title}>
           <div class="${ESC_CLASS_SHUTTERS}">
-            ${console_log('Card this.localCfgs',this.localCfgs)}
-            ${console_log('Card isShutterConfigLoaded',this.isShutterConfigLoaded)}
             ${this.config.entities.map( // TODO replace config by global.cfg ??
               (currEntity) => {
                 let entityId = currEntity.entity ? currEntity.entity : currEntity;
 
-                console_log('currEntity',currEntity);
-                console_log('entityId',entityId);
-                console_log('this.hass',this.hass);
-                console_log('this.localCfgs[entity]',this.localCfgs[entityId]);
-                //console_log('Card per shutter this.isShutterConfigLoaded xx',this.isShutterConfigLoaded);
-                //console.log('entity,position',entity,this.hass.states[entity].attributes.current_position);
-                //console.log('state',this.localCfgs[entity]);
                 //console.log('currentPosition old',this.localCfgs[entity].currentPosition());
-                this.localCfgs[entityId].state(this.hass.states[entityId]);
+                this.localCfgs[entityId].setState(this.hass.states[entityId]);
                 //console.log('currentPosition new',this.localCfgs[entity].currentPosition());
 
                 return html
@@ -497,14 +519,13 @@ class EnhancedShutterCardNew extends LitElement{
                     .hass=${this.hass}
                     .config=${currEntity}
                     .cfg=${this.localCfgs[entityId]}
+                    .shutterState=${this.localCfgs[entityId].shutterState}
                   >
                   </enhanced-shutter>`;
               }
             )}
           </div>
         </ha-card>
-        ${console_log('***********************')}
-
       `
     console_log('Card Render ready');
     return htmlout;
@@ -514,7 +535,10 @@ class EnhancedShutterCardNew extends LitElement{
     const CSS = `.${ESC_CLASS_SHUTTERS} { padding: 0px 16px 16px 16px; }`;
     return css`${unsafeCSS(CSS)}`;
   }
-  setConfig(config)
+/*
+* OVERRIDE FUNCTIONS HA CARD
+*/
+setConfig(config)
   {
     if (!config.entities) {
       throw new Error('You need to define entities');
@@ -542,8 +566,8 @@ class EnhancedShutterCardNew extends LitElement{
     //   height: 56px
     //   gap between cells: 8px
 
-    console_log('Card getGridOptions');
-    console_log ('Card getGridOptions isShutterConfigLoaded',this.isShutterConfigLoaded);
+    //console_log('Card getGridOptions');
+    //console_log ('Card getGridOptions isShutterConfigLoaded',this.isShutterConfigLoaded);
 
     // HA basic szies for calculations:
 
@@ -579,7 +603,7 @@ class EnhancedShutterCardNew extends LitElement{
         totalHeightPx += haTitleHeightPx; // TODO
         totalWidthPx  += titleSize.width;
       }
-      console_log('Start size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+      //console_log('Start size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
       Object.keys(this.localCfgs).forEach(key =>{
 
         let localHeightPx=0;
@@ -594,8 +618,8 @@ class EnhancedShutterCardNew extends LitElement{
           let partWidthPx = titleSize.width;
           localHeightPx += partHeightPx;
           localWidthPx = Math.max(totalWidthPx,partWidthPx);
-          console_log('part size B*H',partWidthPx,partHeightPx,'after title');
-          console_log('size B*H',localWidthPx,localHeightPx);
+          //console_log('part size B*H',partWidthPx,partHeightPx,'after title');
+          //console_log('size B*H',localWidthPx,localHeightPx);
         }
         /*
         * Size shutter opening row
@@ -606,19 +630,19 @@ class EnhancedShutterCardNew extends LitElement{
           let partWidthPx = pctSize.width;
           localHeightPx += partHeightPx;
           localWidthPx = Math.max(totalWidthPx,partWidthPx);
-          console_log('part size B*H',partWidthPx,partHeightPx,'after open%');
-          console_log('size B*H',localWidthPx,localHeightPx);
+          //console_log('part size B*H',partWidthPx,partHeightPx,'after open%');
+          //console_log('size B*H',localWidthPx,localHeightPx);
         }
         /*
         * padding top and bottom rows
         */
         let partHeightPx = 32;
         localHeightPx += partHeightPx;
-        console_log('part size H',partHeightPx,'after including padding');
-        console_log('size H',localHeightPx);
+        //console_log('part size H',partHeightPx,'after including padding');
+        //console_log('size H',localHeightPx);
 
         //totalHeightPx+=localHeightPx;
-        console_log('size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+        //console_log('size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
         /*
         * size image
         */
@@ -626,11 +650,11 @@ class EnhancedShutterCardNew extends LitElement{
         let partWidthPx = cfg.windowWidthPx();
         let localHeight2Px = partHeightPx;
         let localWidth2Px  = partWidthPx;
-        console_log('part size B*H',partWidthPx,partHeightPx,'after image');
-        console_log('size B*H',localWidth2Px,localHeight2Px);
+        //console_log('part size B*H',partWidthPx,partHeightPx,'after image');
+        //console_log('size B*H',localWidth2Px,localHeight2Px);
 
         if (cfg.buttonsInRow()){
-          console_log('Buttons Naast shutter');
+          //console_log('Buttons Naast shutter');
           /*
           * size standard-buttons
           */
@@ -639,9 +663,9 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px+=partWidthPx;
-            console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
-            console_log('size B*H',localWidth2Px,localHeight2Px);
-            }
+            //console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
+            //console_log('size B*H',localWidth2Px,localHeight2Px);
+          }
 
           /*
           * size tilt-buttons
@@ -651,9 +675,9 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px += partWidthPx;
-            console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
-            console_log('size B*H',localWidth2Px,localHeight2Px,);
-            }
+          //  console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
+          //  console_log('size B*H',localWidth2Px,localHeight2Px,);
+          }
 
           /*
           * size partial-open-buttons
@@ -663,8 +687,8 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize*2;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px+=partWidthPx;
-            console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
-            console_log('size B*H',localWidth2Px,localHeight2Px);
+            //console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
+            //console_log('size B*H',localWidth2Px,localHeight2Px);
           }
 
 
@@ -678,9 +702,9 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize*3 ;
             localHeight2Px += partHeightPx;
             localWidth2Px=Math.max(localWidth2Px,partWidthPx);
-            console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
-            console_log('size B*H',localWidth2Px,localHeight2Px);
-            }
+            //console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
+            //console_log('size B*H',localWidth2Px,localHeight2Px);
+          }
           /*
           * size tilt-buttons
           */
@@ -689,9 +713,9 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize*2;
             localHeight2Px += partHeightPx;
             localWidth2Px = Math.max(localWidth2Px,partWidthPx);
-            console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
-            console_log('size B*H',localWidth2Px,localHeight2Px);
-            }
+            //console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
+            //console_log('size B*H',localWidth2Px,localHeight2Px);
+          }
 
 
           /*
@@ -702,28 +726,28 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx =  haButtonSize*3;
             localHeight2Px += partHeightPx;
             localWidth2Px=Math.max(localWidth2Px,partWidthPx);
-            console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
-            console_log('size B*H',localWidth2Px,localHeight2Px);
-            }
+            //console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
+            //console_log('size B*H',localWidth2Px,localHeight2Px);
+          }
 
         }
         //localHeightPx+=haCardPadding*2;
         localWidthPx  = Math.max(localWidthPx,localWidth2Px);
         localHeightPx += localHeight2Px;
-        console_log(`Endsize ${key} B*H`,localWidthPx,localHeightPx);
+        //console_log(`Endsize ${key} B*H`,localWidthPx,localHeightPx);
 
         totalWidthPx  = Math.max(totalWidthPx,localWidthPx);
         totalHeightPx += localHeightPx;
       });
       totalHeightPx += 16; // include bottom padding
-      console_log('Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+      //console_log('Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
     }
     let nbRows= Math.ceil(totalHeightPx/haGridPxHeight);
     let nbColsMin= Math.ceil(totalWidthPx/haGridPxWidthMax);
     let nbColsMax= Math.ceil(totalWidthPx/haGridPxWidthMin);
 
-    console_log("size Card getGridOptions total Section sizing computed. nbRows : " + nbRows + " nbColsMax : " + nbColsMax);
-    console_log('Card getGridOptions ready');
+    //console_log("size Card getGridOptions total Section sizing computed. nbRows : " + nbRows + " nbColsMax : " + nbColsMax);
+    //console_log('Card getGridOptions ready');
     return {
       rows: nbRows,
       min_rows: nbRows-1,
@@ -733,12 +757,19 @@ class EnhancedShutterCardNew extends LitElement{
       max_columns: nbColsMax,
     };
   }
-  firstUpdated() {
-    console_log('Card firstUpdated');
-    console_log('Card firstUpdated isShutterConfigLoaded',this.isShutterConfigLoaded);
-    console_log('Card firstUpdated ready');
+  static getStubConfig(hass, unusedEntities, allEntities) {
+    //Search for a cover entity unused first then in all entities.
+    let entity = unusedEntities.find((eid) => eid.split(".")[0] === "cover");
+    if (!entity) {
+      entity = allEntities.find((eid) => eid.split(".")[0] === "cover");
+    }
+    return {
+      "entities": [{
+        "entity": entity,
+        "name": "My Enhanced Shutter"
+      }]
+    };
   }
-
 }
 
 
@@ -747,51 +778,50 @@ class EnhancedShutter extends LitElement
   //reactive properties
   static get properties() {
     return {
-      hass: {},
-      cfg: {type: Object},
+      shutterState: {String},
       screenPosition: {state: true},
-//      positionText: {state: true}
     };
   }
   constructor(){
-    console_log('Shutter constructor');
+    //console_log('Shutter constructor');
     super(); //  mandetory
     this.screenPosition=-1;
     this.positionText ='';
     this.action = '#';
-    console_log('Shutter constructor ready');
+    //console_log('Shutter constructor ready');
   }
-  shouldUpdate(changedProperties) {
-    // Only update element if isShutterConfigLoaded changed   = true
-    console_log('Shutter shouldUpdate');
-    console_log('Shutter shouldUpdate, isShutterConfigLoaded',this.isShutterConfigLoaded);
-    console_log('Shutter shouldUpdate ready');
-    return this.isShutterConfigLoaded;
+  shouldUpdate(changedProperties)
+  {
+    console_log(`Shutter shouldUpdate: ${this.cfg.entityId()}`);
 
-//    return changedProperties.has('prop1');
-  }
-  update(changedProperties) {
-    console_log('Shutter Update');
-    console_log('Shutter update, isShutterConfigLoaded',this.isShutterConfigLoaded);
-    console_log('Shutter update changedProperties',changedProperties);
-    changedProperties.forEach((oldValue, prop) => {
-      console_log(`Shutter update, Property `,prop,` changed from`,oldValue,` to `,this[prop]);
-
+    changedProperties.forEach((oldValue, propName) => {
+      console_log(`Shutter ${propName} changed. oldValue: ${oldValue}; new: ${this[propName]}`);
     });
+    console_log('Shutter shouldUpdate ready');
+    return true;
+  }
+
+  update(changedProperties) {
+    //console_log('Shutter Update');
+    //console_log('Shutter update, isShutterConfigLoaded',this.isShutterConfigLoaded);
+    //console_log('Shutter update changedProperties',changedProperties);
+    //changedProperties.forEach((oldValue, prop) => {
+      //console_log(`Shutter update, Property `,prop,` changed from`,oldValue,` to `,this[prop]);
+
+    //});
     super.update(changedProperties);
-    console_log('Shutter Update ready');
+    //console_log('Shutter Update ready');
   }
   updated(changedProperties) {
     // Log the properties that were updated
-    console_log('Shutter Updated');
+    //console_log('Shutter Updated');
     super.updated(changedProperties);
     this.action='cover';
-    console_log('Shutter Updated ready');
+    //console_log('Shutter Updated ready');
   }
   render()
   {
     console_log('Shutter Render',this.cfg.entityId());
-    console_log('Shutter Render,isShutterConfigLoaded',this.isShutterConfigLoaded);
     let entityId = this.cfg.entityId();
     let positionText;
     let screenPosition;
@@ -978,7 +1008,7 @@ class EnhancedShutter extends LitElement
     return newScreenPosition;
   }
   mouseDown = (event) =>{
-    console_log('mouseDown:',event.type);
+    //console_log('mouseDown:',event.type);
     if (event.pageY === undefined) return;
 
     if (event.cancelable) {
@@ -993,7 +1023,7 @@ class EnhancedShutter extends LitElement
   };
 
   mouseMove = (event) =>{
-    console_log('mouseMove:',event.type);
+    //console_log('mouseMove:',event.type);
     if (event.pageY === undefined) return;
     this.action='user-drag';
 
@@ -1004,7 +1034,7 @@ class EnhancedShutter extends LitElement
   };
 
   mouseUp = (event) => {
-    console_log('mouseUp:',event.type);
+    //console_log('mouseUp:',event.type);
     if (event.pageY === undefined) return;
 
     document.removeEventListener('pointermove', this.mouseMove);
@@ -1103,7 +1133,6 @@ class EnhancedShutter extends LitElement
     return css`${unsafeCSS(SHUTTER_CSS)}
     `
   }
-
 }
 customElements.define(HA_CARD_NAME, EnhancedShutterCardNew);
 customElements.define(HA_SHUTTER_NAME, EnhancedShutter);
@@ -1115,12 +1144,14 @@ console.info(
 class shutterCfg {
 
   #cfg={};
-  #state={};
+  #hassStateInfo={};
+
   constructor(hass,config,allImages,imageDimension=null)
   {
-      let entityId = this.entityId(config[CONFIG_ENTITY_ID] ? config[CONFIG_ENTITY_ID] : config);
+    this.shutterState = 'None';
+    let entityId = this.entityId(config[CONFIG_ENTITY_ID] ? config[CONFIG_ENTITY_ID] : config);
 
-      this.state(hass.states[entityId]);
+      this.setState(hass.states[entityId]);
       this.friendlyName(config[CONFIG_NAME] ? config[CONFIG_NAME] : this.stateAttributes() ? this.stateAttributes().friendly_name : 'Unkown');
       this.invertPercentage(config[CONFIG_INVERT_PCT]);
       this.passiveMode(config[CONFIG_PASSIVE_MODE]);
@@ -1173,15 +1204,25 @@ class shutterCfg {
    ** getters/setters
    */
   getCfg(key,value= null){
-    if (value!== null) this.#cfg[key]= value;
+    if (value!== null && this.#cfg[key]!=value){
+      this.#cfg[key]= value;
+    }
     return this.#cfg[key];
   }
-  getState(key,value= null){
-    if (value!== null) this.#state[key]= value;
-    return this.#state[key];
+  stateAttributes(){
+    return (this.#state() && this.#state().attributes);
   }
-  state(value = null){
-    return this.getState(CONFIG_STATE,value);
+  setState(value){
+    return this.#state(value);
+  }
+  getState(){
+    return this.#state().state;
+  }
+  #state(value= null){
+    if (value!== null && this.#hassStateInfo != value) {
+      this.#hassStateInfo = value
+    };
+    return this.#hassStateInfo;
   }
   buttonsPosition(value = null){
     return this.getCfg(CONFIG_BUTTONS_POSITION,value);
@@ -1258,7 +1299,6 @@ class shutterCfg {
 
   // deprecated
   titlePosition(value = null){
-    console.warn("Enhanced Shutter Card: 'title_position'-setting is deprecated, use 'name_position' !!");
     return this.getCfg(CONFIG_NAME_POSITION,value);
   }
 
@@ -1298,14 +1338,11 @@ class shutterCfg {
     return this.stateAttributes().current_position;
   }
   movementState(){
-    let state = (this.state() ? this.state().state : 'unknownMovement');
+    let state = (this.getState() ? this.getState() : 'unknownMovement');
     if (state == SHUTTER_STATE_OPEN && this.currentPosition() != 100 && this.currentPosition() != 0){
       state= SHUTTER_STATE_PARTIAL_OPEN;
     }
     return state;
-  }
-  stateAttributes(){
-    return (this.state() && this.state().attributes);
   }
   buttonsInRow(){
     return this.buttonsPosition() == LEFT || this.buttonsPosition() == RIGHT;
@@ -1314,7 +1351,7 @@ class shutterCfg {
     return this.buttonsPosition() == BOTTOM || this.buttonsPosition() == RIGHT;
   }
   disabledGlobaly() {
-    return (this.state().state == "unavailable");
+    return (this.getState() == "unavailable");
   }
   upButtonDisabled(){
     let upDisabled = false;
@@ -1411,9 +1448,9 @@ function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
   let height =  Math.ceil(data.fontBoundingBoxAscent + data.fontBoundingBoxDescent);
   let fontHeightData =        data.fontBoundingBoxAscent + data.fontBoundingBoxDescent;
   let actualHeight =      data.actualBoundingBoxAscent + data.actualBoundingBoxDescent;
-  console_log("Text data:",text,data);
-  console_log("Text fontHeightData actualHeight:",fontHeightData,actualHeight);
-  console_log("Text sizes w*h:",text,width,height);
+  //console_log("Text data:",text,data);
+  //console_log("Text fontHeightData actualHeight:",fontHeightData,actualHeight);
+  //console_log("Text sizes w*h:",text,width,height);
   return {width,height};
 
 }
