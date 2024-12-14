@@ -9,7 +9,7 @@ It is a follow-up of [Deejayfool/Shuttercard](https://github.com/Deejayfool/hass
 I started with a simple change for the motion of the shutters, but soon it became a huge update.
 Due to the inactivity of the Shutter Card, I decided to add this one as 'Enhanced Shutter Card' to HACS.
 
-It supports all options of the original Card, but also graphical options like different backrounds, windows an shutters.
+It supports all options of the original Card, but also graphical options like different backgrounds, windows an shutters.
 Also the sizes of every shutter can be altered:
 
 ![Enhanced Shutter Card](EnhancedShutterCard.gif)
