@@ -1136,6 +1136,17 @@ class EnhancedShutter extends LitElement
 }
 customElements.define(HA_CARD_NAME, EnhancedShutterCardNew);
 customElements.define(HA_SHUTTER_NAME, EnhancedShutter);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "enhanced-shutter-card",
+  name: "Enhanced Shutter Card",
+  preview: true,
+  description: "A shutter card for easy control of shutters",
+  documentationURL: "https://github.com/marcelhoogantink/enhanced-shutter-card"
+});
+
+
 console.info(
   '%c ENHANCED-SHUTTER-CARD ',
   'color: white; background: green; font-weight: 700',
