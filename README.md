@@ -12,7 +12,7 @@ Due to the inactivity of the Shutter Card, I decided to add this one as 'Enhance
 It supports all options of the original Card, but also graphical options like different backgrounds, windows an shutters.
 Also the sizes of every shutter can be altered:
 
-![Enhanced Shutter Card](EnhancedShutterCard.gif)
+![Enhanced Shutter Card](EnhancedShutterCardNew.gif)
 
 (_find below the yaml for this example._)
 

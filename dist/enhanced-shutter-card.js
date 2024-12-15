@@ -920,6 +920,8 @@ class EnhancedShutter extends LitElement
               </div>
               <div class="${ESC_CLASS_SELECTOR_PICKER}"
                 @pointerdown="${this.mouseDown}"
+                @mousedown="${this.mouseDown}"
+                @touchstart="${this.mouseDown}"
                 style="top: ${screenPosition-this.cfg.pickerOverlapPx()}${UNITY};">
               </div>
               ${this.cfg.partial() && !this.cfg.offset()? html`
@@ -1007,8 +1009,9 @@ class EnhancedShutter extends LitElement
     let newScreenPosition = Math. round(boundary(pickPoint - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
     return newScreenPosition;
   }
-  mouseDown = (event) =>{
-    //console_log('mouseDown:',event.type);
+  mouseDown = (event) =>
+  {
+    console_log('mouseDown:',event.type,event);
     if (event.pageY === undefined) return;
 
     if (event.cancelable) {
@@ -1018,12 +1021,19 @@ class EnhancedShutter extends LitElement
     this.action='user-drag';
 
     this.getPickPoint(event);
-    document.addEventListener('pointermove', this.mouseMove);
-    document.addEventListener('pointerup', this.mouseUp);
+
+    this.addEventListener('mousemove', this.mouseMove);
+    this.addEventListener('touchmove', this.mouseMove);
+    this.addEventListener('pointermove', this.mouseMove);
+
+    this.addEventListener('mouseup', this.mouseUp);
+    this.addEventListener('touchend', this.mouseUp);
+    this.addEventListener('pointerup', this.mouseUp);
   };
 
-  mouseMove = (event) =>{
-    //console_log('mouseMove:',event.type);
+  mouseMove = (event) =>
+  {
+    console_log('mouseMove:',event.type,event);
     if (event.pageY === undefined) return;
     this.action='user-drag';
 
@@ -1033,13 +1043,19 @@ class EnhancedShutter extends LitElement
     this.positionText = this.computePositionText(pointedShutterPosition);
   };
 
-  mouseUp = (event) => {
-    //console_log('mouseUp:',event.type);
+  mouseUp = (event) =>
+  {
+    console_log('mouseUp:',event.type,event);
     if (event.pageY === undefined) return;
 
-    document.removeEventListener('pointermove', this.mouseMove);
+    this.removeEventListener('mousemove', this.mouseMove);
+    this.removeEventListener('touchmove', this.mouseMove);
+    this.removeEventListener('pointermove', this.mouseMove);
 
-    document.removeEventListener('pointerup', this.mouseUp);
+    this.removeEventListener('mouseup', this.mouseUp);
+    this.removeEventListener('touchend', this.mouseUp);
+    this.removeEventListener('pointerup', this.mouseUp);
+
 
     this.action='user-drag';
 
