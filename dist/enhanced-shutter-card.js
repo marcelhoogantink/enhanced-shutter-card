@@ -508,12 +508,9 @@ class EnhancedShutterCardNew extends LitElement{
               (currEntity) => {
                 let entityId = currEntity.entity ? currEntity.entity : currEntity;
 
-                //console.log('currentPosition old',this.localCfgs[entity].currentPosition());
                 this.localCfgs[entityId].setState(this.hass.states[entityId]);
-                //console.log('currentPosition new',this.localCfgs[entity].currentPosition());
 
-                return html
-                `
+                return html`
                   <enhanced-shutter
                     .isShutterConfigLoaded=${this.isShutterConfigLoaded}
                     .hass=${this.hass}
@@ -521,7 +518,8 @@ class EnhancedShutterCardNew extends LitElement{
                     .cfg=${this.localCfgs[entityId]}
                     .shutterState=${this.localCfgs[entityId].shutterState}
                   >
-                  </enhanced-shutter>`;
+                  </enhanced-shutter>
+                `;
               }
             )}
           </div>
@@ -1121,25 +1119,19 @@ class EnhancedShutter extends LitElement
     if (this.cfg.invertPercentage()) {
       visiblePosition = offset ? Math.min(100, Math.round(currentPosition / offset * 100 )) : currentPosition;
       positionText = this.positionPercentToText(visiblePosition);
-      //console.log(`PositionText1='${positionText}'`);
 
       if (visiblePosition == 100 && offset) {
         positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
       }
-      //console.log(`PositionText2='${positionText}'`);
 
     } else {
       visiblePosition = offset ? Math.max(0, Math.round((currentPosition - offset) / (100-offset) * 100 )) : currentPosition;
-      //console.log(`visiblePosition='${visiblePosition}'`);
       positionText = this.positionPercentToText(visiblePosition);
-      //console.log(`PositionText3='${positionText}'`);
 
       if (visiblePosition == 0 && offset) {
         positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
       }
-      //console.log(`PositionText4='${positionText}'`);
     }
-    //console.log(`PositionText='${positionText}'`);
     return positionText;
   }
   positionPercentToText(percent){
@@ -1484,7 +1476,7 @@ function formatDate(format) {
 }
 
 function console_log(...args){
-  console.log(formatDate("HH:mm:ss.SSS"),...args);
+  // console.log(formatDate("HH:mm:ss.SSS"),...args);
 
 }
 function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
