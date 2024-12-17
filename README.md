@@ -41,7 +41,7 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 
 | Name | Type | Required | Default | Description | Remarks |
 | - | - | - | - | - | - |
-| type | string | True | - | Must be "custom:shutter-card"
+| type | string | True | - | Must be "custom:enhanced-shutter-card"
 | title | string | False | - | Title of the card
 | passive_mode | boolean | no | false | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.| new in v1.1.0 |
 | image_map | string | No | /local/community/enhanced-shutter-card/images | map of the images
