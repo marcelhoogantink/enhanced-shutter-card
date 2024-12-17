@@ -115,11 +115,11 @@ const ESC_RESIZE_WIDTH_PCT  = 100;
 const ESC_TOP_OFFSET_PCT = 0;
 const ESC_BOTTOM_OFFSET_PCT = 0;
 const ESC_BUTTONS_POSITION = LEFT;
-const ESC_NAME_POSITION =TOP;
 const ESC_TITLE_POSITION = null;  // deprecated
+const ESC_NAME_POSITION =TOP;
 const ESC_NAME_DISABLED = false;
-const ESC_OPENING_POSITION = null;
-const ESC_OPENING_DISABLED = null;
+const ESC_OPENING_POSITION = TOP;
+const ESC_OPENING_DISABLED = false;
 const ESC_INVERT_PCT = false;
 const ESC_CAN_TILT = false;
 const ESC_PARTIAL_CLOSE_PCT = 0;
@@ -532,7 +532,11 @@ class EnhancedShutterCardNew extends LitElement{
   }
 
   static get styles() {
-    const CSS = `.${ESC_CLASS_SHUTTERS} { padding: 0px 16px 16px 16px; }`;
+    const CSS = `
+     .${ESC_CLASS_SHUTTERS} {
+      padding: 16px;
+     }
+    `;
     return css`${unsafeCSS(CSS)}`;
   }
 /*
@@ -759,14 +763,29 @@ setConfig(config)
   }
   static getStubConfig(hass, unusedEntities, allEntities) {
     //Search for a cover entity unused first then in all entities.
-    let entity = unusedEntities.find((eid) => eid.split(".")[0] === "cover");
+    let entity = unusedEntities.find((eid) => eid.split(".")[0] === "cover" );
     if (!entity) {
       entity = allEntities.find((eid) => eid.split(".")[0] === "cover");
     }
     return {
       "entities": [{
         "entity": entity,
-        "name": "My Enhanced Shutter"
+        "name": "My Enhanced Shuttter",
+        "button_up_hide_states": [
+          "open",
+          "opening",
+          "closing"
+        ],
+        "button_down_hide_states": [
+          "closed",
+          "opening",
+          "closing"
+        ],
+        "button_stop_hide_states": [
+          "open",
+          "closed",
+          "partial_open"
+        ]
       }]
     };
   }
@@ -840,10 +859,9 @@ class EnhancedShutter extends LitElement
 
 
         <div class="${ESC_CLASS_TOP}">
-
           <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
             @click="${() => this.doDetailOpen(entityId)}"
-            style="display: ${(this.cfg.namePosition() != TOP || this.cfg.nameDisabled()) ? 'none' : 'block'}">
+            style="display: ${this.cfg.displayName(TOP)}">
             ${this.cfg.friendlyName()}
             ${this.cfg.passiveMode() ? html`
               <span class="${ESC_CLASS_HA_ICON_LOCK}">
@@ -852,10 +870,11 @@ class EnhancedShutter extends LitElement
             `:''}
           </div>
           <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
-            style="display: ${(this.cfg.openingPosition() != TOP || this.cfg.openingDisabled()) ? 'none' : 'block'}">
+            style="display: ${this.cfg.displayOpening(TOP)}">
             <span>${positionText}</span>
           </div>
         </div>
+
         <div class="${ESC_CLASS_MIDDLE}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;">
           <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
               ${!this.cfg.disableStandardButtons() && !this.cfg.buttonUpHideStates().includes(this.cfg.movementState()) ? html`
@@ -951,10 +970,11 @@ class EnhancedShutter extends LitElement
             `
           :''}
         </div>
-        <div class="${ESC_CLASS_BOTTOM}">
 
-          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}" @click="${() => this.doDetailOpen(entityId)}"
-            style="display: ${(this.cfg.namePosition() != BOTTOM || this.cfg.nameDisabled()) ? 'none' : 'block'}">
+        <div class="${ESC_CLASS_BOTTOM}">
+          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
+            @click="${() => this.doDetailOpen(entityId)}"
+            style="display: ${this.cfg.displayName(BOTTOM)}">
             ${this.cfg.friendlyName()}
             ${this.cfg.passiveMode() ? html`
               <span class="${ESC_CLASS_HA_ICON_LOCK}">
@@ -963,10 +983,11 @@ class EnhancedShutter extends LitElement
             `:''}
           </div>
           <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
-            style="display: ${(this.cfg.openingPosition() != BOTTOM || this.cfg.openingDisabled()) ? 'none' : 'inline-block'}">
-            ${positionText}
+            style="display: ${this.cfg.displayOpening(BOTTOM)}">
+            <span>${positionText}</span>
           </div>
         </div>
+
       </div>
     `;
   }
@@ -1333,24 +1354,18 @@ class shutterCfg {
     return this.getCfg(CONFIG_NAME_POSITION,value);
   }
   openingDisabled(value = null){
-    let disabled;
-    if (!value && !this.getCfg(CONFIG_OPENING_DISABLED,value))
+    if (value !== null  && this.getCfg(CONFIG_OPENING_DISABLED,value) === null)
     {
-      disabled=this.getCfg(CONFIG_NAME_DISABLED,value);
-    }else{
-      disabled=this.getCfg(CONFIG_OPENING_DISABLED,value);
+      value = this.getCfg(CONFIG_NAME_DISABLED);
     }
-    return disabled;
+    return this.getCfg(CONFIG_OPENING_DISABLED,value);
   }
   openingPosition(value = null){
-    let position;
-    if (!value && !this.getCfg(CONFIG_OPENING_POSITION,value))
+    if (value !== null  && this.getCfg(CONFIG_OPENING_POSITION,value) === null)
     {
-      position=this.getCfg(CONFIG_NAME_POSITION,value);
-    }else{
-      position=this.getCfg(CONFIG_OPENING_POSITION,value);
+      value = this.getCfg(CONFIG_NAME_POSITION);
     }
-    return position;
+    return this.getCfg(CONFIG_OPENING_POSITION,value);
   }
   alwaysPercentage(value = null){
     return this.getCfg(CONFIG_ALWAYS_PCT,value);
@@ -1402,7 +1417,17 @@ class shutterCfg {
     }
     return downDisabled;
   }
-  defButtonPosition(config) {
+
+  displayName(position){
+      let display =(this.namePosition() != position || this.nameDisabled()) ? 'none' : 'block';
+      return display;
+  }
+  displayOpening(position){
+    let display =(this.openingPosition() != position || this.openingDisabled()) ? 'none' : 'block';
+
+    return display;
+}
+defButtonPosition(config) {
     let buttonsPosition = config[CONFIG_BUTTONS_POSITION];
     buttonsPosition
       = (buttonsPosition && POSITIONS.includes(buttonsPosition.toLowerCase()))
