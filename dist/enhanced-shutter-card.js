@@ -375,17 +375,19 @@ class EnhancedShutterCardNew extends LitElement{
 
   #getAllImages(){
     this.allImages={};
+    let base_image_map = this.config[CONFIG_IMAGE_MAP] || ESC_IMAGE_MAP;
+
     IMAGE_TYPES.forEach((image_type) =>
     {
       let images={};
-      let base_image_map = this.config[CONFIG_IMAGE_MAP] || ESC_IMAGE_MAP;
-      let base_image = this.config[image_type] ? defImagePath(base_image_map,this.config[image_type]) : `${ESC_IMAGE_MAP}/${CONFIG_DEFAULT[image_type]}`;
+
+      let base_image = this.config[image_type] ? defImagePathOrColor(base_image_map,this.config[image_type],image_type) : `${ESC_IMAGE_MAP}/${CONFIG_DEFAULT[image_type]}`;
       this.config.entities.forEach((entity) =>
       {
         let image_map = entity.image_map || base_image_map;
         let entityId = entity.entity ? entity.entity : entity;
 
-        let image = entity[image_type] ? defImagePath(image_map,entity[image_type]) : base_image;
+        let image = entity[image_type] ? defImagePathOrColor(image_map,entity[image_type],image_type) : base_image;
         let src = image || `${ESC_IMAGE_MAP}/${CONFIG_DEFAULT[image_type]}`;
         images[entityId]={entityId,src};
 
@@ -929,7 +931,10 @@ class EnhancedShutter extends LitElement
               style="
                 width: ${this.cfg.windowWidthPx()}${UNITY};
                 height: ${this.cfg.windowHeightPx()}${UNITY};
-                background-image: url(${this.cfg.viewImage()});
+                ${this.cfg.viewImage().includes('.')
+                ? `background-image: url(${this.cfg.viewImage()}`
+                : `background-color:${this.cfg.viewImage()}`
+                }
               ">
               <img src= "${this.cfg.windowImage() } ">
               <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${screenPosition}${UNITY}; background-image: url(${this.cfg.shutterSlatImage()});">
@@ -1457,9 +1462,17 @@ defButtonPosition(config) {
 function boundary(value,min=0,max=100){
   return Math.max(min,Math.min(max,value));
 }
-function defImagePath(image_map,image)
+function defImagePathOrColor(image_map,image,image_type)
 {
- return (image.includes('/') ? image : `${image_map}/${image}`);
+  let result;
+  if (image_type== CONFIG_VIEW_IMAGE && !image.includes('.')){
+    // is Color
+    result=image;
+  }else{
+    // is URL
+    result =(image.includes('/') ? image : `${image_map}/${image}`);
+  }
+  return result;
 }
 
 function formatDate(format) {

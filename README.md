@@ -34,6 +34,7 @@ These are the avialable background views:
 These images can be combined like in the example above. For (optinal) defintion of the location of the images, a setting 'image_map" does exits.
 The default map-setting can be found in the Configuration-info below.
 It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is considerd to include a full path.
+And last but not least, the `view_image` -setting also accepts HTML-color definitions like `red`, `green`, `_#AAFFEE` or `rgb(255,255,0)` in stead of an image-filename. (The `#` input needs quotes around it in YAML)
 
 ## Configuration
 
@@ -46,7 +47,7 @@ It is also possible to enter a full path in the imagename itself. When a '/' is 
 | passive_mode | boolean | no | false | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.| new in v1.1.0 |
 | image_map | string | No | /local/community/enhanced-shutter-card/images | map of the images
 | window_image | string | No | esc-window.png | image of the window/shutter
-| view_image | string | No | esc-back-view.png | background-image trough the window.
+| view_image | string | No | esc-back-view.png | background-image through the window, or a HTML color.
 | shutter_slat_image | string | No | esc-shutter-slat.png | Image of one slat of the shutter.
 | shutter_bottom_image | string | No | esc-shutter-bottom.png | the bottom bar of the shutter.
 | base_height_px | int | No | 150 | height of image in pixels
