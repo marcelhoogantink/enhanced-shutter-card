@@ -575,17 +575,22 @@ setConfig(config)
 
     // HA basic szies for calculations:
 
-    let haCardPadding= 14; // 1rem
-    let haCardTitleFontHeight= 24;
-    let haTitleHeightPx = 76;
-    let haTitleFont = 'Roboto, Noto, sans-serif';
+    const haCardPadding= 14; // 1rem
+    const haCardTitleFontHeight= 24;
+    const haTitleHeightPx = 76;
+    const haTitleFont = 'Roboto, Noto, sans-serif';
 
-    let haButtonSize= 48;
+    const haButtonSize= 48;
 
-    let haGridPxHeight =65;
-    let haGridPxWidthMin  =27;
-    let haGridPxWidthMax  =40;
-    let shutterTitleHeight = 20;
+    const haGridPxHeight =56;
+    const haGridPxHeightGap = 8;
+
+    const haGridPxWidthMin  =19; // 19
+    const haGridPxWidthMean =26; // 26
+    const haGridPxWidthMax  =32; // 32
+    const haGridPxWidthGap  = 8;
+
+    const shutterTitleHeight = 20;
 
     /**
      * load config is needed.
@@ -600,14 +605,14 @@ setConfig(config)
     let totalWidthPx =0;
 
     if (this.config && this.config.entities && this.isShutterConfigLoaded) {
-
+      let titleSize;
       if (this.config.title){
         // TODO: Add Card title to globalCfg
-        let titleSize= getTextSize(this.config.title,haTitleFont,haCardTitleFontHeight);
+        titleSize= getTextSize(this.config.title,haTitleFont,haCardTitleFontHeight);
         totalHeightPx += haTitleHeightPx; // TODO
         totalWidthPx  += titleSize.width;
       }
-      //console_log('Start size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+      console_log('Start size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx,titleSize);
       Object.keys(this.localCfgs).forEach(key =>{
 
         let localHeightPx=0;
@@ -622,31 +627,31 @@ setConfig(config)
           let partWidthPx = titleSize.width;
           localHeightPx += partHeightPx;
           localWidthPx = Math.max(totalWidthPx,partWidthPx);
-          //console_log('part size B*H',partWidthPx,partHeightPx,'after title');
-          //console_log('size B*H',localWidthPx,localHeightPx);
+          console_log('part size B*H',partWidthPx,partHeightPx,'after title',titleSize);
+          console_log('size B*H',localWidthPx,localHeightPx);
         }
         /*
         * Size shutter opening row
         */
         if (!cfg.openingDisabled()){
-          let pctSize = getTextSize(cfg.currentPosition()+' %',haTitleFont,14);
+          let pctSize = getTextSize(cfg.computePositionText(),haTitleFont,14);
           let partHeightPx = 20;
           let partWidthPx = pctSize.width;
           localHeightPx += partHeightPx;
           localWidthPx = Math.max(totalWidthPx,partWidthPx);
-          //console_log('part size B*H',partWidthPx,partHeightPx,'after open%');
-          //console_log('size B*H',localWidthPx,localHeightPx);
+          console_log('part size B*H',partWidthPx,partHeightPx,'after open%',pctSize);
+          console_log('size B*H',localWidthPx,localHeightPx);
         }
         /*
         * padding top and bottom rows
         */
         let partHeightPx = 32;
         localHeightPx += partHeightPx;
-        //console_log('part size H',partHeightPx,'after including padding');
-        //console_log('size H',localHeightPx);
+        console_log('part size H',partHeightPx,'after including padding');
+        console_log('size B*H',localWidthPx,localHeightPx);
 
         //totalHeightPx+=localHeightPx;
-        //console_log('size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+        console_log('size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
         /*
         * size image
         */
@@ -654,8 +659,8 @@ setConfig(config)
         let partWidthPx = cfg.windowWidthPx();
         let localHeight2Px = partHeightPx;
         let localWidth2Px  = partWidthPx;
-        //console_log('part size B*H',partWidthPx,partHeightPx,'after image');
-        //console_log('size B*H',localWidth2Px,localHeight2Px);
+        console_log('part size B*H',partWidthPx,partHeightPx,'after image');
+        console_log('size B2*H2',localWidth2Px,localHeight2Px);
 
         if (cfg.buttonsInRow()){
           //console_log('Buttons Naast shutter');
@@ -667,8 +672,8 @@ setConfig(config)
             let partWidthPx = haButtonSize;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px+=partWidthPx;
-            //console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
-            //console_log('size B*H',localWidth2Px,localHeight2Px);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
+            console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
 
           /*
@@ -679,8 +684,8 @@ setConfig(config)
             let partWidthPx = haButtonSize;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px += partWidthPx;
-          //  console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
-          //  console_log('size B*H',localWidth2Px,localHeight2Px,);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
+            console_log('size B2*H2',localWidth2Px,localHeight2Px,);
           }
 
           /*
@@ -691,8 +696,8 @@ setConfig(config)
             let partWidthPx = haButtonSize*2;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px+=partWidthPx;
-            //console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
-            //console_log('size B*H',localWidth2Px,localHeight2Px);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
+            console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
 
 
@@ -706,8 +711,8 @@ setConfig(config)
             let partWidthPx = haButtonSize*3 ;
             localHeight2Px += partHeightPx;
             localWidth2Px=Math.max(localWidth2Px,partWidthPx);
-            //console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
-            //console_log('size B*H',localWidth2Px,localHeight2Px);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
+            console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
           /*
           * size tilt-buttons
@@ -717,8 +722,8 @@ setConfig(config)
             let partWidthPx = haButtonSize*2;
             localHeight2Px += partHeightPx;
             localWidth2Px = Math.max(localWidth2Px,partWidthPx);
-            //console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
-            //console_log('size B*H',localWidth2Px,localHeight2Px);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
+            console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
 
 
@@ -730,32 +735,40 @@ setConfig(config)
             let partWidthPx =  haButtonSize*3;
             localHeight2Px += partHeightPx;
             localWidth2Px=Math.max(localWidth2Px,partWidthPx);
-            //console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
-            //console_log('size B*H',localWidth2Px,localHeight2Px);
+            console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
+            console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
 
         }
         //localHeightPx+=haCardPadding*2;
         localWidthPx  = Math.max(localWidthPx,localWidth2Px);
         localHeightPx += localHeight2Px;
-        //console_log(`Endsize ${key} B*H`,localWidthPx,localHeightPx);
+        localHeightPx += 16; // include bottom padding
+        console_log(`Endsize ${key} B*H`,localWidthPx,localHeightPx);
 
         totalWidthPx  = Math.max(totalWidthPx,localWidthPx);
         totalHeightPx += localHeightPx;
       });
+      console_log('Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
       totalHeightPx += 16; // include bottom padding
-      //console_log('Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+      totalWidthPx += 32;
+      console_log('Add padding Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
     }
-    let nbRows= Math.ceil(totalHeightPx/haGridPxHeight);
-    let nbColsMin= Math.ceil(totalWidthPx/haGridPxWidthMax);
-    let nbColsMax= Math.ceil(totalWidthPx/haGridPxWidthMin);
+    let nbRows= Math.ceil((totalHeightPx+haGridPxHeightGap)/(haGridPxHeight+haGridPxHeightGap));
+    let nbRows2 = ((totalHeightPx+haGridPxHeightGap)/(haGridPxHeight+haGridPxHeightGap));
+    let nbColsMin= Math.ceil((totalWidthPx+haGridPxWidthGap)/(haGridPxWidthMax+haGridPxWidthGap));
+    let nbColsMean= Math.ceil((totalWidthPx+haGridPxWidthGap)/(haGridPxWidthMean+haGridPxWidthGap));
+    let nbColsMax= Math.ceil((totalWidthPx+haGridPxWidthGap)/(haGridPxWidthMin+haGridPxWidthGap));
+    //let nbRows= Math.ceil(totalHeightPx/haGridPxHeight);
+    //let nbColsMin= Math.ceil(totalWidthPx/haGridPxWidthMax);
+    //let nbColsMax= Math.ceil(totalWidthPx/haGridPxWidthMin);
 
-    //console_log("size Card getGridOptions total Section sizing computed. nbRows : " + nbRows + " nbColsMax : " + nbColsMax);
-    //console_log('Card getGridOptions ready');
+    console_log(`size Card getGridOptions totalHeightPx:`,totalHeightPx,'totalWidthPx',totalWidthPx, " ==> nbRows : " + nbRows +'/' + nbRows2 + " nbColsMin : " + nbColsMin + " nbColsMean : " + nbColsMean+ " nbColsMax : " + nbColsMax);
+    console_log('Card getGridOptions ready');
     return {
       rows: nbRows,
-      min_rows: nbRows-1,
-      max_rows: nbRows+1,
+      min_rows: nbRows,
+      max_rows: nbRows,
       columns: nbColsMax,
       min_columns: nbColsMin,
       max_columns: nbColsMax,
@@ -849,7 +862,7 @@ class EnhancedShutter extends LitElement
       positionText =  this.positionText;
       screenPosition = this.screenPosition
     }else{
-      positionText =  this.computePositionText();
+      positionText =  this.cfg.computePositionText();
       screenPosition =  this.cfg.defScreenPositionFromPercent();
     }
 
@@ -1064,7 +1077,7 @@ class EnhancedShutter extends LitElement
     this.screenPosition = this.getScreenPosition(event.pageY); // triggers refresh
     let pointedShutterPosition = this.getShutterPosition(this.screenPosition);
 
-    this.positionText = this.computePositionText(pointedShutterPosition);
+    this.positionText = this.cfg.computePositionText(pointedShutterPosition);
   };
 
   mouseUp = (event) =>
@@ -1114,54 +1127,6 @@ class EnhancedShutter extends LitElement
   {
     this.callHassCoverService(entityId,SERVICE_SHUTTER_PARTIAL, { position: position });
   }
-  computePositionText(currentPosition =this.cfg.currentPosition()) {
-
-    let offset = this.cfg.offset()
-
-    let visiblePosition;
-    let positionText;
-
-    if (this.cfg.invertPercentage()) {
-      visiblePosition = offset ? Math.min(100, Math.round(currentPosition / offset * 100 )) : currentPosition;
-      positionText = this.positionPercentToText(visiblePosition);
-
-      if (visiblePosition == 100 && offset) {
-        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
-      }
-
-    } else {
-      visiblePosition = offset ? Math.max(0, Math.round((currentPosition - offset) / (100-offset) * 100 )) : currentPosition;
-      positionText = this.positionPercentToText(visiblePosition);
-
-      if (visiblePosition == 0 && offset) {
-        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
-      }
-    }
-    return positionText;
-  }
-  positionPercentToText(percent){
-    let text='';
-    if (typeof percent === 'number') {
-      if (this.cfg.alwaysPercentage()) {
-        text = percent + '%';
-      }else{
-        if (percent == 100 || !percent) {
-          if (this.cfg.invertPercentage()) percent = 100-percent;
-          if (percent == 100 ) {
-            text = this.hass.localize('component.cover.entity_component._.state.open');
-          } else if (!percent) {
-            text = this.hass.localize('component.cover.entity_component._.state.closed');
-          }
-        } else{
-          text = percent + '%';
-        }
-      }
-    } else {
-      text = this.hass.localize('state.default.unavailable');
-    }
-    return text;
-  }
-
 
   static get styles() {
     return css`${unsafeCSS(SHUTTER_CSS)}
@@ -1190,12 +1155,14 @@ class shutterCfg {
 
   #cfg={};
   #hassStateInfo={};
+  #hass={};
 
   constructor(hass,config,allImages,imageDimension=null)
   {
     this.shutterState = 'None';
     let entityId = this.entityId(config[CONFIG_ENTITY_ID] ? config[CONFIG_ENTITY_ID] : config);
 
+      this.setHass(hass);
       this.setState(hass.states[entityId]);
       this.friendlyName(config[CONFIG_NAME] ? config[CONFIG_NAME] : this.stateAttributes() ? this.stateAttributes().friendly_name : 'Unkown');
       this.invertPercentage(config[CONFIG_INVERT_PCT]);
@@ -1256,6 +1223,12 @@ class shutterCfg {
   }
   stateAttributes(){
     return (this.#state() && this.#state().attributes);
+  }
+  setHass(value){
+    this.#hass=value;
+  }
+  getHass(){
+    return this.#hass;
   }
   setState(value){
     return this.#state(value);
@@ -1447,6 +1420,54 @@ defButtonPosition(config) {
     return position;
 
   }
+  positionPercentToText(percent){
+    let text='';
+    if (typeof percent === 'number') {
+      if (this.alwaysPercentage()) {
+        text = percent + '%';
+      }else{
+        if (percent == 100 || !percent) {
+          if (this.invertPercentage()) percent = 100-percent;
+          if (percent == 100 ) {
+            text = this.#hass.localize('component.cover.entity_component._.state.open');
+          } else if (!percent) {
+            text = this.#hass.localize('component.cover.entity_component._.state.closed');
+          }
+        } else{
+          text = percent + '%';
+        }
+      }
+    } else {
+      text = this.#hass.localize('state.default.unavailable');
+    }
+    return text;
+  }
+  computePositionText(currentPosition =this.currentPosition()) {
+
+    let offset = this.offset()
+
+    let visiblePosition;
+    let positionText;
+
+    if (this.invertPercentage()) {
+      visiblePosition = offset ? Math.min(100, Math.round(currentPosition / offset * 100 )) : currentPosition;
+      positionText = this.positionPercentToText(visiblePosition);
+
+      if (visiblePosition == 100 && offset) {
+        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+      }
+
+    } else {
+      visiblePosition = offset ? Math.max(0, Math.round((currentPosition - offset) / (100-offset) * 100 )) : currentPosition;
+      positionText = this.positionPercentToText(visiblePosition);
+
+      if (visiblePosition == 0 && offset) {
+        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+      }
+    }
+    return positionText;
+  }
+
   coverHeightPx(){
     return this.windowHeightPx()-this.bottomOffsetPct() - this.topOffsetPct();
   }
@@ -1489,7 +1510,7 @@ function formatDate(format) {
 }
 
 function console_log(...args){
-  // console.log(formatDate("HH:mm:ss.SSS"),...args);
+ //console.log(formatDate("HH:mm:ss.SSS"),...args);
 
 }
 function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
@@ -1508,6 +1529,6 @@ function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
   //console_log("Text data:",text,data);
   //console_log("Text fontHeightData actualHeight:",fontHeightData,actualHeight);
   //console_log("Text sizes w*h:",text,width,height);
-  return {width,height};
+  return {width,height,text,data};
 
 }
