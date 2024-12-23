@@ -6,7 +6,7 @@ import {
 }
 from "https://unpkg.com/lit-element@3.0.1/lit-element.js?module";
 
-const VERSION = 'v1.1.0b0';
+const VERSION = 'v1.1.1';
 const HA_CARD_NAME = "enhanced-shutter-card";
 const HA_SHUTTER_NAME = `enhanced-shutter`;
 
@@ -784,6 +784,7 @@ setConfig(config)
       "entities": [{
         "entity": entity,
         "name": "My Enhanced Shuttter",
+        "top_offset_pct": 13,
         "button_up_hide_states": [
           "open",
           "opening",
@@ -1133,24 +1134,6 @@ class EnhancedShutter extends LitElement
     `
   }
 }
-customElements.define(HA_CARD_NAME, EnhancedShutterCardNew);
-customElements.define(HA_SHUTTER_NAME, EnhancedShutter);
-
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "enhanced-shutter-card",
-  name: "Enhanced Shutter Card",
-  preview: true,
-  description: "A shutter card for easy control of shutters",
-  documentationURL: "https://github.com/marcelhoogantink/enhanced-shutter-card"
-});
-
-
-console.info(
-  '%c ENHANCED-SHUTTER-CARD ',
-  'color: white; background: green; font-weight: 700',
-);
-//###########################################
 class shutterCfg {
 
   #cfg={};
@@ -1532,3 +1515,25 @@ function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
   return {width,height,text,data};
 
 }
+
+/**
+ * Main code
+ */
+customElements.define(HA_CARD_NAME, EnhancedShutterCardNew);
+customElements.define(HA_SHUTTER_NAME, EnhancedShutter);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "enhanced-shutter-card",
+  name: "Enhanced Shutter Card",
+  preview: true,
+  description: "A shutter card for easy control of shutters",
+  documentationURL: "https://github.com/marcelhoogantink/enhanced-shutter-card"
+});
+
+console.info(
+  `%c ENHANCED-SHUTTER-CARD %c Version ${VERSION}`,
+  'color: white; background: green; font-weight: 700',
+  'color: black;background: white; font-weight: bold'
+);
+//###########################################
