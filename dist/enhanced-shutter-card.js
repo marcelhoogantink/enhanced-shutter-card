@@ -580,7 +580,7 @@ setConfig(config)
     const haTitleHeightPx = 76;
     const haTitleFont = 'Roboto, Noto, sans-serif';
 
-    const haButtonSize= 48;
+    const haButtonSize = 48;
 
     const haGridPxHeight =56;
     const haGridPxHeightGap = 8;
