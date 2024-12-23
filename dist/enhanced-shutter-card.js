@@ -1396,8 +1396,8 @@ class shutterCfg {
     let display =(this.openingPosition() != position || this.openingDisabled()) ? 'none' : 'block';
 
     return display;
-}
-defButtonPosition(config) {
+  }
+  defButtonPosition(config) {
     let buttonsPosition = config[CONFIG_BUTTONS_POSITION];
     buttonsPosition
       = (buttonsPosition && POSITIONS.includes(buttonsPosition.toLowerCase()))
