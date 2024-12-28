@@ -6,7 +6,7 @@ import {
 }
 from "https://unpkg.com/lit-element@3.0.1/lit-element.js?module";
 
-const VERSION = 'v1.1.1';
+const VERSION = 'v1.1.2b0';
 const HA_CARD_NAME = "enhanced-shutter-card";
 const HA_SHUTTER_NAME = `enhanced-shutter`;
 
@@ -198,10 +198,10 @@ const SHUTTER_CSS =`
         margin: auto;
       }
       .${ESC_CLASS_BUTTONS} {
+        display: flex;
         flex: 1;
         justify-content: center;
         align-items: center;
-        display: flex;
         max-width: 100%;
       }
       .${ESC_CLASS_BUTTONS_TOP} {
@@ -554,6 +554,9 @@ setConfig(config)
     return this.config.entities.length + 1;
   }
 
+  getLayoutOptions(){
+    const test=0;
+  };
   //Section layout : we compute the size of the card. (experimental)
   getGridOptions(){
     // from https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view
@@ -890,8 +893,14 @@ class EnhancedShutter extends LitElement
         </div>
 
         <div class="${ESC_CLASS_MIDDLE}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;">
-          <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
-              ${!this.cfg.disableStandardButtons() && !this.cfg.buttonUpHideStates().includes(this.cfg.movementState()) ? html`
+          <div
+            class="${ESC_CLASS_BUTTONS}"
+              style="
+              flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;
+              flex: none;
+              ${this.cfg.disableStandardButtons()?'display: none':''};
+            ">
+              ${!this.cfg.buttonUpHideStates().includes(this.cfg.movementState()) ? html`
                 <ha-icon-button
                   label="${this.hass.localize('ui.card.cover.open_cover')}"
                   .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()}
@@ -902,7 +911,7 @@ class EnhancedShutter extends LitElement
                   </ha-icon>
                 </ha-icon-button>
               ` : ''}
-              ${!this.cfg.disableStandardButtons() && !this.cfg.buttonStopHideStates().includes(this.cfg.movementState())? html`
+              ${!this.cfg.buttonStopHideStates().includes(this.cfg.movementState())? html`
                 <ha-icon-button
                   label="${this.hass.localize('ui.card.cover.stop_cover')}"
                   .disabled=${this.cfg.disabledGlobaly()}
@@ -913,7 +922,7 @@ class EnhancedShutter extends LitElement
                   </ha-icon>
                 </ha-icon-button>
               ` : ''}
-              ${!this.cfg.disableStandardButtons() && !this.cfg.buttonDownHideStates().includes(this.cfg.movementState())? html`
+              ${!this.cfg.buttonDownHideStates().includes(this.cfg.movementState())? html`
                 <ha-icon-button
                   label="${this.hass.localize('ui.card.cover.close_cover')}"
                   .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()}
@@ -925,7 +934,13 @@ class EnhancedShutter extends LitElement
                 </ha-icon-button>
               ` : ''}
           </div>
-          <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
+          <div
+            class="${ESC_CLASS_BUTTONS}"
+            style="
+              flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;
+              flex: none;
+              ${this.cfg.partial() || this.cfg.canTilt()?'':'display: none'};
+            ">
             ${this.cfg.partial()  /* TODO localize texts */
               ? html`
                   <ha-icon-button label="Partially close (${100-this.cfg.partial()}% closed)"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, this.cfg.partial() )}" >
@@ -940,14 +955,18 @@ class EnhancedShutter extends LitElement
                     <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-bottom-left"></ha-icon>
                 </ha-icon-button>` : ''}
           </div>
-          <div class="${ESC_CLASS_SELECTOR}">
+          <div
+            class="${ESC_CLASS_SELECTOR}";
+            style="
+              flex: 0 1 ${this.cfg.windowWidthPx()}${UNITY};
+            ">
             <div class="${ESC_CLASS_SELECTOR_PICTURE}"
               style="
-                width: ${this.cfg.windowWidthPx()}${UNITY};
+                width: 100%;
                 height: ${this.cfg.windowHeightPx()}${UNITY};
                 ${this.cfg.viewImage().includes('.')
-                ? `background-image: url(${this.cfg.viewImage()}`
-                : `background-color:${this.cfg.viewImage()}`
+                  ? `background-image: url(${this.cfg.viewImage()}`
+                  : `background-color:${this.cfg.viewImage()}`
                 }
               ">
               <img src= "${this.cfg.windowImage() } ">
@@ -1461,7 +1480,9 @@ class shutterCfg {
     return this.windowHeightPx()-this.bottomOffsetPct();
   }
 }
-//####################################
+/**
+ * global functions
+ */
 
 function boundary(value,min=0,max=100){
   return Math.max(min,Math.min(max,value));
@@ -1479,23 +1500,6 @@ function defImagePathOrColor(image_map,image,image_type)
   return result;
 }
 
-function formatDate(format) {
-  const now = new Date();
-  const pad = (num, length) => num.toString().padStart(length, '0');
-
-  return format.replace(/YYYY/g, now.getFullYear())
-               .replace(/MM/g, pad(now.getMonth() + 1, 2))
-               .replace(/DD/g, pad(now.getDate(), 2))
-               .replace(/HH/g, pad(now.getHours(), 2))
-               .replace(/mm/g, pad(now.getMinutes(), 2))
-               .replace(/ss/g, pad(now.getSeconds(), 2))
-               .replace(/SSS/g, pad(now.getMilliseconds(), 3));
-}
-
-function console_log(...args){
- //console.log(formatDate("HH:mm:ss.SSS"),...args);
-
-}
 function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
   // Create a temporary canvas element
   const canvas = document.createElement('canvas');
@@ -1536,4 +1540,24 @@ console.info(
   'color: white; background: green; font-weight: 700',
   'color: black;background: white; font-weight: bold'
 );
-//###########################################
+/**
+ * test functions
+ */
+function formatDate(format) {
+  const now = new Date();
+  const pad = (num, length) => num.toString().padStart(length, '0');
+
+  return format.replace(/YYYY/g, now.getFullYear())
+               .replace(/MM/g, pad(now.getMonth() + 1, 2))
+               .replace(/DD/g, pad(now.getDate(), 2))
+               .replace(/HH/g, pad(now.getHours(), 2))
+               .replace(/mm/g, pad(now.getMinutes(), 2))
+               .replace(/ss/g, pad(now.getSeconds(), 2))
+               .replace(/SSS/g, pad(now.getMilliseconds(), 3));
+}
+
+function console_log(...args){
+  if (VERSION.indexOf('b')>0){
+    console.log(formatDate("HH:mm:ss.SSS"),...args);
+  }
+}
