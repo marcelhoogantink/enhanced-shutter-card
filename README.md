@@ -53,7 +53,7 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | base_height_px | int | No | 150 | height of image in pixels
 | base_width_px | int | No | 150 | witdh of image in pixels
 | resize_height_pct | int | No | 100 | rezise of the base height in percent
-| resise_width_pct | int | No | 100 | rezise of the base width in percent
+| resize_width_pct | int | No | 100 | rezise of the base width in percent
 | top_offset_pct | int | No | 0 | space between top image/window and top shutter
 | bottom_offset_pct | int | No | 0 | space between bottom image/window and bottom shutter
 | buttons_position | string | No | `left` | Set buttons on `left`, `right`, `top` or `bottom` of the shutter
@@ -70,9 +70,9 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | disable_end_buttons | boolean | No | `false` | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button
 | disable_standard_buttons | boolean | No | false | Show or hide the default up, down and stop buttons | new in v1.1.0 |
 | disable_partial_open_buttons | boolean | No | true | Show or hide the partail open buttons. | new in v1.1.0 |
-| button_up_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
-| button_stop_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
-| button_down_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `close`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
+| button_up_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
+| button_stop_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
+| button_down_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
 
 ### Entities
 
@@ -89,7 +89,7 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | base_height_px | int | No | global item setting, see under _General_ | see under _General_
 | base_width_px | int | No | global item setting, see under _General_ | see under _General_
 | resize_height_pct | int | No | global item setting, see under _General_ | see under _General_
-| resise_width_pct | int | No | global item setting, see under _General_ | see under _General_
+| resize_width_pct | int | No | global item setting, see under _General_ | see under _General_
 | top_offset_pct | int | No | global item setting, see under _General_ | see under _General_
 | bottom_offset_pct | int | No | global item setting, see under _General_ | see under _General_
 | buttons_position | string | No | global item setting, see under _General_ | see under _General_
