@@ -6,15 +6,24 @@ import {
 }
 from "https://unpkg.com/lit-element@3.0.1/lit-element.js?module";
 
-const VERSION = 'v1.1.2b0';
+const VERSION = 'v1.1.2';
 const HA_CARD_NAME = "enhanced-shutter-card";
 const HA_SHUTTER_NAME = `enhanced-shutter`;
+const HA_HUI_VIEW = 'hui-view';
 
+const AUTO = 'auto';
 const LEFT = 'left';
 const RIGHT = 'right';
 const BOTTOM = 'bottom';
 const TOP = 'top';
 const NONE = 'none';
+const AUTO_TL = `${AUTO}-${TOP}-${LEFT}`;
+const AUTO_TR = `${AUTO}-${TOP}-${RIGHT}`;
+const AUTO_BL = `${AUTO}-${BOTTOM}-${LEFT}`;
+const AUTO_BR = `${AUTO}-${BOTTOM}-${RIGHT}`;
+
+const PORTRAIT ="P";
+const LANDSCAPE ="L";
 
 const SHUTTER_STATE_OPEN = 'open';
 const SHUTTER_STATE_CLOSED = 'closed';
@@ -23,6 +32,8 @@ const SHUTTER_STATE_CLOSING = 'closing';
 const SHUTTER_STATE_PARTIAL_OPEN = 'partial_open'; // speudo state
 
 const ESC_CLASS_BASE_NAME = 'esc-shutter';
+
+const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}`;
 const ESC_CLASS_SHUTTERS = `${ESC_CLASS_BASE_NAME}s`;
 const ESC_CLASS_TOP = `${ESC_CLASS_BASE_NAME}-${TOP}`;
 const ESC_CLASS_MIDDLE = `${ESC_CLASS_BASE_NAME}-middle`;
@@ -48,7 +59,7 @@ const ESC_CLASS_MOVEMENT_CLOSE = `${ESC_CLASS_BASE_NAME}-movement-close`;
 const ESC_CLASS_HA_ICON = `${ESC_CLASS_BASE_NAME}-ha-icon`;
 const ESC_CLASS_HA_ICON_LOCK = `${ESC_CLASS_HA_ICON}-lock`;
 
-const POSITIONS =[LEFT,RIGHT,TOP,BOTTOM,NONE];
+const POSITIONS =[AUTO,AUTO_BL,AUTO_BR,AUTO_TL,AUTO_TR,LEFT,RIGHT,TOP,BOTTOM,NONE];
 
 const SERVICE_SHUTTER_UP = 'open_cover';
 const SERVICE_SHUTTER_DOWN = 'close_cover';
@@ -75,6 +86,8 @@ const CONFIG_BASE_HEIGHT_PX = 'base_height_px';
 const CONFIG_BASE_WIDTH_PX = 'base_width_px';
 const CONFIG_RESIZE_HEIGHT_PCT = 'resize_height_pct';
 const CONFIG_RESIZE_WIDTH_PCT = 'resize_width_pct';
+
+const CONFIG_SCALE_BUTTONS = 'scale_buttons';
 const CONFIG_TOP_OFFSET_PCT = 'top_offset_pct';
 const CONFIG_BOTTOM_OFFSET_PCT = 'bottom_offset_pct';
 const CONFIG_BUTTONS_POSITION = 'buttons_position';
@@ -83,6 +96,8 @@ const CONFIG_NAME_POSITION = 'name_position';
 const CONFIG_NAME_DISABLED = 'name_disabled';
 const CONFIG_OPENING_POSITION = 'opening_position';
 const CONFIG_OPENING_DISABLED = 'opening_disabled';
+const CONFIG_INLINE_HEADER = 'inline_header';
+
 const CONFIG_INVERT_PCT = 'invert_percentage';
 const CONFIG_CAN_TILT = 'can_tilt';
 const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
@@ -112,6 +127,7 @@ const ESC_BASE_WIDTH_PX = 150;  // image-width
 const ESC_RESIZE_HEIGHT_PCT = 100;
 const ESC_RESIZE_WIDTH_PCT  = 100;
 
+const ESC_SCALE_BUTTONS = false;
 const ESC_TOP_OFFSET_PCT = 0;
 const ESC_BOTTOM_OFFSET_PCT = 0;
 const ESC_BUTTONS_POSITION = LEFT;
@@ -120,6 +136,7 @@ const ESC_NAME_POSITION =TOP;
 const ESC_NAME_DISABLED = false;
 const ESC_OPENING_POSITION = TOP;
 const ESC_OPENING_DISABLED = false;
+const ESC_INLINE_HEADER = false;
 const ESC_INVERT_PCT = false;
 const ESC_CAN_TILT = false;
 const ESC_PARTIAL_CLOSE_PCT = 0;
@@ -154,6 +171,8 @@ const CONFIG_DEFAULT ={
   [CONFIG_BASE_WIDTH_PX]: ESC_BASE_WIDTH_PX,
   [CONFIG_RESIZE_HEIGHT_PCT]: ESC_RESIZE_HEIGHT_PCT,
   [CONFIG_RESIZE_WIDTH_PCT]: ESC_RESIZE_WIDTH_PCT,
+
+  [CONFIG_SCALE_BUTTONS]: ESC_SCALE_BUTTONS,
   [CONFIG_TOP_OFFSET_PCT]: ESC_TOP_OFFSET_PCT,
   [CONFIG_BOTTOM_OFFSET_PCT]: ESC_BOTTOM_OFFSET_PCT,
   [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
@@ -162,6 +181,8 @@ const CONFIG_DEFAULT ={
   [CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,
   [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION,
   [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,
+  [CONFIG_INLINE_HEADER]: ESC_INLINE_HEADER,
+
   [CONFIG_INVERT_PCT]: ESC_INVERT_PCT,
   [CONFIG_CAN_TILT]: ESC_CAN_TILT,
   [CONFIG_PARTIAL_CLOSE_PCT]: ESC_PARTIAL_CLOSE_PCT,
@@ -181,25 +202,29 @@ const CONFIG_DEFAULT ={
 };
 const IMAGE_TYPES = [CONFIG_WINDOW_IMAGE,CONFIG_VIEW_IMAGE,CONFIG_SHUTTER_SLAT_IMAGE,CONFIG_SHUTTER_BOTTOM_IMAGE];
 const SHUTTER_CSS =`
+
       .${ESC_CLASS_BUTTON} {
         height: 36px;
         width: 36px;
       }
-      .${ESC_CLASS_BASE_NAME} {
+      .${ESC_CLASS_SHUTTER} {
         overflow: visible;
+        --mdc-icon-button-size: 48px;
+        --mdc-icon-size: 24px;
+
       }
       .${ESC_CLASS_MIDDLE} {
         display: flex;
         flex-flow: row;
         justify-content: center;
         align-items: center;
-        width: fit-content;
         max-width: 100%;
+        max-height: 100%;
         margin: auto;
       }
       .${ESC_CLASS_BUTTONS} {
         display: flex;
-        flex: 1;
+        flex: none;
         justify-content: center;
         align-items: center;
         max-width: 100%;
@@ -221,7 +246,7 @@ const SHUTTER_CSS =`
         width: min-content;
       }
       .${ESC_CLASS_SELECTOR} {
-        flex: 1;
+        max-width: 100%;
         justify-content: center;
         align-items: center;
       }
@@ -235,6 +260,7 @@ const SHUTTER_CSS =`
         background-color: gray;
       }
       .${ESC_CLASS_SELECTOR_PICTURE} {
+        max-width: 100%;
         z-index: 1;
         justify-content: center;
         position: relative;
@@ -260,6 +286,7 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_SELECTOR_SLIDE}>img {
         width: 100%;
+        height: 7px;
         position: absolute;
         bottom: 0;
         left: 0;
@@ -325,13 +352,17 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_POSITION} {
         display: inline-block;
+        vertical-align: top;
+        line-height: 20px;
         clear: both;
         font-size: 14px;
         height: 20px;
-        border-radius: 2px;
+        border-radius: 5px;
+        margin: 5px;
       }
       .${ESC_CLASS_POSITION}>span {
         background-color: var(--secondary-background-color);
+        padding: 2px 5px 2px 5px;
       }
       .${ESC_CLASS_HA_ICON} {
         padding-bottom: 10px;
@@ -350,13 +381,19 @@ class EnhancedShutterCardNew extends LitElement{
       hass: {type: Object},
       config: {type: Object},
       isShutterConfigLoaded: {type: Boolean, state: true},
-      localCfgs: {type: Object, state: true}
+      localCfgs: {type: Object, state: true},
+      screenOrientation: {type: Object, state: true},
     };
   }
+
   constructor() {
     super();
     console_log('Card constructor');
     this.isShutterConfigLoaded = false;
+    this.screenOrientation = Globals.screenOrientation;
+    this.isResizeInProgress = false;
+    this.handleWindowResize = this.onWindowResize.bind(this); // Bind the function once
+
     console_log('Card constructor: isShutterConfigLoaded:',this.isShutterConfigLoaded);
     console_log('Card constructor ready');
   }
@@ -422,7 +459,7 @@ class EnhancedShutterCardNew extends LitElement{
 * OVERRIDE FUNCTIONS LIT ELEMENT
 */
   shouldUpdate(changedProperties) {
-    // Only update element if prop1 changed.
+
     console_log('Card shouldUpdate');
     console_log('Card shouldUpdate: isShutterConfigLoaded:',this.isShutterConfigLoaded);
     let doUpdate =false;
@@ -466,9 +503,9 @@ class EnhancedShutterCardNew extends LitElement{
   {
     //console_log('Card Update');
     super.update(changedProperties);
-    //changedProperties.forEach((oldValue, prop) => {
-    //  console_log(`Card Update, Property `,prop,` changed from`,oldValue,` to `,this[prop]);
-    //});
+    changedProperties.forEach((oldValue, prop) => {
+      console_log(`Card Update, Property `,prop,` changed from`,oldValue,` to `,this[prop]);
+    });
     //console_log('Card Update ready');
   }
   updated(changedProperties) {
@@ -486,16 +523,57 @@ class EnhancedShutterCardNew extends LitElement{
     super.connectedCallback();
     if (!this.isShutterConfigLoaded) {
       this.#defAllShutterConfig();
-      console_log("def configs",this.globalCfg, this.localCfgs);
     }
-    console_log('Card connectedCallback ready');
+    this.initializeResizeObserver();
+    // Initialize window resize event listener
+    window.addEventListener('resize', this.handleWindowResize);
 
+    this.checkOrientation(Globals.huiView); // Initial orientation check
+    console_log('Card connectedCallback ready');
+  }
+  // Check the orientation based on the window and div visibility
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.resizeObserver) this.resizeObserver.disconnect();
+    window.removeEventListener('resize', this.handleWindowResize);
+  }
+  checkOrientation(element) {
+    // Get the window size
+    this.isResizeInProgress = true; // Set flag to indicate a resize operation is in progress
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // Get the bounding rect of the div (the visible area of the div)
+    const rect = element.getBoundingClientRect();
+
+    // Calculate the visible width and height of the element within the viewport
+    const visibleWidth = Math.max(0, Math.min(rect.right, windowWidth) - Math.max(rect.left, 0));
+    const visibleHeight = Math.max(0, Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0));
+
+    // Determine the orientation based on visible area and window size
+    Globals.screenOrientation = {value: visibleWidth > visibleHeight ? LANDSCAPE : PORTRAIT};
+    this.screenOrientation = Globals.screenOrientation;
+    console_log('Card checkOrientation: screenOrientation:',this.screenOrientation);
+    // Trigger re-render to update orientation
+    //this.requestUpdate();
+    // After orientation check is done, reset the flag
+    this.isResizeInProgress = false;
+  }
+  initializeResizeObserver() {
+    this.resizeObserver = new ResizeObserver(() => {
+      if (!this.isResizeInProgress) {
+        this.checkOrientation(Globals.huiView);
+      }
+    });
+    this.resizeObserver.observe(Globals.huiView);
+  }
+  onWindowResize() {
+    if (!this.isResizeInProgress) {
+         this.checkOrientation(Globals.huiView); // Recheck orientation on window resize
+    }
   }
 
-/**
- *
- * @returns
- */
   render() {
     console_log('Card Render');
     //console_log('Card Render,isShutterConfigLoaded',this.isShutterConfigLoaded);
@@ -519,6 +597,7 @@ class EnhancedShutterCardNew extends LitElement{
                     .config=${currEntity}
                     .cfg=${this.localCfgs[entityId]}
                     .shutterState=${this.localCfgs[entityId].shutterState}
+                    .screenOrientation=${this.screenOrientation}
                   >
                   </enhanced-shutter>
                 `;
@@ -542,7 +621,7 @@ class EnhancedShutterCardNew extends LitElement{
 /*
 * OVERRIDE FUNCTIONS HA CARD
 */
-setConfig(config)
+  setConfig(config)
   {
     if (!config.entities) {
       throw new Error('You need to define entities');
@@ -814,8 +893,9 @@ class EnhancedShutter extends LitElement
   //reactive properties
   static get properties() {
     return {
-      shutterState: {String},
+      shutterState: {type: String},
       screenPosition: {state: true},
+      screenOrientation: {type: String},
     };
   }
   constructor(){
@@ -839,12 +919,6 @@ class EnhancedShutter extends LitElement
 
   update(changedProperties) {
     //console_log('Shutter Update');
-    //console_log('Shutter update, isShutterConfigLoaded',this.isShutterConfigLoaded);
-    //console_log('Shutter update changedProperties',changedProperties);
-    //changedProperties.forEach((oldValue, prop) => {
-      //console_log(`Shutter update, Property `,prop,` changed from`,oldValue,` to `,this[prop]);
-
-    //});
     super.update(changedProperties);
     //console_log('Shutter Update ready');
   }
@@ -872,13 +946,16 @@ class EnhancedShutter extends LitElement
 
     console_log('Shutter Render ready');
     return html`
-      <div class=${ESC_CLASS_BASE_NAME} data-shutter="${entityId}">
-
-
+      <div class=${ESC_CLASS_SHUTTER} data-shutter="${entityId}"
+        style="--mdc-icon-button-size: ${this.cfg.icon_button_size()}${UNITY};
+               --mdc-icon-size: ${this.cfg.icon_size()}${UNITY};
+              "
+      >
         <div class="${ESC_CLASS_TOP}">
           <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
             @click="${() => this.doDetailOpen(entityId)}"
-            style="display: ${this.cfg.displayName(TOP)}">
+            style="display: ${this.cfg.displayName(TOP)}"
+          >
             ${this.cfg.friendlyName()}
             ${this.cfg.passiveMode() ? html`
               <span class="${ESC_CLASS_HA_ICON_LOCK}">
@@ -945,8 +1022,7 @@ class EnhancedShutter extends LitElement
               ? html`
                   <ha-icon-button label="Partially close (${100-this.cfg.partial()}% closed)"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, this.cfg.partial() )}" >
                     <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
-                </ha-icon-button>`
-              : ''}
+                </ha-icon-button>` : ''}
             ${this.cfg.canTilt() ? html`
                 <ha-icon-button label="${this.hass.localize('ui.card.cover.open_tilt_cover')}"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_TILT_OPEN}`)}">
                     <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-top-right"></ha-icon>
@@ -958,12 +1034,15 @@ class EnhancedShutter extends LitElement
           <div
             class="${ESC_CLASS_SELECTOR}";
             style="
-              flex: 0 1 ${this.cfg.windowWidthPx()}${UNITY};
-            ">
+              flex-grow: 0;
+              flex-shrink: 1;
+              flex-basis: ${this.cfg.buttonsInRow() ? this.cfg.windowWidthPx():this.cfg.windowHeightPx()}${UNITY};
+            "
+          >
             <div class="${ESC_CLASS_SELECTOR_PICTURE}"
               style="
-                width: 100%;
-                height: ${this.cfg.windowHeightPx()}${UNITY};
+                width: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
+                height: ${this.cfg.windowHeightPx()+UNITY};
                 ${this.cfg.viewImage().includes('.')
                   ? `background-image: url(${this.cfg.viewImage()}`
                   : `background-color:${this.cfg.viewImage()}`
@@ -1031,9 +1110,7 @@ class EnhancedShutter extends LitElement
   //##########################################
 
   doDetailOpen(entityIdValue) {
-    if (this.cfg.passiveMode()){
-      console.warn('Passive mode, no action');
-    }else{
+    if (!this.cfg.passiveMode()){
       let e = new Event('hass-more-info', { composed: true});
       e.detail= { entityId : entityIdValue};
       this.dispatchEvent(e);
@@ -1069,7 +1146,7 @@ class EnhancedShutter extends LitElement
   mouseDown = (event) =>
   {
     console_log('mouseDown:',event.type,event);
-    if (event.pageY === undefined) return;
+    if (event.pageY === undefined || this.cfg.passiveMode()) return;
 
     if (event.cancelable) {
       //Disable default drag event
@@ -1122,12 +1199,14 @@ class EnhancedShutter extends LitElement
     this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
 
   };
+  sendShutterPosition( entityId, position)
+  {
+    this.callHassCoverService(entityId,SERVICE_SHUTTER_PARTIAL, { position: position });
+  }
   callHassCoverService(entityId,command,args='')
   {
-    if (this.cfg.passiveMode()){
-      console.warn('Passive mode, no action');
-    }else{
-        const domain= 'cover';
+    if (!this.cfg.passiveMode()){
+      const domain= 'cover';
       if (this.checkServiceAvailability(domain, command)) {
         this.hass.callService(domain, command, {
           entity_id: entityId,
@@ -1142,10 +1221,6 @@ class EnhancedShutter extends LitElement
     const services = this.hass.services;
     let check = services[serviceDomain]?.[serviceName] !== undefined;
     return check;
-  }
-  sendShutterPosition( entityId, position)
-  {
-    this.callHassCoverService(entityId,SERVICE_SHUTTER_PARTIAL, { position: position });
   }
 
   static get styles() {
@@ -1183,6 +1258,8 @@ class shutterCfg {
       let resize_width_pct  = config[CONFIG_RESIZE_WIDTH_PCT];
       this.windowWidthPx(Math.round(boundary(resize_width_pct, ESC_MIN_RESIZE_WIDTH_PCT ,ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
 
+
+      this.scaleButtons(config[CONFIG_SCALE_BUTTONS]);
       this.partial(boundary(config[CONFIG_PARTIAL_CLOSE_PCT]));
       this.offset(boundary(config[CONFIG_OFFSET_CLOSED_PCT]));
 
@@ -1199,6 +1276,7 @@ class shutterCfg {
 
       this.openingPosition(config[CONFIG_OPENING_POSITION]);
       this.openingDisabled(config[CONFIG_OPENING_DISABLED]);
+      this.inlineHeader(config[CONFIG_INLINE_HEADER]);
 
       this.alwaysPercentage(!!config[CONFIG_ALWAYS_PCT]);
       this.disableEndButtons(!!config[CONFIG_DISABLE_END_BUTTONS]);
@@ -1269,7 +1347,9 @@ class shutterCfg {
     return this.getCfg(CONFIG_OPENING_DISABLED,value);
   }
   passiveMode(value = null){
-    return this.getCfg(CONFIG_PASSIVE_MODE,value);
+    let mode = this.getCfg(CONFIG_PASSIVE_MODE,value)
+    if (value!== null && mode) console.warn('Passive mode, no action');
+    return mode;
   }
   viewImage(value = null){
     return this.getCfg(CONFIG_VIEW_IMAGE,value);
@@ -1294,6 +1374,9 @@ class shutterCfg {
   }
   offset(value = null){
     return this.getCfg(CONFIG_OFFSET_CLOSED_PCT,value);
+  }
+  scaleButtons(value = null){
+    return this.getCfg(CONFIG_SCALE_BUTTONS,value);
   }
   topOffsetPct(value = null){
     return this.getCfg(CONFIG_TOP_OFFSET_PCT,value);
@@ -1325,6 +1408,9 @@ class shutterCfg {
   namePosition(value = null){
     return this.getCfg(CONFIG_NAME_POSITION,value);
   }
+  inlineHeader(value = null){
+    return this.getCfg(CONFIG_INLINE_HEADER,value);
+  }
   openingDisabled(value = null){
     if (value !== null  && this.getCfg(CONFIG_OPENING_DISABLED,value) === null)
     {
@@ -1351,6 +1437,9 @@ class shutterCfg {
   currentPosition(){
     return this.stateAttributes().current_position;
   }
+  getOrientation(){
+    return Globals.screenOrientation.value; // global variable !!
+  }
   movementState(){
     let state = (this.getState() ? this.getState() : 'unknownMovement');
     if (state == SHUTTER_STATE_OPEN && this.currentPosition() != 100 && this.currentPosition() != 0){
@@ -1359,10 +1448,10 @@ class shutterCfg {
     return state;
   }
   buttonsInRow(){
-    return this.buttonsPosition() == LEFT || this.buttonsPosition() == RIGHT;
+    return this.getButtonsPosition() == LEFT || this.getButtonsPosition() == RIGHT;
   }
   buttonsContainerReversed(){
-    return this.buttonsPosition() == BOTTOM || this.buttonsPosition() == RIGHT;
+    return this.getButtonsPosition() == BOTTOM || this.getButtonsPosition() == RIGHT;
   }
   disabledGlobaly() {
     return (this.getState() == "unavailable");
@@ -1391,14 +1480,41 @@ class shutterCfg {
   }
 
   displayName(position){
-      let display =(this.namePosition() != position || this.nameDisabled()) ? 'none' : 'block';
+      let displayType= this.inlineHeader() ? 'inline-block' : 'block';
+      let display =(this.namePosition() != position || this.nameDisabled()) ? 'none' : displayType;
       return display;
-  }
+    }
   displayOpening(position){
-    let display =(this.openingPosition() != position || this.openingDisabled()) ? 'none' : 'block';
-
+    let displayType= this.inlineHeader() ? 'inline-block' : 'block';
+    let display;
+    if (this.inlineHeader()){
+      display =(this.namePosition() != position || this.openingDisabled()) ? 'none' : displayType;
+    }else{
+      display =(this.openingPosition() != position || this.openingDisabled()) ? 'none' : displayType;
+    }
     return display;
   }
+  getButtonsPosition(){
+    let position = this.buttonsPosition();
+    if (position.substring(0,4) == AUTO){
+      if  (this.getOrientation() == LANDSCAPE){
+        if (position == AUTO || position == AUTO_TL || position == AUTO_BL){
+          position = LEFT;
+        } else {
+          position = RIGHT;
+        }
+      }
+      else{
+        if (position == AUTO || position == AUTO_TL || position == AUTO_TR){
+          position = TOP;
+        } else {
+          position = BOTTOM;
+        }
+      }
+    }
+    return position;
+  }
+
   defButtonPosition(config) {
     let buttonsPosition = config[CONFIG_BUTTONS_POSITION];
     buttonsPosition
@@ -1479,6 +1595,35 @@ class shutterCfg {
   coverBottomPx(){
     return this.windowHeightPx()-this.bottomOffsetPct();
   }
+
+  icon_button_size(){
+    let size = 48;
+    if (this.scaleButtons()){
+      let px;
+      if (this.buttonsInRow()){
+        px = this.windowHeightPx();
+      }else{
+        px = this.windowWidthPx();
+      }
+      size = Math.min(px/3.0,48);
+    }
+    return size;
+  }
+  icon_size(){
+    let size = 24;
+    if (this.scaleButtons()){
+      let px;
+      if (this.buttonsInRow()){
+        px = this.windowHeightPx();
+      }else{
+        px = this.windowWidthPx();
+      }
+      size = Math.min(px/6.0,24);
+    }
+    return size;
+  }
+
+
 }
 /**
  * global functions
@@ -1523,6 +1668,13 @@ function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
 /**
  * Main code
  */
+const Globals={
+  huiView: findElement(HA_HUI_VIEW),
+  screenOrientation: {value:''},
+}
+const rect = Globals.huiView.getBoundingClientRect();
+Globals.screenOrientation.value = rect.width > rect.height ? LANDSCAPE : PORTRAIT;
+
 customElements.define(HA_CARD_NAME, EnhancedShutterCardNew);
 customElements.define(HA_SHUTTER_NAME, EnhancedShutter);
 
@@ -1557,7 +1709,76 @@ function formatDate(format) {
 }
 
 function console_log(...args){
-  if (VERSION.indexOf('b')>0){
+  if (VERSION.indexOf('b') > 0){
     console.log(formatDate("HH:mm:ss.SSS"),...args);
   }
+}
+/**
+ * function findElement() to find an element in DOM body, inluding shadow DOMs.
+ * @param {*} selector
+ * @returns
+ */
+function findElement(selector) {
+  // Search in the regular DOM
+  const foundInDom = document.body.querySelector(selector);
+
+  // If found, return the element
+  if (foundInDom) {
+    return foundInDom;
+  }
+  return recursiveSearch(document.body);
+
+  // Function to recursively search in shadow roots
+  function searchInShadowDom(node) {
+    // Check if the node has a shadow root
+    if (node.shadowRoot) {
+      // Search in the shadow root's DOM
+      const foundInShadow = node.shadowRoot.querySelector(selector);
+      if (foundInShadow) {
+        return foundInShadow;
+      }
+      // Recurse into any shadow DOMs within this shadow root
+      const shadowHost = node.shadowRoot.host;
+      for (const child of node.shadowRoot.children) {
+        const result = searchInShadowDom(child);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    for (const child of node.children) {
+      const result = recursiveSearch(child);
+      if (result) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+  // Start the search in the whole document, including all shadow DOMs
+  function recursiveSearch(node) {
+    // Search in the node itself
+    if (node.matches && node.matches(selector)) {
+      return node;
+    }
+
+    // Recurse into child nodes, including shadow roots if present
+    if (node.shadowRoot) {
+      const result = searchInShadowDom(node);
+      if (result) {
+        return result;
+      }
+    }
+
+    // Recurse into child nodes (excluding shadow roots)
+    for (const child of node.children) {
+      const result = recursiveSearch(child);
+      if (result) {
+        return result;
+      }
+    }
+
+    return null;
+  }
+
 }
