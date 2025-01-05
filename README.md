@@ -3,6 +3,23 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
 
+
+### New in version v1.1.2:
+
+* #### New automatic placement of the buttons
+New automatic placement of the buttons according to Landscape or Portrait format of the visible part of the dashboard. Using the new settings `auto-top-left` (or `auto`), `auto-top-right`, `auto-bottom-left` or `auto-bottom-right` for the optional option `buttons_position`, the card wil change the button positions to top or botton on Portrait and Left or Right in Landscape, automaticly.
+* #### inline_header
+New setting (`true` of `false`). When set to `true`, the card wil place the Name and Position information in one line, as long as possible. In this mode, only the `opening_position` option will be used for the `bottom`/`top` placement of the full shutter header, the `opening_position`wil be discarded.
+* #### scale_buttons
+New setting (`true` of `false`). When set to `true` the buttons will be rescaled (smaller) when the windows-image is getting smaller then 150px. The width is taken into account when the resulting button_position is `left` or `right`, the heieght is used when `buttons_position`is `top` or `bottom`. This will work also with the new `auto*` options.
+* #### further improvement of responsiveness.
+The responsiveness of the card is further improved.
+
+
+
+
+## Functions of the Card
+
 This card allows besides opening, closing or setting a shutter to the opening rate you want, also many options to design your shutter by combining the sizes and images you want.
 
 It is a follow-up of [Deejayfool/Shuttercard](https://github.com/Deejayfool/hass-shutter-card), a nice Card for Shutters.
@@ -34,7 +51,7 @@ These are the avialable background views:
 These images can be combined like in the example above. For (optinal) defintion of the location of the images, a setting 'image_map" does exits.
 The default map-setting can be found in the Configuration-info below.
 It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is considerd to include a full path.
-And last but not least, the `view_image` -setting also accepts HTML-color definitions like `red`, `green`, `_#AAFFEE` or `rgb(255,255,0)` in stead of an image-filename. (The `#` input needs quotes around it in YAML)
+And last but not least, the `view_image` -setting also accepts HTML-color definitions like `red`, `green`, `#AAFFEE` or `rgb(255,255,0)` in stead of an image-filename. (The `#` input needs quotes around it in YAML)
 
 ## Configuration
 
@@ -44,7 +61,7 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | - | - | - | - | - | - |
 | type | string | True | - | Must be "custom:enhanced-shutter-card"
 | title | string | False | - | Title of the card
-| passive_mode | boolean | no | false | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.| new in v1.1.0 |
+| passive_mode | boolean | no | false | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.|
 | image_map | string | No | /local/community/enhanced-shutter-card/images | map of the images
 | window_image | string | No | esc-window.png | image of the window/shutter
 | view_image | string | No | esc-back-view.png | background-image through the window, or a HTML color.
@@ -56,23 +73,25 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | resize_width_pct | int | No | 100 | rezise of the base width in percent
 | top_offset_pct | int | No | 0 | space between top image/window and top shutter
 | bottom_offset_pct | int | No | 0 | space between bottom image/window and bottom shutter
-| buttons_position | string | No | `left` | Set buttons on `left`, `right`, `top` or `bottom` of the shutter
+| buttons_position | string | No | `left` | Set buttons on `left`, `right`, `top` or `bottom` of the shutter. For automatic placement  on Landscape or Portrait-format of the visible Dashboard, you can also use the `auto-top-left` (or `auto`), `auto-top-right`, `auto-bottom-left` or `auto-bottom-right` options.
+| scale_buttons | boolean | No | false | Scale the buttons when the windows-image gets smaller then 150px in the direction of the button-placement.
 | title_position | string | No | `top` | Set title on `top` or on `bottom` of the shutter | deprecated, use `name_position`|
-| name_position |string | No | `top` | Set title/name shutter on `top` or on `bottom` of the shutter image.| new in v1.1.0 |
-| name_disabled | boolean| No | false| hide title/name of shutter | new in v1.1.0 |
-| opening_position | string | No | _name_position_| set position info of shutter on `top` or `bottom` of the shutter image.| new in v1.1.0 |
-| opening_disabled |boolean| No | false| hide position info of shutter | new in v1.1.0 |
+| name_position |string | No | `top` | Set title/name shutter on `top` or on `bottom` of the shutter image.|
+| name_disabled | boolean| No | false| hide title/name of shutter |
+| opening_position | string | No | _name_position_| set position info of shutter on `top` or `bottom` of the shutter image.|
+| opening_disabled | boolean| No | false| hide position info of shutter |
+| inline_header | boolean | No | false | place the shutter-header (name and position) in one line.
 | invert_percentage | boolean | No | `false` | Set it to `true` if your shutter is 100% when it is closed, and 0% when it is opened
 | can_tilt | boolean | No | `false` | Set it to `true` if your shutters support tilting.
 | partial_close_percentage | int | No | `0` | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.
 | offset_closed_percentage | int | No | `0` | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.
 | always_percentage | boolean | No | `false` | If set to `true`, the end states (opened/closed) will be also as numbers (0 / 100 % ) instead of a text
 | disable_end_buttons | boolean | No | `false` | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button
-| disable_standard_buttons | boolean | No | false | Show or hide the default up, down and stop buttons | new in v1.1.0 |
-| disable_partial_open_buttons | boolean | No | true | Show or hide the partail open buttons. | new in v1.1.0 |
-| button_up_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
-| button_stop_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
-| button_down_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. | new in v1.1.0 |
+| disable_standard_buttons | boolean | No | false | Show or hide the default up, down and stop buttons |
+| disable_partial_open_buttons | boolean | No | true | Show or hide the partail open buttons. |
+| button_up_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. |
+| button_stop_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. |
+| button_down_hide_states | string list | False | empty list | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states.  This can be combined with other `*_hide_states` options. |
 
 ### Entities
 
@@ -80,7 +99,7 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | - | - | - | - | - | - |
 | entity | string | Yes | - | The shutter entity ID
 | name | string | No | _Friendly name of the entity_ | Name to display for the shutter
-| passive_mode || No | global item setting, see under _General_ | see under _General_| new in v1.1.0 |
+| passive_mode || No | global item setting, see under _General_ | see under _General_|
 | image_map | string | No | global item setting, see under _General_ | see under _General_
 | window_image | string | No | global item setting, see under _General_ | see under _General_
 | view_image | string | No | global item setting, see under _General_ | see under _General_
@@ -94,21 +113,20 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | bottom_offset_pct | int | No | global item setting, see under _General_ | see under _General_
 | buttons_position | string | No | global item setting, see under _General_ | see under _General_
 | title_position | string | No | global item setting, see under _General_ | see under _General_ | deprecated as of v1.1.0, use `name_position`|
-| name_position | string | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
-| name_disabled | boolean | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
-| opening_position | string | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
-| opening_disabled | boolean | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
-| invert_percentage | boolean | No | global item setting, see under _General_ | see under _General_
+| name_position | string | No | global item setting, see under _General_ | see under _General_ |
+| name_disabled | boolean | No | global item setting, see under _General_ | see under _General_ |
+| opening_position | string | No | global item setting, see under _General_ | see under _General_ |
+| opening_disabled | boolean | No | global item setting, see under _General_ | see under _General_ |
 | can_tilt | boolean | No | global item setting, see under _General_ | see under _General_
 | partial_close_percentage | int | No | global item setting, see under _General_ | see under _General_
 | offset_closed_percentage | int | No | global item setting, see under _General_ | see under _General_
 | always_percentage | boolean | No | global item setting, see under _General_ | see under _General_
 | disable_end_buttons | boolean | No | global item setting, see under _General_ | see under _General_
-| disable_standard_buttons | boolean | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
-| disable_partial_open_buttons | boolean | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
-| button_up_hide_states | string list | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
-| button_stop_hide_states | string list | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
-| button_down_hide_states | string list | No | global item setting, see under _General_ | see under _General_ | new in v1.1.0 |
+| disable_standard_buttons | boolean | No | global item setting, see under _General_ | see under _General_ |
+| disable_partial_open_buttons | boolean | No | global item setting, see under _General_ | see under _General_ |
+| button_up_hide_states | string list | No | global item setting, see under _General_ | see under _General_ |
+| button_stop_hide_states | string list | No | global item setting, see under _General_ | see under _General_ |
+| button_down_hide_states | string list | No | global item setting, see under _General_ | see under _General_ |
 
 
 _Remark : you can also just give the entity ID (without to specify `entity:`) if you don't need to specify the other configurations._
