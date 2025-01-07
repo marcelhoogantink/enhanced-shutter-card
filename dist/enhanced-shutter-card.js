@@ -6,7 +6,7 @@ import {
 }
 from "https://unpkg.com/lit-element@3.0.1/lit-element.js?module";
 
-const VERSION = 'v1.1.2';
+const VERSION = 'v1.1.3';
 const HA_CARD_NAME = "enhanced-shutter-card";
 const HA_SHUTTER_NAME = `enhanced-shutter`;
 const HA_HUI_VIEW = 'hui-view';
