@@ -6,7 +6,7 @@ import {
 }
 from "https://unpkg.com/lit-element@3.0.1/lit-element.js?module";
 
-const VERSION = 'v1.1.2';
+const VERSION = 'v1.1.4';
 const HA_CARD_NAME = "enhanced-shutter-card";
 const HA_SHUTTER_NAME = `enhanced-shutter`;
 const HA_HUI_VIEW = 'hui-view';
@@ -662,8 +662,6 @@ class EnhancedShutterCardNew extends LitElement{
     const haTitleHeightPx = 76;
     const haTitleFont = 'Roboto, Noto, sans-serif';
 
-    const haButtonSize = 48;
-
     const haGridPxHeight =56;
     const haGridPxHeightGap = 8;
 
@@ -699,7 +697,9 @@ class EnhancedShutterCardNew extends LitElement{
 
         let localHeightPx=0;
         let localWidthPx =0;
+
         let cfg= this.localCfgs[key];
+        const haButtonSize = cfg.icon_button_size();
         /*
         * Size shutter title row
         */
@@ -707,6 +707,7 @@ class EnhancedShutterCardNew extends LitElement{
           let titleSize = getTextSize(cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
           let partHeightPx = 30;
           let partWidthPx = titleSize.width;
+
           localHeightPx += partHeightPx;
           localWidthPx = Math.max(totalWidthPx,partWidthPx);
           console_log('part size B*H',partWidthPx,partHeightPx,'after title',titleSize);
@@ -715,7 +716,7 @@ class EnhancedShutterCardNew extends LitElement{
         /*
         * Size shutter opening row
         */
-        if (!cfg.openingDisabled()){
+        if (!cfg.openingDisabled() && !cfg.inlineHeader()){
           let pctSize = getTextSize(cfg.computePositionText(),haTitleFont,14);
           let partHeightPx = 20;
           let partWidthPx = pctSize.width;
@@ -1435,7 +1436,7 @@ class shutterCfg {
   ** end getters/setters
   */
   currentPosition(){
-    return this.stateAttributes().current_position;
+    return this.stateAttributes() ? this.stateAttributes().current_position: 0;
   }
   getOrientation(){
     return Globals.screenOrientation.value; // global variable !!
@@ -1445,6 +1446,9 @@ class shutterCfg {
     if (state == SHUTTER_STATE_OPEN && this.currentPosition() != 100 && this.currentPosition() != 0){
       state= SHUTTER_STATE_PARTIAL_OPEN;
     }
+    if (this.currentPosition() == 100) state =SHUTTER_STATE_OPEN;
+    else if (this.currentPosition() == 0) state =SHUTTER_STATE_CLOSED;
+
     return state;
   }
   buttonsInRow(){
