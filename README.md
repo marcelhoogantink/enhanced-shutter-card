@@ -6,18 +6,18 @@
 ### New in version v1.1.4:
 
 * #### New: Battery and signal level display
-New settings `battery_entity` and `signal_entity` fro displaying battery and signal icon with level-information.
-New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
+New settings `battery_entity` and `signal_entity` for displaying battery and signal icons with level-information.
+New settings `scale_icons` for activating scaling of the icons when the window-image-size is made smaller.
 
 * #### Card works now 100% local.
-The card inludes now the lit-libary, no internet-connection needed after downloading.
+The card inludes now the lit-library, no internet-connection needed after downloading.
 
 * #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) solved.
 This error is found and removed.
 
 * #### Improved sizing of the Card
 
-The sizoing of the card is further improved. (This can result in little differences in size with previous versions)
+The sizing of the card is further improved. (This can result in little differences in size with previous versions)
 
 
 ### New in version v1.1.3:
