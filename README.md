@@ -3,6 +3,22 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
 
+### New in version v1.1.4:
+
+* #### New: Battery ans signal level display
+New settings `battery_entity` and `signal_entity` fro displaying battery and signal icon with level-information.
+New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
+
+* #### Card works now 100% local.
+The card inludes now the lit-libary, no internet-connection needed after downloading.
+
+* #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) solved.
+This error is found and removed.
+
+* #### Improved sizing of the Card
+
+The sizoing of the card is further improved. (This can result in little differences in size with previous versions)
+
 
 ### New in version v1.1.3:
 
@@ -75,6 +91,7 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | bottom_offset_pct | int | No | 0 | space between bottom image/window and bottom shutter
 | buttons_position | string | No | `left` | Set buttons on `left`, `right`, `top` or `bottom` of the shutter. For automatic placement  on Landscape or Portrait-format of the visible Dashboard, you can also use the `auto-top-left` (or `auto`), `auto-top-right`, `auto-bottom-left` or `auto-bottom-right` options.
 | scale_buttons | boolean | No | false | Scale the buttons when the windows-image gets smaller then 150px in the direction of the button-placement.
+| scale_icons | boolean | No | true | Scale the icon for battery and signal icons windows-image gets smaller then 150px in the horizonal direction.
 | title_position | string | No | `top` | Set title on `top` or on `bottom` of the shutter | deprecated, use `name_position`|
 | name_position |string | No | `top` | Set title/name shutter on `top` or on `bottom` of the shutter image.|
 | name_disabled | boolean| No | false| hide title/name of shutter |
@@ -99,6 +116,8 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | - | - | - | - | - | - |
 | entity | string | Yes | - | The shutter entity ID
 | name | string | No | _Friendly name of the entity_ | Name to display for the shutter
+| battery_entity | string | No | `null` | EntityId of the sensor represenating the battery-level of the shutter (as a number)
+| signal_entity | string | No | `null` | EntityId of the sensor represenating the Wireless signal-level of the shutter (as a number)
 | passive_mode || No | global item setting, see under _General_ | see under _General_|
 | image_map | string | No | global item setting, see under _General_ | see under _General_
 | window_image | string | No | global item setting, see under _General_ | see under _General_
@@ -112,6 +131,8 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | top_offset_pct | int | No | global item setting, see under _General_ | see under _General_
 | bottom_offset_pct | int | No | global item setting, see under _General_ | see under _General_
 | buttons_position | string | No | global item setting, see under _General_ | see under _General_
+| scale_buttons | boolean | No | global item setting, see under _General_ | see under _General_
+| scale_icons | boolean | No | global item setting, see under _General_ | see under _General_
 | title_position | string | No | global item setting, see under _General_ | see under _General_ | deprecated as of v1.1.0, use `name_position`|
 | name_position | string | No | global item setting, see under _General_ | see under _General_ |
 | name_disabled | boolean | No | global item setting, see under _General_ | see under _General_ |

@@ -1,12 +1,15 @@
+const VERSION = 'v1.1.4';
+
 import {
   LitElement,
   html,
   css,
   unsafeCSS
 }
-from "https://unpkg.com/lit-element@3.0.1/lit-element.js?module";
+from './lit/lit-core.min.js';
+// local copy of RELEASE 3.0.1 of
+// https://www.jsdelivr.com/package/gh/lit/dist
 
-const VERSION = 'v1.1.4';
 const HA_CARD_NAME = "enhanced-shutter-card";
 const HA_SHUTTER_NAME = `enhanced-shutter`;
 const HA_HUI_VIEW = 'hui-view';
@@ -61,12 +64,14 @@ const ESC_CLASS_HA_ICON_LOCK = `${ESC_CLASS_HA_ICON}-lock`;
 
 const POSITIONS =[AUTO,AUTO_BL,AUTO_BR,AUTO_TL,AUTO_TR,LEFT,RIGHT,TOP,BOTTOM,NONE];
 
-const SERVICE_SHUTTER_UP = 'open_cover';
-const SERVICE_SHUTTER_DOWN = 'close_cover';
-const SERVICE_SHUTTER_STOP = 'stop_cover';
-const SERVICE_SHUTTER_PARTIAL = 'set_cover_position';
-const SERVICE_SHUTTER_TILT_OPEN = 'open_cover_tilt';
-const SERVICE_SHUTTER_TILT_CLOSE = 'close_cover_tilt';
+const ACTION_SHUTTER_OPEN = 'open_cover';
+const ACTION_SHUTTER_OPEN_TILT = 'open_cover_tilt';
+const ACTION_SHUTTER_CLOSE = 'close_cover';
+const ACTION_SHUTTER_CLOSE_TILT = 'close_cover_tilt';
+const ACTION_SHUTTER_STOP = 'stop_cover';
+const ACTION_SHUTTER_STOP_TILT = 'stop_cover_tilt';
+const ACTION_SHUTTER_SET_POS = 'set_cover_position';
+const ACTION_SHUTTER_SET_POS_TILT = 'set_cover_tilt_position';
 
 const UNITY= 'px';
 
@@ -74,6 +79,9 @@ const CONFIG_ENTITY_ID = 'entity';
 const CONFIG_STATE = 'state';
 const CONFIG_HEIGHT_PX = 'height_px';
 const CONFIG_WIDTH_PX = 'width_px';
+
+const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
+const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
 
 const CONFIG_NAME = 'name';
 const CONFIG_PASSIVE_MODE = 'passive_mode';
@@ -87,6 +95,7 @@ const CONFIG_BASE_WIDTH_PX = 'base_width_px';
 const CONFIG_RESIZE_HEIGHT_PCT = 'resize_height_pct';
 const CONFIG_RESIZE_WIDTH_PCT = 'resize_width_pct';
 
+const CONFIG_SCALE_ICONS = 'scale_icons';
 const CONFIG_SCALE_BUTTONS = 'scale_buttons';
 const CONFIG_TOP_OFFSET_PCT = 'top_offset_pct';
 const CONFIG_BOTTOM_OFFSET_PCT = 'bottom_offset_pct';
@@ -115,6 +124,9 @@ const CONFIG_BUTTON_DOWN_HIDE_STATES = 'button_down_hide_states';
 
 const ESC_ENTITY_ID = null;
 
+const ESC_BATTERY_ENTITY_ID = null;
+const ESC_SIGNAL_ENTITY_ID = null;
+
 const ESC_NAME = null;
 const ESC_PASSIVE_MODE = false;
 const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}/images`;
@@ -127,6 +139,7 @@ const ESC_BASE_WIDTH_PX = 150;  // image-width
 const ESC_RESIZE_HEIGHT_PCT = 100;
 const ESC_RESIZE_WIDTH_PCT  = 100;
 
+const ESC_SCALE_ICONS = true;
 const ESC_SCALE_BUTTONS = false;
 const ESC_TOP_OFFSET_PCT = 0;
 const ESC_BOTTOM_OFFSET_PCT = 0;
@@ -160,6 +173,9 @@ const ESC_BUTTON_DOWN_HIDE_STATES = [];
 const CONFIG_DEFAULT ={
   [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
 
+  [CONFIG_BATTERY_ENTITY_ID]: ESC_BATTERY_ENTITY_ID,
+  [CONFIG_SIGNAL_ENTITY_ID]: ESC_SIGNAL_ENTITY_ID,
+
   [CONFIG_NAME]: ESC_NAME,
   [CONFIG_PASSIVE_MODE]: ESC_PASSIVE_MODE,
   [CONFIG_IMAGE_MAP]: ESC_IMAGE_MAP,
@@ -172,6 +188,7 @@ const CONFIG_DEFAULT ={
   [CONFIG_RESIZE_HEIGHT_PCT]: ESC_RESIZE_HEIGHT_PCT,
   [CONFIG_RESIZE_WIDTH_PCT]: ESC_RESIZE_WIDTH_PCT,
 
+  [CONFIG_SCALE_ICONS]: ESC_SCALE_ICONS,
   [CONFIG_SCALE_BUTTONS]: ESC_SCALE_BUTTONS,
   [CONFIG_TOP_OFFSET_PCT]: ESC_TOP_OFFSET_PCT,
   [CONFIG_BOTTOM_OFFSET_PCT]: ESC_BOTTOM_OFFSET_PCT,
@@ -200,7 +217,12 @@ const CONFIG_DEFAULT ={
   [CONFIG_BUTTON_DOWN_HIDE_STATES]: ESC_BUTTON_DOWN_HIDE_STATES,
 
 };
-const IMAGE_TYPES = [CONFIG_WINDOW_IMAGE,CONFIG_VIEW_IMAGE,CONFIG_SHUTTER_SLAT_IMAGE,CONFIG_SHUTTER_BOTTOM_IMAGE];
+const IMAGE_TYPES = [
+  CONFIG_WINDOW_IMAGE,
+  CONFIG_VIEW_IMAGE,
+  CONFIG_SHUTTER_SLAT_IMAGE,
+  CONFIG_SHUTTER_BOTTOM_IMAGE,
+];
 const SHUTTER_CSS =`
 
       .${ESC_CLASS_BUTTON} {
@@ -327,13 +349,10 @@ const SHUTTER_CSS =`
         position: absolute;
         display: block;
       }
-      .${ESC_CLASS_TOP} {
+      .${ESC_CLASS_TOP}, .${ESC_CLASS_BOTTOM} {
         text-align: center;
-        padding-bottom: 16px;
-      }
-      .${ESC_CLASS_BOTTOM} {
-        text-align: center;
-        padding-bottom: 16px;
+        padding-top: 8px;
+        padding-bottom: 8px;
       }
       .${ESC_CLASS_LABEL} {
         display: inline-block;
@@ -372,6 +391,22 @@ const SHUTTER_CSS =`
         top: -0.3em;
         --mdc-icon-size: 10px;
       }
+      .blankDiv{
+        width: calc(var(--mdc-icon-size)*1.5);
+        height: 1px;
+      }
+      .top-left, .top-right {
+        --mdc-icon-size: var(--icon-size-wifi-battery, 24px);
+        position: absolute;
+        padding: 0 10px 10px 10px;
+        text-align: center;
+      }
+      .top-left {
+        left: 0;
+      }
+      .top-right {
+        right: 0;
+      }
    `;
 
 class EnhancedShutterCardNew extends LitElement{
@@ -389,8 +424,8 @@ class EnhancedShutterCardNew extends LitElement{
   constructor() {
     super();
     console_log('Card constructor');
+
     this.isShutterConfigLoaded = false;
-    this.screenOrientation = Globals.screenOrientation;
     this.isResizeInProgress = false;
     this.handleWindowResize = this.onWindowResize.bind(this); // Bind the function once
 
@@ -402,10 +437,9 @@ class EnhancedShutterCardNew extends LitElement{
     this.#getAllImages();
     this.globalCfg = this.#buildConfig(CONFIG_DEFAULT,this.config);
     this.localCfgs = {};
-    this.config.entities.map((currEntity) => {
-      let tempCfg = this.#buildConfig(this.globalCfg,currEntity);
-      let entity= tempCfg.entity;
-      this.localCfgs[entity] = new shutterCfg(this.hass,tempCfg,this.allImages);
+    this.config.entities.map((currEntityCfg) => {
+      let tempCfg = this.#buildConfig(this.globalCfg,currEntityCfg);
+      this.localCfgs[tempCfg.entity] = new shutterCfg(this.hass,tempCfg,this.allImages);
     });
     this.isShutterConfigLoaded = true;
   }
@@ -521,14 +555,17 @@ class EnhancedShutterCardNew extends LitElement{
   connectedCallback() {
     console_log('Card connectedCallback: isShutterConfigLoaded:',this.isShutterConfigLoaded);
     super.connectedCallback();
+    Globals.huiView = findElement(HA_HUI_VIEW);
+    const rect = Globals.huiView.getBoundingClientRect();
+    this.checkOrientation(Globals.huiView); // Initial orientation check
+
     if (!this.isShutterConfigLoaded) {
       this.#defAllShutterConfig();
     }
-    this.initializeResizeObserver();
+    this.startResizeObserver();
     // Initialize window resize event listener
     window.addEventListener('resize', this.handleWindowResize);
 
-    this.checkOrientation(Globals.huiView); // Initial orientation check
     console_log('Card connectedCallback ready');
   }
   // Check the orientation based on the window and div visibility
@@ -539,6 +576,7 @@ class EnhancedShutterCardNew extends LitElement{
   }
   checkOrientation(element) {
     // Get the window size
+
     this.isResizeInProgress = true; // Set flag to indicate a resize operation is in progress
 
     const windowWidth = window.innerWidth;
@@ -552,7 +590,7 @@ class EnhancedShutterCardNew extends LitElement{
     const visibleHeight = Math.max(0, Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0));
 
     // Determine the orientation based on visible area and window size
-    Globals.screenOrientation = {value: visibleWidth > visibleHeight ? LANDSCAPE : PORTRAIT};
+    Globals.screenOrientation = {value: visibleWidth*1.4 > visibleHeight ? LANDSCAPE : PORTRAIT};
     this.screenOrientation = Globals.screenOrientation;
     console_log('Card checkOrientation: screenOrientation:',this.screenOrientation);
     // Trigger re-render to update orientation
@@ -560,7 +598,7 @@ class EnhancedShutterCardNew extends LitElement{
     // After orientation check is done, reset the flag
     this.isResizeInProgress = false;
   }
-  initializeResizeObserver() {
+  startResizeObserver() {
     this.resizeObserver = new ResizeObserver(() => {
       if (!this.isResizeInProgress) {
         this.checkOrientation(Globals.huiView);
@@ -600,6 +638,7 @@ class EnhancedShutterCardNew extends LitElement{
                     .screenOrientation=${this.screenOrientation}
                   >
                   </enhanced-shutter>
+                  <div class="seperate"></div>
                 `;
               }
             )}
@@ -615,6 +654,15 @@ class EnhancedShutterCardNew extends LitElement{
      .${ESC_CLASS_SHUTTERS} {
       padding: 16px;
      }
+    .seperate:not(:last-child){
+      height: 5px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 25%;
+      border-width: 3px 0 0 0;
+      border-style: solid;
+      border-color: var(--divider-color);
+    }
     `;
     return css`${unsafeCSS(CSS)}`;
   }
@@ -699,7 +747,7 @@ class EnhancedShutterCardNew extends LitElement{
         let localWidthPx =0;
 
         let cfg= this.localCfgs[key];
-        const haButtonSize = cfg.icon_button_size();
+        const haButtonSize = cfg.iconButtonSize();
         /*
         * Size shutter title row
         */
@@ -859,14 +907,15 @@ class EnhancedShutterCardNew extends LitElement{
   }
   static getStubConfig(hass, unusedEntities, allEntities) {
     //Search for a cover entity unused first then in all entities.
-    let entity = unusedEntities.find((eid) => eid.split(".")[0] === "cover" );
-    if (!entity) {
-      entity = allEntities.find((eid) => eid.split(".")[0] === "cover");
+    let entityId = unusedEntities.find((eid) => eid.split(".")[0] === "cover" );
+    if (!entityId) {
+      entityId = allEntities.find((eid) => eid.split(".")[0] === "cover");
     }
+    let entity = hass.states[entityId];
     return {
       "entities": [{
-        "entity": entity,
-        "name": "My Enhanced Shuttter",
+        "entity": entityId,
+        "name": entity.attributes.friendly_name ? entity.attributes.friendly_name : "My Enhanced Shuttter",
         "top_offset_pct": 13,
         "button_up_hide_states": [
           "open",
@@ -905,6 +954,7 @@ class EnhancedShutter extends LitElement
     this.screenPosition=-1;
     this.positionText ='';
     this.action = '#';
+    console_log('Version:',this.version);
     //console_log('Shutter constructor ready');
   }
   shouldUpdate(changedProperties)
@@ -948,10 +998,38 @@ class EnhancedShutter extends LitElement
     console_log('Shutter Render ready');
     return html`
       <div class=${ESC_CLASS_SHUTTER} data-shutter="${entityId}"
-        style="--mdc-icon-button-size: ${this.cfg.icon_button_size()}${UNITY};
-               --mdc-icon-size: ${this.cfg.icon_size()}${UNITY};
+        style="--mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
+               --mdc-icon-size: ${this.cfg.iconSize()}${UNITY};
+               --icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${UNITY};
+               --
               "
       >
+        <!-- battery-icon -->
+        ${this.cfg.batteryEntityId() ? html`
+          <div class="top-left" style="color: ${this.cfg.batteryIconColor()};";>
+            <ha-icon
+              class="${ESC_CLASS_HA_ICON}"
+              icon=${this.cfg.batteryLevelIcon()}
+            ></ha-icon>
+            <div style="text-align: center; line-height: ${this.cfg.iconScalePercent()}; font-size: ${this.cfg.iconScalePercent()};">
+              ${this.cfg.batteryLevelText()}
+            </div>
+          </div>
+          ` : ''
+        }
+        <!-- signal-icon -->
+        ${this.cfg.signalEntityId() ? html`
+          <div class="top-right" style="color: ${this.cfg.signalIconColor()};">
+            <ha-icon
+              class="${ESC_CLASS_HA_ICON}"
+              icon=${this.cfg.signalLevelIcon()}
+            ></ha-icon>
+            <div style="text-align: center; line-height: ${this.cfg.iconScalePercent()}; font-size: ${this.cfg.iconScalePercent()};">
+              ${this.cfg.signalLevelText()}
+            </div>
+          </div>
+          ` : ''
+        }
         <div class="${ESC_CLASS_TOP}">
           <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
             @click="${() => this.doDetailOpen(entityId)}"
@@ -971,18 +1049,19 @@ class EnhancedShutter extends LitElement
         </div>
 
         <div class="${ESC_CLASS_MIDDLE}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;">
-          <div
-            class="${ESC_CLASS_BUTTONS}"
+          ${this.cfg.buttonsLeftActive()
+          ? html`
+            <div
+              class="${ESC_CLASS_BUTTONS}"
               style="
-              flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;
-              flex: none;
-              ${this.cfg.disableStandardButtons()?'display: none':''};
-            ">
+                flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;
+                flex: none;
+              ">
               ${!this.cfg.buttonUpHideStates().includes(this.cfg.movementState()) ? html`
                 <ha-icon-button
                   label="${this.hass.localize('ui.card.cover.open_cover')}"
                   .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()}
-                  @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_UP}`)} >
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_OPEN}`)} >
                   <ha-icon
                     class="${ESC_CLASS_HA_ICON}"
                     icon="mdi:arrow-up">
@@ -993,7 +1072,7 @@ class EnhancedShutter extends LitElement
                 <ha-icon-button
                   label="${this.hass.localize('ui.card.cover.stop_cover')}"
                   .disabled=${this.cfg.disabledGlobaly()}
-                  @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_STOP}`)}>
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_STOP}`)}>
                   <ha-icon
                     class="${ESC_CLASS_HA_ICON}"
                     icon="mdi:stop">
@@ -1004,34 +1083,37 @@ class EnhancedShutter extends LitElement
                 <ha-icon-button
                   label="${this.hass.localize('ui.card.cover.close_cover')}"
                   .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()}
-                  @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_DOWN}`)} >
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_CLOSE}`)} >
                   <ha-icon
                     class="${ESC_CLASS_HA_ICON}"
                     icon="mdi:arrow-down">
                   </ha-icon>
                 </ha-icon-button>
               ` : ''}
-          </div>
-          <div
-            class="${ESC_CLASS_BUTTONS}"
-            style="
-              flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;
-              flex: none;
-              ${this.cfg.partial() || this.cfg.canTilt()?'':'display: none'};
-            ">
-            ${this.cfg.partial()  /* TODO localize texts */
-              ? html`
-                  <ha-icon-button label="Partially close (${100-this.cfg.partial()}% closed)"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, this.cfg.partial() )}" >
-                    <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
-                </ha-icon-button>` : ''}
-            ${this.cfg.canTilt() ? html`
-                <ha-icon-button label="${this.hass.localize('ui.card.cover.open_tilt_cover')}"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_TILT_OPEN}`)}">
-                    <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-top-right"></ha-icon>
-                </ha-icon-button>
-                <ha-icon-button label="${this.hass.localize('ui.card.cover.close_tilt_cover')}"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_TILT_CLOSE}`)}">
-                    <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-bottom-left"></ha-icon>
-                </ha-icon-button>` : ''}
-          </div>
+            </div>
+            <div
+              class="${ESC_CLASS_BUTTONS}"
+              style="
+                flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;
+                flex: none;
+                ${this.cfg.partial() || this.cfg.canTilt()?'':'display: none'};
+              ">
+              ${this.cfg.partial()  /* TODO localize texts */
+                ? html`
+                    <ha-icon-button label="Partially close (${100-this.cfg.partial()}% closed)"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, this.cfg.partial() )}" >
+                      <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
+                  </ha-icon-button>` : ''}
+              ${this.cfg.canTilt() ? html`
+                  <ha-icon-button label="${this.hass.localize('ui.card.cover.open_tilt_cover')}"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_OPEN_TILT}`)}">
+                      <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-top-right"></ha-icon>
+                  </ha-icon-button>
+                  <ha-icon-button label="${this.hass.localize('ui.card.cover.close_tilt_cover')}"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_CLOSE_TILT}`)}">
+                      <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-bottom-left"></ha-icon>
+                  </ha-icon-button>` : ''}
+            </div>`
+           : html`
+            <div class='blankDiv'></div>
+          `}
           <div
             class="${ESC_CLASS_SELECTOR}";
             style="
@@ -1071,20 +1153,22 @@ class EnhancedShutter extends LitElement
               </div>
             </div>
           </div>
-          ${!this.cfg.disablePartialOpenButtons() /* TODO localize texts */
+          ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons() /* TODO localize texts */
             ? html`
               <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
-                <ha-icon-button label="Fully opened" .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 100)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z"></ha-icon-button>
-                <ha-icon-button label="Partially close (${25}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 75)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z"></ha-icon-button>
-                <ha-icon-button label="Partially close (${50}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 50)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z"></ha-icon-button>
+                <ha-icon-button label="Fully opened" .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 100)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z"></ha-icon-button>
+                <ha-icon-button label="Partially close (${25}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 75)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z"></ha-icon-button>
+                <ha-icon-button label="Partially close (${50}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 50)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z"></ha-icon-button>
               </div>
               <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
-                <ha-icon-button label="Partially close (${75}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 25)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z"></ha-icon-button>
-                <ha-icon-button label="Partially close (${90}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 10)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z"></ha-icon-button>
-                <ha-icon-button label="Fully closed" .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${SERVICE_SHUTTER_PARTIAL}`, 0)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z"></ha-icon-button>
+                <ha-icon-button label="Partially close (${75}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 25)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z"></ha-icon-button>
+                <ha-icon-button label="Partially close (${90}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 10)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z"></ha-icon-button>
+                <ha-icon-button label="Fully closed" .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 0)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z"></ha-icon-button>
               </div>
             `
-          :''}
+           : html`
+            <div class='blankDiv'></div>
+          `}
         </div>
 
         <div class="${ESC_CLASS_BOTTOM}">
@@ -1103,7 +1187,6 @@ class EnhancedShutter extends LitElement
             <span>${positionText}</span>
           </div>
         </div>
-
       </div>
     `;
   }
@@ -1121,12 +1204,12 @@ class EnhancedShutter extends LitElement
 
     this.action='user-click';
     const services ={
-      [SERVICE_SHUTTER_UP] : {'args': ''},
-      [SERVICE_SHUTTER_DOWN] : {'args': ''},
-      [SERVICE_SHUTTER_STOP] : {'args': ''},
-      [SERVICE_SHUTTER_PARTIAL] : {'args': {position: position}},
-      [SERVICE_SHUTTER_TILT_OPEN] : {'args': ''},
-      [SERVICE_SHUTTER_TILT_CLOSE] : {'args': ''},
+      [ACTION_SHUTTER_OPEN] : {'args': ''},
+      [ACTION_SHUTTER_CLOSE] : {'args': ''},
+      [ACTION_SHUTTER_STOP] : {'args': ''},
+      [ACTION_SHUTTER_SET_POS] : {'args': {position: position}},
+      [ACTION_SHUTTER_OPEN_TILT] : {'args': ''},
+      [ACTION_SHUTTER_CLOSE_TILT] : {'args': ''},
     }
     this.callHassCoverService(entityId,command,services[command].args);
   }
@@ -1202,7 +1285,7 @@ class EnhancedShutter extends LitElement
   };
   sendShutterPosition( entityId, position)
   {
-    this.callHassCoverService(entityId,SERVICE_SHUTTER_PARTIAL, { position: position });
+    this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS, { position: position });
   }
   callHassCoverService(entityId,command,args='')
   {
@@ -1242,6 +1325,10 @@ class shutterCfg {
 
       this.setHass(hass);
       this.setState(hass.states[entityId]);
+
+      this.batteryEntityId(config[CONFIG_BATTERY_ENTITY_ID]);
+      this.signalEntityId(config[CONFIG_SIGNAL_ENTITY_ID]);
+
       this.friendlyName(config[CONFIG_NAME] ? config[CONFIG_NAME] : this.stateAttributes() ? this.stateAttributes().friendly_name : 'Unkown');
       this.invertPercentage(config[CONFIG_INVERT_PCT]);
       this.passiveMode(config[CONFIG_PASSIVE_MODE]);
@@ -1261,6 +1348,7 @@ class shutterCfg {
 
 
       this.scaleButtons(config[CONFIG_SCALE_BUTTONS]);
+      this.scaleIcons(config[CONFIG_SCALE_ICONS]);
       this.partial(boundary(config[CONFIG_PARTIAL_CLOSE_PCT]));
       this.offset(boundary(config[CONFIG_OFFSET_CLOSED_PCT]));
 
@@ -1323,6 +1411,40 @@ class shutterCfg {
     };
     return this.#hassStateInfo;
   }
+  batteryEntityId(value=null){
+    return this.getCfg(CONFIG_BATTERY_ENTITY_ID,value);
+  }
+  batteryLevel(){
+    let entity = this.batteryEntityId();
+
+    let state = entity ? (this.#hass.states[entity] ? this.#hass.states[entity].state : '?') : '?';
+    state = ['unavailable','unknown'].includes (state) ? '?' : state ;
+    return state;
+  }
+  signalLevel(){
+    let entity = this.signalEntityId();
+
+    let state = entity ? (this.#hass.states[entity] ? this.#hass.states[entity].state : '?') : '?';
+    state = ['unavailable','unknown'].includes (state) ? '?' : state ;
+    return state;
+  }
+  signalUnit(){
+    let entity = this.signalEntityId();
+
+    let unit = entity ? (this.#hass.states[entity] ? this.#hass.states[entity].attributes.unit_of_measurement : '?') : '?';
+    unit = ['unavailable','unknown'].includes (unit) ? '?' : unit ;
+    return unit;
+  }
+  batteryUnit(){
+    let entity = this.batteryEntityId();
+
+    let unit = entity ? (this.#hass.states[entity] ? this.#hass.states[entity].attributes.unit_of_measurement : '?') : '?';
+    unit = ['unavailable','unknown'].includes (unit) ? '?' : unit ;
+    return unit;
+  }
+  signalEntityId(value){
+    return this.getCfg(CONFIG_SIGNAL_ENTITY_ID,value);
+  }
   buttonsPosition(value = null){
     return this.getCfg(CONFIG_BUTTONS_POSITION,value);
   }
@@ -1378,6 +1500,9 @@ class shutterCfg {
   }
   scaleButtons(value = null){
     return this.getCfg(CONFIG_SCALE_BUTTONS,value);
+  }
+  scaleIcons(value = null){
+    return this.getCfg(CONFIG_SCALE_ICONS,value);
   }
   topOffsetPct(value = null){
     return this.getCfg(CONFIG_TOP_OFFSET_PCT,value);
@@ -1450,6 +1575,18 @@ class shutterCfg {
     else if (this.currentPosition() == 0) state =SHUTTER_STATE_CLOSED;
 
     return state;
+  }
+  buttonsLeftActive(){
+    //if (this.disabledGlobaly()) return false;
+    //if (!this.buttonsInRow()) return false;
+    if (this.disableStandardButtons() && !this.canTilt() && !this.partial()) return false;
+    return true;
+  }
+  buttonsRightActive(){
+    //if (this.disabledGlobaly()) return false;
+    //if (!this.buttonsInRow()) return false;
+    if (this.disablePartialOpenButtons()) return false;
+    return true;
   }
   buttonsInRow(){
     return this.getButtonsPosition() == LEFT || this.getButtonsPosition() == RIGHT;
@@ -1599,8 +1736,14 @@ class shutterCfg {
   coverBottomPx(){
     return this.windowHeightPx()-this.bottomOffsetPct();
   }
+  iconScaleFactor(){
+    return this.scaleIcons()? Math.min(this.windowWidthPx()/ESC_BASE_WIDTH_PX*1.25,1): 1;
+  }
+  iconScalePercent(){
+    return Math.round(this.iconScaleFactor()*100)+'%';
+  }
 
-  icon_button_size(){
+  iconButtonSize(){
     let size = 48;
     if (this.scaleButtons()){
       let px;
@@ -1613,7 +1756,7 @@ class shutterCfg {
     }
     return size;
   }
-  icon_size(){
+  iconSize(){
     let size = 24;
     if (this.scaleButtons()){
       let px;
@@ -1626,7 +1769,111 @@ class shutterCfg {
     }
     return size;
   }
+  iconSizeWifiBattery(){
+    let size = 24;
+    if (this.scaleIcons()){
+      let px = this.windowWidthPx();
+      size = Math.min(px/6.0,24);
+    }
+    return size;
+  }
+  batteryLevelText(){
+    let level = this.batteryLevel();
+    let unit = this.batteryUnit();
+    return level+unit;
+  }
+  signalLevelText(){
+    let level = this.signalLevel();
+    let unit = this.signalUnit();
+    return level+unit;
+  }
+  batteryLevelIcon(){
 
+    let level = this.batteryLevel();
+    let icon;
+    let roundedLevel = Math.round(level / 10) * 10;
+    roundedLevel = isNaN(roundedLevel) ? -1 : roundedLevel;
+
+		switch (roundedLevel) {
+			case -1:
+				icon = 'mdi:battery-off-outline'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
+				break;
+			case 100:
+				icon = 'mdi:battery'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
+				break;
+			case 0:
+				icon = 'mdi:battery-outline'; // mdi:battery-outline should have an alias of mdi:battery-0, doesn't work in current HASS
+				break;
+			default:
+				icon = 'mdi:battery-' + roundedLevel;
+		}
+    return icon;
+  }
+  batteryIconColor(){
+    let level = this.batteryLevel();
+    let roundedLevel = Math.round(level / 20);
+    roundedLevel = isNaN(roundedLevel) ? -1 : roundedLevel;
+    const iconColor = {
+      '-1': "grey",
+      0: "red",
+      1: "#FF4D00",// deep orange,
+      2: "#FF7F00", // amber
+      3: "orange",
+      4: "#66B266", // sligly dim green
+      5: "green",
+    };
+    return iconColor[roundedLevel];
+  }
+  signalIconColor(){
+    let iconLevelIndex= this.signalLevelIndex();
+    const iconColor = {
+      '-1': "grey",
+      0: "red",
+      1: "#FF4D00",// deep orange,
+      2: "#FF7F00", // amber
+      3: "orange",
+      4: "#66B266", // sligly dim green
+      5: "green",
+    };
+    return iconColor[iconLevelIndex];
+  }
+  signalLevelIndex(){
+    let level = this.signalLevel();
+    let unit = this.signalUnit();
+    if (unit != '?'){
+      const unitType ={
+        'dB': {max: 100, min: 0},
+        'dBm': {max: -40, min: -90},
+        'lqi': {max: 255, min: 0}, // from Z2M values are 0-255 ??
+        '%': {max: 100, min: 0},
+        '?': {max: 100, min: 0}
+      };
+      let delta= unitType[unit].max-unitType[unit].min;
+      let levelPercentage = (level-unitType[unit].min) / delta * 100;
+      let levelIndex =Math.round(levelPercentage / 20);
+
+      return levelIndex;
+    }
+    return -1;
+  }
+  signalLevelIcon(){
+    let unit = this.signalUnit();
+    let icon = 'mdi:wifi-strength-off-outline';
+    if (unit != '?'){
+      const iconStrength = {
+        '-1': "alert-outline",
+        0: "off-outline",
+        1: "outline",
+        2: "1",
+        3: "2",
+        4: "3",
+        5: "4",
+      };
+      let iconLevelIndex= this.signalLevelIndex();
+      icon = 'mdi:wifi-strength-'+iconStrength[iconLevelIndex];
+    }
+    return icon;
+  }
 
 }
 /**
@@ -1673,11 +1920,9 @@ function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
  * Main code
  */
 const Globals={
-  huiView: findElement(HA_HUI_VIEW),
-  screenOrientation: {value:''},
+  huiView: null,
+  screenOrientation: {value:LANDSCAPE},
 }
-const rect = Globals.huiView.getBoundingClientRect();
-Globals.screenOrientation.value = rect.width > rect.height ? LANDSCAPE : PORTRAIT;
 
 customElements.define(HA_CARD_NAME, EnhancedShutterCardNew);
 customElements.define(HA_SHUTTER_NAME, EnhancedShutter);
@@ -1687,7 +1932,7 @@ window.customCards.push({
   type: "enhanced-shutter-card",
   name: "Enhanced Shutter Card",
   preview: true,
-  description: "A shutter card for easy control of shutters",
+  description: "An enhanced shutter card for easy control of shutters",
   documentationURL: "https://github.com/marcelhoogantink/enhanced-shutter-card"
 });
 
@@ -1717,6 +1962,7 @@ function console_log(...args){
     console.log(formatDate("HH:mm:ss.SSS"),...args);
   }
 }
+
 /**
  * function findElement() to find an element in DOM body, inluding shadow DOMs.
  * @param {*} selector
@@ -1724,13 +1970,11 @@ function console_log(...args){
  */
 function findElement(selector) {
   // Search in the regular DOM
-  const foundInDom = document.body.querySelector(selector);
+  let foundInDom = document.body.querySelector(selector);
 
-  // If found, return the element
-  if (foundInDom) {
-    return foundInDom;
-  }
-  return recursiveSearch(document.body);
+  // If not found directly, search the element
+  if (!foundInDom) foundInDom= recursiveSearch(document.body);
+  return foundInDom;
 
   // Function to recursively search in shadow roots
   function searchInShadowDom(node) {
@@ -1786,3 +2030,4 @@ function findElement(selector) {
   }
 
 }
+
