@@ -9,6 +9,10 @@
 New settings `battery_entity` and `signal_entity` for displaying battery and signal icons with level-information.
 New settings `scale_icons` for activating scaling of the icons when the window-image-size is made smaller.
 
+![image](https://github.com/user-attachments/assets/4c0ad49b-e003-4ca8-a64f-3b1fea6d5b68)
+
+
+
 * #### Card works now 100% local.
 The card inludes now the lit-library, no internet-connection needed after downloading.
 
