@@ -12,8 +12,8 @@ New settings `scale_icons` for activating scaling of the icons when the window-i
 * #### Card works now 100% local.
 The card inludes now the lit-library, no internet-connection needed after downloading.
 
-* #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) solved.
-This error is found and removed.
+* #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) 
+This bug is found and removed.
 
 * #### Improved sizing of the Card
 
