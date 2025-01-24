@@ -5,7 +5,7 @@
 
 ### New in version v1.1.4:
 
-* #### New: Battery ans signal level display
+* #### New: Battery and signal level display
 New settings `battery_entity` and `signal_entity` fro displaying battery and signal icon with level-information.
 New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
 
