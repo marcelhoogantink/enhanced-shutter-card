@@ -28,6 +28,20 @@ const AUTO_BR = `${AUTO}-${BOTTOM}-${RIGHT}`;
 const PORTRAIT ="P";
 const LANDSCAPE ="L";
 
+// derived from: https://github.com/home-assistant/core/blob/dev/homeassistant/components/cover/__init__.py
+//               lines 101-108
+
+const ESC_FEATURE_OPEN              = 0b00000001; // 1
+const ESC_FEATURE_CLOSE             = 0b00000010; // 2
+const ESC_FEATURE_SET_POSITION      = 0b00000100; // 4
+const ESC_FEATURE_STOP              = 0b00001000; // 8
+const ESC_FEATURE_OPEN_TILT         = 0b00010000; // 16
+const ESC_FEATURE_CLOSE_TILT        = 0b00100000; // 32
+const ESC_FEATURE_STOP_TILT         = 0b01000000; // 64
+const ESC_FEATURE_SET_TILT_POSITION = 0b10000000; // 128
+
+const ESC_FEATURE_ALL               = 0b11111111; // 255
+
 const SHUTTER_STATE_OPEN = 'open';
 const SHUTTER_STATE_CLOSED = 'closed';
 const SHUTTER_STATE_OPENING = 'opening';
