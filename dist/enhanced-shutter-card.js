@@ -1294,7 +1294,12 @@ class EnhancedShutter extends LitElement
     let newScreenPosition = this.getScreenPosition(event.pageY);
     let shutterPosition = this.getShutterPosition(newScreenPosition);
 
-    this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
+    if (this.cfg.getFeatureActive(ESC_FEATURE_SET_POSITION)){
+      this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
+    }else{
+      const actionToSend = (shutterPosition > 50) ? ACTION_SHUTTER_OPEN : ACTION_SHUTTER_CLOSE;
+      this.callHassCoverService(this.cfg.entityId(),actionToSend);
+    }
 
   };
   sendShutterPosition( entityId, position)
@@ -1714,18 +1719,28 @@ class shutterCfg {
   positionPercentToText(percent){
     let text='';
     if (typeof percent === 'number') {
-      if (this.alwaysPercentage()) {
-        text = percent + '%';
-      }else{
-        if (percent == 100 || !percent) {
-          if (this.invertPercentage()) percent = 100-percent;
-          if (percent == 100 ) {
-            text = this.#hass.localize('component.cover.entity_component._.state.open');
-          } else if (!percent) {
-            text = this.#hass.localize('component.cover.entity_component._.state.closed');
-          }
-        } else{
+      if (this.getFeatureActive(ESC_FEATURE_SET_POSITION)) {
+        if (this.alwaysPercentage()) {
           text = percent + '%';
+        }else{
+          if (percent == 100 || !percent) {
+            if (this.invertPercentage()) percent = 100-percent;
+            if (percent == 100 ) {
+              text = this.#hass.localize('component.cover.entity_component._.state.open');
+            } else if (!percent) {
+              text = this.#hass.localize('component.cover.entity_component._.state.closed');
+            }
+          } else{
+            text = percent + '%';
+          }
+        }
+      }
+      else{
+        if (this.invertPercentage()) percent = 100-percent;
+        if (percent > 50 ) {
+          text = this.#hass.localize('component.cover.entity_component._.state.open');
+        } else {
+          text = this.#hass.localize('component.cover.entity_component._.state.closed');
         }
       }
     } else {
