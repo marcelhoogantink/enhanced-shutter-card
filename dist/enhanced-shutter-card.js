@@ -1539,20 +1539,20 @@ class shutterCfg {
     return this.getCfg(CONFIG_NAME_DISABLED,value);
   }
   showButtonStop(){
-    return show = !this.buttonStopHideStates().includes(this.movementState()) && this.getFeatureActive(ESC_FEATURE_STOP);
+    return !this.buttonStopHideStates().includes(this.movementState()) && this.getFeatureActive(ESC_FEATURE_STOP);
   }
   buttonStopHideStates(value = null){
     return this.getCfg(CONFIG_BUTTON_STOP_HIDE_STATES,value);
   }
   showButtonOpen(){
-    return show = !this.buttonOpenHideStates().includes(this.movementState()) && this.getFeatureActive(ESC_FEATURE_OPEN);
+    return !this.buttonOpenHideStates().includes(this.movementState()) && this.getFeatureActive(ESC_FEATURE_OPEN);
   }
 
   buttonOpenHideStates(value = null){
     return this.getCfg(CONFIG_BUTTON_UP_HIDE_STATES,value);
   }
   showButtonClose(){
-    return show = !this.buttonCloseHideStates().includes(this.movementState()) && this.getFeatureActive(ESC_FEATURE_CLOSE);
+    return !this.buttonCloseHideStates().includes(this.movementState()) && this.getFeatureActive(ESC_FEATURE_CLOSE);
   }
   buttonCloseHideStates(value = null){
     return this.getCfg(CONFIG_BUTTON_DOWN_HIDE_STATES,value);
