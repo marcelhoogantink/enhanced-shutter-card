@@ -1407,6 +1407,9 @@ class shutterCfg {
   stateAttributes(){
     return (this.#state() && this.#state().attributes);
   }
+  getFeatureActive(feature=ESC_FEATURE_ALL){
+    return (this.stateAttributes() && (this.stateAttributes().supported_features & feature));
+  }
   setHass(value){
     this.#hass=value;
   }
@@ -1525,7 +1528,7 @@ class shutterCfg {
     return this.getCfg(CONFIG_BOTTOM_OFFSET_PCT,value);
   }
   canTilt(value = null){
-    return this.getCfg(CONFIG_CAN_TILT,value);
+    return this.getFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT) && this.getCfg(CONFIG_CAN_TILT,value);
   }
   nameDisabled(value = null){
     return this.getCfg(CONFIG_NAME_DISABLED,value);
