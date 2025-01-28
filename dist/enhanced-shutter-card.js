@@ -517,16 +517,17 @@ class EnhancedShutterCardNew extends LitElement{
     if (this.isShutterConfigLoaded){
 
       changedProperties.forEach((oldValue, propName) => {
-        let newCoverStates;
+        let coverStatesFromHass;
         if (propName=='hass'){
 
-            const statesNew = Object.values(this[propName].states);
-            newCoverStates = statesNew.filter(entity => entity.entity_id.startsWith('cover.'));
+            const statesFromHass = Object.values(this[propName].states);
+            coverStatesFromHass = statesFromHass.filter(entity => entity.entity_id.startsWith('cover.'));
 
             Object.keys(this.localCfgs).forEach(entityId =>{
-              const entity = Object.values(newCoverStates).find(states => states.entity_id === entityId);
-              if (entity) {
-                let shutterState = `${entity.state}-${entity.attributes.current_position}`;
+              const entityFromHass = Object.values(coverStatesFromHass).find(states => states.entity_id === entityId);
+              if (entityFromHass) {
+                //let shutterState = `${entity.state}-${entity.attributes.current_position}`;
+                let shutterState = `${entityFromHass.state}-${entityFromHass.attributes.current_position}`;
                 if (shutterState != this.localCfgs[entityId].shutterState){
                   this.localCfgs[entityId].shutterState = shutterState;
                   doUpdate =true;
