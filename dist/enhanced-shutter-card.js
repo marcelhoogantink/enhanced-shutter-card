@@ -14,6 +14,8 @@ const HA_CARD_NAME = "enhanced-shutter-card";
 const HA_SHUTTER_NAME = `enhanced-shutter`;
 const HA_HUI_VIEW = 'hui-view';
 
+const UNAVAILABLE = 'unavailable';
+
 const AUTO = 'auto';
 const LEFT = 'left';
 const RIGHT = 'right';
@@ -640,7 +642,7 @@ class EnhancedShutterCardNew extends LitElement{
               (currEntity) => {
                 let entityId = currEntity.entity ? currEntity.entity : currEntity;
 
-                this.localCfgs[entityId].setState(this.hass.states[entityId]);
+                this.localCfgs[entityId].setEntityInfo(entityId);
 
                 return html`
                   <enhanced-shutter
@@ -776,7 +778,7 @@ class EnhancedShutterCardNew extends LitElement{
           console_log('size B*H',localWidthPx,localHeightPx);
         }
         /*
-        * Size shutter opening row
+        * Size shutter-opening row
         */
         if (!cfg.openingDisabled() && !cfg.inlineHeader()){
           let pctSize = getTextSize(cfg.computePositionText(),haTitleFont,14);
@@ -1170,14 +1172,42 @@ class EnhancedShutter extends LitElement
           ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons() /* TODO localize texts */
             ? html`
               <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
-                <ha-icon-button label="Fully opened" .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 100)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z"></ha-icon-button>
-                <ha-icon-button label="Partially close (${25}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 75)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z"></ha-icon-button>
-                <ha-icon-button label="Partially close (${50}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 50)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z"></ha-icon-button>
+                <ha-icon-button
+                  label="Fully opened"
+                  .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()}
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 100)}
+                  path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z">
+                </ha-icon-button>
+                <ha-icon-button
+                  label="Partially close (${25}% closed)"
+                  .disabled=${this.cfg.disabledGlobaly()}
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 75)}
+                  path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z"></ha-icon-button>
+                <ha-icon-button
+                  label="Partially close (${50}% closed)"
+                  .disabled=${this.cfg.disabledGlobaly()}
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 50)}
+                  path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z"></ha-icon-button>
               </div>
               <div class="${ESC_CLASS_BUTTONS}" style="flex-flow: ${!this.cfg.buttonsInRow() ? 'row': 'column'} wrap;">
-                <ha-icon-button label="Partially close (${75}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 25)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z"></ha-icon-button>
-                <ha-icon-button label="Partially close (${90}% closed)" .disabled=${this.cfg.disabledGlobaly()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 10)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z"></ha-icon-button>
-                <ha-icon-button label="Fully closed" .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()} @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 0)} path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z"></ha-icon-button>
+                <ha-icon-button
+                  label="Partially close (${75}% closed)"
+                  .disabled=${this.cfg.disabledGlobaly()}
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 25)}
+                  path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z">
+                </ha-icon-button>
+                <ha-icon-button
+                  label="Partially close (${90}% closed)"
+                  .disabled=${this.cfg.disabledGlobaly()}
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 10)}
+                  path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z">
+                </ha-icon-button>
+                <ha-icon-button
+                  label="Fully closed"
+                  .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()}
+                  @click=${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, 0)}
+                  path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z">
+                </ha-icon-button>
               </div>
             `
            : html`
@@ -1227,18 +1257,18 @@ class EnhancedShutter extends LitElement
     }
     this.callHassCoverService(entityId,command,services[command].args);
   }
-  getPickPoint(event){
+  getBasePickPoint(event){
     let siblings = Array.from(event.target.parentElement.children);
     let slide = siblings.find(sibling => sibling.classList.contains(ESC_CLASS_SELECTOR_SLIDE));
-    this.pickPoint = event.pageY - parseInt(slide.style.height);
+    this.basePickPoint = event.pageY - parseInt(slide.style.height);
   }
-  getShutterPosition(newScreenPosition){
-    let shutterPosition = (newScreenPosition - this.cfg.topOffsetPct()) * (100-this.cfg.offset()) / this.cfg.coverHeightPx();
-    shutterPosition = Math.round(this.cfg.invertPercentage() ?shutterPosition: 100 - shutterPosition);
+  getShutterPosFromScreenPos(newScreenPosition){
+    let shutterPosition = Math.round((newScreenPosition - this.cfg.topOffsetPct()) * (100-this.cfg.offset()) / this.cfg.coverHeightPx());
+    shutterPosition = this.cfg.shutterPosition2(shutterPosition);
     return shutterPosition;
   }
-  getScreenPosition(pickPoint){
-    let newScreenPosition = Math. round(boundary(pickPoint - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
+  getScreenPosFromPickPoint(pickPoint){
+    let newScreenPosition = Math. round(boundary(pickPoint - this.basePickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
     return newScreenPosition;
   }
   mouseDown = (event) =>
@@ -1252,7 +1282,7 @@ class EnhancedShutter extends LitElement
     }
     this.action='user-drag';
 
-    this.getPickPoint(event);
+    this.getBasePickPoint(event);
 
     this.addEventListener('mousemove', this.mouseMove);
     this.addEventListener('touchmove', this.mouseMove);
@@ -1269,8 +1299,8 @@ class EnhancedShutter extends LitElement
     if (event.pageY === undefined) return;
     this.action='user-drag';
 
-    this.screenPosition = this.getScreenPosition(event.pageY); // triggers refresh
-    let pointedShutterPosition = this.getShutterPosition(this.screenPosition);
+    this.screenPosition = this.getScreenPosFromPickPoint(event.pageY); // triggers refresh
+    let pointedShutterPosition = this.getShutterPosFromScreenPos(this.screenPosition);
 
     this.positionText = this.cfg.computePositionText(pointedShutterPosition);
   };
@@ -1291,8 +1321,8 @@ class EnhancedShutter extends LitElement
 
     this.action='user-drag';
 
-    let newScreenPosition = this.getScreenPosition(event.pageY);
-    let shutterPosition = this.getShutterPosition(newScreenPosition);
+    let newScreenPosition = this.getScreenPosFromPickPoint(event.pageY);
+    let shutterPosition = this.getShutterPosFromScreenPos(newScreenPosition);
 
     if (this.cfg.getFeatureActive(ESC_FEATURE_SET_POSITION)){
       this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
@@ -1334,7 +1364,7 @@ class EnhancedShutter extends LitElement
 class shutterCfg {
 
   #cfg={};
-  #hassStateInfo={};
+  #hassEntityInfo={};
   #hass={};
 
   constructor(hass,config,allImages,imageDimension=null)
@@ -1343,12 +1373,12 @@ class shutterCfg {
     let entityId = this.entityId(config[CONFIG_ENTITY_ID] ? config[CONFIG_ENTITY_ID] : config);
 
       this.setHass(hass);
-      this.setState(hass.states[entityId]);
+      this.setEntityInfo(entityId);
 
       this.batteryEntityId(config[CONFIG_BATTERY_ENTITY_ID]);
       this.signalEntityId(config[CONFIG_SIGNAL_ENTITY_ID]);
 
-      this.friendlyName(config[CONFIG_NAME] ? config[CONFIG_NAME] : this.stateAttributes() ? this.stateAttributes().friendly_name : 'Unkown');
+      this.friendlyName(config[CONFIG_NAME] ? config[CONFIG_NAME] : this.entityAttributes() ? this.entityAttributes().friendly_name : 'Unkown');
       this.invertPercentage(config[CONFIG_INVERT_PCT]);
       this.passiveMode(config[CONFIG_PASSIVE_MODE]);
 
@@ -1409,11 +1439,8 @@ class shutterCfg {
     }
     return this.#cfg[key];
   }
-  stateAttributes(){
-    return (this.#state() && this.#state().attributes);
-  }
   getFeatureActive(feature=ESC_FEATURE_ALL){
-    return (this.stateAttributes() && (this.stateAttributes().supported_features & feature));
+    return (this.entityAttributes() && (this.entityAttributes().supported_features & feature));
   }
   setHass(value){
     this.#hass=value;
@@ -1421,17 +1448,28 @@ class shutterCfg {
   getHass(){
     return this.#hass;
   }
-  setState(value){
-    return this.#state(value);
+  setEntityInfo(entityId){
+    if (typeof this.#hass.states[entityId] !== "undefined") {
+      this.#hassEntityInfo = this.#hass.states[entityId];
+    }else{
+      console.warn('setEntityInfo: Entity [', entityId, '] not found');
+      this.#hassEntityInfo = {
+        state: UNAVAILABLE,
+        attributes: UNAVAILABLE,
+        entityId: entityId
+      }
+    };
+    return this.#hassEntityInfo;
   }
   getState(){
-    return this.#state().state;
+    return this.#getEntityInfo() ? this.#getEntityInfo().state : UNAVAILABLE;
   }
-  #state(value= null){
-    if (value!== null && this.#hassStateInfo != value) {
-      this.#hassStateInfo = value
-    };
-    return this.#hassStateInfo;
+  entityAttributes(){
+    return this.#getEntityInfo() ? this.#getEntityInfo().attributes : UNAVAILABLE;
+  }
+
+  #getEntityInfo(){
+    return this.#hassEntityInfo;
   }
   batteryEntityId(value=null){
     return this.getCfg(CONFIG_BATTERY_ENTITY_ID,value);
@@ -1597,8 +1635,19 @@ class shutterCfg {
   /*
   ** end getters/setters
   */
+
+  shutterPosition2(visiblePosition){
+    return (this.invertPercentage()?visiblePosition:100-visiblePosition)
+  }
   currentPosition(){
-    return this.stateAttributes() ? this.stateAttributes().current_position: 0;
+    let position;
+    if (this.getFeatureActive(ESC_FEATURE_SET_POSITION)){
+      position= this.entityAttributes() ? this.entityAttributes().current_position: 0;
+    }else{
+      position= this.getState()==SHUTTER_STATE_OPEN ? 100 :  0;
+    }
+
+    return position;
   }
   getOrientation(){
     return Globals.screenOrientation.value; // global variable !!
@@ -1632,7 +1681,7 @@ class shutterCfg {
     return this.getButtonsPosition() == BOTTOM || this.getButtonsPosition() == RIGHT;
   }
   disabledGlobaly() {
-    return (this.getState() == "unavailable");
+    return (this.getState() == UNAVAILABLE);
   }
   upButtonDisabled(){
     let upDisabled = false;
@@ -1711,15 +1760,15 @@ class shutterCfg {
       visiblePosition = !!this.offset() ? Math.max(0, Math.round((position_pct - this.offset()) / (100-this.offset()) * 100 )) : position_pct;
     }
 
-    let position =this.coverHeightPx() * (this.invertPercentage()?visiblePosition:100-visiblePosition) / 100 + this.topOffsetPct();
+    let position =this.coverHeightPx() * (this.shutterPosition2(visiblePosition)) / 100 + this.topOffsetPct();
 
     return position;
 
   }
   positionPercentToText(percent){
     let text='';
-    if (typeof percent === 'number') {
-      if (this.getFeatureActive(ESC_FEATURE_SET_POSITION)) {
+    if (this.getFeatureActive(ESC_FEATURE_SET_POSITION)) {
+      if (typeof percent === 'number') {
         if (this.alwaysPercentage()) {
           text = percent + '%';
         }else{
@@ -1727,48 +1776,53 @@ class shutterCfg {
             if (this.invertPercentage()) percent = 100-percent;
             if (percent == 100 ) {
               text = this.#hass.localize('component.cover.entity_component._.state.open');
-            } else if (!percent) {
+            } else {
               text = this.#hass.localize('component.cover.entity_component._.state.closed');
             }
           } else{
             text = percent + '%';
           }
         }
+      } else {
+        text = this.#hass.localize('state.default.unavailable');
       }
-      else{
-        if (this.invertPercentage()) percent = 100-percent;
-        if (percent > 50 ) {
-          text = this.#hass.localize('component.cover.entity_component._.state.open');
-        } else {
-          text = this.#hass.localize('component.cover.entity_component._.state.closed');
         }
+    else{
+      if (this.invertPercentage()) percent = 100-percent; // TODO: check with this.shutterPosition2() , just the other way around ...
+      if (percent > 50 ) {
+        text = this.#hass.localize('component.cover.entity_component._.state.open');
+      } else {
+        text = this.#hass.localize('component.cover.entity_component._.state.closed');
       }
-    } else {
-      text = this.#hass.localize('state.default.unavailable');
     }
     return text;
   }
   computePositionText(currentPosition =this.currentPosition()) {
 
-    let offset = this.offset()
-
-    let visiblePosition;
     let positionText;
+    if (this.getState()==UNAVAILABLE){
+        positionText = this.#hass.localize('state.default.unavailable');
+    }else{
 
-    if (this.invertPercentage()) {
-      visiblePosition = offset ? Math.min(100, Math.round(currentPosition / offset * 100 )) : currentPosition;
-      positionText = this.positionPercentToText(visiblePosition);
+      let offset = this.offset()
 
-      if (visiblePosition == 100 && offset) {
-        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
-      }
+      let visiblePosition;
 
-    } else {
-      visiblePosition = offset ? Math.max(0, Math.round((currentPosition - offset) / (100-offset) * 100 )) : currentPosition;
-      positionText = this.positionPercentToText(visiblePosition);
+      if (this.invertPercentage()) {
+        visiblePosition = offset ? Math.min(100, Math.round(currentPosition / offset * 100 )) : currentPosition;
+        positionText = this.positionPercentToText(visiblePosition);
 
-      if (visiblePosition == 0 && offset) {
-        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+        if (visiblePosition == 100 && offset) {
+          positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+        }
+
+      } else {
+        visiblePosition = offset ? Math.max(0, Math.round((currentPosition - offset) / (100-offset) * 100 )) : currentPosition;
+        positionText = this.positionPercentToText(visiblePosition);
+
+        if (visiblePosition == 0 && offset) {
+          positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+        }
       }
     }
     return positionText;
