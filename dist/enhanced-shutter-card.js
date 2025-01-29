@@ -517,14 +517,14 @@ class EnhancedShutterCardNew extends LitElement{
     if (this.isShutterConfigLoaded){
 
       changedProperties.forEach((oldValue, propName) => {
-        let coverStatesFromHass;
+        let allCoverStatesFromHass;
         if (propName=='hass'){
-
+          /* On hass update, check if there is a cover change */
             const statesFromHass = Object.values(this[propName].states);
-            coverStatesFromHass = statesFromHass.filter(entity => entity.entity_id.startsWith('cover.'));
+            allCoverStatesFromHass = statesFromHass.filter(entity => entity.entity_id.startsWith('cover.'));
 
             Object.keys(this.localCfgs).forEach(entityId =>{
-              const entityFromHass = Object.values(coverStatesFromHass).find(states => states.entity_id === entityId);
+              const entityFromHass = Object.values(allCoverStatesFromHass).find(states => states.entity_id === entityId);
               if (entityFromHass) {
                 //let shutterState = `${entity.state}-${entity.attributes.current_position}`;
                 let shutterState = `${entityFromHass.state}-${entityFromHass.attributes.current_position}`;
@@ -536,6 +536,7 @@ class EnhancedShutterCardNew extends LitElement{
             });
 
         }else{
+          /* On other property change, do the update */
           doUpdate =true;
         }
       });
@@ -554,8 +555,9 @@ class EnhancedShutterCardNew extends LitElement{
   {
     //console_log('Card Update');
     super.update(changedProperties);
-    changedProperties.forEach((oldValue, prop) => {
-      console_log(`Card Update, Property `,prop,` changed from`,oldValue,` to `,this[prop]);
+    changedProperties.forEach((oldValue, propName) => {
+      console_log(`Card Update, Property ${propName} changed. oldValue: ${oldValue}; new: ${this[propName]}`);
+
     });
     //console_log('Card Update ready');
   }
@@ -717,8 +719,10 @@ class EnhancedShutterCardNew extends LitElement{
     //   height: 56px
     //   gap between cells: 8px
 
-    //console_log('Card getGridOptions');
-    //console_log ('Card getGridOptions isShutterConfigLoaded',this.isShutterConfigLoaded);
+    const debug=0;
+
+    if (debug) console_log('Card getGridOptions');
+    if (debug) console_log ('Card getGridOptions isShutterConfigLoaded',this.isShutterConfigLoaded);
 
     // HA basic szies for calculations:
 
@@ -757,7 +761,7 @@ class EnhancedShutterCardNew extends LitElement{
         totalHeightPx += haTitleHeightPx; // TODO
         totalWidthPx  += titleSize.width;
       }
-      console_log('Start size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx,titleSize);
+      if (debug) console_log('Start size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx,titleSize);
       Object.keys(this.localCfgs).forEach(key =>{
 
         let localHeightPx=0;
@@ -775,8 +779,8 @@ class EnhancedShutterCardNew extends LitElement{
 
           localHeightPx += partHeightPx;
           localWidthPx = Math.max(totalWidthPx,partWidthPx);
-          console_log('part size B*H',partWidthPx,partHeightPx,'after title',titleSize);
-          console_log('size B*H',localWidthPx,localHeightPx);
+          if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after title',titleSize);
+          if (debug) console_log('size B*H',localWidthPx,localHeightPx);
         }
         /*
         * Size shutter-opening row
@@ -787,19 +791,19 @@ class EnhancedShutterCardNew extends LitElement{
           let partWidthPx = pctSize.width;
           localHeightPx += partHeightPx;
           localWidthPx = Math.max(totalWidthPx,partWidthPx);
-          console_log('part size B*H',partWidthPx,partHeightPx,'after open%',pctSize);
-          console_log('size B*H',localWidthPx,localHeightPx);
+          if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after open%',pctSize);
+          if (debug) console_log('size B*H',localWidthPx,localHeightPx);
         }
         /*
         * padding top and bottom rows
         */
         let partHeightPx = 32;
         localHeightPx += partHeightPx;
-        console_log('part size H',partHeightPx,'after including padding');
-        console_log('size B*H',localWidthPx,localHeightPx);
+        if (debug) console_log('part size H',partHeightPx,'after including padding');
+        if (debug) console_log('size B*H',localWidthPx,localHeightPx);
 
         //totalHeightPx+=localHeightPx;
-        console_log('size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+        if (debug) console_log('size: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
         /*
         * size image
         */
@@ -807,11 +811,11 @@ class EnhancedShutterCardNew extends LitElement{
         let partWidthPx = cfg.windowWidthPx();
         let localHeight2Px = partHeightPx;
         let localWidth2Px  = partWidthPx;
-        console_log('part size B*H',partWidthPx,partHeightPx,'after image');
-        console_log('size B2*H2',localWidth2Px,localHeight2Px);
+        if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after image');
+        if (debug) console_log('size B2*H2',localWidth2Px,localHeight2Px);
 
         if (cfg.buttonsInRow()){
-          //console_log('Buttons Naast shutter');
+          //if (debug) console_log('Buttons Naast shutter');
           /*
           * size standard-buttons
           */
@@ -820,8 +824,8 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px+=partWidthPx;
-            console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
-            console_log('size B2*H2',localWidth2Px,localHeight2Px);
+            if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
+            if (debug) console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
 
           /*
@@ -832,8 +836,8 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px += partWidthPx;
-            console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
-            console_log('size B2*H2',localWidth2Px,localHeight2Px,);
+            if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
+            if (debug) console_log('size B2*H2',localWidth2Px,localHeight2Px,);
           }
 
           /*
@@ -844,13 +848,13 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize*2;
             localHeight2Px = Math.max(localHeight2Px,partHeightPx);
             localWidth2Px+=partWidthPx;
-            console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
-            console_log('size B2*H2',localWidth2Px,localHeight2Px);
+            if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
+            if (debug) console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
 
 
         }else{
-          console_log('Buttons boven/onder shutter');
+          if (debug) console_log('Buttons boven/onder shutter');
           /*
           * size standard-buttons
           */
@@ -859,8 +863,8 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize*3 ;
             localHeight2Px += partHeightPx;
             localWidth2Px=Math.max(localWidth2Px,partWidthPx);
-            console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
-            console_log('size B2*H2',localWidth2Px,localHeight2Px);
+            if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after std buttons');
+            if (debug) console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
           /*
           * size tilt-buttons
@@ -870,8 +874,8 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx = haButtonSize*2;
             localHeight2Px += partHeightPx;
             localWidth2Px = Math.max(localWidth2Px,partWidthPx);
-            console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
-            console_log('size B2*H2',localWidth2Px,localHeight2Px);
+            if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after tilt');
+            if (debug) console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
 
 
@@ -883,8 +887,8 @@ class EnhancedShutterCardNew extends LitElement{
             let partWidthPx =  haButtonSize*3;
             localHeight2Px += partHeightPx;
             localWidth2Px=Math.max(localWidth2Px,partWidthPx);
-            console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
-            console_log('size B2*H2',localWidth2Px,localHeight2Px);
+            if (debug) console_log('part size B*H',partWidthPx,partHeightPx,'after partial buttons');
+            if (debug) console_log('size B2*H2',localWidth2Px,localHeight2Px);
           }
 
         }
@@ -892,15 +896,15 @@ class EnhancedShutterCardNew extends LitElement{
         localWidthPx  = Math.max(localWidthPx,localWidth2Px);
         localHeightPx += localHeight2Px;
         localHeightPx += 16; // include bottom padding
-        console_log(`Endsize ${key} B*H`,localWidthPx,localHeightPx);
+        if (debug) console_log(`Endsize ${key} B*H`,localWidthPx,localHeightPx);
 
         totalWidthPx  = Math.max(totalWidthPx,localWidthPx);
         totalHeightPx += localHeightPx;
       });
-      console_log('Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+      if (debug) console_log('Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
       totalHeightPx += 16; // include bottom padding
       totalWidthPx += 32;
-      console_log('Add padding Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
+      if (debug) console_log('Add padding Endsize: totalHeightPx:',totalHeightPx,'totalWidthPx',totalWidthPx);
     }
     let nbRows= Math.ceil((totalHeightPx+haGridPxHeightGap)/(haGridPxHeight+haGridPxHeightGap));
     let nbRows2 = ((totalHeightPx+haGridPxHeightGap)/(haGridPxHeight+haGridPxHeightGap));
@@ -911,8 +915,8 @@ class EnhancedShutterCardNew extends LitElement{
     //let nbColsMin= Math.ceil(totalWidthPx/haGridPxWidthMax);
     //let nbColsMax= Math.ceil(totalWidthPx/haGridPxWidthMin);
 
-    console_log(`size Card getGridOptions totalHeightPx:`,totalHeightPx,'totalWidthPx',totalWidthPx, " ==> nbRows : " + nbRows +'/' + nbRows2 + " nbColsMin : " + nbColsMin + " nbColsMean : " + nbColsMean+ " nbColsMax : " + nbColsMax);
-    console_log('Card getGridOptions ready');
+    if (debug) console_log(`size Card getGridOptions totalHeightPx:`,totalHeightPx,'totalWidthPx',totalWidthPx, " ==> nbRows : " + nbRows +'/' + nbRows2 + " nbColsMin : " + nbColsMin + " nbColsMean : " + nbColsMean+ " nbColsMax : " + nbColsMax);
+    if (debug) console_log('Card getGridOptions ready');
     return {
       rows: nbRows,
       min_rows: nbRows,
@@ -979,7 +983,8 @@ class EnhancedShutter extends LitElement
     console_log(`Shutter shouldUpdate: ${this.cfg.entityId()}`);
 
     changedProperties.forEach((oldValue, propName) => {
-      console_log(`Shutter ${propName} changed. oldValue: ${oldValue}; new: ${this[propName]}`);
+      console_log(`Shutter Update, Property ${propName} changed. oldValue: ${oldValue}; new: ${this[propName]}`);
+
     });
     console_log('Shutter shouldUpdate ready');
     return true;
@@ -999,7 +1004,7 @@ class EnhancedShutter extends LitElement
   }
   render()
   {
-    console_log('Shutter Render',this.cfg.entityId());
+    console_log('Shutter Render',this.cfg.entityId(),this.cfg);
     let entityId = this.cfg.entityId();
     let positionText;
     let screenPosition;
@@ -2060,7 +2065,7 @@ function formatDate(format) {
 }
 
 function console_log(...args){
-  if (VERSION.indexOf('b') > 0){
+  if (VERSION.indexOf('1') > 0){
     console.log(formatDate("HH:mm:ss.SSS"),...args);
   }
 }
