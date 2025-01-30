@@ -15,6 +15,7 @@ const HA_SHUTTER_NAME = `enhanced-shutter`;
 const HA_HUI_VIEW = 'hui-view';
 
 const UNAVAILABLE = 'unavailable';
+const NOT_KNOWN =[UNAVAILABLE,'unknown',undefined]
 
 const AUTO = 'auto';
 const LEFT = 'left';
@@ -525,11 +526,29 @@ class EnhancedShutterCardNew extends LitElement{
 
             Object.keys(this.localCfgs).forEach(entityId =>{
               const entityFromHass = Object.values(allCoverStatesFromHass).find(states => states.entity_id === entityId);
+              const cfg = this.localCfgs[entityId];
               if (entityFromHass) {
                 //let shutterState = `${entity.state}-${entity.attributes.current_position}`;
                 let shutterState = `${entityFromHass.state}-${entityFromHass.attributes.current_position}`;
-                if (shutterState != this.localCfgs[entityId].shutterState){
-                  this.localCfgs[entityId].shutterState = shutterState;
+                if (shutterState != cfg.shutterState){
+                  //this.localCfgs[entityId].shutterState = shutterState;
+                  cfg.shutterState = shutterState;
+                  doUpdate =true;
+                }
+                // check battery entity change
+                const batteryEntityId = cfg.batteryEntity().entity_id;
+                const batteryEntityFromHass = Object.values(statesFromHass).find(states => states.entity_id === batteryEntityId);
+                if (!batteryEntityFromHass || batteryEntityFromHass != cfg.batteryEntity()){
+                  cfg.setBatteryEntityInfo(this.hass,batteryEntityId);
+                  cfg.batteryState = NOT_KNOWN.includes (batteryEntityFromHass) ? UNAVAILABLE : batteryEntityFromHass.state;
+                  doUpdate =true;
+                }
+                // check signal entity change
+                const signalEntityId = cfg.signalEntity().entity_id;
+                const signalEntityFromHass = Object.values(statesFromHass).find(states => states.entity_id === signalEntityId);
+                if (!signalEntityFromHass || signalEntityFromHass != cfg.signalEntity()){
+                  cfg.setSignalEntityInfo(this.hass,signalEntityId);
+                  cfg.signalState = NOT_KNOWN.includes (signalEntityFromHass) ? UNAVAILABLE : signalEntityFromHass.state;
                   doUpdate =true;
                 }
               }
@@ -645,7 +664,9 @@ class EnhancedShutterCardNew extends LitElement{
               (currEntity) => {
                 let entityId = currEntity.entity ? currEntity.entity : currEntity;
 
-                this.localCfgs[entityId].setEntityInfo(entityId);
+                this.localCfgs[entityId].setCoverEntityInfo(this.hass,entityId);
+                this.localCfgs[entityId].setBatteryEntityInfo(this.hass,currEntity.battery_entity);
+                this.localCfgs[entityId].setSignalEntityInfo(this.hass,currEntity.signal_entity);
 
                 return html`
                   <enhanced-shutter
@@ -654,6 +675,8 @@ class EnhancedShutterCardNew extends LitElement{
                     .config=${currEntity}
                     .cfg=${this.localCfgs[entityId]}
                     .shutterState=${this.localCfgs[entityId].shutterState}
+                    .batteryState=${this.localCfgs[entityId].batteryState}
+                    .signalState=${this.localCfgs[entityId].signalState}
                     .screenOrientation=${this.screenOrientation}
                   >
                   </enhanced-shutter>
@@ -964,9 +987,11 @@ class EnhancedShutter extends LitElement
   //reactive properties
   static get properties() {
     return {
-      shutterState: {type: String},
       screenPosition: {state: true},
-      screenOrientation: {type: String},
+      screenOrientation: {type: Object},
+      shutterState: {type: String},
+      batteryState: {type: String},
+      signalState: {type: String},
     };
   }
   constructor(){
@@ -1027,7 +1052,7 @@ class EnhancedShutter extends LitElement
               "
       >
         <!-- battery-icon -->
-        ${this.cfg.batteryEntityId() ? html`
+        ${this.cfg.batteryEntity() ? html`
           <div class="top-left" style="color: ${this.cfg.batteryIconColor()};";>
             <ha-icon
               class="${ESC_CLASS_HA_ICON}"
@@ -1040,7 +1065,7 @@ class EnhancedShutter extends LitElement
           ` : ''
         }
         <!-- signal-icon -->
-        ${this.cfg.signalEntityId() ? html`
+        ${this.cfg.signalEntity() ? html`
           <div class="top-right" style="color: ${this.cfg.signalIconColor()};">
             <ha-icon
               class="${ESC_CLASS_HA_ICON}"
@@ -1052,6 +1077,7 @@ class EnhancedShutter extends LitElement
           </div>
           ` : ''
         }
+        <!-- top div -->
         <div class="${ESC_CLASS_TOP}">
           <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
             @click="${() => this.doDetailOpen(entityId)}"
@@ -1371,20 +1397,27 @@ class shutterCfg {
 
   #cfg={};
   #hassEntityInfo={};
+  #hassBatteryEntityInfo={};
+  #hassSignalEntityInfo={};
   #hass={};
+  shutterState = 'None';
+  batteryState = 'None';
+  signalState = 'None';
 
   constructor(hass,config,allImages,imageDimension=null)
   {
     this.shutterState = 'None';
+    this.batteryState = 'None';
+    this.signalState = 'None';
     let entityId = this.entityId(config[CONFIG_ENTITY_ID] ? config[CONFIG_ENTITY_ID] : config);
 
       this.setHass(hass);
-      this.setEntityInfo(entityId);
+      this.setCoverEntityInfo(hass,entityId);
 
-      this.batteryEntityId(config[CONFIG_BATTERY_ENTITY_ID]);
-      this.signalEntityId(config[CONFIG_SIGNAL_ENTITY_ID]);
+      this.setBatteryEntityInfo(hass,config[CONFIG_BATTERY_ENTITY_ID]);
+      this.setSignalEntityInfo(hass,config[CONFIG_SIGNAL_ENTITY_ID]);
 
-      this.friendlyName(config[CONFIG_NAME] ? config[CONFIG_NAME] : this.entityAttributes() ? this.entityAttributes().friendly_name : 'Unkown');
+      this.friendlyName(config[CONFIG_NAME] ? config[CONFIG_NAME] : this.#getEntityAttributes() ? this.#getEntityAttributes().friendly_name : 'Unkown');
       this.invertPercentage(config[CONFIG_INVERT_PCT]);
       this.passiveMode(config[CONFIG_PASSIVE_MODE]);
 
@@ -1446,7 +1479,7 @@ class shutterCfg {
     return this.#cfg[key];
   }
   getFeatureActive(feature=ESC_FEATURE_ALL){
-    return (this.entityAttributes() && (this.entityAttributes().supported_features & feature));
+    return (this.#getEntityAttributes() && (this.#getEntityAttributes().supported_features & feature));
   }
   setHass(value){
     this.#hass=value;
@@ -1454,63 +1487,68 @@ class shutterCfg {
   getHass(){
     return this.#hass;
   }
-  setEntityInfo(entityId){
-    if (typeof this.#hass.states[entityId] !== "undefined") {
-      this.#hassEntityInfo = this.#hass.states[entityId];
-    }else{
-      console.warn('setEntityInfo: Entity [', entityId, '] not found');
-      this.#hassEntityInfo = {
-        state: UNAVAILABLE,
-        attributes: UNAVAILABLE,
-        entityId: entityId
-      }
-    };
+  setCoverEntityInfo(hass,entityId){
+    this.#hassEntityInfo = this.#setEntityInfo(hass,entityId);
     return this.#hassEntityInfo;
   }
-  getState(){
+  setBatteryEntityInfo(hass,entityId){
+    this.#hassBatteryEntityInfo = this.#setEntityInfo(hass,entityId);
+    return this.#hassBatteryEntityInfo;
+  }
+  setSignalEntityInfo(hass,entityId){
+    this.#hassSignalEntityInfo = this.#setEntityInfo(hass,entityId);
+    return this.#hassSignalEntityInfo;
+  }
+
+  #setEntityInfo(hass,entityId){
+    let entityInfo = hass.states[entityId];
+    let hassEntityInfo;
+    if (typeof entityInfo !== "undefined") {
+      hassEntityInfo = entityInfo;
+    }else{
+      //console.warn('setEntityInfo: Entity [', entityId, '] not found');
+      hassEntityInfo = {
+        state: UNAVAILABLE,
+        attributes: UNAVAILABLE,
+        entity_id: entityId ? entityId : UNAVAILABLE
+      }
+    };
+    return hassEntityInfo;
+  }
+  #getEntityState(){
     return this.#getEntityInfo() ? this.#getEntityInfo().state : UNAVAILABLE;
   }
-  entityAttributes(){
+  #getEntityAttributes(){
     return this.#getEntityInfo() ? this.#getEntityInfo().attributes : UNAVAILABLE;
   }
 
   #getEntityInfo(){
     return this.#hassEntityInfo;
   }
-  batteryEntityId(value=null){
-    return this.getCfg(CONFIG_BATTERY_ENTITY_ID,value);
+  batteryEntity(){
+    return NOT_KNOWN.includes (this.#hassBatteryEntityInfo.entity_id) ? false : this.#hassBatteryEntityInfo ;
+  }
+  signalEntity(){
+    return NOT_KNOWN.includes (this.#hassSignalEntityInfo.entity_id) ? false : this.#hassSignalEntityInfo ;
   }
   batteryLevel(){
-    let entity = this.batteryEntityId();
-
-    let state = entity ? (this.#hass.states[entity] ? this.#hass.states[entity].state : '?') : '?';
-    state = ['unavailable','unknown'].includes (state) ? '?' : state ;
-    return state;
+    let state = this.#hassBatteryEntityInfo.state;
+    return NOT_KNOWN.includes (state) ? '?' : state ;
   }
   signalLevel(){
-    let entity = this.signalEntityId();
-
-    let state = entity ? (this.#hass.states[entity] ? this.#hass.states[entity].state : '?') : '?';
-    state = ['unavailable','unknown'].includes (state) ? '?' : state ;
-    return state;
-  }
-  signalUnit(){
-    let entity = this.signalEntityId();
-
-    let unit = entity ? (this.#hass.states[entity] ? this.#hass.states[entity].attributes.unit_of_measurement : '?') : '?';
-    unit = ['unavailable','unknown'].includes (unit) ? '?' : unit ;
-    return unit;
+    let state = this.#hassSignalEntityInfo.state;
+    return  NOT_KNOWN.includes (state) ? '?' : state ;
   }
   batteryUnit(){
-    let entity = this.batteryEntityId();
+    let unit = this.#hassBatteryEntityInfo.attributes.unit_of_measurement;
+    return NOT_KNOWN.includes (unit) ? '?' : unit ;
+  }
+  signalUnit(){
+    let unit = this.#hassSignalEntityInfo.attributes.unit_of_measurement;
+    return NOT_KNOWN.includes (unit) ? '?' : unit ;
+  }
 
-    let unit = entity ? (this.#hass.states[entity] ? this.#hass.states[entity].attributes.unit_of_measurement : '?') : '?';
-    unit = ['unavailable','unknown'].includes (unit) ? '?' : unit ;
-    return unit;
-  }
-  signalEntityId(value){
-    return this.getCfg(CONFIG_SIGNAL_ENTITY_ID,value);
-  }
+
   buttonsPosition(value = null){
     return this.getCfg(CONFIG_BUTTONS_POSITION,value);
   }
@@ -1648,9 +1686,9 @@ class shutterCfg {
   currentPosition(){
     let position;
     if (this.getFeatureActive(ESC_FEATURE_SET_POSITION)){
-      position= this.entityAttributes() ? this.entityAttributes().current_position: 0;
+      position= this.#getEntityAttributes() ? this.#getEntityAttributes().current_position: 0;
     }else{
-      position= this.getState()==SHUTTER_STATE_OPEN ? 100 :  0;
+      position= this.#getEntityState()==SHUTTER_STATE_OPEN ? 100 :  0;
     }
 
     return position;
@@ -1659,12 +1697,12 @@ class shutterCfg {
     return Globals.screenOrientation.value; // global variable !!
   }
   movementState(){
-    let state = (this.getState() ? this.getState() : 'unknownMovement');
+    let state = (this.#getEntityState() ? this.#getEntityState() : UNAVAILABLE);
     if (state == SHUTTER_STATE_OPEN && this.currentPosition() != 100 && this.currentPosition() != 0){
       state= SHUTTER_STATE_PARTIAL_OPEN;
     }
-    if (this.currentPosition() == 100) state =SHUTTER_STATE_OPEN;
-    else if (this.currentPosition() == 0) state =SHUTTER_STATE_CLOSED;
+    if (this.currentPosition() == 100 && state== SHUTTER_STATE_OPENING) state =SHUTTER_STATE_OPEN;
+    else if (this.currentPosition() == 0 && state== SHUTTER_STATE_CLOSING) state =SHUTTER_STATE_CLOSED;
 
     return state;
   }
@@ -1687,7 +1725,7 @@ class shutterCfg {
     return this.getButtonsPosition() == BOTTOM || this.getButtonsPosition() == RIGHT;
   }
   disabledGlobaly() {
-    return (this.getState() == UNAVAILABLE);
+    return (this.#getEntityState() == UNAVAILABLE);
   }
   upButtonDisabled(){
     let upDisabled = false;
@@ -1806,7 +1844,7 @@ class shutterCfg {
   computePositionText(currentPosition =this.currentPosition()) {
 
     let positionText;
-    if (this.getState()==UNAVAILABLE){
+    if (this.#getEntityState()==UNAVAILABLE){
         positionText = this.#hass.localize('state.default.unavailable');
     }else{
 
