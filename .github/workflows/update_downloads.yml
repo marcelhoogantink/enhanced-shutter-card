@@ -1,0 +1,51 @@
+name: Update Download Stats
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # This will run daily at midnight. You can change the cron schedule.
+  workflow_dispatch:  # This allows you to manually trigger the workflow from GitHub Actions UI.
+
+jobs:
+  fetch-release-stats:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Fetch release data and update DOWNLOADS.md
+        run: |
+          # Define repository and output file
+          REPO="marcelhoogantink/enhanced-shutter-card"
+          OUTPUT_FILE="DOWNLOADS.md"
+
+          # Fetch release data from GitHub API
+          RELEASES=$(curl -s https://api.github.com/repos/$REPO/releases)
+
+          # Start creating the DOWNLOADS.md file
+          echo "# Enhanced Shutter Card - Download Stats" > $OUTPUT_FILE
+          echo "" >> $OUTPUT_FILE
+
+          # Loop through releases and append data to the file
+          echo "$RELEASES" | grep -o '"name": "[^"]*"' | sed 's/"name": "\(.*\)"/\1/' | while read release_name; do
+            # Fetch the download count for the assets in the release
+            download_count=$(echo "$RELEASES" | grep -o "\"name\": \"$release_name\".*\"download_count\": [0-9]*" | awk -F ': ' '{sum+=$2} END {print sum}')
+            
+            # If no download count found, set it to 0
+            if [ -z "$download_count" ]; then
+              download_count=0
+            fi
+
+            # Append the release and download count to the output file
+            echo "### $release_name" >> $OUTPUT_FILE
+            echo "- $download_count downloads" >> $OUTPUT_FILE
+            echo "" >> $OUTPUT_FILE
+          done
+
+      - name: Commit and push updated DOWNLOADS.md
+        uses: EndBug/add-and-commit@v7
+        with:
+          author_name: 'GitHub Actions'
+          author_email: 'actions@github.com'
+          message: 'Update download stats'
+          add: 'DOWNLOADS.md'
