@@ -2,7 +2,7 @@ name: Update Download Stats
 
 on:
   schedule:
-    - cron: '0 * * * *'  # This will run daily at midnight. You can change the cron schedule.
+    - cron: '0 0 * * *'  # This will run daily at midnight. You can change the cron schedule.
   workflow_dispatch:  # This allows you to manually trigger the workflow from GitHub Actions UI.
 
 jobs:
@@ -43,9 +43,13 @@ jobs:
           done
 
       - name: Commit and push updated DOWNLOADS.md
-        uses: EndBug/add-and-commit@v7
-        with:
-          author_name: 'GitHub Actions'
-          author_email: 'actions@github.com'
-          message: 'Update download stats'
-          add: 'DOWNLOADS.md'
+        run: |
+          # Configure Git to use the token for pushing
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
+          
+          # Commit the updated DOWNLOADS.md file
+          git add DOWNLOADS.md
+          git commit -m "Update download stats"
+          git push origin main
