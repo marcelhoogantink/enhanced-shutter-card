@@ -47,8 +47,8 @@ jobs:
           # Configure Git to use the token for pushing
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
-          
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+                    
           # Commit the updated DOWNLOADS.md file
           git add DOWNLOADS.md
           git commit -m "Update download stats"
