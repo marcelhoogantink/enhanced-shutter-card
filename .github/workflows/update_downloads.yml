@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # Explicitly provide the token here        
 
       - name: Fetch release data and update DOWNLOADS.md
         run: |
