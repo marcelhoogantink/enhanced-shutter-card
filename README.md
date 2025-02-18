@@ -207,3 +207,12 @@ Use HACS, search for Enhancd Shutter Card, the resources will automatically be c
 As long as this card is not a default one in HACS (PR is awaiting aproval), you need to add this repository as a Custom Repository.
 See for installing Custom Repositories this [hacs-custom-repositories](https://www.hacs.xyz/docs/faq/custom_repositories/) page.
 Enter repository-url `https://github.com/marcelhoogantink/enhanced-shutter-card.git` and choose type `Dashboard`.
+
+```bash
+#!/bin/bash
+
+# Fetch release info from the GitHub API for the repository
+REPO="marcelhoogantink/enhnced-shutter-card"
+
+# Fetch the release data
+curl -s https://api.github.com/repos/$REPO/releases | grep -o '"name": "[^"]*"' | sed 's/"name": "\(.*\)"/\1/' 
