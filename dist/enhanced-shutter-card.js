@@ -306,7 +306,7 @@ const SHUTTER_CSS =`
         position: relative;
         margin: auto;
         line-height: 0;
-        ooverflow: hidden;
+        overflow: hidden;
       }
       .${ESC_CLASS_SELECTOR_PICTURE}>img {
         justify-content: center;
@@ -314,16 +314,28 @@ const SHUTTER_CSS =`
         width: 100%;
         height: 100%;
       }
+      .${ESC_CLASS_SELECTOR_PICKER} {
+        z-index: 3;
+        position: absolute;
+        left: -50%;
+        width: 100%;
+        top: var(--esc-picker-top);
+        height: var(--esc-picker-height);
+        cursor: pointer;
+        transform-origin: center;
+        transform: var(--esc-transform-picker);
+      }
       .${ESC_CLASS_SELECTOR_SLIDE} {
-        border: 1px solid red;
         z-index: -1;
         position: absolute;
+        left: -50%;
+        width: 100%;
         background-position: bottom;
         overflow: hidden;
-        top: 0;
-        width: 100%;
+        bottom: 100%;
+        height: var(--esc-slide-height);
         max-width: 100%;
-        transform-origin: 50% 0 0;
+        transform-origin: bottom;
         transform: var(--esc-transform-slide)
       }
       .${ESC_CLASS_SELECTOR_SLIDE}>img {
@@ -332,18 +344,6 @@ const SHUTTER_CSS =`
         position: absolute;
         bottom: 0;
         left: 0;
-      }
-      .${ESC_CLASS_SELECTOR_PICKER} {
-        border: 1px solid black;
-        z-index: 3;
-        position: absolute;
-        top: var(--esc-picker-top);
-        left: -50%;
-        width: 100%;
-        height: var(--esc-picker-height);
-        cursor: pointer;
-        ttransform-origin: var(--esc-transform-origin-picker);
-        transform: var(--esc-transform-picker);
       }
       .${ESC_CLASS_MOVEMENT_OVERLAY} {
         z-index: -1;
@@ -754,9 +754,6 @@ class EnhancedShutterCardNew extends LitElement{
     return this.config.entities.length + 1;
   }
 
-  getLayoutOptions(){
-    const test=0;
-  };
   //Section layout : we compute the size of the card. (experimental)
   getGridOptions(){
     // from https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view
@@ -1140,14 +1137,12 @@ class EnhancedShutter extends LitElement
                --esc-window-rotate: ${this.cfg.viewImageRotate()};
                --esc-button-rotate: ${this.cfg.buttonRotate()};
 
-               --esc-transform-slide: ${this.transformSlide()};
-
-
-               --esc-transform-origin-picker: ${this.transformOrigin()};
-               --esc-transform-picker: ${this.transformPicker()};
+               --esc-transform-slide: ${this.transformDiv()};
+               --esc-transform-picker: ${this.transformDiv()};
 
                --esc-picker-top: -${this.cfg.pickerOverlapPx()+UNITY};
                --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+UNITY};
+               --esc-slide-height: ${this.cfg.slideHeightPx()+UNITY};
 
                --esc-transform-partial: ${this.cfg.transformRotate()};
                --esc-transform-overlay: ${this.cfg.transformRotate()};
@@ -1168,31 +1163,6 @@ class EnhancedShutter extends LitElement
       </div>
     `;
   }
-  transformOrigin(){
-
-    if (!this.origin){
-      const rectP = this[ESC_CLASS_SELECTOR] ? this[ESC_CLASS_SELECTOR].getBoundingClientRect() : null;
-      const rectC = this[ESC_CLASS_SELECTOR_PICKER] ? this[ESC_CLASS_SELECTOR_PICKER].getBoundingClientRect() : null;
-      if (rectP && rectC){
-        let left_div= rectP.left-rectC.left;
-        let top_div= rectP.top-rectC.top;
-        let centerX = left_div + rectP.width/2;
-        let centerY = top_div + rectP.height/2;
-        console_log('rectP:',rectP);
-        console_log('rectC:',rectC);
-        console_log('rotate on:',centerX,centerY);
-        console_log('cfg:',this.cfg);
-        return this.origin= `${centerX}px ${centerY}px`;
-      }
-      else{
-        return '';
-      }
-    }
-    else{
-      console_log('rotate on2:',this.origin);
-      return this.origin;
-    }
-  }
   actualWidth(){
     const rect = this[ESC_CLASS_SELECTOR] ? this[ESC_CLASS_SELECTOR].getBoundingClientRect() : null;
     return rect ? rect.width :this.cfg.windowWidthPx();
@@ -1206,68 +1176,27 @@ class EnhancedShutter extends LitElement
     return  this.cfg.verticalMovement() ? 1 : this.actualWidth()/this.actualHeight(); // TODO  do better !!
 
   }
-/*
-   let parent=document.getElementById("parent");
-   let child=document.getElementById("child");
-   let rectP = parent.getBoundingClientRect();
-   let rectC = child.getBoundingClientRect();
-
-   let left_div= rectP.left-rectC.left;
-   let top_div= rectP.top-rectC.top;
-   let centerX= left_div + rectP.width/2;
-   let centerY= top_div + rectP.height/2;
-
-   console.log('Center:', centerX,centerY);
-   console.log('Child', rectC);
-   console.log('Parent', rectP);
-   child.style.transformOrigin = centerX+"px "+centerY+"px";
-*/
-  transformSlide(){
-    return [
-      this.cfg.transformTranslateVertical(),
-      this.cfg.transformRotate(),
-      this.cfg.transformTranslateHorizontal(),
-      this.cfg.transformScale(),
-      ].join(' ');
-  }
-
-  transformPicker(){ //test
-    const rect = this[ESC_CLASS_SELECTOR] ? this[ESC_CLASS_SELECTOR].getBoundingClientRect() : null;
-
-    const dist_x = this.actualWidth();
-    const dist_y = this.actualHeight();
-//    const dist_global ={x:dist_x,y:dist_y};
-    const dist_global = new xyPair(dist_x,dist_y);
-    const dist_local=this.switchAxis(dist_global);
-    if (rect){
+  transformDiv(){
+    if (this[ESC_CLASS_SELECTOR_SLIDE]){
       //
+      const dist_x = this.actualWidth();
+      const dist_y = this.actualHeight();
+      const dist_global = new xyPair(dist_x,dist_y);
+      const dist_local=this.switchAxis(dist_global);
       return [
-        this.transformTranslatePicker(dist_global.x/2,dist_global.y/2), // to mid-point
+        this.cfg.transformTranslate(dist_global.x/2,dist_global.y/2), // to mid-point
         this.cfg.transformRotate(), // rotate around middle point
         this.cfg.transformScale(dist_global.x,dist_global.y), // correct local width of the Picker
-        this.transformTranslateVerticalPicker(-dist_local.y/2 + this.actualScreenPosition),
+        this.cfg.transformTranslate(0,-dist_local.y/2 + this.actualScreenPosition),  // Move to correct position
 
       ].join(' ');
     }else{
       return '';
     }
+  }
 
-  }
-  transformTranslatePicker(x=this.windowWidthPx(),y=this.windowHeightPx()){
-    let transform =`translate(${x}px,${y}px)`;
-    return transform;
-  }
-  transformTranslateVerticalPicker(y=this.windowHeightPx()){
-    let transform =`translate(0px,${y}px)`;
-    return transform;
-  }
-  transformTranslateHorizontalPicker(x=this.windowWidthPx()){
-    let transform =`translate(${x}px,0px)`;
-    return transform;
-  }
   rotateOrtho(coord,angle=this.cfg.getCloseAngle()){
-
-     switch (angle){
+    switch (angle){
       case (90):
         return { x: -coord.y, y:  coord.x };
       case (180):
@@ -1281,9 +1210,8 @@ class EnhancedShutter extends LitElement
         throw new Error(`Angle must be a multiple of 90 degrees. (angle= ${angle})`);
     }
   }
-rotateBackOrtho(coord,angle=this.cfg.getCloseAngle()){
-
-     switch (angle){
+  rotateBackOrtho(coord,angle=this.cfg.getCloseAngle()){
+    switch (angle){
       case (90):
         return { x:  coord.y, y: -coord.x };
       case (180):
@@ -1312,7 +1240,7 @@ rotateBackOrtho(coord,angle=this.cfg.getCloseAngle()){
  }
  //##########################################
 
-  doDetailOpen(entityIdValue) {
+  doHassMoreInfoOpen(entityIdValue) {
     if (!this.cfg.passiveMode()){
       let e = new Event('hass-more-info', { composed: true});
       e.detail= { entityId : entityIdValue};
@@ -1334,14 +1262,10 @@ rotateBackOrtho(coord,angle=this.cfg.getCloseAngle()){
     this.callHassCoverService(entityId,command,services[command].args);
   }
   getBasePickPoint(event){
-    let siblings = Array.from(event.target.parentElement.children);
-    //let slide = siblings.find(sibling => sibling.classList.contains(ESC_CLASS_SELECTOR_SLIDE));
-    let slide = this[ESC_CLASS_SELECTOR_SLIDE]
-
-    //this.basePickPoint = this.getPoint(event) - parseInt(slide.style.height);
+    /* get picked point */
     this.basePickPoint = this.getPoint(event);
-    this.basePickPoint.point = this.basePickPoint.point - parseInt(slide.style.height);
-    this.basePickPoint.shutterScreenPos = parseInt(slide.style.height);
+    /* get current shutter position on screen */
+    this.basePickPoint.shutterScreenPos = this.cfg.defScreenPositionFromPercent();
 
     console_log('screenPos: basePickPoint:',this.basePickPoint);
   }
@@ -1353,42 +1277,28 @@ rotateBackOrtho(coord,angle=this.cfg.getCloseAngle()){
   }
   getScreenPosFromPickPoint(pickPoint){
 
-    console_log('getScreenPosFromPickPoint ');
-    console_log('getScreenPosFromPickPoint ------------------------------');
-    console_log('getScreenPosFromPickPoint BASEPOINT:',this.basePickPoint);
-    console_log('getScreenPosFromPickPoint POINT:',pickPoint);
-    console_log('getScreenPosFromPickPoint rotation:',this.cfg.getCloseAngle(),this.cfg.closingDirection());
 
     let delta = {x: pickPoint.x - this.basePickPoint.x ,
                  y: pickPoint.y - this.basePickPoint.y};
     let delta_local = this.rotateBackOrtho(delta);
-    let screenPos = this.basePickPoint.shutterScreenPos;
-    console_log('getScreenPosFromPickPoint delta2 globaal',delta);
-    console_log('getScreenPosFromPickPoint delta2 lokaal',delta_local);
-    console_log('getScreenPosFromPickPoint screenPos',screenPos);
-    console_log('getScreenPosFromPickPoint new screenPos=',screenPos+delta_local.y);
 
-    let screenPosition = Math. round(boundary(this.basePickPoint.shutterScreenPos+delta_local.y,
-      this.cfg.coverTopPx()*this.widthHeightFactor(),
-      this.cfg.coverBottomPx()*this.widthHeightFactor()
+    let newScreenPosition =
+      Math. round(boundary(
+        this.basePickPoint.shutterScreenPos+delta_local.y,
+        this.cfg.coverTopPx()*this.widthHeightFactor(),
+        this.cfg.coverBottomPx()*this.widthHeightFactor()
     ));
-    console_log('getScreenPosFromPickPoint screenPositionNew=',screenPosition);
-    console_log('getScreenPosFromPickPoint ==============================');
 
-    return screenPosition;
+    return newScreenPosition;
   }
   getPoint(event){
-    //let point =this.cfg.verticalMovement() ? event.pageY : event.pageX;
     let point ={
       x: event.pageX ,
       y: event.pageY,
-      coord: {x: event.pageX ,y: event.pageY},
+      coord: new xyPair(event.pageX,event.pageY),
       movementVertical: this.cfg.verticalMovement(),
-      point: this.cfg.verticalMovement() ? event.pageY : event.pageX, // old point
       closingDir: this.cfg.closingDirection()
     };
-
-    console.log('screenPos: point:',point,this.cfg.verticalMovement() ?'Y':'X');
     return point;
   }
   mouseDown = (event) =>
@@ -1625,7 +1535,7 @@ class shutterCfg {
     return NOT_KNOWN.includes (this.#hassSignalEntityInfo.entity_id) ? false : this.#hassSignalEntityInfo ;
   }
   viewImageRotate(){
-    let transform =this.transformRotate()+' '+ this.transformScale2();
+    let transform =this.transformRotate();
     return transform;
   }
   buttonRotate(){
@@ -1636,24 +1546,12 @@ class shutterCfg {
     let transform =`${this.verticalMovement() ? '': `scale(${y/x},1)`}`;
     return transform;
   }
-  transformScale2(x = this.windowWidthPx(),y = this.windowHeightPx()){
-    let transform =`${this.verticalMovement() ? '': `scale(${1},${1})`}`;
-    return transform;
-  }
-  transformTranslateVertical(y=this.windowHeightPx()){
-    let transform =`${this.verticalMovement() ? '': `translate(0px,${y/2}px)`}`;
-    return transform;
-  }
-  transformTranslateHorizontal(x=this.windowWidthPx()){
-    let transform =`${this.verticalMovement() ? '': `translate(0px,${-x/2}px)`}`;
+  transformTranslate(x=this.windowWidthPx(),y=this.windowHeightPx()){
+    let transform =`translate(${x}px,${y}px)`;
     return transform;
   }
   transformRotate(r = this.getCloseAngle()){
     let transform =`rotate(${r}deg)`;
-    return transform;
-  }
-  transformScale2(x=this.windowWidthPx(),y=this.windowHeightPx()){
-    let transform =`${this.verticalMovement() ? '': `scale(${y/x},${x/y})`}`;
     return transform;
   }
 
@@ -1800,9 +1698,11 @@ class shutterCfg {
   /*
   ** end getters/setters
   */
-
+  slideHeightPx(){
+    return this.windowMovingDirectionPx();
+  }
   verticalMovement(){
-    return this.closingDirection()=='down';
+    return this.closingDirection()=='down' || this.closingDirection()=='up';
   }
   shutterPosition2(visiblePosition){
     return (this.invertPercentage()?visiblePosition:100-visiblePosition);
@@ -2358,7 +2258,7 @@ class htmlCard{
     return html`
         <div class="${className}">
           <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
-            @click="${() => this.enhancedShutter.doDetailOpen()}"
+            @click="${() => this.enhancedShutter.doHassMoreInfoOpen(this.cfg.entityId())}"
           >
             ${this.cfg.friendlyName()}
             ${this.cfg.passiveMode() ? html`
@@ -2505,7 +2405,7 @@ class htmlCard{
 
           <img src= "${this.cfg.windowImage()} ">
           <div class="${ESC_CLASS_SELECTOR_SLIDE}"
-               style="height: ${this.enhancedShutter.actualScreenPosition}${UNITY};
+               style="hheight: ${this.enhancedShutter.actualScreenPosition}${UNITY};
                       background-image: url(${this.cfg.shutterSlatImage()});">
             <img src="${this.cfg.shutterBottomImage()}">
           </div>
