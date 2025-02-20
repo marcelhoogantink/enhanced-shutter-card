@@ -1,4 +1,4 @@
-const VERSION = 'v1.1.4';
+const VERSION = 'v1.2.0b1';
 const TEMP_DEGREES = 90;
 
 import {
@@ -315,6 +315,7 @@ const SHUTTER_CSS =`
         height: 100%;
       }
       .${ESC_CLASS_SELECTOR_SLIDE} {
+        border: 1px solid red;
         z-index: -1;
         position: absolute;
         background-position: bottom;
@@ -368,19 +369,12 @@ const SHUTTER_CSS =`
         transform-origin: center center;
         transform: var(--esc-transform-partial);
       }
-      .${ESC_CLASS_MOVEMENT_OPEN} {
-        z-index: 3 !important;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        position: absolute;
-        display: block;
-      }
+      .${ESC_CLASS_MOVEMENT_OPEN},
       .${ESC_CLASS_MOVEMENT_CLOSE} {
         z-index: 3 !important;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%) var(--esc-button-rotate);
         position: absolute;
         display: block;
       }
@@ -875,7 +869,6 @@ class EnhancedShutterCardNew extends LitElement{
         if (debug) console_log('size B2*H2',localWidth2Px,localHeight2Px);
 
         if (cfg.buttonsInRow()){
-          //if (debug) console_log('Buttons Naast shutter');
           /*
           * size standard-buttons
           */
@@ -1024,12 +1017,12 @@ class EnhancedShutter extends LitElement
   //reactive properties
   static get properties() {
     return {
-      screenPosition: {state: true},
-      screenOrientation: {type: Object},
-      shutterState: {type: String},
-      batteryState: {type: String},
-      signalState: {type: String},
-      resizeDivShutterSelector: {state: true},
+      screenPosition: {state: true},       // for dragging shutter onscreen
+      screenOrientation: {type: Object},   // for chnage in screen orientation  by resize window or rotate device
+      shutterState: {type: String},        // for detecting state of shuuer (open close etc)
+      batteryState: {type: String},        // for detecting battery state change
+      signalState: {type: String},         // for detecting signal state change
+      resizeDivShutterSelector: {state: true}, // for detecting resize of shutter div by responsive design
     };
   }
   constructor(){
@@ -1152,6 +1145,7 @@ class EnhancedShutter extends LitElement
 
                --esc-transform-origin-picker: ${this.transformOrigin()};
                --esc-transform-picker: ${this.transformPicker()};
+
                --esc-picker-top: -${this.cfg.pickerOverlapPx()+UNITY};
                --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+UNITY};
 
@@ -1816,7 +1810,7 @@ class shutterCfg {
   currentPosition(){
     let position;
     if (this.getFeatureActive(ESC_FEATURE_SET_POSITION)){
-      position= this.#getEntityAttributes() ? this.#getEntityAttributes().current_position: 0;
+      position = this.#getEntityAttributes()?.current_position ?? 50;
     }else{
       position= this.#getEntityState()==SHUTTER_STATE_OPEN ? 100 :  0;
     }
@@ -1824,7 +1818,7 @@ class shutterCfg {
     return position;
   }
   getCloseAngle(){
-    const direction= {down:0,left:90,right:270}; //,up:180};
+    const direction= {down:0,left:90,right:270,up:180};
     return direction[this.closingDirection()];
 
   }
@@ -1832,7 +1826,7 @@ class shutterCfg {
     return Globals.screenOrientation.value; // global variable !!
   }
   movementState(){
-    let state = (this.#getEntityState() ? this.#getEntityState() : UNAVAILABLE);
+    let state = this.#getEntityState() || UNAVAILABLE;
     if (state == SHUTTER_STATE_OPEN && this.currentPosition() != 100 && this.currentPosition() != 0){
       state= SHUTTER_STATE_PARTIAL_OPEN;
     }
@@ -1901,36 +1895,21 @@ class shutterCfg {
     }
     return display;
   }
-  getButtonsPosition(){
+  getButtonsPosition() {
     let position = this.buttonsPosition();
-    if (position.substring(0,4) == AUTO){
-      if  (this.getOrientation() == LANDSCAPE){
-        if (position == AUTO || position == AUTO_TL || position == AUTO_BL){
-          position = LEFT;
-        } else {
-          position = RIGHT;
-        }
-      }
-      else{
-        if (position == AUTO || position == AUTO_TL || position == AUTO_TR){
-          position = TOP;
-        } else {
-          position = BOTTOM;
-        }
-      }
+    if (position.startsWith(AUTO)) {
+      const isLandscape = this.getOrientation() === LANDSCAPE;
+      const isTopOrLeft = position === AUTO || position === AUTO_TL || position === AUTO_BL;
+      position = isLandscape ? (isTopOrLeft ? LEFT : RIGHT) : (isTopOrLeft ? TOP : BOTTOM);
     }
     return position;
   }
 
   defButtonPosition(config) {
-    let buttonsPosition = config[CONFIG_BUTTONS_POSITION];
-    buttonsPosition
-      = (buttonsPosition && POSITIONS.includes(buttonsPosition.toLowerCase()))
-      ? buttonsPosition.toLowerCase()
-      : ESC_BUTTONS_POSITION;
-
-      this.buttonsPosition(buttonsPosition);
+    const buttonsPosition = config[CONFIG_BUTTONS_POSITION]?.toLowerCase();
+    this.buttonsPosition(POSITIONS.includes(buttonsPosition) ? buttonsPosition : ESC_BUTTONS_POSITION);
   }
+
   defScreenPositionFromPercent(position_pct=this.currentPosition()) {
     let visiblePosition;
     if (this.invertPercentage()) {
