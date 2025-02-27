@@ -17,16 +17,10 @@ jobs:
       - name: "Checkout the repository"
         uses: "actions/checkout@v4.2.2"
 
-      - name: "Adjust version number"
-        shell: "bash"
-        run: |
-          yq -i -o json '.version="${{ github.event.release.tag_name }}"' \
-            "${{ github.workspace }}/custom_components/enhanced-shutter-card/manifest.json"
-
       - name: "ZIP the integration directory"
         shell: "bash"
         run: |
-          cd "${{ github.workspace }}/custom_components/enhanced-shutter-card"
+          cd "${{ github.workspace }}/dist"
           zip enhanced-shutter-card.zip -r ./
 
       - name: "Upload the ZIP file to the release"
