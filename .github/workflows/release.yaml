@@ -17,6 +17,12 @@ jobs:
       - name: "Checkout the repository"
         uses: "actions/checkout@v4.2.2"
 
+      - name: "Adjust version number"
+        shell: "bash"
+        run: |
+          yq -i -o json '.version="${{ github.event.release.tag_name }}"' \
+            "${{ github.workspace }}/dist/manifest.json"
+
       - name: "ZIP the integration directory"
         shell: "bash"
         run: |
@@ -26,4 +32,4 @@ jobs:
       - name: "Upload the ZIP file to the release"
         uses: softprops/action-gh-release@v2.2.1
         with:
-          files: ${{ github.workspace }}/custom_components/enhanced-shutter-card/enhanced-shutter-card.zip
+          files: ${{ github.workspace }}/enhanced-shutter-card.zip
