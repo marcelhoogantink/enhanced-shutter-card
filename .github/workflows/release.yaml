@@ -37,3 +37,4 @@ jobs:
             dist/enhanced-shutter-card.js
             dist/lit/*.*            
             dist/images/*.*
+            dist/*.* -s
