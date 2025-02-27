@@ -1,4 +1,4 @@
-ancname: "Release"
+name: "Release"
 
 on:
   release:
