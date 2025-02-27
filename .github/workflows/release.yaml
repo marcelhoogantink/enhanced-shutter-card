@@ -34,7 +34,5 @@ jobs:
         with:
           files: | 
             ${{ github.workspace }}/dist/enhanced-shutter-card.zip
-            dist/enhanced-shutter-card.js
-            dist/
-            dist
+            ${{ github.workspace }}/dist/enhanced-shutter-card.js
             
