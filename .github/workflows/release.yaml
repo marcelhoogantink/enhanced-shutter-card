@@ -32,4 +32,4 @@ jobs:
       - name: "Upload the ZIP file to the release"
         uses: softprops/action-gh-release@v2.2.1
         with:
-          files: ${{ github.workspace }}/enhanced-shutter-card.zip
+          files: ${{ github.workspace }}/dist/enhanced-shutter-card.zip
