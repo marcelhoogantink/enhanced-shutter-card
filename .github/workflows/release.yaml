@@ -1,1 +1,26 @@
 
+name: "Release"
+
+on:
+  release:
+    types:
+      - "published" 
+
+permissions: {}
+
+jobs:
+  release:
+    name: "Release"
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: write
+    steps:
+      - name: Download dists
+        uses: actions/download-artifact@v4.1.9
+        with:
+          name: "dist"
+          path: "dist/"
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          files: dist/*
