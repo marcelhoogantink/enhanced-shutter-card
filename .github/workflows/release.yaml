@@ -1,4 +1,3 @@
-
 name: "Release"
 
 on:
@@ -15,7 +14,16 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Upload release assets
+      - name: "Checkout the repository"
+        uses: "actions/checkout@v4.2.2"
+      - name: "ZIP the integration directory"
+        shell: "bash"
+        run: |
+          cd "${{ github.workspace }}/dist"
+          zip enhanced-shutter-card.zip -r ./
+
+      - name: "Upload the ZIP file to the release"
         uses: softprops/action-gh-release@v2.2.1
         with:
-          files: dist/*
+          files: | 
+            ${{ github.workspace }}/dist/enhanced-shutter-card.zip
