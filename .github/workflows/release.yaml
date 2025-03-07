@@ -29,3 +29,4 @@ jobs:
             ${{ github.workspace }}/dist/enhanced-shutter-card.zip
             ${{ github.workspace }}/dist/enhanced-shutter-card.js
             ${{ github.workspace }}/hacs.json
+            ${{ github.workspace }}/README.md
