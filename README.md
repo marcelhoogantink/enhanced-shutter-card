@@ -3,6 +3,8 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marcelhoogantink&repository=enhanced-shutter-card&category=plugin)
+
 ### New in version v1.1.4:
 
 * #### New: Battery and signal level display
@@ -205,6 +207,10 @@ entities:
 ```
 
 ## Install
+Use the button below
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marcelhoogantink&repository=enhanced-shutter-card&category=plugin)
+
+OR
 
 Use HACS, search for Enhancd Shutter Card, the resources will automatically be configured with the needed files.
 
