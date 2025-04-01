@@ -90,6 +90,7 @@ const CONFIG_WINDOW_IMAGE = 'window_image';
 const CONFIG_VIEW_IMAGE = 'view_image';
 const CONFIG_SHUTTER_SLAT_IMAGE = 'shutter_slat_image';
 const CONFIG_SHUTTER_BOTTOM_IMAGE = 'shutter_bottom_image';
+const CONFIG_SHUTTER_BOTTOM_HEIGHT_PX = 'shutter_bottom_height_px';
 const CONFIG_BASE_HEIGHT_PX = 'base_height_px';
 const CONFIG_BASE_WIDTH_PX = 'base_width_px';
 const CONFIG_RESIZE_HEIGHT_PCT = 'resize_height_pct';
@@ -97,8 +98,12 @@ const CONFIG_RESIZE_WIDTH_PCT = 'resize_width_pct';
 
 const CONFIG_SCALE_ICONS = 'scale_icons';
 const CONFIG_SCALE_BUTTONS = 'scale_buttons';
+
 const CONFIG_TOP_OFFSET_PCT = 'top_offset_pct';
 const CONFIG_BOTTOM_OFFSET_PCT = 'bottom_offset_pct';
+const CONFIG_LEFT_OFFSET_PCT = 'left_offset_pct';
+const CONFIG_RIGHT_OFFSET_PCT = 'right_offset_pct';
+
 const CONFIG_BUTTONS_POSITION = 'buttons_position';
 const CONFIG_TITLE_POSITION = 'title_position';  // deprecated
 const CONFIG_NAME_POSITION = 'name_position';
@@ -134,6 +139,8 @@ const ESC_IMAGE_WINDOW = 'esc-window.png';
 const ESC_IMAGE_VIEW = 'esc-view.png';
 const ESC_IMAGE_SHUTTER_SLAT = 'esc-shutter-slat.png';
 const ESC_IMAGE_SHUTTER_BOTTOM = 'esc-shutter-bottom.png';
+const ESC_SHUTTER_BOTTOM_HEIGHT_PX = 7;
+
 const ESC_BASE_HEIGHT_PX = 150; // image-height
 const ESC_BASE_WIDTH_PX = 150;  // image-width
 const ESC_RESIZE_HEIGHT_PCT = 100;
@@ -141,8 +148,13 @@ const ESC_RESIZE_WIDTH_PCT  = 100;
 
 const ESC_SCALE_ICONS = true;
 const ESC_SCALE_BUTTONS = false;
-const ESC_TOP_OFFSET_PCT = 0;
-const ESC_BOTTOM_OFFSET_PCT = 0;
+
+// precise percentage values work better with high aspect rations
+const ESC_TOP_OFFSET_PCT = 10.5; // default image has 16px of 151px (10.59%) from top until transparency starts
+const ESC_BOTTOM_OFFSET_PCT = 3.9; // default image has 6px of 151px (3.9%) from bottom until transparency starts
+const ESC_LEFT_OFFSET_PCT = 5.2; // default image has 8px of 153px (5.2%) from left until transparency starts
+const ESC_RIGHT_OFFSET_PCT = 5.2; // default image has 8px of 153px (3.9%) from right until transparency starts
+
 const ESC_BUTTONS_POSITION = LEFT;
 const ESC_TITLE_POSITION = null;  // deprecated
 const ESC_NAME_POSITION =TOP;
@@ -191,6 +203,9 @@ const CONFIG_DEFAULT ={
   [CONFIG_SCALE_ICONS]: ESC_SCALE_ICONS,
   [CONFIG_SCALE_BUTTONS]: ESC_SCALE_BUTTONS,
   [CONFIG_TOP_OFFSET_PCT]: ESC_TOP_OFFSET_PCT,
+  [CONFIG_SHUTTER_BOTTOM_HEIGHT_PX]: ESC_SHUTTER_BOTTOM_HEIGHT_PX,
+  [CONFIG_LEFT_OFFSET_PCT]: ESC_LEFT_OFFSET_PCT,
+  [CONFIG_RIGHT_OFFSET_PCT]: ESC_RIGHT_OFFSET_PCT,
   [CONFIG_BOTTOM_OFFSET_PCT]: ESC_BOTTOM_OFFSET_PCT,
   [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
   [CONFIG_TITLE_POSITION]: ESC_TITLE_POSITION,  // deprecated
@@ -297,6 +312,10 @@ const SHUTTER_CSS =`
         margin: auto;
         width: 100%;
         height: 100%;
+        
+        image-rendering: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
       }
       .${ESC_CLASS_SELECTOR_SLIDE} {
         z-index: -1;
@@ -304,11 +323,13 @@ const SHUTTER_CSS =`
         background-position: bottom;
         overflow: hidden;
         top: 0;
-        width: 100%;
+        
+        image-rendering: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
       }
       .${ESC_CLASS_SELECTOR_SLIDE}>img {
         width: 100%;
-        height: 7px;
         position: absolute;
         bottom: 0;
         left: 0;
@@ -327,8 +348,6 @@ const SHUTTER_CSS =`
         display: block;
         position: absolute;
         top: 0;
-        width: 100%;
-        height: 100%;
         background-color: rgba(0,0,0,0.3);
         text-align: center;
         --mdc-icon-size: 60px;
@@ -1132,21 +1151,28 @@ class EnhancedShutter extends LitElement
                 }
               ">
               <img src= "${this.cfg.windowImage() } ">
-              <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="height: ${screenPosition}${UNITY}; background-image: url(${this.cfg.shutterSlatImage()});">
-                <img src="${this.cfg.shutterBottomImage()}">
+              <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="
+                margin: ${this.cfg.topOffsetPx()+UNITY} ${this.cfg.rightOffsetPx()+UNITY} ${this.cfg.bottomOffsetPx()+UNITY} ${this.cfg.leftOffsetPx()+UNITY};
+                width: calc(100% - (${(this.cfg.leftOffsetPx() + this.cfg.rightOffsetPx())+UNITY}));
+                height: ${screenPosition + this.cfg.shutterBottomHeightPx()}${UNITY};
+                background-image: url(${this.cfg.shutterSlatImage()});
+                ">
+                <img style="height: ${this.cfg.shutterBottomHeightPx()}${UNITY};" src="${this.cfg.shutterBottomImage()}">
               </div>
               <div class="${ESC_CLASS_SELECTOR_PICKER}"
                 @pointerdown="${this.mouseDown}"
                 @mousedown="${this.mouseDown}"
                 @touchstart="${this.mouseDown}"
-                style="top: ${screenPosition-this.cfg.pickerOverlapPx()}${UNITY};">
+                style="top: ${screenPosition + this.cfg.topOffsetPx() - this.cfg.pickerOverlapPx() + (this.cfg.shutterBottomHeightPx() / 2)}${UNITY};">
               </div>
               ${this.cfg.partial() && !this.cfg.offset()? html`
                 <div class="${ESC_CLASS_SELECTOR_PARTIAL}" style="top:${this.cfg.defScreenPositionFromPercent(this.cfg.partial())}${UNITY}"></div>
                 ` : ''}
               <div class="${ESC_CLASS_MOVEMENT_OVERLAY}" style="
-                top: ${this.cfg.topOffsetPct()-7}${UNITY};
-                height: ${this.cfg.coverHeightPx() + 7}${UNITY};
+                top: ${this.cfg.topOffsetPx()}${UNITY};
+                left: ${this.cfg.leftOffsetPx()+UNITY};
+                width: calc(100% - (${(this.cfg.leftOffsetPx() + this.cfg.rightOffsetPx())+UNITY}));
+                height: ${this.cfg.coverAreaHeightPx()}${UNITY};
                 display: ${(this.cfg.movementState() == SHUTTER_STATE_OPENING || this.cfg.movementState() == SHUTTER_STATE_CLOSING) ? 'block' : 'none'}">
                 <ha-icon class="${ESC_CLASS_MOVEMENT_OPEN}" icon="mdi:arrow-up" style="display: ${this.cfg.movementState() == SHUTTER_STATE_OPENING ? 'block' : 'none'}"></ha-icon>
                 <ha-icon class="${ESC_CLASS_MOVEMENT_CLOSE}" icon="mdi:arrow-down" style="display: ${this.cfg.movementState() == SHUTTER_STATE_CLOSING ? 'block' : 'none'}"></ha-icon>
@@ -1219,12 +1245,12 @@ class EnhancedShutter extends LitElement
     this.pickPoint = event.pageY - parseInt(slide.style.height);
   }
   getShutterPosition(newScreenPosition){
-    let shutterPosition = (newScreenPosition - this.cfg.topOffsetPct()) * (100-this.cfg.offset()) / this.cfg.coverHeightPx();
+    let shutterPosition = (newScreenPosition ) * (100-this.cfg.offset()) / (this.cfg.coverSlatsAreaHeightPx());
     shutterPosition = Math.round(this.cfg.invertPercentage() ?shutterPosition: 100 - shutterPosition);
     return shutterPosition;
   }
   getScreenPosition(pickPoint){
-    let newScreenPosition = Math. round(boundary(pickPoint - this.pickPoint,this.cfg.coverTopPx(),this.cfg.coverBottomPx()));
+    let newScreenPosition = Math. round(boundary(pickPoint - this.pickPoint, 0, this.cfg.coverSlatsAreaHeightPx()));
     return newScreenPosition;
   }
   mouseDown = (event) =>
@@ -1352,8 +1378,12 @@ class shutterCfg {
       this.partial(boundary(config[CONFIG_PARTIAL_CLOSE_PCT]));
       this.offset(boundary(config[CONFIG_OFFSET_CLOSED_PCT]));
 
-      this.topOffsetPct(Math.round(boundary(config[CONFIG_TOP_OFFSET_PCT])/ 100 * this.windowHeightPx()));
-      this.bottomOffsetPct(Math.round(boundary(config[CONFIG_BOTTOM_OFFSET_PCT])/ 100 * this.windowHeightPx()));
+      this.topOffsetPx(Math.round(boundary(config[CONFIG_TOP_OFFSET_PCT])/ 100 * this.windowHeightPx()));
+      this.bottomOffsetPx(Math.round(boundary(config[CONFIG_BOTTOM_OFFSET_PCT])/ 100 * this.windowHeightPx()));
+      this.leftOffsetPx(Math.round(boundary(config[CONFIG_LEFT_OFFSET_PCT])/ 100 * this.windowWidthPx()));
+      this.rightOffsetPx(Math.round(boundary(config[CONFIG_RIGHT_OFFSET_PCT])/ 100 * this.windowWidthPx()));
+
+      this.shutterBottomHeightPx(config[CONFIG_SHUTTER_BOTTOM_HEIGHT_PX]);
 
       this.canTilt(!!config[CONFIG_CAN_TILT]);
 
@@ -1490,7 +1520,7 @@ class shutterCfg {
     return this.getCfg(CONFIG_HEIGHT_PX,value);
   }
   windowWidthPx(value = null){
-    return this.getCfg(CONFIG_WIDTH_PX,value);lo
+    return this.getCfg(CONFIG_WIDTH_PX,value);
   }
   partial(value = null){
     return this.getCfg(CONFIG_PARTIAL_CLOSE_PCT,value);
@@ -1504,12 +1534,23 @@ class shutterCfg {
   scaleIcons(value = null){
     return this.getCfg(CONFIG_SCALE_ICONS,value);
   }
-  topOffsetPct(value = null){
+  topOffsetPx(value = null){
     return this.getCfg(CONFIG_TOP_OFFSET_PCT,value);
   }
-  bottomOffsetPct(value = null){
+  bottomOffsetPx(value = null){
     return this.getCfg(CONFIG_BOTTOM_OFFSET_PCT,value);
   }
+  leftOffsetPx(value = null){
+    return this.getCfg(CONFIG_LEFT_OFFSET_PCT, value);
+  }
+  rightOffsetPx(value = null){
+    return this.getCfg(CONFIG_RIGHT_OFFSET_PCT, value);
+  }
+
+  shutterBottomHeightPx(value = null){
+    return this.getCfg(CONFIG_SHUTTER_BOTTOM_HEIGHT_PX, value);
+  }
+
   canTilt(value = null){
     return this.getCfg(CONFIG_CAN_TILT,value);
   }
@@ -1674,9 +1715,7 @@ class shutterCfg {
       visiblePosition = !!this.offset() ? Math.max(0, Math.round((position_pct - this.offset()) / (100-this.offset()) * 100 )) : position_pct;
     }
 
-    let position =this.coverHeightPx() * (this.invertPercentage()?visiblePosition:100-visiblePosition) / 100 + this.topOffsetPct();
-
-    return position;
+    return this.coverSlatsAreaHeightPx() * (this.invertPercentage() ? visiblePosition : 100 - visiblePosition) / 100 ;
 
   }
   positionPercentToText(percent){
@@ -1713,7 +1752,7 @@ class shutterCfg {
       positionText = this.positionPercentToText(visiblePosition);
 
       if (visiblePosition == 100 && offset) {
-        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
       }
 
     } else {
@@ -1721,21 +1760,22 @@ class shutterCfg {
       positionText = this.positionPercentToText(visiblePosition);
 
       if (visiblePosition == 0 && offset) {
-        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+        positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
       }
     }
     return positionText;
   }
 
-  coverHeightPx(){
-    return this.windowHeightPx()-this.bottomOffsetPct() - this.topOffsetPct();
+  // whole area from window inner top to inner bottom
+  coverAreaHeightPx(){
+    return this.windowHeightPx() - this.bottomOffsetPx() - this.topOffsetPx();
   }
-  coverTopPx(){
-    return this.topOffsetPct();
+
+  // area excluding the bottom (slats-only area that will expand/collapse based on position)
+  coverSlatsAreaHeightPx(){
+    return this.coverAreaHeightPx() - this.shutterBottomHeightPx()
   }
-  coverBottomPx(){
-    return this.windowHeightPx()-this.bottomOffsetPct();
-  }
+
   iconScaleFactor(){
     return this.scaleIcons()? Math.min(this.windowWidthPx()/ESC_BASE_WIDTH_PX*1.25,1): 1;
   }
