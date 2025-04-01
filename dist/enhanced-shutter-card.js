@@ -53,6 +53,8 @@ const ESC_CLASS_BUTTONS_RIGHT = `${ESC_CLASS_BUTTONS}-${RIGHT}`;
 const ESC_CLASS_BUTTON = `${ESC_CLASS_BASE_NAME}-button`;
 const ESC_CLASS_SELECTOR = `${ESC_CLASS_BASE_NAME}-selector`;
 const ESC_CLASS_SELECTOR_PICTURE = `${ESC_CLASS_BASE_NAME}-selector-picture`;
+const ESC_CLASS_SELECTOR_VIEW = `${ESC_CLASS_BASE_NAME}-selector-view`;
+const ESC_CLASS_SELECTOR_FRAME = `${ESC_CLASS_BASE_NAME}-selector-frame`;
 const ESC_CLASS_SELECTOR_SLIDE = `${ESC_CLASS_BASE_NAME}-selector-slide`;
 const ESC_CLASS_SELECTOR_PICKER = `${ESC_CLASS_BASE_NAME}-selector-picker`;
 const ESC_CLASS_SELECTOR_PARTIAL = `${ESC_CLASS_BASE_NAME}-selector-partial`;
@@ -302,16 +304,32 @@ const SHUTTER_CSS =`
         justify-content: center;
         position: relative;
         margin: auto;
-        background-size: cover;
-        background-position: center;
         line-height: 0;
         overflow: hidden;
       }
-      .${ESC_CLASS_SELECTOR_PICTURE}>img {
-        justify-content: center;
+      .${ESC_CLASS_SELECTOR_VIEW} {
+        z-index: -2;
+      
+        overflow: hidden;
+        
+        position: absolute;
+        top: 0;
+        left: 0;
+        
+        background-size: cover;
+        background-position: center;
+      }
+      .${ESC_CLASS_SELECTOR_FRAME} {
         margin: auto;
         width: 100%;
         height: 100%;
+        
+        position: absolute;
+        top: 0;
+        left: 0;
+        
+        background-size: cover;
+        background-position: center;
         
         image-rendering: auto;
         image-rendering: pixelated;
@@ -1020,7 +1038,6 @@ class EnhancedShutter extends LitElement
         style="--mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
                --mdc-icon-size: ${this.cfg.iconSize()}${UNITY};
                --icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${UNITY};
-               --
               "
       >
         <!-- battery-icon -->
@@ -1119,7 +1136,7 @@ class EnhancedShutter extends LitElement
               ">
               ${this.cfg.partial()  /* TODO localize texts */
                 ? html`
-                    <ha-icon-button label="Partially close (${100-this.cfg.partial()}% closed)"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, this.cfg.partial() )}" >
+                  <ha-icon-button label="Partially close (${100-this.cfg.partial()}% closed)"  .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.doOnclick(entityId, `${ACTION_SHUTTER_SET_POS}`, this.cfg.partial() )}" >
                       <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
                   </ha-icon-button>` : ''}
               ${this.cfg.canTilt() ? html`
@@ -1134,7 +1151,7 @@ class EnhancedShutter extends LitElement
             <div class='blankDiv'></div>
           `}
           <div
-            class="${ESC_CLASS_SELECTOR}";
+            class="${ESC_CLASS_SELECTOR}"
             style="
               flex-grow: 0;
               flex-shrink: 1;
@@ -1145,12 +1162,16 @@ class EnhancedShutter extends LitElement
               style="
                 width: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
                 height: ${this.cfg.windowHeightPx()+UNITY};
-                ${this.cfg.viewImage().includes('.')
-                  ? `background-image: url(${this.cfg.viewImage()}`
-                  : `background-color:${this.cfg.viewImage()}`
-                }
               ">
-              <img src= "${this.cfg.windowImage() } ">
+                <img class="${ESC_CLASS_SELECTOR_VIEW}" style="
+                  margin: ${this.cfg.topOffsetPx()+UNITY} ${this.cfg.rightOffsetPx()+UNITY} ${this.cfg.bottomOffsetPx()+UNITY} ${this.cfg.leftOffsetPx()+UNITY};
+                  width: calc(100% - (${(this.cfg.leftOffsetPx() + this.cfg.rightOffsetPx())+UNITY}));
+                  height: ${this.cfg.coverAreaHeightPx()}${UNITY};
+                  ${this.cfg.viewImage().includes('.')
+                    ? `background-image: url(${this.cfg.viewImage()}`
+                    : `background-color:${this.cfg.viewImage()}`
+                  }">
+                <img class="${ESC_CLASS_SELECTOR_FRAME}" src= "${this.cfg.windowImage() } ">
               <div class="${ESC_CLASS_SELECTOR_SLIDE}" style="
                 margin: ${this.cfg.topOffsetPx()+UNITY} ${this.cfg.rightOffsetPx()+UNITY} ${this.cfg.bottomOffsetPx()+UNITY} ${this.cfg.leftOffsetPx()+UNITY};
                 width: calc(100% - (${(this.cfg.leftOffsetPx() + this.cfg.rightOffsetPx())+UNITY}));
