@@ -1263,7 +1263,7 @@ class EnhancedShutter extends LitElement
   getPickPoint(event){
     let siblings = Array.from(event.target.parentElement.children);
     let slide = siblings.find(sibling => sibling.classList.contains(ESC_CLASS_SELECTOR_SLIDE));
-    this.pickPoint = event.pageY - parseInt(slide.style.height);
+    this.pickPoint = event.pageY - (parseInt(slide.style.height) - this.cfg.shutterBottomHeightPx());
   }
   getShutterPosition(newScreenPosition){
     let shutterPosition = (newScreenPosition ) * (100-this.cfg.offset()) / (this.cfg.coverSlatsAreaHeightPx());
