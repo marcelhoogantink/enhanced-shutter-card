@@ -2,12 +2,14 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
-
 ---
 
 ### Install
 
-Use HACS, search for `Enhancd Shutter Card`, the resources will automatically be configured with the needed files.
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marcelhoogantink&repository=enhanced-shutter-card&category=plugin)
+
+
+Use HACS, search for `Enhanced Shutter Card`, the resources will automatically be configured with the needed files.
 
 As long as this card is not yet a default one in HACS (PR is awaiting aproval), you first need to add this repository as a Custom Repository.
 See for installing Custom Repositories this [hacs-custom-repositories](https://www.hacs.xyz/docs/faq/custom_repositories/) page.

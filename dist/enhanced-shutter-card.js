@@ -7,9 +7,6 @@ import {
   unsafeCSS
 }
 from './lit/lit-core.min.js';
-//import {  Task  } from './lit/task/task.js';
-//import { task } from 'https://cdn.skypack.dev/lit/directive-task.js';
-
 // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
 
@@ -370,6 +367,10 @@ const SHUTTER_CSS =`
         margin: auto;
         line-height: 0;
         overflow: hidden;
+        image-rendering: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
       }
       .${ESC_CLASS_SELECTOR_PICTURE}>img {
         justify-content: center;
@@ -400,7 +401,7 @@ const SHUTTER_CSS =`
         height: var(--esc-slide-height);
         max-width: 100%;
         transform-origin: bottom;
-        transform: var(--esc-transform-slide)
+        transform: var(--esc-transform-slide);
       }
       .${ESC_CLASS_SELECTOR_SLIDE}::before {
         content: '';
@@ -415,6 +416,10 @@ const SHUTTER_CSS =`
         overflow: hidden;
         height: var(--esc-slide-height);
         transform: var(--esc-transform-pre-slide);
+        image-rendering: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
       }
       .${ESC_CLASS_SELECTOR_SLIDE} {
         z-index: ${Z_INDEX_SLIDE};
@@ -426,6 +431,7 @@ const SHUTTER_CSS =`
         height: var(--esc-slide-height);
         transform-origin: bottom;
         transform: var(--esc-transform-slide);
+        image-rendering: pixelated;
       }
       .${ESC_CLASS_SELECTOR_PARTIAL} {
         z-index: ${Z_INDEX_PARTIAL};
@@ -1823,10 +1829,6 @@ class shutterCfg {
     let transform =`${this.verticalMovement() ? '': `scale(${y/x},1)`}`;
     return transform;
   }
-  transformScalePicker(x = this.actualGlobalWidthPx(),y = this.actualGlobalHeightPx()){
-    let transform =`${this.verticalMovement() ? '': `scale(${y/x},1)`}`;
-    return transform;
-  }
   transformScale(x = this.actualGlobalWidthPx(),y = this.actualGlobalHeightPx()){
     let transform =`${this.verticalMovement() ? '': `scale(${y/x},${x/y})`}`;
     return transform;
@@ -1872,23 +1874,6 @@ class shutterCfg {
     if (value!== null && mode) console.warn('Passive mode, no action');
     return mode;
   }
-/*
-  viewImage(value = null){
-    return this.#getCfg(CONFIG_VIEW_IMAGE,value);
-  }
-  windowImage(value = null){
-    return this.#getCfg(CONFIG_WINDOW_IMAGE,value);
-  }
-  shutterSlatImage(value = null){
-    return this.#getCfg(CONFIG_SHUTTER_SLAT_IMAGE,value);
-  }
-  shutterSlatImage2(value = null){
-    return this.#getCfg(CONFIG_SHUTTER_SLAT_IMAGE,value);
-  }
-  shutterBottomImage(value = null){
-    return this.#getCfg(CONFIG_SHUTTER_BOTTOM_IMAGE,value);
-  }
-*/
   windowHeightPx(value = null){
     return this.#getCfg(CONFIG_HEIGHT_PX,value);
   }
@@ -2144,7 +2129,7 @@ class shutterCfg {
 
 //        if (visiblePosition == 100 && offset) {
         if (offset) {
-            positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+            positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
         }
 
       } else {
@@ -2153,7 +2138,7 @@ class shutterCfg {
 
         //if (visiblePosition == 0 && offset) {
         if (offset) {
-            positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +' %)';
+            positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
         }
       }
       //console_log('xxx computePositionText:',this.friendlyName(),currentPosition,visiblePosition,positionText);
@@ -2739,7 +2724,7 @@ class EscImages{
     this.images=[];
     this.width=[];
     this.height=[];
-    var nImages=0;
+    this.nImages=0;
     this.escImages={};
     let base_image_map = config[CONFIG_IMAGE_MAP] || ESC_IMAGE_MAP;
 
@@ -2822,16 +2807,13 @@ class EscImages{
   async processImages() {
     try {
       const images=this.images;
-      console_log('Start In processImages2:', this);
       const imageDimensions = await readImageDimensions(images);
-      console_log('Image dimensions are ready:', imageDimensions);
       imageDimensions.forEach((value,key,array)=>{
         this.width[key] = value.width;
         this.height[key]= value.height;
       });
 
       this.escImagesLoaded = true; // Mark images as loaded
-      console_log('In processImages2.1:', this,this.escImagesLoaded);
     } catch (error) {
         console.error('Failed to load image dimensions:', error);
     }
@@ -2871,13 +2853,11 @@ function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
 
   // Set the fontstyle
   context.font = `${fontWeight} ${fontHeight}px ${font}`;
+
   // Measure and return the width of the text
   let data = context.measureText(text);
   let width = Math.ceil(data.width);
   let height =  Math.ceil(data.fontBoundingBoxAscent + data.fontBoundingBoxDescent);
-  //console_log("Text data:",text,data);
-  //console_log("Text fontHeightData actualGlobalHeightPx:",fontHeightData,actualGlobalHeightPx);
-  //console_log("Text sizes w*h:",text,width,height);
   return {width,height,text,data};
 
 }
