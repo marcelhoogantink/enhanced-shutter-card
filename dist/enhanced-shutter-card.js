@@ -101,6 +101,9 @@ const ACTION_SHUTTER_STOP_TILT = 'stop_cover_tilt';
 const ACTION_SHUTTER_SET_POS = 'set_cover_position';
 const ACTION_SHUTTER_SET_POS_TILT = 'set_cover_tilt_position';
 
+const ICON_BUTTON_SIZE = 36; // original: 48
+const ICON_SIZE = 24;
+
 const UNITY= 'px';
 
 const CONFIG_TYPE = "type";
@@ -309,6 +312,7 @@ const SHUTTER_CSS =`
         overflow: visible;
         --mdc-icon-button-size: 48px;
         --mdc-icon-size: 24px;
+        background-color: red;
 
       }
       .${ESC_CLASS_MIDDLE} {
@@ -1402,7 +1406,7 @@ class EnhancedShutter extends LitElement
   }
   shutterSlatSizePercentage(){
     const imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId())
-    const min=Math.max(Math.min( imageSize.x,imageSize.y),6);
+    const min=Math.max(Math.min( imageSize.x,imageSize.y),6); // TODO why 6 here?
     let size;
     if (this.cfg.verticalMovement()){
       size=`100% ${min}px`;
@@ -1413,7 +1417,7 @@ class EnhancedShutter extends LitElement
   }
   shutterBottomSizePercentage(){
     const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.entityId())
-    const min=Math.max(Math.min( imageSize.x,imageSize.y),6);
+    const min=Math.max(Math.min( imageSize.x,imageSize.y),6); // TODO why 6 here?
     let size;
     if (this.cfg.verticalMovement()){
       size=`100% ${min}px`;
@@ -2154,7 +2158,7 @@ class shutterCfg {
   }
 
   iconButtonSize(){
-    let size = 48;
+    let size = ICON_BUTTON_SIZE;
     if (this.scaleButtons()){
       let px;
       if (this.buttonsInRow()){
@@ -2162,12 +2166,12 @@ class shutterCfg {
       }else{
         px = this.windowWidthPx();
       }
-      size = Math.min(px/3.0,48);
+      size = Math.min(px/3.0,ICON_BUTTON_SIZE); // buttons fit in 1/3 of the size
     }
     return size;
   }
   iconSize(){
-    let size = 24;
+    let size = ICON_SIZE;
     if (this.scaleButtons()){
       let px;
       if (this.buttonsInRow()){
@@ -2175,15 +2179,15 @@ class shutterCfg {
       }else{
         px = this.windowWidthPx();
       }
-      size = Math.min(px/6.0,24);
+      size = Math.min(px/(3.0*ICON_BUTTON_SIZE/ICON_SIZE),ICON_SIZE); // buttons fit in 1/3 of the size
     }
     return size;
   }
   iconSizeWifiBattery(){
-    let size = 24;
+    let size = ICON_SIZE;
     if (this.scaleIcons()){
       let px = this.windowWidthPx();
-      size = Math.min(px/6.0,24);
+      size = Math.min(px/6.0,ICON_SIZE);
     }
     return size;
   }
@@ -2724,7 +2728,7 @@ class EscImages{
     this.images=[];
     this.width=[];
     this.height=[];
-    this.nImages=0;
+    var nImages=0;
     this.escImages={};
     let base_image_map = config[CONFIG_IMAGE_MAP] || ESC_IMAGE_MAP;
 
@@ -2751,7 +2755,7 @@ class EscImages{
         let image = typeof entity[image_type] !== 'undefined' ? defImagePathOrColor(image_map,entity[image_type],image_type) : base_image;
         if (image){
           let src = image || `${ESC_IMAGE_MAP}/${default_image}`;
-          src.replace(/([^:]\/)\/+/g, "$1")  // remove double slaches .... # //  #49
+          src = src.replace(/([^:]\/)\/+/g, "/").trim(); // Remove double slashes and trim
           var key;
           if (!(this.images.includes(src))){
             this.images[nImages]=src;
