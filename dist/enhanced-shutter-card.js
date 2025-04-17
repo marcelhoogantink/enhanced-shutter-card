@@ -34,6 +34,26 @@ const AUTO_TL = `${AUTO}-${TOP}-${LEFT}`;
 const AUTO_TR = `${AUTO}-${TOP}-${RIGHT}`;
 const AUTO_BL = `${AUTO}-${BOTTOM}-${LEFT}`;
 const AUTO_BR = `${AUTO}-${BOTTOM}-${RIGHT}`;
+/*
+    from https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view
+    for getLayoutOptions() {
+      size off cells.
+      width:
+         layout: between 80px and 120px depending on the screen size
+      height: 56px
+      gap between cells: 8px
+
+    for getGridOptions() (used here)
+      width:
+         layout: between 27px and 40px depending on the screen size (width for code: size is LayoutWidth/3 )
+      height: 56px
+      gap between cells: 8px
+*/
+const HA_GRID_PX_HEIGHTt = 56;
+const HA_GRID_PX_WIDTH = 24; // beween 17 and 30 ???
+const HA_GRID_PX_GAP = 8;
+
+
 
 const PORTRAIT ="P";
 const LANDSCAPE ="L";
@@ -312,7 +332,7 @@ const SHUTTER_CSS =`
         overflow: visible;
         --mdc-icon-button-size: 48px;
         --mdc-icon-size: 24px;
-        background-color: red;
+        bbackground-color: red;
 
       }
       .${ESC_CLASS_MIDDLE} {
@@ -350,6 +370,7 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_SELECTOR} {
         max-width: 100%;
+        margin: 2px;
         justify-content: center;
         position: relative;
         align-items: center;
@@ -893,36 +914,11 @@ class EnhancedShutterCardNew extends LitElement{
 
 
   getGridOptionsInternal(){
-    // from https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view
-    // for getLayoutOptions() {
-    //   size off cells.
-    //   width:
-    //      layout: between 80px and 120px depending on the screen size
-    //   height: 56px
-    //   gap between cells: 8px
-
-    // for getGridOptions() (used here)
-    //   width:
-    //      layout: between 27px and 40px depending on the screen size (width for code: size is LayoutWidth/3 )
-    //   height: 56px
-    //   gap between cells: 8px
 
     const debug=0;
 
     console_log('Card getGridOptionsInternal');
 
-    // HA basic sizes for calculations:
-
-
-    const haGridPxHeight =56;
-    const haGridPxHeightGap = 8;
-
-    const haGridPxWidthMin  =19; // 19
-    const haGridPxWidthGap  = 8;
-
-    /**
-     * initial
-     */
     let cardSize;
     let seperate=0;
 
@@ -950,12 +946,12 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
       console.warn('ShutterCard  .. no content ??..');
     }
-    this.nbRows= Math.ceil((cardSize.localHeightPx+haGridPxHeightGap)/(haGridPxHeight+haGridPxHeightGap));
-    this.nbCols= Math.ceil((cardSize.localWidthPx+haGridPxWidthGap)/(haGridPxWidthMin+haGridPxWidthGap));
-    //this.nbRows= Math.round((cardSize.localHeightPx+haGridPxHeightGap)/(haGridPxHeight+haGridPxHeightGap));
-    //this.nbCols= Math.round((cardSize.localWidthPx+haGridPxWidthGap)/(haGridPxWidthMin+haGridPxWidthGap));
-    //this.nbRows= Math.floor((cardSize.localHeightPx+haGridPxHeightGap)/(haGridPxHeight+haGridPxHeightGap));
-    //this.nbCols= Math.floor((cardSize.localWidthPx+haGridPxWidthGap)/(haGridPxWidthMin+haGridPxWidthGap));
+    this.nbRows= Math.ceil((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
+    this.nbCols= Math.ceil((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
+    //this.nbRows= Math.round((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
+    //this.nbCols= Math.round((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
+    //this.nbRows= Math.floor((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
+    //this.nbCols= Math.floor((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
 
     return {
       rows: this.nbRows,

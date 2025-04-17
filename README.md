@@ -32,7 +32,7 @@ and choose type: `Dashboard`.
   `can_tilt` option is replace by `show_tilt`, due to the Cra is now reading and acting on `supported-features`-attribute of the shutter.
 - #### calculated grid-space for the card (in rows and colums) is displayed while editing the card in yaml.
   For more control on the size of the Card, the needed Gridsize (rows, columsn) are shown while editing the Card in Yaml.
-  For more information on the Gidsize, see: https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view.
+  For more information on the Gridsize, see: https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view.
 - #### solved issues:
   - [#59](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/59) Size and Toggle.
   - [#57](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/57) Stop-button not showing up.
