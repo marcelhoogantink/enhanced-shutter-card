@@ -71,6 +71,7 @@ const ESC_FEATURE_STOP_TILT         = 0b01000000; // 64
 const ESC_FEATURE_SET_TILT_POSITION = 0b10000000; // 128
 
 const ESC_FEATURE_ALL               = 0b11111111; // 255
+const ESC_FEATURE_NO_TILT           = 0b00001111; // 15
 
 const SHUTTER_STATE_OPEN = 'open';
 const SHUTTER_STATE_CLOSED = 'closed';
@@ -1721,7 +1722,7 @@ class shutterCfg {
     return this.#cfg[key];
   }
   isCoverFeatureActive(feature=ESC_FEATURE_ALL){
-    return Boolean((this.getCoverEntity()?.getSupportedFeatures() ?? null) & feature);
+    return Boolean((this.getCoverEntity()?.getSupportedFeatures() ?? ESC_FEATURE_NO_TILT) & feature);
   }
   #setLocalize(localize){
     this.#localize=localize;
@@ -1972,7 +1973,7 @@ class shutterCfg {
   currentPosition(){
     let position;
     if (this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)){
-      position = this.#getCoverEntity()?.getCurrentPosition() ?? 50;
+      position = this.#getCoverEntity()?.getCurrentPosition() ?? 0;
     }else{
       position= this.#getCoverEntity()?.getState()==SHUTTER_STATE_OPEN ? 100 :  0;
     }
@@ -2646,13 +2647,13 @@ class haEntity{
     return this.#entityId || UNAVAILABLE;
   }
   getCurrentPosition(){
-    return this.getAttributes()?.current_position ?? UNAVAILABLE;
+    return this.getAttributes()?.current_position ?? null;
   }
   getFriendlyName(){
     return this.getAttributes()?.friendly_name ?? UNAVAILABLE;
   }
   getSupportedFeatures(){
-    return this.getAttributes()?.supported_features ?? UNAVAILABLE;
+    return this.getAttributes()?.supported_features ?? null;
   }
   getUnitOfMeasurement(){
     return this.getAttributes()?.unit_of_measurement ?? UNAVAILABLE;
