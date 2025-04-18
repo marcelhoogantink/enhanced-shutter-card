@@ -53,18 +53,17 @@ and choose type: `Dashboard`.
 
   New settings `battery_entity` and `signal_entity` for displaying battery and signal icon with level-information.
   New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
-
+  
+  ![image](https://github.com/user-attachments/assets/4c0ad49b-e003-4ca8-a64f-3b1fea6d5b68)
+  
 - #### Card works now 100% local.
-
   The card inludes now the lit-libary, no internet-connection needed after downloading.
 
-- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) solved.
-
-  This error is found and removed.
+- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) 
+  This bug is found and removed.
 
 - #### Improved sizing of the Card
-
-The sizing of the card is further improved. (This can result in little differences in size with previous versions)
+  The sizing of the card is further improved. (This can result in little differences in size with previous versions)
 
 ---
 
