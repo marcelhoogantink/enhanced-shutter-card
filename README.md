@@ -25,11 +25,12 @@ and choose type: `Dashboard`.
   Therefore the `can_tilt`option is changed into `show_tilt`
 - #### Horizontal moving shutters (left to right, right to left)
   Horizontal moving shutters are now possible. Add `closing_direction` to your settings, and give it the value `left`, `right` or `down`. `down` is default.
+ ![Curtain](Curtain.gif)
   For horizontal moving shutters (curtains), a new image is added: `esc_curtain.png`
 - #### Warnings (unknown/deprected/removed items) while editing the shutters in YAML.
   To help you with defining your settings, unknown/deprecated/removed messaged are shown when defing your card in YAML.
 - #### can_tilt is deprecated , use show_tilt
-  `can_tilt` option is replace by `show_tilt`, due to the Cra is now reading and acting on `supported-features`-attribute of the shutter.
+  `can_tilt` option is replace by `show_tilt`, due to the Card is now reading and acting on `supported-features`-attribute of the shutter.
 - #### calculated grid-space for the card (in rows and colums) is displayed while editing the card in yaml.
   For more control on the size of the Card, the needed Gridsize (rows, columsn) are shown while editing the Card in Yaml.
   For more information on the Gridsize, see: https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view.
@@ -53,17 +54,18 @@ and choose type: `Dashboard`.
 
   New settings `battery_entity` and `signal_entity` for displaying battery and signal icon with level-information.
   New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
-  
-  ![image](https://github.com/user-attachments/assets/4c0ad49b-e003-4ca8-a64f-3b1fea6d5b68)
-  
+
 - #### Card works now 100% local.
+
   The card inludes now the lit-libary, no internet-connection needed after downloading.
 
-- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) 
-  This bug is found and removed.
+- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) solved.
+
+  This error is found and removed.
 
 - #### Improved sizing of the Card
-  The sizing of the card is further improved. (This can result in little differences in size with previous versions)
+
+The sizing of the card is further improved. (This can result in little differences in size with previous versions)
 
 ---
 
@@ -174,7 +176,7 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | name                         | string      | No       | _Friendly name of the entity_            | Name to display for the shutter                                                             |
 | battery_entity               | string      | No       | `null`                                   | EntityId of the sensor represenating the battery-level of the shutter (as a number)         |
 | signal_entity                | string      | No       | `null`                                   | EntityId of the sensor represenating the Wireless signal-level of the shutter (as a number) |
-| passive_mode                 |             | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| passive_mode                 | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | image_map                    | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | window_image                 | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | view_image                   | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
@@ -195,6 +197,8 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | name_disabled                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | opening_position             | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | opening_disabled             | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| inline_header                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_percentage            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | can_tilt                     | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         | deprecated as of v1.2.0, use `show_tilt`     |
 | show_tilt                    | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | partial_close_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
