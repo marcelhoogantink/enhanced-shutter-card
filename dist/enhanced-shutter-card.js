@@ -3024,7 +3024,7 @@ function displayNodePathToTopIncludingShadowAndClass(node) {
   console.log(path.reverse().join(" \n > "));
 }
 function console_log(...args){
-  if (VERSION.indexOf('1') > 0){
+  if (VERSION.indexOf('b') > 0){
     console.log(formatDate("HH:mm:ss.SSS"),...args);
   }
 }
