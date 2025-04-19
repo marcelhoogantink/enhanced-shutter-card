@@ -26,7 +26,9 @@ and choose type: `Dashboard`.
   Therefore the `can_tilt`option is changed into `show_tilt`
 - #### Horizontal moving shutters (left to right, right to left)
   Horizontal moving shutters are now possible. Add `closing_direction` to your settings, and give it the value `left`, `right` or `down`. `down` is default.
+  
  ![Curtain](Curtain.gif)
+ 
   For horizontal moving shutters (curtains), a new image is added: `esc_curtain.png`
 - #### Warnings (unknown/deprected/removed items) while editing the shutters in YAML.
   To help you with defining your settings, unknown/deprecated/removed messaged are shown when defing your card in YAML.
