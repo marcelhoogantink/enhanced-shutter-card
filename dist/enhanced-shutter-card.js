@@ -1989,11 +1989,12 @@ class shutterCfg {
   getCloseAngle(){
     const direction= {[DOWN]:0,[LEFT]:90,[RIGHT]:270,[UP]:180};
     return direction[this.closingDirection()] || 0;
-
   }
+
   getOrientation(){
     return Globals.screenOrientation.value; // global variable !!
   }
+  
   movementState(position=this.currentPosition()) {
     let state = this.#getCoverEntity().getState() || UNAVAILABLE;
     if (state == SHUTTER_STATE_OPEN && position != 100 && position != 0){
