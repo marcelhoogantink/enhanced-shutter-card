@@ -1445,12 +1445,12 @@ class EnhancedShutter extends LitElement
 
   defScreenPositionFromPercent(position_pct=this.cfg.currentPosition()) {
     let visiblePosition;
-    if (this.cfg.invertPercentage()) {
-      visiblePosition = !!this.cfg.offset() ? Math.min(100, Math.round(position_pct / this.cfg.offset() * 100 )) : position_pct;
-    }
-    else  {
+//    if (this.cfg.invertPercentage()) {
+//      visiblePosition = !!this.cfg.offset() ? Math.min(100, Math.round(position_pct / this.cfg.offset() * 100 )) : position_pct;
+//    }
+//    else  {
       visiblePosition = !!this.cfg.offset() ? Math.max(0, Math.round((position_pct - this.cfg.offset()) / (100-this.cfg.offset()) * 100 )) : position_pct;
-    }
+//    }
     let position = this.offsetOpenedPx() + (this.coverMovingDirectionPx() * (this.cfg.shutterPosition2(visiblePosition)) / 100) ;
 
     //let position=this.offsetOpenedPx() + (this.coverHeightPx()     * (this.shutterPosition2(visiblePosition)) / 100) ;
@@ -1612,7 +1612,9 @@ class EnhancedShutter extends LitElement
 
   };
   sendShutterPosition( entityId, position)
+
   {
+    if (this.cfg.invertPercentage()) position = 100-position;
     this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS, { position: position });
   }
   callHassCoverService(entityId,command,args='')
@@ -1866,6 +1868,8 @@ class shutterCfg {
   }
   invertPercentage(value = null){
     return this.#getCfg(CONFIG_INVERT_PCT,value);
+    //this.invertPercentageTemp= this.#getCfg(CONFIG_INVERT_PCT,value);
+    //return false;
   }
   openingDisabled(value = null){
     return this.#getCfg(CONFIG_OPENING_DISABLED,value);
@@ -1968,7 +1972,8 @@ class shutterCfg {
     return IS_VERTICAL.includes(this.closingDirection());
   }
   shutterPosition2(visiblePosition){
-    return (this.invertPercentage()?visiblePosition:100-visiblePosition);
+    return (100-visiblePosition);
+    // return (this.invertPercentage()?visiblePosition:100-visiblePosition);
   }
   currentPosition(){
     let position;
@@ -1977,6 +1982,7 @@ class shutterCfg {
     }else{
       position= this.#getCoverEntity()?.getState()==SHUTTER_STATE_OPEN ? 100 :  0;
     }
+    if (this.invertPercentage()) position = 100-position;
 
     return position;
   }
@@ -1995,8 +2001,8 @@ class shutterCfg {
     }
     const stateOrg =state;
     if (state === SHUTTER_STATE_OPEN || state === SHUTTER_STATE_CLOSED) {
-      position = this.shutterPosition2(100-position); // TODO check the logic for (100-position) .....
-      //console_log('xxx 1 movementState: state:',stateOrg,'position:',position,'state:',state);
+      // see https://www.home-assistant.io/integrations/cover.template/#combining-value_template-and-position_template
+      // so when inverted extra handling is needed.
       return this.invertPercentage()
         ? (state === SHUTTER_STATE_OPEN ? SHUTTER_STATE_CLOSED : SHUTTER_STATE_OPEN)
         : state;
@@ -2035,9 +2041,11 @@ class shutterCfg {
     let upDisabled = false;
     if (this.disableEndButtons()) {
       if (this.currentPosition() == 0) {
-        upDisabled = this.invertPercentage();
+        upDisabled = false;
+        //upDisabled = this.invertPercentage();
       } else if (this.currentPosition() == 100) {
-        upDisabled = !this.invertPercentage();
+        upDisabled = true;
+        //upDisabled = !this.invertPercentage();
       }
     }
     return upDisabled;
@@ -2046,9 +2054,11 @@ class shutterCfg {
     let downDisabled = false;
     if (this.disableEndButtons()) {
       if (this.currentPosition() == 0) {
-        downDisabled = !this.invertPercentage();
+        downDisabled = true;
+        //downDisabled = !this.invertPercentage();
       } else if (this.currentPosition() == 100) {
-        downDisabled = this.invertPercentage();
+        downDisabled = false;
+        //downDisabled = this.invertPercentage();
       }
     }
     return downDisabled;
@@ -2104,7 +2114,7 @@ class shutterCfg {
       }
         }
     else{
-      if (this.invertPercentage()) percent = 100-percent; // TODO: check with this.shutterPosition2() , just the other way around ...
+      //if (this.invertPercentage()) percent = 100-percent; // TODO: check with this.shutterPosition2() , just the other way around ...
       if (percent > 50 ) {
         text = this.getLocalize(LOCALIZE_TEXT[SHUTTER_STATE_OPEN]);
       } else {
@@ -2124,16 +2134,17 @@ class shutterCfg {
 
       let visiblePosition;
 
-      if (this.invertPercentage()) {
-        visiblePosition = offset ? Math.min(100, Math.round(currentPosition / offset * 100 )) : currentPosition;
-        positionText = this.positionPercentToText(visiblePosition);
-
-//        if (visiblePosition == 100 && offset) {
-        if (offset) {
-            positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
-        }
-
-      } else {
+//      if (this.invertPercentage()) {
+//        visiblePosition = offset ? Math.min(100, Math.round(currentPosition / offset * 100 )) : currentPosition;
+//        positionText = this.positionPercentToText(visiblePosition);
+//
+////        if (visiblePosition == 100 && offset) {
+//        if (offset) {
+//            positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
+//        }
+//
+//      } else {
+        if (this.invertPercentage()) currentPosition = 100-currentPosition;
         visiblePosition = offset ? Math.max(0, Math.round((currentPosition - offset) / (100-offset) * 100 )) : currentPosition;
         positionText = this.positionPercentToText(visiblePosition);
 
@@ -2141,7 +2152,7 @@ class shutterCfg {
         if (offset) {
             positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
         }
-      }
+//      }
       //console_log('xxx computePositionText:',this.friendlyName(),currentPosition,visiblePosition,positionText);
     }
     return positionText;
