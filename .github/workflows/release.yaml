@@ -32,3 +32,8 @@ jobs:
             ${{ github.workspace }}/dist/lit
             ${{ github.workspace }}/hacs.json
             ${{ github.workspace }}/README.md
+
+      - name: Upload release assets (losse bestanden uit dist/)
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          files: dist/**/*
