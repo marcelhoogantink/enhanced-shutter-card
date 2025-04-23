@@ -2557,11 +2557,6 @@ class htmlCard{
           </div>
         </div>
         <div class="${ESC_CLASS_SELECTOR_PICKER}"
-          @pointerdown="${this.enhancedShutter.mouseDown}"
-          @mousedown="${this.enhancedShutter.mouseDown}"
-          @touchstart="${this.enhancedShutter.mouseDown}">
-        </div>
-        <div class="${ESC_CLASS_SELECTOR_PICKER}"
           @pointerdown=${this.enhancedShutter.mouseDown}
           style="touch-action: none; user-select: none;">
         </div>
