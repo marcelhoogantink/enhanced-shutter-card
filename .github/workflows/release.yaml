@@ -37,3 +37,13 @@ jobs:
         uses: softprops/action-gh-release@v2.2.1
         with:
           files: dist/**/*
+
+      - name: "Find all files in dist"
+        id: list_files
+        run: |
+          echo "FILES=$(find dist -type f | paste -sd ',' -)" >> $GITHUB_OUTPUT
+
+      - name: "Upload each file preserving folder structure"
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          files: ${{ steps.list_files.outputs.FILES }}
