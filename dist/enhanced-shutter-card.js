@@ -414,6 +414,8 @@ const SHUTTER_CSS =`
         cursor: pointer;
         transform-origin: center;
         transform: var(--esc-transform-picker);
+        touch-action: none;
+        user-select: none;
       }
       .${ESC_CLASS_SELECTOR_SLIDE}org {
         z-index: ${Z_INDEX_SLIDE};
@@ -1226,17 +1228,28 @@ class EnhancedShutter extends LitElement
     //console_log('Shutter Resize detected',this[ESC_CLASS_SELECTOR]?.getBoundingClientRect());
     //console_log('Shutter Update ready');
   }
-  firstUpdated(changedProperties){
-    //console_log('Shutter firstUpdated');
-    this[ESC_CLASS_SELECTOR]        = findElement(this,'.'+ESC_CLASS_SELECTOR);
-    this[ESC_CLASS_SELECTOR_SLIDE]  = findElement(this,'.'+ESC_CLASS_SELECTOR_SLIDE);
-    this[ESC_CLASS_SELECTOR_PICKER] = findElement(this,'.'+ESC_CLASS_SELECTOR_PICKER);
-    // resize observer here .... observer needs  this[ESC_CLASS_SELECTOR] to be set
-    //displayNodePathToTopIncludingShadowAndClass(this[ESC_CLASS_SELECTOR]);
-    this.startResizeObserver();
-    //console_log('Shutter firstUpdated ready');
+  firstUpdated(changedProperties) {
+    super.firstUpdated(changedProperties);
 
+    this[ESC_CLASS_SELECTOR]        = findElement(this, `.${ESC_CLASS_SELECTOR}`);
+    this[ESC_CLASS_SELECTOR_SLIDE]  = findElement(this, `.${ESC_CLASS_SELECTOR_SLIDE}`);
+    // NOTE: drop the old lit‐decorated @touchstart from the template
+    //      so we can re‑attach it manually below
+    const picker = findElement(this, `.${ESC_CLASS_SELECTOR_PICKER}`);
+    if (picker) {
+      // detach any lit‐added touchstart so we don’t double‐fire
+      picker.removeEventListener('touchstart', this.mouseDown);
+
+      // re‐attach as non‑passive so event.preventDefault() works
+      picker.addEventListener('touchstart', this.mouseDown, { passive: false });
+      // pointerdown is non‑passive by default, you can leave it or re‑attach for clarity:
+      picker.addEventListener('pointerdown', this.mouseDown);
+      picker.addEventListener('mousedown',  this.mouseDown);
+    }
+
+    this.startResizeObserver();
   }
+
   startResizeObserver() {
 
     const onResize = (entries) => {
@@ -2547,6 +2560,10 @@ class htmlCard{
           @pointerdown="${this.enhancedShutter.mouseDown}"
           @mousedown="${this.enhancedShutter.mouseDown}"
           @touchstart="${this.enhancedShutter.mouseDown}">
+        </div>
+        <div class="${ESC_CLASS_SELECTOR_PICKER}"
+          @pointerdown=${this.enhancedShutter.mouseDown}
+          style="touch-action: none; user-select: none;">
         </div>
       </div>
     `;
