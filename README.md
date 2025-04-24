@@ -1,21 +1,31 @@
 # Enhanced Shutter Card
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
-[![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs) [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
 ---
 
-### Install
+### Installation:
 
 Us this button:
-
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marcelhoogantink&repository=enhanced-shutter-card&category=plugin)
+... and download the card.
 
 Or use HACS, search for `Enhanced Shutter Card`, the resources will automatically be configured with the needed files.
 
-As long as this card is not yet a default one in HACS (PR is awaiting aproval), you first need to add this repository as a Custom Repository.
+When all is done, you can find the card under `custom cards` under the `By Card` tab in the list of available cards when building a Dashboard:
+
+![alt text](example.png)
+
+And when you're done, you can ...
+
+<a href="https://www.buymeacoffee.com/tijq3xcipj" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+Thank you !
+
+
+<small>(When unfortunately both options above don't work, you need to add this repository as a Custom Repository.
 See for installing Custom Repositories this [hacs-custom-repositories](https://www.hacs.xyz/docs/faq/custom_repositories/) page.
 Enter repository-url: `https://github.com/marcelhoogantink/enhanced-shutter-card.git`
-and choose type: `Dashboard`.
+and choose type: `Dashboard`.)</small>
 
 ---
 
@@ -27,9 +37,9 @@ and choose type: `Dashboard`.
 - #### Horizontal moving shutters (left to right, right to left)
   Horizontal moving shutters are now possible. Add `closing_direction` to your settings, and give it the value `left`, `right` or `down`.
   Setting `down` is default.
-  
+
   ![Curtain](Curtain.gif)
-  
+
   For horizontal moving shutters (curtains), a new image is added: `esc_curtain.png`
 - #### Warnings (unknown/deprected/removed items) while editing the shutters in YAML.
   To help you with defining your settings, unknown/deprecated/removed messaged are shown when defing your card in YAML.
@@ -73,7 +83,7 @@ and choose type: `Dashboard`.
   New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
   ![image](https://github.com/user-attachments/assets/4c0ad49b-e003-4ca8-a64f-3b1fea6d5b68)
 
-- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) 
+- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist)
   This bug is found and removed.
 
 - #### Improved sizing of the Card

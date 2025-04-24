@@ -1146,7 +1146,7 @@ class EnhancedShutterCardNew extends LitElement{
     return {
       "entities": [{
         "entity": entityId,
-        "name": entity.attributes.friendly_name ? entity.attributes.friendly_name : "My Enhanced Shuttter",
+        "name": "My First Enhanced Shutter Card",
         "top_offset_pct": 13,
         "button_up_hide_states": [
           SHUTTER_STATE_OPEN,
