@@ -5,8 +5,9 @@
 
 ### Installation:
 
-Us this button:
+Use this button:
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marcelhoogantink&repository=enhanced-shutter-card&category=plugin)
+
 ... and download the card.
 
 Or use HACS, search for `Enhanced Shutter Card`, the resources will automatically be configured with the needed files.
