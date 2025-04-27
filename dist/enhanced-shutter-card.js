@@ -2556,9 +2556,7 @@ class htmlCard{
             </ha-icon>
           </div>
         </div>
-        <div class="${ESC_CLASS_SELECTOR_PICKER}"
-          @pointerdown=${this.enhancedShutter.mouseDown}
-          style="touch-action: none; user-select: none;">
+        <div class="${ESC_CLASS_SELECTOR_PICKER}">
         </div>
       </div>
     `;
