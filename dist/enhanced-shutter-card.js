@@ -1445,12 +1445,7 @@ class EnhancedShutter extends LitElement
 
   defScreenPositionFromPercent(position_pct=this.cfg.currentPosition()) {
     let visiblePosition;
-//    if (this.cfg.invertPercentage()) {
-//      visiblePosition = !!this.cfg.offset() ? Math.min(100, Math.round(position_pct / this.cfg.offset() * 100 )) : position_pct;
-//    }
-//    else  {
-      visiblePosition = !!this.cfg.offset() ? Math.max(0, Math.round((position_pct - this.cfg.offset()) / (100-this.cfg.offset()) * 100 )) : position_pct;
-//    }
+    visiblePosition = !!this.cfg.offset() ? Math.max(0, Math.round((position_pct - this.cfg.offset()) / (100-this.cfg.offset()) * 100 )) : position_pct;
     let position = this.offsetOpenedPx() + (this.coverMovingDirectionPx() * (this.cfg.shutterPosition2(visiblePosition)) / 100) ;
 
     //let position=this.offsetOpenedPx() + (this.coverHeightPx()     * (this.shutterPosition2(visiblePosition)) / 100) ;
@@ -1523,18 +1518,17 @@ class EnhancedShutter extends LitElement
     let delta = {x: pickPoint.x - this.basePickPoint.x ,
                  y: pickPoint.y - this.basePickPoint.y};
     let delta_local = this.cfg.rotateBackOrtho(delta);
-    console_log('getScreenPosFromPickPoint: delta_local.y:',delta_local.y);
-    console_log('getScreenPosFromPickPoint: basePickPoint:',this.basePickPoint.shutterScreenPos);
-    console_log('getScreenPosFromPickPoint: coverOpenedPx:',this.coverOpenedPx(),'coverClosedPx:',this.coverClosedPx());
+    console.log('getScreenPosFromPickPoint: delta_local.y:',delta_local.y);
+    console.log('getScreenPosFromPickPoint: basePickPoint:',this.basePickPoint.shutterScreenPos);
+    console.log('getScreenPosFromPickPoint: coverOpenedPx:',this.coverOpenedPx(),'coverClosedPx:',this.coverClosedPx());
 
     let newScreenPosition =
       Math.round(boundary(
         this.basePickPoint.shutterScreenPos+delta_local.y,
-        this.coverOpenedPx()
-        ,
+        this.coverOpenedPx(),
         this.coverClosedPx()
     ));
-
+    console.log('getScreenPosFromPickPoint: newScreenPosition:',newScreenPosition);
     return newScreenPosition;
   }
   getPoint(event){
@@ -1576,10 +1570,13 @@ class EnhancedShutter extends LitElement
     console_log('mouseMove: this.action',this.action);
 
     this.action='user-drag';
-    this.screenPosition = this.getScreenPosFromPickPoint(this.getPoint(event)); // screenPosition triggers refresh
+    this.screenPosition = this.getScreenPosFromPickPoint(this.getPoint(event)); // this.screenPosition triggers refresh
+    console.log('mouseMove: this.screenPosition:',this.screenPosition);
     let pointedShutterPosition = this.getShutterPosFromScreenPos(this.screenPosition);
+    console.log('mouseMove: pointedShutterPosition:',pointedShutterPosition);
 
     this.positionText = this.cfg.computePositionText(pointedShutterPosition);
+    console.log('mouseMove: positionText:',this.positionText);
   };
 
   mouseUp = (event) =>
@@ -1611,8 +1608,8 @@ class EnhancedShutter extends LitElement
     }
 
   };
-  sendShutterPosition( entityId, position)
 
+  sendShutterPosition( entityId, position)
   {
     if (this.cfg.invertPercentage()) position = 100-position;
     this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS, { position: position });
@@ -1868,8 +1865,6 @@ class shutterCfg {
   }
   invertPercentage(value = null){
     return this.#getCfg(CONFIG_INVERT_PCT,value);
-    //this.invertPercentageTemp= this.#getCfg(CONFIG_INVERT_PCT,value);
-    //return false;
   }
   openingDisabled(value = null){
     return this.#getCfg(CONFIG_OPENING_DISABLED,value);
@@ -1973,7 +1968,6 @@ class shutterCfg {
   }
   shutterPosition2(visiblePosition){
     return (100-visiblePosition);
-    // return (this.invertPercentage()?visiblePosition:100-visiblePosition);
   }
   currentPosition(){
     let position;
@@ -1994,7 +1988,7 @@ class shutterCfg {
   getOrientation(){
     return Globals.screenOrientation.value; // global variable !!
   }
-  
+
   movementState(position=this.currentPosition()) {
     let state = this.#getCoverEntity().getState() || UNAVAILABLE;
     if (state == SHUTTER_STATE_OPEN && position != 100 && position != 0){
@@ -2043,10 +2037,8 @@ class shutterCfg {
     if (this.disableEndButtons()) {
       if (this.currentPosition() == 0) {
         upDisabled = false;
-        //upDisabled = this.invertPercentage();
       } else if (this.currentPosition() == 100) {
         upDisabled = true;
-        //upDisabled = !this.invertPercentage();
       }
     }
     return upDisabled;
@@ -2056,10 +2048,8 @@ class shutterCfg {
     if (this.disableEndButtons()) {
       if (this.currentPosition() == 0) {
         downDisabled = true;
-        //downDisabled = !this.invertPercentage();
       } else if (this.currentPosition() == 100) {
         downDisabled = false;
-        //downDisabled = this.invertPercentage();
       }
     }
     return downDisabled;
@@ -2115,7 +2105,6 @@ class shutterCfg {
       }
         }
     else{
-      //if (this.invertPercentage()) percent = 100-percent; // TODO: check with this.shutterPosition2() , just the other way around ...
       if (percent > 50 ) {
         text = this.getLocalize(LOCALIZE_TEXT[SHUTTER_STATE_OPEN]);
       } else {
@@ -2135,25 +2124,14 @@ class shutterCfg {
 
       let visiblePosition;
 
-//      if (this.invertPercentage()) {
-//        visiblePosition = offset ? Math.min(100, Math.round(currentPosition / offset * 100 )) : currentPosition;
-//        positionText = this.positionPercentToText(visiblePosition);
-//
-////        if (visiblePosition == 100 && offset) {
-//        if (offset) {
-//            positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
-//        }
-//
-//      } else {
         if (this.invertPercentage()) currentPosition = 100-currentPosition;
         visiblePosition = offset ? Math.max(0, Math.round((currentPosition - offset) / (100-offset) * 100 )) : currentPosition;
         positionText = this.positionPercentToText(visiblePosition);
+        console.log('computePositionText:',this.friendlyName(),currentPosition,visiblePosition,offset,positionText);
 
-        //if (visiblePosition == 0 && offset) {
         if (offset) {
             positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
         }
-//      }
       //console_log('xxx computePositionText:',this.friendlyName(),currentPosition,visiblePosition,positionText);
     }
     return positionText;
