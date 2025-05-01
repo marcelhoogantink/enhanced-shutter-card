@@ -1,4 +1,4 @@
-const VERSION = 'v1.2.0';
+const VERSION = 'v1.2.2';
 const DEBUG = false;
 import {
   LitElement,
@@ -1149,7 +1149,7 @@ class EnhancedShutterCardNew extends LitElement{
     return {
       "entities": [{
         "entity": entityId,
-        "name": entity.attributes.friendly_name ? entity.attributes.friendly_name : "My Enhanced Shuttter",
+        "name": "My First Enhanced Shutter Card",
         "top_offset_pct": 13,
         "button_up_hide_states": [
           SHUTTER_STATE_OPEN,
@@ -2299,8 +2299,8 @@ class htmlCard{
       --esc-flex-flow-middle: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
       --esc-window-width: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
       --esc-window-height: ${this.cfg.windowHeightPx()+UNITY};
-      --esc-window-background-image: ${this.escImages.getViewImageSrc(this.cfg.entityId()).includes('.') ? `url(${this.escImages.getViewImageSrc(this.cfg.entityId())})` : ``};
-      --esc-window-background-color: ${this.escImages.getViewImageSrc(this.cfg.entityId()).includes('.') ? '' : `background-color:${this.escImages.getViewImageSrc(this.cfg.entityId())}`};
+      --esc-window-background-image: ${this.escImages.getViewImageSrc(this.cfg.entityId()).includes('.') ? `url(${this.escImages.getViewImageSrc(this.cfg.entityId())})` : ''};
+      --esc-window-background-color: ${this.escImages.getViewImageSrc(this.cfg.entityId()).includes('.') ? '' : `${this.escImages.getViewImageSrc(this.cfg.entityId())}`};
       --esc-window-rotate: ${this.cfg.viewImageRotate()};
       --esc-button-rotate: ${this.cfg.buttonRotate()};
 
@@ -3016,7 +3016,10 @@ function console_log(...args){
 }
 //*************************************************** */
 
-
+function isUrl(fileName){
+  // Check if the file is a URL (starts with http:// or https://)
+  return fileName.includes('.');
+}
 
 async function readImageDimensions(files) {
   const promises = [];
@@ -3024,7 +3027,7 @@ async function readImageDimensions(files) {
   // Loop through each file URL in the provided array
   for (let i = 0; i < files.length; i++) {
     const fileUrl = files[i];
-    if (fileUrl) {
+    if (isUrl(fileUrl)) {
       const promise = new Promise((resolve, reject) => {
         const img = new Image();
 
