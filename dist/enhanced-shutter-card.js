@@ -79,6 +79,9 @@ const SHUTTER_STATE_OPENING = 'opening';
 const SHUTTER_STATE_CLOSING = 'closing';
 const SHUTTER_STATE_PARTIAL_OPEN = 'partial_open'; // speudo state
 
+const SHUTTER_OPEN_PCT = 100;
+const SHUTTER_CLOSED_PCT = 0;
+
 const ESC_CLASS_BASE_NAME = 'esc-shutter';
 
 const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}`;
@@ -1315,7 +1318,6 @@ class EnhancedShutter extends LitElement
       this.cfg.transformRotate(), // rotate around div transform-origin
       this.cfg.transformScale(size_global.x,size_global.y), // correct local sizes
       this.cfg.transformTranslate(0,-size_local.y/2 + actualScreenPosition),  // Move to correct position
-
     ].join(SPACE);
   }
   transformPicker(actualScreenPosition){
@@ -1338,7 +1340,6 @@ class EnhancedShutter extends LitElement
       const size_y = this.actualGlobalHeightPx();
       const size_global = new xyPair(size_x,size_y);
       const size_local=this.cfg.switchAxis(size_global);
-      //return "";
       return [
         this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
         this.cfg.transformRotate(), // rotate around div transform-origin
@@ -1373,7 +1374,6 @@ class EnhancedShutter extends LitElement
     const size_global = new xyPair(size_x,size_y);
     const size_local=this.cfg.switchAxis(size_global);
     const position = this.offsetOpenedPx()+this.coverMovingDirectionPx()/2.0;
-    //return 'translate(-50%, -50%)';
     return [
       'translate(-50%, -50%)',
       this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
@@ -1403,17 +1403,13 @@ class EnhancedShutter extends LitElement
   }
   shutterSlatSizePercentage(){
     const imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId())
-    const min=Math.max(Math.min( imageSize.x,imageSize.y),6); // TODO why 6 here?
-    let size;
-    if (this.cfg.verticalMovement()){
-      size=`100% ${min}px`;
-    }else{
-      size=`${min}px 100%`;
-    }
-    return size;
+    return this.sizePercentage(imageSize);
   }
   shutterBottomSizePercentage(){
     const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.entityId())
+    return this.sizePercentage(imageSize);
+  }
+  sizePercentage(imageSize){
     const min=Math.max(Math.min( imageSize.x,imageSize.y),6); // TODO why 6 here?
     let size;
     if (this.cfg.verticalMovement()){
@@ -1422,7 +1418,10 @@ class EnhancedShutter extends LitElement
       size=`${min}px 100%`;
     }
     return size;
+
   }
+
+
   offsetOpenedPx(){
     return Math.round(this.cfg.offsetOpenedPct()/ 100 * this.windowMovingDirectionPx());
   }
@@ -1443,14 +1442,10 @@ class EnhancedShutter extends LitElement
   }
 
 
-  defScreenPositionFromPercent(position_pct=this.cfg.currentPosition()) {
-    let visiblePosition;
-    visiblePosition = !!this.cfg.offset() ? Math.max(0, Math.round((position_pct - this.cfg.offset()) / (100-this.cfg.offset()) * 100 )) : position_pct;
-    let position = this.offsetOpenedPx() + (this.coverMovingDirectionPx() * (this.cfg.shutterPosition2(visiblePosition)) / 100) ;
-
-    //let position=this.offsetOpenedPx() + (this.coverHeightPx()     * (this.shutterPosition2(visiblePosition)) / 100) ;
-
-    return position;
+  defScreenPositionFromPercent(currentPosition=this.cfg.currentPosition()) {
+    let visiblePosition = this.cfg.visiblePosition(currentPosition);
+    let screenPosition = this.offsetOpenedPx() + (this.coverMovingDirectionPx() * (100-visiblePosition) / 100) ;
+    return screenPosition;
 
   }
 
@@ -1473,10 +1468,6 @@ class EnhancedShutter extends LitElement
     }
     return height;
   }
-  widthHeightFactor(){
-    return  this.cfg.verticalMovement() ? 1 : this.actualGlobalWidthPx()/this.actualGlobalHeightPx(); // TODO  do better !!
-  }
-
 
  //##########################################
 
@@ -1495,7 +1486,7 @@ class EnhancedShutter extends LitElement
       [ACTION_SHUTTER_OPEN] : {'args': ''},
       [ACTION_SHUTTER_CLOSE] : {'args': ''},
       [ACTION_SHUTTER_STOP] : {'args': ''},
-      [ACTION_SHUTTER_SET_POS] : {'args': {position: this.cfg.shutterPosition2(position)}},
+      [ACTION_SHUTTER_SET_POS] : {'args': {position: this.cfg.applyInvertPercentage(position)}},
       [ACTION_SHUTTER_OPEN_TILT] : {'args': ''},
       [ACTION_SHUTTER_CLOSE_TILT] : {'args': ''},
     }
@@ -1509,11 +1500,12 @@ class EnhancedShutter extends LitElement
 
     console_log('screenPos: basePickPoint:',this.basePickPoint);
   }
-  getShutterPosFromScreenPos(newScreenPosition){
-    let shutterPosition = Math.round((newScreenPosition - this.offsetOpenedPx()) * (100-this.cfg.offset()) / this.coverMovingDirectionPx());
-    shutterPosition = this.cfg.shutterPosition2(shutterPosition);
+
+  getShutterPosFromScreenPos(screenPosition){
+    let shutterPosition = SHUTTER_OPEN_PCT - Math.round((screenPosition - this.offsetOpenedPx()) * (100-this.cfg.offset()) / this.coverMovingDirectionPx());
     return shutterPosition;
   }
+
   getScreenPosFromPickPoint(pickPoint){
     let delta = {x: pickPoint.x - this.basePickPoint.x ,
                  y: pickPoint.y - this.basePickPoint.y};
@@ -1593,26 +1585,22 @@ class EnhancedShutter extends LitElement
     this.removeEventListener('touchend', this.mouseUp);
     this.removeEventListener('pointerup', this.mouseUp);
 
-
-
     let screenPosition = this.getScreenPosFromPickPoint(this.getPoint(event));
     let shutterPosition = this.getShutterPosFromScreenPos(screenPosition);
 
     if (this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)){
-      // set position
+      // send position to shutter
       this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
     }else{
-      // no position-set-feature, so open or close
+      // no ESC_FEATURE_SET_POSITION, so send open- or close-action
       const actionToSend = (shutterPosition > 50) ? ACTION_SHUTTER_OPEN : ACTION_SHUTTER_CLOSE;
       this.callHassCoverService(this.cfg.entityId(),actionToSend);
     }
-
   };
 
   sendShutterPosition( entityId, position)
   {
-    if (this.cfg.invertPercentage()) position = 100-position;
-    this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS, { position: position });
+    this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS, { position: this.cfg.applyInvertPercentage(position) });
   }
   callHassCoverService(entityId,command,args='')
   {
@@ -1881,6 +1869,9 @@ class shutterCfg {
     return this.#getCfg(CONFIG_WIDTH_PX,value);
   }
   partial(value = null){
+    // partial value should be entered in the defined shuuter-percentage setting (inverted or not)
+    // and is stored in the config as non-inverted.
+    if (value !== null) value =this.applyInvertPercentage(value);
     const partial = this.#getCfg(CONFIG_PARTIAL_CLOSE_PCT,value);
     // only when cover can set position
     return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial : 0;
@@ -1966,20 +1957,21 @@ class shutterCfg {
   verticalMovement(){
     return IS_VERTICAL.includes(this.closingDirection());
   }
-  shutterPosition2(visiblePosition){
-    return (100-visiblePosition);
-  }
   currentPosition(){
     let position;
     if (this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)){
       position = this.#getCoverEntity()?.getCurrentPosition() ?? 0;
+      position = this.applyInvertPercentage(position);
     }else{
-      position= this.#getCoverEntity()?.getState()==SHUTTER_STATE_OPEN ? 100 :  0;
+      position= this.#getCoverEntity()?.getState()==SHUTTER_STATE_OPEN ? SHUTTER_OPEN_PCT :  SHUTTER_CLOSED_PCT;
     }
-    if (this.invertPercentage()) position = 100-position;
-
     return position;
   }
+  applyInvertPercentage(position=this.currentPosition()){
+    if (this.invertPercentage()) position = 100-position;
+    return position;
+  }
+
   getCloseAngle(){
     const direction= {[DOWN]:0,[LEFT]:90,[RIGHT]:270,[UP]:180};
     return direction[this.closingDirection()] || 0;
@@ -1989,32 +1981,34 @@ class shutterCfg {
     return Globals.screenOrientation.value; // global variable !!
   }
 
-  movementState(position=this.currentPosition()) {
+  movementState(position= this.currentPosition()){
+    // see for position and state definition: https://www.home-assistant.io/integrations/cover.template/#combining-value_template-and-position_template
     let state = this.#getCoverEntity().getState() || UNAVAILABLE;
-    if (state == SHUTTER_STATE_OPEN && position != 100 && position != 0){
+    if (state !== SHUTTER_STATE_OPENING && state !== SHUTTER_STATE_CLOSING) {
+      state = position ? SHUTTER_STATE_OPEN : SHUTTER_STATE_CLOSED;
+    }
+
+    if (state == SHUTTER_STATE_OPEN && position != SHUTTER_OPEN_PCT && position != SHUTTER_CLOSED_PCT){
       state= SHUTTER_STATE_PARTIAL_OPEN;
     }
-    const stateOrg =state;
-    if (state === SHUTTER_STATE_OPEN || state === SHUTTER_STATE_CLOSED) {
-      // see https://www.home-assistant.io/integrations/cover.template/#combining-value_template-and-position_template
-      // so when inverted extra handling is needed.
-      return this.invertPercentage()
-        ? (state === SHUTTER_STATE_OPEN ? SHUTTER_STATE_CLOSED : SHUTTER_STATE_OPEN)
-        : state;
+
+    // solve issue #54
+    if (position == SHUTTER_OPEN_PCT && state== SHUTTER_STATE_OPENING) {
+      state = SHUTTER_STATE_OPEN;
+    }else if (position == SHUTTER_CLOSED_PCT && state== SHUTTER_STATE_CLOSING) {
+      state = SHUTTER_STATE_CLOSED;
     }
-    position = this.shutterPosition2(100-position); // TODO check the logic for (100-position) .....
-    // solve #54
-    if (position == 100 && state== SHUTTER_STATE_OPENING) state = SHUTTER_STATE_OPEN;
-    else if (position == 0 && state== SHUTTER_STATE_CLOSING) state = SHUTTER_STATE_CLOSED;
-    //console_log('xxx 2 movementState: state:',stateOrg,'position:',position,'state:',state);
+
     return state;
   }
+
   buttonsLeftActive(){
     if (this.disableStandardButtons() && !this.showTilt() && !this.partial())
       return false;
     else
       return true;
   }
+
   buttonsRightActive(){
     //if (this.disabledGlobaly()) return false;
     //if (!this.buttonsInRow()) return false;
@@ -2035,9 +2029,9 @@ class shutterCfg {
   upButtonDisabled(){
     let upDisabled = false;
     if (this.disableEndButtons()) {
-      if (this.currentPosition() == 0) {
+      if (this.coverIsClosed()) {
         upDisabled = false;
-      } else if (this.currentPosition() == 100) {
+      } else if (this.coverIsOpen()) {
         upDisabled = true;
       }
     }
@@ -2046,9 +2040,9 @@ class shutterCfg {
   downButtonDisabled(){
     let downDisabled = false;
     if (this.disableEndButtons()) {
-      if (this.currentPosition() == 0) {
+      if (this.coverIsClosed()) {
         downDisabled = true;
-      } else if (this.currentPosition() == 100) {
+      } else if (this.coverIsOpen()) {
         downDisabled = false;
       }
     }
@@ -2087,24 +2081,24 @@ class shutterCfg {
 
   positionPercentToText(percent){
     let text='';
-    //console_log('xxx positionPercentToText:',this.friendlyName(),percent);
+    console.log('positionPercentToText:',this.friendlyName(),percent);
     if (this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)) {
       if (typeof percent === 'number') {
         if (this.alwaysPercentage()) {
-          text = percent + '%';
+          text = this.applyInvertPercentage(percent) + '%';
         }else{
           let state= this.movementState(percent);
+          console.log('positionPercentToText: state',state);
           if (state != SHUTTER_STATE_PARTIAL_OPEN){
             text= this.getLocalize(LOCALIZE_TEXT[state]);
           } else{
-            text = percent + '%';
+            text = this.applyInvertPercentage(percent) + '%';
           }
         }
       } else {
         text = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
       }
-        }
-    else{
+    }else{
       if (percent > 50 ) {
         text = this.getLocalize(LOCALIZE_TEXT[SHUTTER_STATE_OPEN]);
       } else {
@@ -2114,29 +2108,29 @@ class shutterCfg {
     return text;
   }
   computePositionText(currentPosition =this.currentPosition()) {
-
     let positionText;
     if (this.#getCoverEntity().getState()==UNAVAILABLE){
         positionText = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
     }else{
+      const visiblePosition = this.visiblePosition(currentPosition);
+      positionText = this.positionPercentToText(visiblePosition);
 
-      let offset = this.offset()
-
-      let visiblePosition;
-
-        if (this.invertPercentage()) currentPosition = 100-currentPosition;
-        visiblePosition = offset ? Math.max(0, Math.round((currentPosition - offset) / (100-offset) * 100 )) : currentPosition;
-        positionText = this.positionPercentToText(visiblePosition);
-        console.log('computePositionText:',this.friendlyName(),currentPosition,visiblePosition,offset,positionText);
-
-        if (offset) {
-            positionText += ' ('+ (100-Math.round(Math.abs(currentPosition-visiblePosition)/offset*100)) +'%)';
-        }
-      //console_log('xxx computePositionText:',this.friendlyName(),currentPosition,visiblePosition,positionText);
+      if (this.offset()) {
+          positionText += ' (' + (100-Math.round(Math.abs(currentPosition-visiblePosition)/this.offset()*100)) + '%)';
+      }
     }
     return positionText;
   }
-
+  visiblePosition(currentPosition) {
+    const visiblePosition = this.offset() ? Math.max(0, Math.round((currentPosition - this.offset())     / (100-this.offset()) * 100 ))     : currentPosition;
+    return visiblePosition;
+  }
+  coverIsOpen(){
+    return (this.currentPosition() == SHUTTER_OPEN_PCT);
+  }
+  coverIsClosed(){
+    return (this.currentPosition() == SHUTTER_CLOSED_PCT);
+  }
   iconScaleFactor(){
     return this.scaleIcons()? Math.min(this.windowWidthPx()/ESC_BASE_WIDTH_PX*1.25,1): 1;
   }
@@ -2468,9 +2462,9 @@ class htmlCard{
       ${this.cfg.partial()  /* TODO localize texts */
         ? html`
           <ha-icon-button
-            label="Partially close (${this.cfg.partial()}% closed)"
+            label="Partially close (${SHUTTER_OPEN_PCT- this.cfg.partial()}% closed)"
             .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.partial() )}" >
+            @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.partial())}" >
             <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
           </ha-icon-button>
         ` : ''}
@@ -2549,37 +2543,39 @@ class htmlCard{
             <ha-icon-button
               label="Fully opened"
               .disabled=${this.cfg.disabledGlobaly() || this.cfg.upButtonDisabled()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 0)}
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, SHUTTER_OPEN_PCT)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z">
             </ha-icon-button>
             <ha-icon-button
               label="Partially close (${25}% closed)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 25)}
-              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z"></ha-icon-button>
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 75)}
+              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z">
+            </ha-icon-button>
             <ha-icon-button
               label="Partially close (${50}% closed)"
               .disabled=${this.cfg.disabledGlobaly()}
               @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 50)}
-              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z"></ha-icon-button>
+              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z">
+            </ha-icon-button>
           </div>
           <div class="${ESC_CLASS_BUTTONS}">
             <ha-icon-button
               label="Partially close (${75}% closed)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 75)}
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 25)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z">
             </ha-icon-button>
             <ha-icon-button
               label="Partially close (${90}% closed)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 90)}
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 10)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z">
             </ha-icon-button>
             <ha-icon-button
               label="Fully closed"
               .disabled=${this.cfg.disabledGlobaly() || this.cfg.downButtonDisabled()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 100)}
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, SHUTTER_CLOSED_PCT)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z">
             </ha-icon-button>
           </div>
