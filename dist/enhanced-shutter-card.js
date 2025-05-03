@@ -2657,9 +2657,11 @@ class MessageManager {
       this.messageGroup[subject] = { messages: []};
     }
     this.messageGroup[subject].messages.push(message);
-    //if (type == 'warning' || type == 'error'){
+    if (type == 'warning' || type == 'error'){
       console.warn(`Enhanced Shutter Card (${subject}): "${message.text}"`);
-    //}
+    }else{
+      console.info(`Enhanced Shutter Card (${subject}): "${message.text}"`);
+    }
   }
 
   // Display messages grouped by subject
