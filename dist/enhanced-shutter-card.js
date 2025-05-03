@@ -1229,8 +1229,6 @@ class EnhancedShutter extends LitElement
     //console_log('Shutter Update ready');
   }
   firstUpdated(changedProperties) {
-    super.firstUpdated(changedProperties);
-
     this[ESC_CLASS_SELECTOR]        = findElement(this, `.${ESC_CLASS_SELECTOR}`);
     this[ESC_CLASS_SELECTOR_SLIDE]  = findElement(this, `.${ESC_CLASS_SELECTOR_SLIDE}`);
     // NOTE: drop the old lit‐decorated @touchstart from the template
