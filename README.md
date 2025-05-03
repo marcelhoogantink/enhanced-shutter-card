@@ -16,9 +16,9 @@ When all is done, you can find the card under `custom cards` under the `By Card`
 
 ![alt text](example.png)
 
-.. and when you're done, you can ..
+...and when you're done, you can...
 
-<a href="https://www.buymeacoffee.com/marcelhoogantink" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px; width: 217px;" ></a>
+<a href="https://www.buymeacoffee.com/marcelhoogantink" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height= "60px" width=  "217px" ></a>
 
 Thank you !
 
