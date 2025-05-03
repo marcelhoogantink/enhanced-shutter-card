@@ -1,4 +1,4 @@
-const VERSION = 'v1.2.2';
+const VERSION = 'v1.2.3';
 const DEBUG = false;
 import {
   LitElement,
@@ -1517,9 +1517,6 @@ class EnhancedShutter extends LitElement
     let delta = {x: pickPoint.x - this.basePickPoint.x ,
                  y: pickPoint.y - this.basePickPoint.y};
     let delta_local = this.cfg.rotateBackOrtho(delta);
-    console.log('getScreenPosFromPickPoint: delta_local.y:',delta_local.y);
-    console.log('getScreenPosFromPickPoint: basePickPoint:',this.basePickPoint.shutterScreenPos);
-    console.log('getScreenPosFromPickPoint: coverOpenedPx:',this.coverOpenedPx(),'coverClosedPx:',this.coverClosedPx());
 
     let newScreenPosition =
       Math.round(boundary(
@@ -1527,7 +1524,6 @@ class EnhancedShutter extends LitElement
         this.coverOpenedPx(),
         this.coverClosedPx()
     ));
-    console.log('getScreenPosFromPickPoint: newScreenPosition:',newScreenPosition);
     return newScreenPosition;
   }
   getPoint(event){
@@ -1570,12 +1566,8 @@ class EnhancedShutter extends LitElement
 
     this.action='user-drag';
     this.screenPosition = this.getScreenPosFromPickPoint(this.getPoint(event)); // this.screenPosition triggers refresh
-    console.log('mouseMove: this.screenPosition:',this.screenPosition);
     let pointedShutterPosition = this.getShutterPosFromScreenPos(this.screenPosition);
-    console.log('mouseMove: pointedShutterPosition:',pointedShutterPosition);
-
     this.positionText = this.cfg.computePositionText(pointedShutterPosition);
-    console.log('mouseMove: positionText:',this.positionText);
   };
 
   mouseUp = (event) =>
@@ -2088,14 +2080,12 @@ class shutterCfg {
 
   positionPercentToText(percent){
     let text='';
-    console.log('positionPercentToText:',this.friendlyName(),percent);
     if (this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)) {
       if (typeof percent === 'number') {
         if (this.alwaysPercentage()) {
           text = this.applyInvertPercentage(percent) + '%';
         }else{
           let state= this.movementState(percent);
-          console.log('positionPercentToText: state',state);
           if (state != SHUTTER_STATE_PARTIAL_OPEN){
             text= this.getLocalize(LOCALIZE_TEXT[state]);
           } else{
@@ -3012,8 +3002,8 @@ function displayNodePathToTopIncludingShadowAndClass(node) {
   }
 
   // Reverse the path to show it from the root to the target node
-  console.log('Node path from target to root (including shadow roots and class names):');
-  console.log(path.reverse().join(" \n > "));
+  //console.log('Node path from target to root (including shadow roots and class names):');
+  //console.log(path.reverse().join(" \n > "));
 }
 function console_log(...args){
   if (VERSION.indexOf('b') > 0){

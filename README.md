@@ -1,6 +1,6 @@
 # Enhanced Shutter Card
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs) [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/tijq3xcipj)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs) [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/marcelhoogantink)
 ---
 
 ### Installation:
@@ -18,7 +18,7 @@ When all is done, you can find the card under `custom cards` under the `By Card`
 
 And when you're done, you can ...
 
-<a href="https://www.buymeacoffee.com/tijq3xcipj" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+<a href="https://www.buymeacoffee.com/marcelhoogantink" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 Thank you !
 
@@ -29,7 +29,15 @@ Enter repository-url: `https://github.com/marcelhoogantink/enhanced-shutter-card
 and choose type: `Dashboard`.)</small>
 
 ---
+### New in version v1.2.3:
 
+- #### Enhanced Shutter Card is now part of the default HACS-repositories  :tada: :tada:
+
+- #### Solved ussues:
+  - [#72](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/72) Unable to open/close the shutter in scroll view on mobile.
+  - [#68](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/72) Background colors not working (already solved in v1.2.1)
+
+---
 ### New in version v1.2.0:
 
 - #### Card funtionality is now controled by the `supported_features` attribute of the shutter.
