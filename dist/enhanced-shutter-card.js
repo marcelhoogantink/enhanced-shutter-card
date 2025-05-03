@@ -1196,8 +1196,6 @@ class EnhancedShutter extends LitElement
     this.action = '#';
 
     this[ESC_CLASS_SELECTOR]=null;
-    this[ESC_CLASS_SELECTOR_PICKER]=null;
-    this[ESC_CLASS_SELECTOR_SLIDE]=null;
 
     console_log('Version:',this.version);
 
@@ -1229,18 +1227,16 @@ class EnhancedShutter extends LitElement
     //console_log('Shutter Update ready');
   }
   firstUpdated(changedProperties) {
-    this[ESC_CLASS_SELECTOR]        = findElement(this, `.${ESC_CLASS_SELECTOR}`);
-    this[ESC_CLASS_SELECTOR_SLIDE]  = findElement(this, `.${ESC_CLASS_SELECTOR_SLIDE}`);
+    this[ESC_CLASS_SELECTOR] = findElement(this, `.${ESC_CLASS_SELECTOR}`);
     // NOTE: drop the old lit‐decorated @touchstart from the template
     //      so we can re‑attach it manually below
     const picker = findElement(this, `.${ESC_CLASS_SELECTOR_PICKER}`);
     if (picker) {
       // detach any lit‐added touchstart so we don’t double‐fire
-      picker.removeEventListener('touchstart', this.mouseDown);
-
+      //picker.removeEventListener('touchstart', this.mouseDown);
       // re‐attach as non‑passive so event.preventDefault() works
+      // NOTE: this is a workaround for the lit‐element bug where touchstart is always passive
       picker.addEventListener('touchstart', this.mouseDown, { passive: false });
-      // pointerdown is non‑passive by default, you can leave it or re‑attach for clarity:
       picker.addEventListener('pointerdown', this.mouseDown);
       picker.addEventListener('mousedown',  this.mouseDown);
     }
