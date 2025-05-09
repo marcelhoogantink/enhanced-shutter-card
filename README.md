@@ -6,13 +6,12 @@
 ### Installation:
 
 Use this button:
+
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marcelhoogantink&repository=enhanced-shutter-card&category=plugin)
+...and download the card, or use HACS, search for `Enhanced Shutter Card`.
+The resources will automatically be configured with the needed files.
 
-...and download the card.
-
-Or use HACS, search for `Enhanced Shutter Card`, the resources will automatically be configured with the needed files.
-
-When all is done, you can find the card under `custom cards` under the `By Card` tab in the list of available cards when building a Dashboard:
+When this all is done, you can find the card in Home Assistant in `custom cards` under the `By Card` tab in the list of available cards when building a Dashboard:
 
 ![alt text](example.png)
 
@@ -170,8 +169,8 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | shutter_bottom_image         | string      | No       | esc-shutter-bottom.png                        | the bottom bar of the shutter.
 | base_height_px               | int         | No       | 150                                           | height of image in pixels.
 | base_width_px                | int         | No       | 150                                           | witdh of image in pixels.
-| resize_height_pct            | int         | No       | 100                                           | resize of the base height in percent.
-| resize_width_pct             | int         | No       | 100                                           | resize of the base width in percent.
+| resize_height_pct            | int         | No       | 100                                           | resize of the base height in percent. (limited between 20% and 500%)
+| resize_width_pct             | int         | No       | 100                                           | resize of the base width in percent. (limited between 20% and 500%)
 | top_offset_pct               | int         | No       | 0                                             | space between top image/window and top shutter.
 | bottom_offset_pct            | int         | No       | 0                                             | space between bottom image/window and bottom shutter.
 | closing_direction            | string      | No       | `down`                                        | Set the closing direction: `down`, `left` or `right`.

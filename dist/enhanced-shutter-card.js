@@ -163,7 +163,7 @@ const CONFIG_SCALE_BUTTONS = 'scale_buttons';
 const CONFIG_OFFSET_OPENED_PCT = 'top_offset_pct'; // TODO  rename
 const CONFIG_OFFSET_CLOSED_PCT = 'bottom_offset_pct'; // TODO rename
 const CONFIG_BUTTONS_POSITION = 'buttons_position';
-const CONFIG_TITLE_POSITION = 'title_position';  // deprecated
+const CONFIG_TITLE_POSITION = 'title_position';  // removed
 const CONFIG_NAME_POSITION = 'name_position';
 const CONFIG_NAME_DISABLED = 'name_disabled';
 const CONFIG_OPENING_POSITION = 'opening_position';
@@ -186,6 +186,15 @@ const CONFIG_CURRENT_POSITION = 'current_position';
 const CONFIG_BUTTON_STOP_HIDE_STATES = 'button_stop_hide_states';
 const CONFIG_BUTTON_UP_HIDE_STATES = 'button_up_hide_states';
 const CONFIG_BUTTON_DOWN_HIDE_STATES = 'button_down_hide_states';
+
+const DEPRECATED={
+  //[CONFIG_TITLE_POSITION]: {new: CONFIG_NAME_POSITION},
+  [CONFIG_CAN_TILT]: {new: CONFIG_SHOW_TILT}
+};
+const REMOVED={
+  [CONFIG_TITLE_POSITION]: {new: CONFIG_NAME_POSITION},
+  //[CONFIG_CAN_TILT]: {new: CONFIG_SHOW_TILT}
+};
 
 const Z_INDEX_PARTIAL = 5;
 const Z_INDEX_PICKER  = 3;
@@ -237,10 +246,10 @@ const ESC_DISABLE_PARTIAL_OPEN_BUTTONS = true;
 const ESC_PICKER_OVERLAP_PX = 20;
 const ESC_CURRENT_POSITION = 0;
 
-const ESC_MIN_RESIZE_WIDTH_PCT  =  50;
-const ESC_MAX_RESIZE_WIDTH_PCT  = 200;
-const ESC_MIN_RESIZE_HEIGHT_PCT =  50;
-const ESC_MAX_RESIZE_HEIGHT_PCT = 200;
+const ESC_MIN_RESIZE_WIDTH_PCT  =  20;
+const ESC_MAX_RESIZE_WIDTH_PCT  = 500;
+const ESC_MIN_RESIZE_HEIGHT_PCT =  20;
+const ESC_MAX_RESIZE_HEIGHT_PCT = 500;
 
 const ESC_BUTTON_STOP_HIDE_STATES = [];
 const ESC_BUTTON_UP_HIDE_STATES = [];
@@ -301,14 +310,6 @@ const CONFIG_DEFAULT ={
   [CONFIG_BUTTON_UP_HIDE_STATES]: ESC_BUTTON_UP_HIDE_STATES,
   [CONFIG_BUTTON_DOWN_HIDE_STATES]: ESC_BUTTON_DOWN_HIDE_STATES,
 
-};
-const DEPRECATED={
-  //[CONFIG_TITLE_POSITION]: {new: CONFIG_NAME_POSITION},
-  [CONFIG_CAN_TILT]: {new: CONFIG_SHOW_TILT}
-};
-const REMOVED={
-  [CONFIG_TITLE_POSITION]: {new: CONFIG_NAME_POSITION},
-  //[CONFIG_CAN_TILT]: {new: CONFIG_SHOW_TILT}
 };
 
 const LOCALIZE_TEXT= {
@@ -952,13 +953,29 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
       console.warn('ShutterCard  .. no content ??..');
     }
-    this.nbRows= Math.ceil((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
-    this.nbCols= Math.ceil((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
-    //this.nbRows= Math.round((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
-    //this.nbCols= Math.round((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
-    //this.nbRows= Math.floor((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
-    //this.nbCols= Math.floor((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
+    const gridContainer = this.closest('.container');
+    //const gridContainer = findParentNode(this,'.container');
+    if (gridContainer){
+      const styles = getComputedStyle(gridContainer);
+      const column = parseFloat(styles.gridTemplateColumns.split(" ", 1)[0]);
+      const row = parseFloat(styles.gridTemplateRows.split(" ", 1)[0]);
+      const column_gap = parseFloat(styles.columnGap);
+      const row_gap = parseFloat(styles.rowGap);
+      console.log('Card getGridOptionsInternal: gridContainer',column,row,column_gap,row_gap);
 
+      this.nbRows= Math.ceil((cardSize.localHeightPx+row_gap)/(row+row_gap));
+      this.nbCols= Math.ceil((cardSize.localWidthPx+column_gap)/(column+column_gap));
+      console.log('Card getGridOptionsInternal: gridContainer',this.nbRows,this.nbCols);
+      console.log('Card getGridOptionsInternal: gridContainer',cardSize.localHeightPx,cardSize.localWidthPx);
+    }
+    else{
+      this.nbRows= Math.ceil((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
+      this.nbCols= Math.ceil((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
+      //this.nbRows= Math.round((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
+      //this.nbCols= Math.round((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
+      //this.nbRows= Math.floor((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
+      //this.nbCols= Math.floor((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
+    }
     return {
       rows: this.nbRows,
       min_rows: this.nbRows-1,
@@ -1381,6 +1398,7 @@ class EnhancedShutter extends LitElement
     const size_global = new xyPair(size_x,size_y);
     const size_local=this.cfg.switchAxis(size_global);
     const position = this.offsetOpenedPx()+this.coverMovingDirectionPx()/2.0;
+    //const rotate = this.cfg.getCloseAngle()= this.invertPercentage()?180:0 // ##TODO: check if this is correct
     return [
       'translate(-50%, -50%)',
       this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
@@ -1868,10 +1886,12 @@ class shutterCfg {
     return this.#getCfg(CONFIG_WIDTH_PX,value);
   }
   partial(value = null){
-    // partial value should be entered in the defined shuuter-percentage setting (inverted or not)
+    // partial value should be entered in the defined shutter-percentage setting (inverted or not)
     // and is stored in the config as non-inverted.
     if (value !== null) value =this.applyInvertPercentage(value);
-    const partial = this.#getCfg(CONFIG_PARTIAL_CLOSE_PCT,value);
+    var partial = this.#getCfg(CONFIG_PARTIAL_CLOSE_PCT,value);
+    if (partial == SHUTTER_OPEN_PCT ||  partial == SHUTTER_CLOSED_PCT) partial = 0;
+
     // only when cover can set position
     return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial : 0;
   }
@@ -2971,39 +2991,53 @@ function displayNodePathToTopIncludingShadowAndClass(node) {
   const path = [];
 
   while (currentNode) {
-      // If the node has a shadow root, include it in the path
-      if (currentNode.host) {
-          path.push(`#shadow-root`); // Include shadow root with its mode (open or closed)
-          path.push(`${currentNode.host.nodeName}`); // Include shadow root with its mode (open or closed)
-      }else{
+    // If the node has a shadow root, include it in the path
+    if (currentNode.host) {
+        path.push(`#shadow-root`); // Include shadow root with its mode (open or closed)
+        path.push(`${currentNode.host.nodeName}`); // Include shadow root with its mode (open or closed)
+    }else{
 
-        // Add the current node's tag name and class name (if any)
-        let nodeDescription = currentNode.nodeName;
+      // Add the current node's tag name and class name (if any)
+      let nodeDescription = currentNode.nodeName;
 
-        // If the node has a className, add it to the description
-        if (currentNode.className) {
-            nodeDescription += `.${currentNode.className}`;
-        }
-
-        // Optionally, you can also add the ID, if you want
-        if (currentNode.id) {
-            nodeDescription += `#${currentNode.id}`;
-        }
-
-        path.push(nodeDescription);  // Add the node description to the path
+      // If the node has a className, add it to the description
+      if (currentNode.className) {
+          nodeDescription += `.${currentNode.className}`;
       }
-      // If we're inside a shadow DOM, go up to the shadow host
-      //if (currentNode.shadowRoot) {
-      if (currentNode.host) {
-          currentNode = currentNode.host.parentNode  // Move to the shadow host
-      } else {
-          currentNode = currentNode.parentNode;  // Move to the regular parent node
+
+      // Optionally, you can also add the ID, if you want
+      if (currentNode.id) {
+          nodeDescription += `#${currentNode.id}`;
       }
+
+      path.push(nodeDescription);  // Add the node description to the path
+    }
+    // If we're inside a shadow DOM, go up to the shadow host
+    //if (currentNode.shadowRoot) {
+    if (currentNode.host) {
+        currentNode = currentNode.host.parentNode  // Move to the shadow host
+    } else {
+        currentNode = currentNode.parentNode;  // Move to the regular parent node
+    }
   }
+}
+function findParentNode(node, selector) {
+  // Check if the node matches the selector itself
+  if (node.matches(selector)) {
+      return node;
+  }
+  let currentNode = node;
 
-  // Reverse the path to show it from the root to the target node
-  //console.log('Node path from target to root (including shadow roots and class names):');
-  //console.log(path.reverse().join(" \n > "));
+  while (currentNode && !currentNode.matches(selector)) {
+    // If the node has a shadow root, include it in the path
+    if (currentNode.host) {
+        currentNode = currentNode.host.parentNode  // Move to the shadow host
+    } else {
+        currentNode = currentNode.parentNode;  // Move to the regular parent node
+    }
+  }
+  return currentNode;
+
 }
 function console_log(...args){
   if (VERSION.indexOf('b') > 0){
