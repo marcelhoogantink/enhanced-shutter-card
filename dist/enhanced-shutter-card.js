@@ -175,6 +175,10 @@ const CONFIG_CAN_TILT = 'can_tilt';
 const CONFIG_SHOW_TILT = 'show_tilt';
 const CONFIG_CLOSING_DIRECTION = 'closing_direction'
 const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
+const CONFIG_PARTIAL_OPEN_10_PCT = 'partial_open_10_percentage';
+const CONFIG_PARTIAL_OPEN_25_PCT = 'partial_open_25_percentage';
+const CONFIG_PARTIAL_OPEN_50_PCT = 'partial_open_50_percentage';
+const CONFIG_PARTIAL_OPEN_75_PCT = 'partial_open_75_percentage';
 const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
 const CONFIG_ALWAYS_PCT = 'always_percentage';
 const CONFIG_DISABLE_END_BUTTONS = 'disable_end_buttons';
@@ -238,6 +242,10 @@ const ESC_CAN_TILT = false;
 const ESC_SHOW_TILT = true;
 const ESC_CLOSING_DIRECTION = DOWN;
 const ESC_PARTIAL_CLOSE_PCT = 0;
+const ESC_PARTIAL_OPEN_10_PCT = 10;
+const ESC_PARTIAL_OPEN_25_PCT = 25;
+const ESC_PARTIAL_OPEN_50_PCT = 50;
+const ESC_PARTIAL_OPEN_75_PCT = 75;
 const ESC_OFFSET_CLOSED_PCT = 0;
 const ESC_ALWAYS_PCT = false;
 const ESC_DISABLE_END_BUTTONS = false;
@@ -297,6 +305,10 @@ const CONFIG_DEFAULT ={
 
   [CONFIG_CLOSING_DIRECTION]: ESC_CLOSING_DIRECTION,
   [CONFIG_PARTIAL_CLOSE_PCT]: ESC_PARTIAL_CLOSE_PCT,
+  [CONFIG_PARTIAL_OPEN_10_PCT]: ESC_PARTIAL_OPEN_10_PCT,
+  [CONFIG_PARTIAL_OPEN_25_PCT]: ESC_PARTIAL_OPEN_25_PCT,
+  [CONFIG_PARTIAL_OPEN_50_PCT]: ESC_PARTIAL_OPEN_50_PCT,
+  [CONFIG_PARTIAL_OPEN_75_PCT]: ESC_PARTIAL_OPEN_75_PCT,
   [CONFIG_OFFSET_IS_CLOSED_PCT]: ESC_OFFSET_CLOSED_PCT,
   [CONFIG_ALWAYS_PCT]: ESC_ALWAYS_PCT,
   [CONFIG_DISABLE_END_BUTTONS]: ESC_DISABLE_END_BUTTONS,
@@ -1685,6 +1697,10 @@ class shutterCfg {
       this.scaleButtons(escConfig[CONFIG_SCALE_BUTTONS]);
       this.scaleIcons(escConfig[CONFIG_SCALE_ICONS]);
       this.partial(boundary(escConfig[CONFIG_PARTIAL_CLOSE_PCT]));
+      this.partial10(boundary(escConfig[CONFIG_PARTIAL_OPEN_10_PCT]));
+      this.partial25(boundary(escConfig[CONFIG_PARTIAL_OPEN_25_PCT]));
+      this.partial50(boundary(escConfig[CONFIG_PARTIAL_OPEN_50_PCT]));
+      this.partial75(boundary(escConfig[CONFIG_PARTIAL_OPEN_75_PCT]));
       this.offset(boundary(escConfig[CONFIG_OFFSET_IS_CLOSED_PCT]));
 
       this.offsetOpenedPct(boundary(escConfig[CONFIG_OFFSET_OPENED_PCT]));
@@ -1894,6 +1910,38 @@ class shutterCfg {
 
     // only when cover can set position
     return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial : 0;
+  }
+  partial10(value = null) {
+    // partial10 value should be entered in the defined shutter-percentage setting (inverted or not)
+    // and is stored in the config as non-inverted.
+    if (value !== null) value = this.applyInvertPercentage(value);
+    const partial10 = this.#getCfg(CONFIG_PARTIAL_OPEN_10_PCT, value);
+    // only when cover can set position
+    return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial10 : 0;
+  }
+  partial25(value = null) {
+    // partial25 value should be entered in the defined shutter-percentage setting (inverted or not)
+    // and is stored in the config as non-inverted.
+    if (value !== null) value = this.applyInvertPercentage(value);
+    const partial25 = this.#getCfg(CONFIG_PARTIAL_OPEN_25_PCT, value);
+    // only when cover can set position
+    return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial25 : 0;
+  }
+  partial50(value = null) {
+    // partial50 value should be entered in the defined shutter-percentage setting (inverted or not)
+    // and is stored in the config as non-inverted.
+    if (value !== null) value = this.applyInvertPercentage(value);
+    const partial50 = this.#getCfg(CONFIG_PARTIAL_OPEN_50_PCT, value);
+    // only when cover can set position
+    return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial50 : 0;
+  }
+  partial75(value = null) {
+    // partial75 value should be entered in the defined shutter-percentage setting (inverted or not)
+    // and is stored in the config as non-inverted.
+    if (value !== null) value = this.applyInvertPercentage(value);
+    const partial75 = this.#getCfg(CONFIG_PARTIAL_OPEN_75_PCT, value);
+    // only when cover can set position
+    return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial75 : 0;
   }
   offset(value = null){
     return this.#getCfg(CONFIG_OFFSET_IS_CLOSED_PCT,value);
@@ -2561,29 +2609,29 @@ class htmlCard{
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z">
             </ha-icon-button>
             <ha-icon-button
-              label="Partially close (${25}% closed)"
+              label="Partially opened (${75}%)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 75)}
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.partial75())}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z">
             </ha-icon-button>
             <ha-icon-button
-              label="Partially close (${50}% closed)"
+              label="Partially opened (${50}%)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 50)}
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.partial50())}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z">
             </ha-icon-button>
           </div>
           <div class="${ESC_CLASS_BUTTONS}">
             <ha-icon-button
-              label="Partially close (${75}% closed)"
+              label="Partially opened (${25}%)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 25)}
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.partial25())}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z">
             </ha-icon-button>
             <ha-icon-button
-              label="Partially close (${90}% closed)"
+              label="Partially opened (${10}%)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 10)}
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.partial10())}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z">
             </ha-icon-button>
             <ha-icon-button
