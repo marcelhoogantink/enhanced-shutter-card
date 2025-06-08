@@ -141,12 +141,18 @@ For horizontal shutter there is one image:
 | ----- | ------------ | ------------------ | ------------------------ | ------- |
 | red   | [see above]  | esc-curtain.png    | [none]                   | yes     |
 
-These are the avialable background views:
+For awning there is one image:
+| color      | window-image | shutter-slat image | shutter-bottom-bar image | default |
+| ---------- | ------------ | ------------------ | ------------------------ | ------- |
+| white/blue | [see above]  | esc-awning.png     | esc-shutter-bottom.png   | no      |
 
-| view filename | default |
-| ------------- | ------- |
-| esc-view.png  | yes     |
-| esc-view2.png | no      |
+These are the available background views:
+
+| view filename | default | comment   |
+| ------------- | ------- | --------- |
+| esc-view.png  | yes     |           |
+| esc-view2.png | no      |           |
+| esc-view3.png | no      | for awning|
 
 These images can be combined like in the example above. For (optinal) defintion of the location of the images, a setting 'image_map" does exits.
 The default map-setting can be found in the Configuration-info below.
