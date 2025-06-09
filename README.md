@@ -46,7 +46,7 @@ and choose type: `Dashboard`.)</small>
   Horizontal moving shutters are now possible. Add `closing_direction` to your settings, and give it the value `left`, `right` or `down`.
   Setting `down` is default.
 
-  ![Curtain](Curtain.gif)
+  ![Curtain](pictures/Curtain.gif)
 
   For horizontal moving shutters (curtains), a new image is added: `esc_curtain.png`
 - #### Warnings (unknown/deprected/removed items) while editing the shutters in YAML.
@@ -123,7 +123,7 @@ Due to the inactivity of the Shutter Card, I decided to add this one as 'Enhance
 It supports all options of the original Card, but also graphical options like different backgrounds, windows an shutters.
 Also the sizes of every shutter can be altered:
 
-![Enhanced Shutter Card](EnhancedShutterCardNew.gif)
+![Enhanced Shutter Card](pictures/EnhancedShutterCardNew.gif)
 
 (_find below the yaml for this example._)
 
@@ -294,4 +294,22 @@ entities:
     resize_width_pct: 70
     title_position: top
     disable_partial_open_buttons: false
+```
+
+![Awning example](pictures/awning.png)
+
+```yaml
+type: custom:enhanced-shutter-card
+entities:
+  - entity: cover.awning
+    name: Awning
+    view_image: esc-view3.png
+    window_image: esc-window2.png
+    shutter_slat_image: esc-awning.png
+    name_position: top
+    base_height_px: 180
+    disable_end_buttons: true
+    buttons_position: bottom
+    opening_disabled: true
+    bottom_offset_pct: 50
 ```
