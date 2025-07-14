@@ -428,6 +428,8 @@ const SHUTTER_CSS =`
         width: 100%;
         background-position: bottom;
         background-image: var(--esc-slide-background-image);
+        background-color: var(--esc-slide-background-color);
+
         overflow: hidden;
         bottom: 100%;
         height: var(--esc-slide-height);
@@ -441,6 +443,7 @@ const SHUTTER_CSS =`
         width: 100%;
         background-position: var(--esc-slide-background-position);
         background-image: var(--esc-slide-background-image);
+        background-color: var(--esc-slide-background-color);
 
         background-repeat: no-repeat, repeat;
         background-size: var(--esc-slide-background-size);
@@ -2327,6 +2330,11 @@ class htmlCard{
 
   defStyleVars(){
     let state=this.cfg.movementState();
+    const viewImage=this.escImages.getViewImageSrc(this.cfg.entityId());
+
+    // solves #103 see other lines with shutterSlatImage
+    const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.entityId());
+
 
     return `
       --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
@@ -2339,8 +2347,8 @@ class htmlCard{
       --esc-flex-flow-middle: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
       --esc-window-width: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
       --esc-window-height: ${this.cfg.windowHeightPx()+UNITY};
-      --esc-window-background-image: ${this.escImages.getViewImageSrc(this.cfg.entityId()).includes('.') ? `url(${this.escImages.getViewImageSrc(this.cfg.entityId())})` : ''};
-      --esc-window-background-color: ${this.escImages.getViewImageSrc(this.cfg.entityId()).includes('.') ? '' : `${this.escImages.getViewImageSrc(this.cfg.entityId())}`};
+      --esc-window-background-image: ${viewImage.includes('.') ?  `url(${viewImage})` : ''};
+      --esc-window-background-color: ${viewImage.includes('.') ? '' : `${viewImage}`};
       --esc-window-rotate: ${this.cfg.viewImageRotate()};
       --esc-button-rotate: ${this.cfg.buttonRotate()};
 
@@ -2366,7 +2374,11 @@ class htmlCard{
 
       --esc-partial-top: ${this.enhancedShutter.defScreenPositionFromPercent(this.cfg.partial())}${UNITY};
 
-      --esc-slide-background-image: url(${this.escImages.getShutterBottomImageSrc(this.cfg.entityId())}), url(${this.escImages.getShutterSlatImageSrc(this.cfg.entityId())});
+      --esc-slide-background-image: url(${this.escImages.getShutterBottomImageSrc(this.cfg.entityId())}) ${shutterSlatImage.includes('.') ?  `, url(${shutterSlatImage})` : ''};
+      --esc-slide-background-color: ${shutterSlatImage.includes('.') ? '' : `${shutterSlatImage}`};
+
+
+      --esc-slide-background-image-old: url(${this.escImages.getShutterBottomImageSrc(this.cfg.entityId())}), url(${this.escImages.getShutterSlatImageSrc(this.cfg.entityId())});
       --esc-slide-background-size: ${this.enhancedShutter.shutterBottomSizePercentage()}, ${this.enhancedShutter.shutterSlatSizePercentage()};
       --esc-slide-background-position: ${this.enhancedShutter.shutterBackgroundPosition()};
 
@@ -2835,8 +2847,10 @@ class EscImages{
       const images=this.images;
       const imageDimensions = await readImageDimensions(images);
       imageDimensions.forEach((value,key,array)=>{
-        this.width[key] = value.width;
-        this.height[key]= value.height;
+        //this.width[key] = value.width;
+        //this.height[key]= value.height;
+        this.width[value.index] = value.width;
+        this.height[value.index]= value.height;
       });
 
       this.escImagesLoaded = true; // Mark images as loaded
@@ -2862,7 +2876,7 @@ function defImagePathOrColor(image_map,image,image_type)
   let result;
   if (!image) return '';
 
-  if (image_type== CONFIG_VIEW_IMAGE && !image.includes('.')){
+  if ((image_type == CONFIG_VIEW_IMAGE  || image_type == CONFIG_SHUTTER_SLAT_IMAGE) && !image.includes('.')){
     // is Color
     result=image;
   }else{
@@ -3076,7 +3090,8 @@ function isUrl(fileName){
 
 async function readImageDimensions(files) {
   const promises = [];
-
+  var count=0;
+  var pointer=[];
   // Loop through each file URL in the provided array
   for (let i = 0; i < files.length; i++) {
     const fileUrl = files[i];
@@ -3088,7 +3103,8 @@ async function readImageDimensions(files) {
             resolve({
                 url: fileUrl,
                 width: img.width,
-                height: img.height
+                height: img.height,
+                index: i // Store the index of the image in the original array
             });
         };
 
@@ -3097,8 +3113,12 @@ async function readImageDimensions(files) {
         };
 
         img.src = fileUrl; // Set the src to the image URL directly
+        //img.index= i; // Store the index of the image in the original array
+
       });
       promises.push(promise);
+      pointer[i]=count++;
+      //promises[i] = promise; // Store the promise in the array at index i
     }
   }
 
