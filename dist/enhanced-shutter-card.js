@@ -455,6 +455,7 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_SELECTOR_SLIDE} {
         z-index: ${Z_INDEX_SLIDE};
+        text-align: start;` /* align to left, solves #104 */ +`
         position: absolute;
         left: -50%;
         width: 100%;
