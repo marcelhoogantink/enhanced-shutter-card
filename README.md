@@ -15,7 +15,14 @@ When this all is done, you can find the card in Home Assistant in `custom cards`
 
 ![alt text](example.png)
 
-...and when you're done, you can...
+... and when you're done, you can...
+
+<a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target="_blank">
+  ⭐ Star <b>Enhanced Shutter Card</b> on GitHub
+  <br><nbsp><br>
+</a>
+
+ ... or ...
 
 <a href="https://www.buymeacoffee.com/marcelhoogantink" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height= "60px" width=  "217px" ></a>
 
@@ -30,20 +37,20 @@ and choose type: `Dashboard`.)</small>
 ---
 ### New in version v1.3.0:
 
- - #### slat image also accepts colors
+ - #### [shutter_slat_image] also accepts colors.
 
    The setting ``` shutter_slat_image ``` also accepts colors besides images, like ```view_image``` already does.
 
-- #### New option: Invert Open - Close
+- #### New option: [invert_open_close].
 
-  For awnings, a new options is inroduced: ```invert_open_close``` for making the card more logic for this kind of covering.
+  For awnings, a new options is introduced: ```invert_open_close (true/false)``` for making the card more logic for this kind of covering.
 - #### Solved issues:
   - [#95](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/95) [FEATURE REQUEST] Invert arrow functionality
   - [#98](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/98) Invert open/close
   - [#103](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/103) [Feature Request] Add blind support #103
 
   - [#104](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/104) Card as “custom_fields” in a button-card
-  
+
 ---
 ### New in version v1.2.3:
 
@@ -168,7 +175,7 @@ These are the avialable background views:
 These images can be combined like in the example above. For (optinal) defintion of the location of the images, a setting 'image_map" does exits.
 The default map-setting can be found in the Configuration-info below.
 It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is considerd to include a full path.
-And last but not least, the `view_image` -setting also accepts HTML-color definitions like `red`, `green`, `#AAFFEE` or `rgb(255,255,0)` in stead of an image-filename. (The `#` input needs quotes around it in YAML)
+And last but not least, the `view_image` and `shutter_slat_image`-settings also accept HTML-color definitions like `red`, `green`, `'#AAFFEE'` or `rgb(255,255,0)` in stead of an image-filename. (The `#` input needs quotes around it in YAML)
 
 ## Configuration
 
@@ -176,8 +183,8 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 
 | Name                         | Type        | Required | Default                                       | Description                                                                                                                                                                                                                                                                | Remarks                                  |
 | ---------------------------- | ----------- | -------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| type                         | string      | True     | -                                             | Must be "custom:enhanced-shutter-card"
-| title                        | string      | False    | -                                             | Title of the card
+| type                         | string      | Yes      | -                                             | Must be "custom:enhanced-shutter-card"
+| title                        | string      | no       | -                                             | Title of the card
 | passive_mode                 | boolean     | no       | false                                         | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.
 | image_map                    | string      | No       | /local/community/enhanced-shutter-card/images | map of the images.
 | window_image                 | string      | No       | esc-window.png                                | image of the window shutter.
@@ -201,6 +208,7 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | opening_disabled             | boolean     | No       | false                                         | hide position info of shutter
 | inline_header                | boolean     | No       | false                                         | place the shutter-header (name and position) in one line.
 | invert_percentage            | boolean     | No       | `false`                                       | Set it to `true` if your shutter is 100% when it is closed, and 0% when it is opened                                                                                                                                                                                       |
+| invert_open_close            | boolean     | No       | `false`                                       | Set it to `true` if your want to invert the `open` and `close` buttons                                                                                                                                                                                       |
 | can_tilt                     | boolean     | No       | `false`                                       | Set it to `true` if your shutters support tilting.                                                                                                                                                                                                                         | deprecated as of v1.2.0, use `show_tilt` |
 | show_tilt                    | boolean     | No       | `true`                                        | Show the `tilt` options and buttons, only active when the shutter supports `tilt`                                                                                                                                                                                          |
 | partial_close_percentage     | int         | No       | `0`                                           | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.                                                                                                                                                       |
@@ -209,9 +217,9 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | disable_end_buttons          | boolean     | No       | `false`                                       | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button                                                                                                                                                 |
 | disable_standard_buttons     | boolean     | No       | false                                         | Show or hide the default up, down and stop buttons                                                                                                                                                                                                                         |
 | disable_partial_open_buttons | boolean     | No       | true                                          | Show or hide the partail open buttons.                                                                                                                                                                                                                                     |
-| button_up_hide_states        | string list | False    | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                   |
-| button_stop_hide_states      | string list | False    | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |
-| button_down_hide_states      | string list | False    | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |
+| button_up_hide_states        | string list | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                   |
+| button_stop_hide_states      | string list | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |
+| button_down_hide_states      | string list | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |
 
 ### Entities
 
@@ -244,6 +252,7 @@ And last but not least, the `view_image` -setting also accepts HTML-color defini
 | opening_disabled             | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | inline_header                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | invert_percentage            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_open_close            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | can_tilt                     | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         | deprecated as of v1.2.0, use `show_tilt`     |
 | show_tilt                    | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | partial_close_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
