@@ -171,6 +171,7 @@ const CONFIG_OPENING_DISABLED = 'opening_disabled';
 const CONFIG_INLINE_HEADER = 'inline_header';
 
 const CONFIG_INVERT_PCT = 'invert_percentage';
+const CONFIG_INVERT_OPEN_CLOSE = 'invert_open_close';
 const CONFIG_CAN_TILT = 'can_tilt';
 const CONFIG_SHOW_TILT = 'show_tilt';
 const CONFIG_CLOSING_DIRECTION = 'closing_direction'
@@ -234,6 +235,7 @@ const ESC_OPENING_POSITION = TOP;
 const ESC_OPENING_DISABLED = false;
 const ESC_INLINE_HEADER = false;
 const ESC_INVERT_PCT = false;
+const ESC_INVERT_OPEN_CLOSE = false
 const ESC_CAN_TILT = false;
 const ESC_SHOW_TILT = true;
 const ESC_CLOSING_DIRECTION = DOWN;
@@ -255,6 +257,15 @@ const ESC_BUTTON_STOP_HIDE_STATES = [];
 const ESC_BUTTON_OPENED_HIDE_STATES = [];
 const ESC_BUTTON_CLOSED_HIDE_STATES = [];
 
+const INVERT_OPEN_CLOSE ={
+  [SHUTTER_STATE_OPEN]: SHUTTER_STATE_CLOSED,
+  [SHUTTER_STATE_CLOSED]: SHUTTER_STATE_OPEN,
+  [SHUTTER_STATE_OPENING]: SHUTTER_STATE_CLOSING,
+  [SHUTTER_STATE_CLOSING]: SHUTTER_STATE_OPENING,
+  [ACTION_SHUTTER_OPEN]: ACTION_SHUTTER_CLOSE,
+  [ACTION_SHUTTER_CLOSE]: ACTION_SHUTTER_OPEN,
+
+};
 
 const CONFIG_DEFAULT ={
   [CONFIG_TYPE]: "",
@@ -291,6 +302,7 @@ const CONFIG_DEFAULT ={
   [CONFIG_INLINE_HEADER]: ESC_INLINE_HEADER,
 
   [CONFIG_INVERT_PCT]: ESC_INVERT_PCT,
+  [CONFIG_INVERT_OPEN_CLOSE]: ESC_INVERT_OPEN_CLOSE,
 
   [CONFIG_CAN_TILT]: ESC_CAN_TILT,
   [CONFIG_SHOW_TILT]: ESC_SHOW_TILT,
@@ -313,10 +325,16 @@ const CONFIG_DEFAULT ={
 };
 
 const LOCALIZE_TEXT= {
-  [SHUTTER_STATE_OPEN]: 'component.cover.entity_component._.state.open',
-  [SHUTTER_STATE_CLOSED]: 'component.cover.entity_component._.state.closed',
+  [SHUTTER_STATE_OPEN]:    'component.cover.entity_component._.state.open',
+  [SHUTTER_STATE_CLOSED]:  'component.cover.entity_component._.state.closed',
   [SHUTTER_STATE_CLOSING]: 'component.cover.entity_component._.state.closing',
   [SHUTTER_STATE_OPENING]: 'component.cover.entity_component._.state.opening',
+  [ACTION_SHUTTER_OPEN]:       'ui.card.cover.open_cover',
+  [ACTION_SHUTTER_OPEN_TILT]:  'ui.card.cover.open_cover_tilt',
+  [ACTION_SHUTTER_STOP]:       'ui.card.cover.stop_cover',
+  [ACTION_SHUTTER_CLOSE]:      'ui.card.cover.close_cover',
+  [ACTION_SHUTTER_CLOSE_TILT]: 'ui.card.cover.close_cover_tilt',
+
   [UNAVAILABLE]: 'state.default.unavailable',
 };
 
@@ -396,7 +414,7 @@ const SHUTTER_CSS =`
         position: relative;
         margin: auto;
         line-height: 0;
-        overflow: hidden;
+        overflow: hidden; /* prevents image overflow */
         image-rendering: auto;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
@@ -1297,7 +1315,7 @@ class EnhancedShutter extends LitElement
       this.cfg.invertPercentage(),
       this.cfg.friendlyName()
     );
-    //cons  ole_log('Shutter Updated ready');
+    //console_log('Shutter Updated ready');
   }
   render()
   {
@@ -1431,12 +1449,31 @@ class EnhancedShutter extends LitElement
   coverWidthPx(){
     return this.actualGlobalWidthPx()-this.offsetClosedPx() - this.offsetOpenedPx();
   }
+  shutterBottomSize(){
+    const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.entityId());
+    return imageSize;
+  };
+
   shutterBackgroundPosition(){
-    const direction=this.cfg.closingDirection();
-    const dirs={[DOWN]:BOTTOM,[UP]:TOP,[LEFT]:LEFT,[RIGHT]:RIGHT};
+
+    const direction=this.cfg.unrollUnfoldDirection();
+    const dirs={
+      [DOWN]:BOTTOM,
+      [UP]:TOP,
+      [LEFT]:LEFT,
+      [RIGHT]:RIGHT
+    };
     const position = dirs[direction] || BOTTOM;
     return position;
   }
+/*
+      const y_size_bottom= this.escImages.getShutterBottomImageSize(this.cfg.entityId()).y+'px';
+      [DOWN]:'center bottom '+y_size_bottom,
+      [UP]:'center top '+y_size_bottom,
+      [LEFT]:'left '+y_size_bottom+' center',
+      [RIGHT]:'right '+y_size_bottom+' center',
+*/
+
   shutterSlatSizePercentage(){
     const imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId())
     return this.sizePercentage(imageSize);
@@ -1565,7 +1602,7 @@ class EnhancedShutter extends LitElement
       y: event.pageY,
       coord: new xyPair(event.pageX,event.pageY),
       movementVertical: this.cfg.verticalMovement(),
-      closingDir: this.cfg.closingDirection()
+      closingDir: this.cfg.unrollUnfoldDirection()
     };
     return point;
   }
@@ -1638,6 +1675,7 @@ class EnhancedShutter extends LitElement
   {
     if (!this.cfg.passiveMode()){
       const domain= 'cover';
+      //command= this.cfg.applyInvertToCommand(command);
       if (this.checkServiceAvailability(domain, command)) {
         this.hass.callService(domain, command, {
           entity_id: entityId,
@@ -1684,10 +1722,13 @@ class shutterCfg {
       this.setSignalEntity(hass,escConfig[CONFIG_SIGNAL_ENTITY_ID]);
 
       this.friendlyName(escConfig[CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || 'Unknown');
+
       this.invertPercentage(escConfig[CONFIG_INVERT_PCT]);
+      this.invertOpenClose(escConfig[CONFIG_INVERT_OPEN_CLOSE]);
+
       this.passiveMode(escConfig[CONFIG_PASSIVE_MODE]);
 
-      this.closingDirection(escConfig[CONFIG_CLOSING_DIRECTION]);
+      this.unrollUnfoldDirection(escConfig[CONFIG_CLOSING_DIRECTION]);
 
       let base_height_px = escConfig[CONFIG_BASE_HEIGHT_PX];
       let resize_height_pct = escConfig[CONFIG_RESIZE_HEIGHT_PCT];
@@ -1883,6 +1924,9 @@ class shutterCfg {
   invertPercentage(value = null){
     return this.#getCfg(CONFIG_INVERT_PCT,value);
   }
+  invertOpenClose(value = null){
+    return this.#getCfg(CONFIG_INVERT_OPEN_CLOSE,value);
+  }
   openingDisabled(value = null){
     return this.#getCfg(CONFIG_OPENING_DISABLED,value);
   }
@@ -1933,7 +1977,7 @@ class shutterCfg {
   }
 
 
-  closingDirection(value = null){
+  unrollUnfoldDirection(value = null){
     return this.#getCfg(CONFIG_CLOSING_DIRECTION,value);
   }
   nameDisabled(value = null){
@@ -1986,7 +2030,7 @@ class shutterCfg {
   ** end getters/setters
   */
   verticalMovement(){
-    return IS_VERTICAL.includes(this.closingDirection());
+    return IS_VERTICAL.includes(this.unrollUnfoldDirection());
   }
   currentPosition(){
     let position;
@@ -2002,6 +2046,10 @@ class shutterCfg {
     if (this.invertPercentage()) position = 100-position;
     return position;
   }
+  applyInvertToOpenClose(setting){
+    if (this.invertOpenClose()) setting = Object.keys(INVERT_OPEN_CLOSE).includes(setting) ? INVERT_OPEN_CLOSE[setting] : setting;
+    return setting;
+  }
   applyInvertToCommand(command){
     if (this.invertPercentage()) {
       if (command == ACTION_SHUTTER_OPEN) command = ACTION_SHUTTER_CLOSE;
@@ -2011,7 +2059,7 @@ class shutterCfg {
   }
   getCloseAngle(){
     const direction= {[DOWN]:0,[LEFT]:90,[RIGHT]:270,[UP]:180};
-    return direction[this.closingDirection()] || 0;
+    return direction[this.unrollUnfoldDirection()] || 0;
   }
 
   getOrientation(){
@@ -2029,16 +2077,16 @@ class shutterCfg {
       if (position != SHUTTER_OPEN_PCT && position != SHUTTER_CLOSED_PCT){
         state= SHUTTER_STATE_PARTIAL_OPEN;
       }else{
-        state = position ? SHUTTER_STATE_OPEN : SHUTTER_STATE_CLOSED;
+        state = position ? this.applyInvertToOpenClose(SHUTTER_STATE_OPEN) : this.applyInvertToOpenClose(SHUTTER_STATE_CLOSED);
       }
     }
     console.log('Shutter movementState 2:',position,state);
 
     // solve issue #54
-    if (position == SHUTTER_OPEN_PCT && state== SHUTTER_STATE_OPENING) {
-      state = SHUTTER_STATE_OPEN;
-    }else if (position == SHUTTER_CLOSED_PCT && state== SHUTTER_STATE_CLOSING) {
-      state = SHUTTER_STATE_CLOSED;
+    if (position == SHUTTER_OPEN_PCT && state== this.applyInvertToOpenClose(SHUTTER_STATE_OPENING)) {
+      state = this.applyInvertToOpenClose(SHUTTER_STATE_OPEN);
+    }else if (position == SHUTTER_CLOSED_PCT && state== this.applyInvertToOpenClose(SHUTTER_STATE_CLOSING)) {
+      state = this.applyInvertToOpenClose(SHUTTER_STATE_CLOSED);
     }
     console.log('Shutter movementState Final:',position,state);
 
@@ -2133,6 +2181,7 @@ class shutterCfg {
         }else{
           let state= this.movementState(percent);
           if (state != SHUTTER_STATE_PARTIAL_OPEN){
+            // text= this.getLocalize(LOCALIZE_TEXT[this.applyInvertToOpenClose(state)]);
             text= this.getLocalize(LOCALIZE_TEXT[state]);
           } else{
             text = percent + '%';
@@ -2143,9 +2192,9 @@ class shutterCfg {
       }
     }else{
       if (percent > 50 ) {
-        text = this.getLocalize(LOCALIZE_TEXT[SHUTTER_STATE_OPEN]);
+        text = this.getLocalize(LOCALIZE_TEXT[this.applyInvertToOpenClose(SHUTTER_STATE_OPEN)]);
       } else {
-        text = this.getLocalize(LOCALIZE_TEXT[SHUTTER_STATE_CLOSED]);
+        text = this.getLocalize(LOCALIZE_TEXT[this.applyInvertToOpenClose(SHUTTER_STATE_CLOSED)]);
       }
     }
     return text;
@@ -2367,8 +2416,8 @@ class htmlCard{
       --esc-buttons-flex-flow: ${!this.cfg.buttonsInRow() ? 'row' : 'column'} wrap;
 
       --esc-movement-overlay-display: ${(state == SHUTTER_STATE_OPENING || state == SHUTTER_STATE_CLOSING) ? 'block' : 'none'};
-      --esc-movement-overlay-open-display: ${state == SHUTTER_STATE_OPENING ? 'block' : 'none'};
-      --esc-movement-overlay-close-display: ${state == SHUTTER_STATE_CLOSING ? 'block' : 'none'};
+      --esc-movement-overlay-open-display: ${state == this.cfg.applyInvertToOpenClose(SHUTTER_STATE_OPENING) ? 'block' : 'none'};
+      --esc-movement-overlay-close-display: ${state == this.cfg.applyInvertToOpenClose(SHUTTER_STATE_CLOSING) ? 'block' : 'none'};
       --esc-movement-overlay-top: ${this.enhancedShutter.offsetOpenedPx()-7}${UNITY};
       --esc-movement-overlay-height: ${this.enhancedShutter.coverHeightPx() + 7}${UNITY};
 
@@ -2450,14 +2499,14 @@ class htmlCard{
         </div>
     `;
   }
-  showButtonOpen(){
+  showButtonUp(){
     return html`
       ${!this.cfg.disableStandardButtons() &&
         !this.cfg.buttonOpenHideStates().includes(this.cfg.movementState()) &&
          this.cfg.isCoverFeatureActive(ESC_FEATURE_OPEN)
       ? html`
         <ha-icon-button
-          label="${this.cfg.getLocalize('ui.card.cover.open_cover')}"
+          label="${this.cfg.getLocalize(LOCALIZE_TEXT[this.cfg.applyInvertToOpenClose(ACTION_SHUTTER_OPEN)])}"
           .disabled=${this.cfg.disabledGlobaly() || this.cfg.openCoverButtonDisabled()}
           @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_OPEN}`)} >
           <ha-icon
@@ -2477,7 +2526,7 @@ class htmlCard{
          this.cfg.isCoverFeatureActive(ESC_FEATURE_STOP)
       ? html`
         <ha-icon-button
-          label="${this.cfg.getLocalize('ui.card.cover.stop_cover')}"
+          label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_STOP])}"
           .disabled=${this.cfg.disabledGlobaly()}
           @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_STOP}`)} >
           <ha-icon
@@ -2490,14 +2539,14 @@ class htmlCard{
     }`;
   }
 
-  showButtonClose(){
+  showButtonDown(){
     return html`
       ${!this.cfg.disableStandardButtons() &&
         !this.cfg.buttonCloseHideStates().includes(this.cfg.movementState()) &&
         this.cfg.isCoverFeatureActive(ESC_FEATURE_CLOSE)
       ? html`
         <ha-icon-button
-          label="${this.cfg.getLocalize('ui.card.cover.close_cover')}"
+          label="${this.cfg.getLocalize(LOCALIZE_TEXT[this.cfg.applyInvertToOpenClose(ACTION_SHUTTER_CLOSE)])}"
           .disabled=${this.cfg.disabledGlobaly() || this.cfg.closeCoverButtonDisabled()}
           @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_CLOSE}`)} >
           <ha-icon
@@ -2526,13 +2575,13 @@ class htmlCard{
     return html`
       ${this.cfg.showTilt() ? html`
           <ha-icon-button
-            label="${this.cfg.getLocalize('ui.card.cover.open_tilt_cover')}"
+            label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_OPEN_TILT])}"
             .disabled=${this.cfg.disabledGlobaly()}
             @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_OPEN_TILT}`)}">
             <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-top-right"></ha-icon>
           </ha-icon-button>
           <ha-icon-button
-            label="${this.cfg.getLocalize('ui.card.cover.close_tilt_cover')}"
+            label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_CLOSE_TILT])}"
             .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_CLOSE_TILT}`)}">
             <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-bottom-left"></ha-icon>
           </ha-icon-button>
@@ -2544,9 +2593,9 @@ class htmlCard{
       ${this.cfg.buttonsLeftActive()
       ? html`
         <div class="${ESC_CLASS_BUTTONS}">
-          ${this.showButtonOpen()}
+          ${this.showButtonUp()}
           ${this.showButtonStop()}
-          ${this.showButtonClose()}
+          ${this.showButtonDown()}
         </div>
         <div class="${ESC_CLASS_BUTTONS}">
           ${this.showButtonPartial()}
@@ -2801,7 +2850,7 @@ class EscImages{
           //images[entityId]={entityId,src,width: size.width, height: size.height};
           imageRefs[entityId]={entityId,key};
         }else{
-          imageRefs[entityId]={entityId,key};
+          imageRefs[entityId]={entityId,key: -1};
 
         }
       };
@@ -2839,6 +2888,9 @@ class EscImages{
   }
   getImageSize(image_type,entityId){
     const key = this.escImages[image_type][entityId].key;
+    if (key< 0 || key >= this.images.length) {
+      return new xyPair(0, 0); // Return a default size
+    }
     return new xyPair(this.width[key],this.height[key]);
   }
 

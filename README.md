@@ -28,6 +28,23 @@ Enter repository-url: `https://github.com/marcelhoogantink/enhanced-shutter-card
 and choose type: `Dashboard`.)</small>
 
 ---
+### New in version v1.3.0:
+
+ - #### slat image also accepts colors
+
+   The setting ``` shutter_slat_image ``` also accepts colors besides images, like ```view_image``` already does.
+
+- #### New option: Invert Open - Close
+
+  For awnings, a new options is inroduced: ```invert_open_close``` for making the card more logic for this kind of covering.
+- #### Solved issues:
+  - [#95](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/95) [FEATURE REQUEST] Invert arrow functionality
+  - [#98](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/98) Invert open/close
+  - [#103](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/103) [Feature Request] Add blind support #103
+
+  - [#104](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/104) Card as “custom_fields” in a button-card
+  
+---
 ### New in version v1.2.3:
 
 - #### Enhanced Shutter Card is now part of the default HACS-repositories  :tada: :tada:
