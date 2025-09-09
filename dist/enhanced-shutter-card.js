@@ -1296,7 +1296,7 @@ class EnhancedShutter extends LitElement
 
     this[ESC_CLASS_SELECTOR]=null;
 
-    console_log('Version:',this.version);
+    console_log('Version:',VERSION);
 
     //console_log('Shutter constructor ready');
   }
