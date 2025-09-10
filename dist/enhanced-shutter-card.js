@@ -389,6 +389,7 @@ const ESC_PRESET = {
 }
 
 const LOCALIZE_TEXT= {
+  // Search for this in Lokalise.com : component::cover::entity_component::_::state::
   [SHUTTER_STATE_OPEN]:    'component.cover.entity_component._.state.open',
   [SHUTTER_STATE_CLOSED]:  'component.cover.entity_component._.state.closed',
   [SHUTTER_STATE_CLOSING]: 'component.cover.entity_component._.state.closing',
