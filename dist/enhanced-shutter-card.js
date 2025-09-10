@@ -2381,7 +2381,7 @@ class shutterCfg {
         }else{
           let state= this.positionToState(this.applyInvertPercentageToPosition(position));
           if (state != SHUTTER_STATE_PARTIAL_OPEN){
-            text= state; // + " (" + position + '%%)';
+            text = this.getLocalize(LOCALIZE_TEXT[this.applyInvertOpenClose(state)]);
           } else{
             text = position + '%';
           }
