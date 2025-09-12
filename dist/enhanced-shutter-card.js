@@ -1755,7 +1755,7 @@ class EnhancedShutter extends LitElement
     console_log('mouseUp:',event.type,event);
     if (event.pageY === undefined) return;
 
-    this.action='user-drag';
+    this.action='user-pick';
     this.removeEventListener('mousemove', this.mouseMove);
     this.removeEventListener('touchmove', this.mouseMove);
     this.removeEventListener('pointermove', this.mouseMove);
@@ -2285,8 +2285,6 @@ class shutterCfg {
   }
 
   buttonsRightActive(){
-    //if (this.disabledGlobaly()) return false;
-    //if (!this.buttonsInRow()) return false;
     if (this.disablePartialOpenButtons())
       return false;
     else
@@ -2299,7 +2297,8 @@ class shutterCfg {
     return this.getButtonsPosition() == BOTTOM || this.getButtonsPosition() == RIGHT;
   }
   disabledGlobaly() {
-    return (NOT_KNOWN.includes(this.getCoverEntity().getState()));
+    return false;
+    // return (NOT_KNOWN.includes(this.getCoverEntity().getState()));
   }
   coverButtonUpDisabled(){
     let disabled = false;
@@ -2381,7 +2380,8 @@ class shutterCfg {
         }else{
           let state= this.positionToState(this.applyInvertPercentageToPosition(position));
           if (state != SHUTTER_STATE_PARTIAL_OPEN){
-            text = this.getLocalize(LOCALIZE_TEXT[this.applyInvertOpenClose(state)]);
+            text = this.getLocalize(LOCALIZE_TEXT[(state)]);
+            console.log('positionToText: state:',state,'text:',text, 'position',position);
           } else{
             text = position + '%';
           }
@@ -2401,13 +2401,10 @@ class shutterCfg {
   computePositionText(currentPosition =this.currentPosition()) {
     let positionText;
     if (NOT_KNOWN.includes(this.getCoverEntity().getState())){
-        positionText = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
+      positionText = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
     }else{
-      //currentPosition = this.applyInvertPercentageToPosition(currentPosition);
       const displayPosition = this.applyInvertPercentageToPosition(this.visiblePosition(currentPosition));
-      //const displayPosition = (this.visiblePosition(currentPosition));
       positionText = this.positionToText(displayPosition);
-
       if (this.offset()>0 && this.offset()<100) {
         positionText += ` (${this.applyInvertPercentageToPosition(currentPosition)}%)`;
       }
@@ -2534,7 +2531,7 @@ class shutterCfg {
     let level = this.batteryLevel();
     let icon;
     let roundedLevel = Math.round(level / 10) * 10;
-    roundedLevel = isNaN(roundedLevel) ? -1 : roundedLevel;
+    roundedLevel = isNaN(roundedLevel) ? -1 : Math.min(roundedLevel,100);
 
 		switch (roundedLevel) {
 			case -1:
@@ -3046,6 +3043,7 @@ class EscImages{
   constructor(config){
     this.escImagesLoaded = false; // Mark images as not loaded
     this.images=[];
+    this.imageTypes=[];
     this.width=[];
     this.height=[];
     var nImages=0;
@@ -3083,6 +3081,7 @@ class EscImages{
           var key;
           if (!(this.images.includes(src))){
             this.images[nImages]=src;
+            this.imageTypes[nImages]=image_type;
             key= nImages++;
           }else{
             key = this.images.findIndex(element => element == src);
@@ -3142,7 +3141,7 @@ class EscImages{
   async processImages() {
     try {
       const images=this.images;
-      const imageDimensions = await readImageDimensions(images);
+      const imageDimensions = await readImageDimensions(this);
       imageDimensions.forEach((value,key,array)=>{
         //this.width[key] = value.width;
         //this.height[key]= value.height;
@@ -3385,13 +3384,13 @@ function isUrl(fileName){
   return fileName.includes('.');
 }
 
-async function readImageDimensions(files) {
+async function readImageDimensions(escImages) {
   const promises = [];
-  var count=0;
-  var pointer=[];
   // Loop through each file URL in the provided array
-  for (let i = 0; i < files.length; i++) {
-    const fileUrl = files[i];
+
+
+  for (let i = 0; i < escImages.images.length; i++) {
+    const fileUrl = escImages.images[i];
     if (isUrl(fileUrl)) {
       const promise = new Promise((resolve, reject) => {
         const img = new Image();
@@ -3404,18 +3403,33 @@ async function readImageDimensions(files) {
                 index: i // Store the index of the image in the original array
             });
         };
-
         img.onerror = function() {
-            reject(new Error(`Failed to load image from URL: ${fileUrl}`));
+//          hass.callService("persistent_notification", "create", {
+//            title: "Notitie",
+//            message: "Dit is mijn melding vanuit de card"
+//          });
+          const baseImage = `${ESC_IMAGE_MAP}/${CONFIG_DEFAULT[escImages.imageTypes[i]]}`;
+          escImages.images[i]= baseImage; // Replace with default image on error
+
+          console.warn(`Failed to load image: ${fileUrl}, using default image: ${baseImage}`);
+
+          const fallbackImg = new Image();
+
+          fallbackImg.onload = function () {
+            resolve({
+              url: baseImage,
+              width: fallbackImg.width,
+              height: fallbackImg.height,
+              index: i
+            });
+          };
+          fallbackImg.src = baseImage;
         };
 
         img.src = fileUrl; // Set the src to the image URL directly
-        //img.index= i; // Store the index of the image in the original array
 
       });
       promises.push(promise);
-      pointer[i]=count++;
-      //promises[i] = promise; // Store the promise in the array at index i
     }
   }
 
