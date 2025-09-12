@@ -30,7 +30,23 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 
 Thank you !
 
+---
+### New in version v1.3.1:
 
+- #### Handling not-found images
+  When an image entered in the Card is not found, the default image for the image-type wil be used, and a warning is sent to the console.
+- #### Wrong open/close texts in the position header for awnings.
+  The wrong open/closed/opening/closing texts for awnings are corrected.
+- #### Inactive Buttons improved.
+  When is shutter is (temporary) unavailable the buttons are now still active, so it may trigger the cover to activate.
+- #### battery percentage icon
+  If the battery percentage > 100%, the icon will still be displayed.
+
+- #### Solved issues:
+  - [#115](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/115) shutter-card disappeared
+  - [#117](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/117) Buttons inactive after update
+  - [#118](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/118) Awning problem
+  - [#119](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/119) Fix issue with battery percentage over 100%
 
 ---
 ### New in version v1.3.0:
