@@ -131,6 +131,12 @@ const ACTION_SHUTTER_SET_POS_TILT = 'set_cover_tilt_position';
 const ICON_BUTTON_SIZE = 36; // original: 48
 const ICON_SIZE = 24;
 
+const FONT_SIZE_LABEL = 20;
+const FONT_SIZE_POSITION = 14;
+const LINE_HEIGHT_LABEL = 30;
+const LINE_HEIGHT_POSITION = 20;
+const MARGIN_POSITION = 5;
+
 const UNITY= 'px';
 
 const CONFIG_TYPE = "type";
@@ -292,6 +298,8 @@ const INVERT_OPEN_CLOSE ={
   [SHUTTER_STATE_CLOSING]: SHUTTER_STATE_OPENING,
   [ACTION_SHUTTER_OPEN]: ACTION_SHUTTER_CLOSE,
   [ACTION_SHUTTER_CLOSE]: ACTION_SHUTTER_OPEN,
+  [UP]: DOWN,
+  [DOWN]: UP,
 
 };
 
@@ -371,7 +379,9 @@ const ESC_PRESET = {
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'esc-awning-bottom.png',
     [CONFIG_ROTATE_MAIN_SHUTTER_IMAGE]: true,
     [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: false,
-    [CONFIG_OFFSET_CLOSED_PCT]: 50
+    [CONFIG_OFFSET_CLOSED_PCT]: 50,
+    [CONFIG_CLOSING_DIRECTION]: DOWN,
+
   },
   [ESC_CURTAIN]: {
     [CONFIG_CLOSING_DIRECTION]: RIGHT,
@@ -381,10 +391,12 @@ const ESC_PRESET = {
   },
   [ESC_SHADE]: {
     [CONFIG_SHUTTER_SLAT_IMAGE]: '#00000080',
+    [CONFIG_CLOSING_DIRECTION]: DOWN,
   },
   [ESC_TEST]: {
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'rode_rechthoek.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'gele_rechthoek.png',
+    [CONFIG_CLOSING_DIRECTION]: DOWN,
   },
 }
 
@@ -578,8 +590,8 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_TOP}, .${ESC_CLASS_BOTTOM} {
         text-align: center;
-        padding-top: calc(8px*var(--esc-text-scale));
-        padding-bottom: calc(8px*var(--esc-text-scale));
+        padding-top: calc(${8}px*var(--esc-text-scale));
+        padding-bottom: calc(${8}px*var(--esc-text-scale));
       }
       .${ESC_CLASS_TOP}>.${ESC_CLASS_LABEL} {
          display: var(--esc-display-name-top);
@@ -596,8 +608,8 @@ const SHUTTER_CSS =`
       .${ESC_CLASS_LABEL} {
         display: inline-block;
         clear: both;
-        font-size: calc(20px*var(--esc-text-scale));
-        line-height: calc(30px*var(--esc-text-scale));
+        font-size: calc(${FONT_SIZE_LABEL}px*var(--esc-text-scale));
+        line-height: calc(${LINE_HEIGHT_LABEL}px*var(--esc-text-scale));
         bottom: 0;
         position: relative;
         cursor: pointer;
@@ -613,11 +625,11 @@ const SHUTTER_CSS =`
         display: inline-block;
         vertical-align: top;
         clear: both;
-        font-size: calc(14px*var(--esc-text-scale));
-        line-height: calc(20px*var(--esc-text-scale));
-        height: calc(20px*var(--esc-text-scale));
+        font-size: calc(${FONT_SIZE_POSITION}px*var(--esc-text-scale));
+        line-height: calc(${LINE_HEIGHT_POSITION}px*var(--esc-text-scale));
+        height:      calc(${LINE_HEIGHT_POSITION}px*var(--esc-text-scale));
         border-radius: 5px;
-        margin: 5px;
+        margin: ${MARGIN_POSITION}px;
 
       }
       .${ESC_CLASS_POSITION}>span {
@@ -669,7 +681,7 @@ class EnhancedShutterCardNew extends LitElement{
       localCfgs: {type: Object, state: true},
       screenOrientation: {type: Object, state: true},
       escImagesLoaded: {type: Boolean, state: true},
-
+      gridPixelWidth: {type: Number, state: true},
     };
   }
 
@@ -681,6 +693,12 @@ class EnhancedShutterCardNew extends LitElement{
     this.isShutterConfigLoaded = false;
     this.isResizeInProgress = false;
     this.screenOrientation= LANDSCAPE;
+
+    this.gridPixelWidth = HA_GRID_PX_WIDTH;
+    this.gridPixelHeight = HA_GRID_PX_HEIGHTt;
+    this.gridPixelGap = HA_GRID_PX_GAP;
+    this.gridContainer = null;
+
     this.messageManager= new MessageManager();
 
     console_log('Card constructor ready');
@@ -715,7 +733,7 @@ class EnhancedShutterCardNew extends LitElement{
     let config = { ...ESC_PRESET[configSub[CONFIG_SHUTTER_PRESET]]} || {};
 
     Object.keys(configBase).forEach(keyMain =>{
-      if (keyMain === CONFIG_SHUTTER_PRESET) return; // skip shutter type
+      //if (keyMain === CONFIG_SHUTTER_PRESET) return; // skip shutter type
       // first, handle deprecations ....
       let keySub = keyMain;
 
@@ -826,7 +844,37 @@ class EnhancedShutterCardNew extends LitElement{
   }
   firstUpdated() {
     console_log('Card firstUpdated Start');
+    this.getGrid();
     console_log('Card firstUpdated End');
+  }
+  getGrid(){
+    if (!this.gridContainer){
+      this.defGridContainer();
+    }
+    if (this.gridContainer) {
+      const style = getComputedStyle(this.gridContainer);
+      const columns = style.getPropertyValue('grid-template-columns');
+      this.gridPixelWidth =Math.ceil(parseFloat(columns.split(/\s+/)[0]));
+      console.log('Card getGrid: gridPixelWidth=',this.gridPixelWidth);
+    } else {
+      console.warn('Could not find grid container');
+    }
+  }
+  defGridContainer(){
+      let el = this;
+      while (el) {
+        const tagName = el.tagName || '(unknown)';
+        const id = el.id || '(no id)';
+        const classList = el.classList?.value || '(no class)';
+
+        if (
+            el.classList?.contains('container')) {
+          break;
+        }
+
+        el = el.parentElement || el.getRootNode()?.host;
+      }
+      this.gridContainer = el;
   }
   connectedCallback() {
     super.connectedCallback();
@@ -847,12 +895,13 @@ class EnhancedShutterCardNew extends LitElement{
 
     const onResize = (entries) => {
       /* Things todo when risize is detected */
-      console_log('Card Resize detected',Globals.huiView?.getBoundingClientRect());
+      console.log('Card Resize detected',Globals.huiView?.getBoundingClientRect());
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
         });
       }
+      this.getGrid();
     }
     this.resizeObserver = new ResizeObserver(onResize);
     this.resizeObserver.observe(Globals.huiView);
@@ -897,7 +946,7 @@ class EnhancedShutterCardNew extends LitElement{
   }
 
   render() {
-    console_log('Card Render');
+    console.log('CARD RENDER !!!!!!');
     if (!this.config || !this.hass || !this.isShutterConfigLoaded) {
       console.warn('ShutterCard  .. no content ..');
       return html`Waiting ...`;
@@ -939,18 +988,19 @@ class EnhancedShutterCardNew extends LitElement{
           </div>
         </ha-card>
       `;
+    console.log('grid-width=',this.gridPixelWidth);
 
-    console_log('Card Render ready');
+    console.log('Card Render ready');
     return htmlout;
   }
 
   static get styles() {
     const CSS = `
      .${ESC_CLASS_SHUTTERS} {
-      padding: 16px;
+      padding: ${16}px;
      }
     .${ESC_CLASS_SHUTTER_SEPERATE}:not(:last-child) {
-      height: 5px;
+      height: ${5}px;
       margin-left: auto;
       margin-right: auto;
       width: 25%;
@@ -1007,6 +1057,7 @@ class EnhancedShutterCardNew extends LitElement{
     let cardSize;
     let seperate=0;
 
+
     if (this.config && this.config.entities && this.isShutterConfigLoaded){
       cardSize= this.gridSizeCardTitle();
 
@@ -1053,8 +1104,10 @@ class EnhancedShutterCardNew extends LitElement{
       this.nbCols= Math.ceil((cardSize.localWidthPx+column_gap)/(column+column_gap));
     }
     else{
-      this.nbRows= Math.ceil((cardSize.localHeightPx+HA_GRID_PX_GAP)/(HA_GRID_PX_HEIGHTt+HA_GRID_PX_GAP));
-      this.nbCols= Math.ceil((cardSize.localWidthPx+HA_GRID_PX_GAP)/(HA_GRID_PX_WIDTH+HA_GRID_PX_GAP));
+      this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
+      this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
+
+      console.log('rows,cols',this.nbRows,this.nbCols,cardSize,this.gridPixelWidth,this.gridPixelHeight);
     }
     return {
       rows: this.nbRows,
@@ -1091,7 +1144,7 @@ class EnhancedShutterCardNew extends LitElement{
     // HA basic sizes for calculations:
 
     const haTitleFont = 'Roboto, Noto, sans-serif';
-    const shutterTitleHeight = 20;
+    const shutterTitleHeight = FONT_SIZE_LABEL * cfg.textScaleFactor();
 
     let localHeightPx=0;
     let localWidthPx =0;
@@ -1100,7 +1153,8 @@ class EnhancedShutterCardNew extends LitElement{
     */
     if (!cfg.nameDisabled()){
       let titleSize = getTextSize(cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
-      let partHeightPx = 30;
+
+      let partHeightPx = LINE_HEIGHT_LABEL * cfg.textScaleFactor();
       let partWidthPx = titleSize.width;
 
       localHeightPx += partHeightPx;
@@ -1110,13 +1164,14 @@ class EnhancedShutterCardNew extends LitElement{
     * Size shutter-opening row
     */
     if (!cfg.openingDisabled() && !cfg.inlineHeader()){
-      let pctSize = getTextSize(cfg.computePositionText(),haTitleFont,14);
-      let partHeightPx = 30;  // including margin
+      let pctSize = getTextSize(cfg.computePositionText(),haTitleFont,FONT_SIZE_POSITION * cfg.textScaleFactor());
+      let partHeightPx = LINE_HEIGHT_POSITION * cfg.textScaleFactor() + 2*MARGIN_POSITION;  // including margin
       let partWidthPx = pctSize.width;
       localHeightPx += partHeightPx;
       localWidthPx = Math.max(localWidthPx,partWidthPx);
     }
     localHeightPx += 16; // padding
+
     return {localWidthPx,localHeightPx};
   }
   gridSizeCardMiddle(cfg){
@@ -2111,6 +2166,7 @@ class shutterCfg {
     return this.#getCfg(CONFIG_BUTTON_STOP_HIDE_STATES,value);
   }
   buttonOpenCloseHideStates(upDown){
+    upDown = this.applyInvertOpenClose(upDown);
     if (upDown == UP) return this.buttonOpenHideStates();
     if (upDown == DOWN) return this.buttonCloseHideStates();
   }
@@ -2322,22 +2378,18 @@ class shutterCfg {
     }
     return disabled;
   }
-  coverButtonDisabled(upDown){
-    upDown = this.applyInvertDirection(upDown);
-    if (upDown === UP) {
-      if (this.invertDirection()) {
-        return this.coverButtonDownDisabled();
-      }else{
-        return this.coverButtonUpDisabled();
-      }
+  coverButtonDisabled(upDown) {
+    const isUp = upDown === UP;
+    const isDown = upDown === DOWN;
+    const inverted = this.invertDirection();
+
+    if (isUp) {
+      return inverted ? this.coverButtonDownDisabled() : this.coverButtonUpDisabled();
     }
-    if (upDown === DOWN) {
-      if (this.invertDirection()) {
-        return this.coverButtonUpDisabled();
-      }else{
-        return this.coverButtonDownDisabled();
-      }
+    if (isDown) {
+      return inverted ? this.coverButtonUpDisabled() : this.coverButtonDownDisabled();
     }
+    return false;
   }
 
   displayName(position){
@@ -2443,7 +2495,7 @@ class shutterCfg {
     let scale = 1.0;
     switch(typeof(scale_setting)){
       case 'boolean':
-        scale = scale_setting ? this.windowWidthPx()/ESC_BASE_WIDTH_PX : 1;
+        scale = scale_setting ? this.windowWidthPx()/ESC_BASE_WIDTH_PX : scale;
         break;
       case 'number':
         scale = boundary(scale_setting,0.1,2);
@@ -3072,10 +3124,15 @@ class EscImages{
 
       for (const entityConfig of config.entities)
       {
+        let shutter_preset = entityConfig[CONFIG_SHUTTER_PRESET];
+        let presetImage = (shutter_preset && ESC_PRESET[shutter_preset] && ESC_PRESET[shutter_preset][image_type]!== undefined)
+          ? ESC_PRESET[shutter_preset][image_type]
+          : entityConfig[image_type];
+
         let image_map = entityConfig[CONFIG_IMAGE_MAP] || base_image_map;
         const entityId = entityConfig[CONFIG_ENTITY_ID] || entityConfig;
 
-        let image = NOT_KNOWN.includes(entityConfig[image_type])  ? base_image : defImagePathOrColor(image_map,entityConfig[image_type],image_type);
+        let image = NOT_KNOWN.includes(presetImage)  ? base_image : defImagePathOrColor(image_map,presetImage,image_type);
         if (image){
           let src = image.replace(/([^:]\/)\/+/g, "/").trim(); // Remove double slashes and trim
           var key;
