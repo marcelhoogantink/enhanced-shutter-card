@@ -844,6 +844,7 @@ class EnhancedShutterCardNew extends LitElement{
   }
   firstUpdated() {
     console_log('Card firstUpdated Start');
+    this._resizeObserver = new ResizeObserver(entries => {
     this.getGrid();
     console_log('Card firstUpdated End');
   }
