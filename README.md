@@ -327,23 +327,19 @@ _Remark : you can also just give the entity ID (without to specify `entity:`) if
 ### Shutter Presets
 The following `preset_shutter` settings are available:
 
-| preset_shutter name | defined setting           | value                     |
-| ------------------- | ------------------------- | ------------------------- |
-| rollor-shutter      | rotate_slat_image         | true                      |
-|
-| awning              | invert_open_close         | true                      |
-|                     | shutter_slat_image        | `esc-awning.png`          |
-|                     | shutter_slat_bottom_image | `esc-awning-bottom.png`   |
-|                     | bottom_offset_pct         | 50                        |
-|                     | stretch_bottom_image      | false                     |
-|
-| curtain             | closing_direction         | `right`                   |
-|                     | shutter_slat_image        | `esc-curtain.png`         |
-|                     | shutter_slat_bottom_image | `''`                      |
-|                     | rotate_slat_image         | false                     |
-|
-| shade               | shutter_slat_image        | `'#00000080'`           |
-
+| **Preset Name** | **Setting**                 | **Value**                 |
+| ---------------- | --------------------------- | ------------------------- |
+| **roller-shutter** | `rotate_slat_image`          | `true`                    |
+| **awning**         | `invert_open_close`          | `true`                    |
+|                   | `shutter_slat_image`         | `esc-awning.png`          |
+|                   | `shutter_slat_bottom_image`  | `esc-awning-bottom.png`   |
+|                   | `bottom_offset_pct`          | `50`                      |
+|                   | `stretch_bottom_image`       | `false`                   |
+| **curtain**        | `closing_direction`          | `right`                   |
+|                   | `shutter_slat_image`         | `esc-curtain.png`         |
+|                   | `shutter_slat_bottom_image`  | `''`                      |
+|                   | `rotate_slat_image`          | `false`                   |
+| **shade**          | `shutter_slat_image`         | `'#00000080'`             |
 
 
 

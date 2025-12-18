@@ -1,5 +1,5 @@
 
-const VERSION = 'v1.4.0alpha';
+const VERSION = 'v1.4.0alpha1';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
@@ -13,7 +13,7 @@ import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
 const HA_CARD_NAME = "enhanced-shutter-card";
 const HA_SHUTTER_NAME = `enhanced-shutter`;
 const HA_HUI_VIEW = 'hui-view';
-const SPACE = '';
+const SPACE = ' ';
 
 const UNAVAILABLE = 'unavailable';
 const UNKNOWN = 'unknown';
@@ -149,6 +149,7 @@ const HA_ALERT_WARNING = 'warning';
 const HA_ALERT_ERROR = 'error';
 const HA_ALERT_INFO = 'info';
 
+const CONFIG_DEBUG = 'debug';
 const CONFIG_ENTITY_ID = 'entity';
 const CONFIG_HEIGHT_PX = 'height_px';
 const CONFIG_WIDTH_PX = 'width_px';
@@ -255,6 +256,7 @@ const ESC_BASE_WIDTH_PX = 150;  // image-width
 const ESC_RESIZE_HEIGHT_PCT = 100;
 const ESC_RESIZE_WIDTH_PCT  = 100;
 
+const ESC_DEBUG = DEBUG || false;
 const ESC_SCALE_ICONS = true;
 const ESC_SCALE_TEXTS = false;
 const ESC_SCALE_BUTTONS = false;
@@ -307,6 +309,8 @@ const CONFIG_DEFAULT ={
   [CONFIG_TYPE]: "",
   [CONFIG_TITLE]: "",
   [CONFIG_ENTITIES]: "",
+
+  [CONFIG_DEBUG]: ESC_DEBUG,
 
   [CONFIG_SHUTTER_PRESET]: ESC_SHUTTER_PRESET,
   [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
@@ -791,24 +795,28 @@ class EnhancedShutterCardNew extends LitElement{
                 const cfg = this.localCfgs[entityId];
                 let shutterState = `${liveEntityFromHass.state}-${liveEntityFromHass.attributes.current_position}`;
                 if (shutterState != cfg.shutterState){
-                  cfg.shutterState = shutterState;
                   doUpdate =true;
+                  cfg.shutterState = shutterState;
                 }
                 // check battery entity change
                 const batteryEntityId = cfg.getBatteryEntity()?.getEntityId() ?? null;
-                const liveBatteryEntityFromHass = liveStates[batteryEntityId];
-                if (liveBatteryEntityFromHass != cfg.getBatteryEntity() || !liveBatteryEntityFromHass){
-                  cfg.setBatteryEntity(this.hass,batteryEntityId);
-                  cfg.batteryState = NOT_KNOWN.includes(liveBatteryEntityFromHass) ? UNAVAILABLE : liveBatteryEntityFromHass.state;
-                  doUpdate =true;
+                if (batteryEntityId) {
+                  const liveBatteryEntityFromHass = liveStates[batteryEntityId];
+                  if (liveBatteryEntityFromHass && liveBatteryEntityFromHass != cfg.getBatteryEntity() ){
+                    doUpdate =true;
+                    cfg.setBatteryEntity(this.hass,batteryEntityId);
+                    cfg.batteryState = NOT_KNOWN.includes(liveBatteryEntityFromHass) ? UNAVAILABLE : liveBatteryEntityFromHass.state;
+                  }
                 }
                 // check signal entity change
                 const signalEntityId = cfg.getSignalEntity()?.getEntityId() ?? null;
-                const signalEntityFromHass = liveStates[signalEntityId];
-                if (signalEntityFromHass != cfg.getSignalEntity() || !signalEntityFromHass){
-                  cfg.setSignalEntity(this.hass,signalEntityId);
-                  cfg.signalState = NOT_KNOWN.includes(signalEntityFromHass) ? UNAVAILABLE : signalEntityFromHass.state;
-                  doUpdate =true;
+                if (signalEntityId) {
+                  const signalEntityFromHass = liveStates[signalEntityId];
+                  if (signalEntityFromHass != cfg.getSignalEntity() || !signalEntityFromHass){
+                    doUpdate =true;
+                    cfg.setSignalEntity(this.hass,signalEntityId);
+                    cfg.signalState = NOT_KNOWN.includes(signalEntityFromHass) ? UNAVAILABLE : signalEntityFromHass.state;
+                  }
                 }
               }
             });
@@ -844,8 +852,6 @@ class EnhancedShutterCardNew extends LitElement{
   }
   firstUpdated() {
     console_log('Card firstUpdated Start');
-    this._resizeObserver = new ResizeObserver(entries => {
-    this.getGrid();
     console_log('Card firstUpdated End');
   }
   getGrid(){
@@ -854,9 +860,14 @@ class EnhancedShutterCardNew extends LitElement{
     }
     if (this.gridContainer) {
       const style = getComputedStyle(this.gridContainer);
+      const previousGridWidth = this.gridPixelWidth;
       const columns = style.getPropertyValue('grid-template-columns');
       this.gridPixelWidth =Math.ceil(parseFloat(columns.split(/\s+/)[0]));
-      console.log('Card getGrid: gridPixelWidth=',this.gridPixelWidth);
+      if (previousGridWidth !== this.gridPixelWidth) {
+        console.log(`#@#@ Card getGrid: changed from ${previousGridWidth} to ${this.gridPixelWidth} `);
+        this.getGridOptions('from getGrid()');
+
+      }
     } else {
       console.warn('Could not find grid container');
     }
@@ -876,27 +887,36 @@ class EnhancedShutterCardNew extends LitElement{
         el = el.parentElement || el.getRootNode()?.host;
       }
       this.gridContainer = el;
+
+      return el;
   }
   connectedCallback() {
     super.connectedCallback();
     console_log('Card connectedCallback Start');
 
+
+    //const parent = this.parentElement;
+
+    const gridContainer = this.defGridContainer();
+    if (!gridContainer) return;
+
+    let lastCols = '';
+    console.log('Card connectedCallback: observing parent:',gridContainer);
+    // Check grid layout changes
+
+
     /* get element of hui-view to detect resizing */
     Globals.huiView = findElementInBody(HA_HUI_VIEW);
 
-    if (!this.isShutterConfigLoaded) {
-      this.#defAllShutterConfig();
-    }
-    this.getGridOptionsInternal();
     this.messageManager.addMessage(`GridSize: rows: ${this.nbRows}, columns: ${this.nbCols}`,HA_ALERT_SUCCESS,'GridSize');
     this.startResizeObserver();
-    console_log('Card connectedCallback End');
+    //console_log('Card connectedCallback End');
   }
   startResizeObserver() {
 
     const onResize = (entries) => {
       /* Things todo when risize is detected */
-      console.log('Card Resize detected',Globals.huiView?.getBoundingClientRect());
+      console.log('#@ Card Resize detected by onResize',Globals.huiView?.getBoundingClientRect());
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
@@ -909,8 +929,9 @@ class EnhancedShutterCardNew extends LitElement{
   }
   // Check the orientation based on the window and div visibility
   disconnectedCallback() {
+    console.log('Card disconnectedCallback Start');
     super.disconnectedCallback();
-    if (this.resizeObserver) this.resizeObserver.disconnect();
+    this.resizeObserver?.disconnect();
   }
 
   checkOrientation(element) {
@@ -947,7 +968,7 @@ class EnhancedShutterCardNew extends LitElement{
   }
 
   render() {
-    console.log('CARD RENDER !!!!!!');
+    console.log('#@ CARD RENDER !!!!!!');
     if (!this.config || !this.hass || !this.isShutterConfigLoaded) {
       console.warn('ShutterCard  .. no content ..');
       return html`Waiting ...`;
@@ -989,7 +1010,7 @@ class EnhancedShutterCardNew extends LitElement{
           </div>
         </ha-card>
       `;
-    console.log('grid-width=',this.gridPixelWidth);
+    console.log('### grid-width=',this.gridPixelWidth);
 
     console.log('Card Render ready');
     return htmlout;
@@ -1033,38 +1054,34 @@ class EnhancedShutterCardNew extends LitElement{
   }
 
   //Section layout : we compute the size of the card. (experimental)
-  getGridOptions(){
-    console_log('Card getGridOptions Start');
+  getGridOptions(text="from External"){
     /**
      * load config is needed.
      */
+    console.log(`getGridOptions ${text}`);
     if (!this.isShutterConfigLoaded)
       this.#defAllShutterConfig();
 
     let options = this.getGridOptionsInternal();
-    console_log('Card getGridOptions End',options);
+    console.log('getGridOptions results: ',options);
     return options;
   }
-
-
-
 
   getGridOptionsInternal(){
 
     const debug=0;
-
-    console_log('Card getGridOptionsInternal');
 
     let cardSize;
     let seperate=0;
 
 
     if (this.config && this.config.entities && this.isShutterConfigLoaded){
+      var tempCardName="";
       cardSize= this.gridSizeCardTitle();
 
       Object.keys(this.localCfgs).forEach(key =>{
         let cfg = this.localCfgs[key];
-
+        if (!tempCardName) tempCardName= cfg.friendlyName();
         let sizeCardTop = this.gridSizeCardTop(cfg);
         cardSize = this.gridAddVertical(cardSize,sizeCardTop);
 
@@ -1087,36 +1104,29 @@ class EnhancedShutterCardNew extends LitElement{
     /*
     *
     * Calculate the number of rows and columns
-    * Based on the card size and the grid size
-    * of the container
-    * Looks not working OK.
-    * Therefore use sizes from calculated cardSize and HA grid sizes
+    * Use sizes from calculated cardSize and HA grid sizes
     */
 
-//  if (gridContainer){
-    if (false){
-      const styles = getComputedStyle(gridContainer);
-      const column = parseFloat(styles.gridTemplateColumns.split(" ", 1)[0]);
-      const row = parseFloat(styles.gridTemplateRows.split(" ", 1)[0]);
-      const column_gap = parseFloat(styles.columnGap);
-      const row_gap = parseFloat(styles.rowGap);
+    this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
+    this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
 
-      this.nbRows= Math.ceil((cardSize.localHeightPx+row_gap)/(row+row_gap));
-      this.nbCols= Math.ceil((cardSize.localWidthPx+column_gap)/(column+column_gap));
-    }
-    else{
-      this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
-      this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
+    const divCard= this.closest('div.card');
+    /* Set CSS variables for number of rows and columns */
+    /* Used in CSS to set sizes */
 
-      console.log('rows,cols',this.nbRows,this.nbCols,cardSize,this.gridPixelWidth,this.gridPixelHeight);
+    if (divCard){
+      divCard.style.setProperty('--row-size',this.nbRows);
+      divCard.style.setProperty('--column-size',this.nbCols);
+    }else{
+      //console.warn('Could not find div.card to set CSS variables');
     }
     return {
       rows: this.nbRows,
-      min_rows: this.nbRows-1,
-      max_rows: this.nbRows+1,
       columns: this.nbCols,
-      min_columns: this.nbCols-1,
-      max_columns: this.nbCols+1,
+//      min_rows: this.nbRows-1,
+//      max_rows: this.nbRows+1,
+//      min_columns: this.nbCols-1,
+//      max_columns: this.nbCols+1,
     };
  }
   gridSizeCardTitle(){
@@ -1886,6 +1896,8 @@ class shutterCfg {
       this.setBatteryEntity(hass,escConfig[CONFIG_BATTERY_ENTITY_ID]);
       this.setSignalEntity(hass,escConfig[CONFIG_SIGNAL_ENTITY_ID]);
 
+      this.debug(!!escConfig[CONFIG_DEBUG]);
+
       this.friendlyName(escConfig[CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || UNKNOWN);
 
       this.invertPercentage(escConfig[CONFIG_INVERT_PCT]);
@@ -2091,6 +2103,9 @@ class shutterCfg {
   friendlyName(value = null){
     return this.#getCfg(CONFIG_NAME,value);
   }
+  debug(value = null){
+    return this.#getCfg(CONFIG_DEBUG,value);
+  }
   invertPercentage(value = null){
     return this.#getCfg(CONFIG_INVERT_PCT,value);
   }
@@ -2220,15 +2235,18 @@ class shutterCfg {
     return IS_VERTICAL.includes(this.unrollUnfoldDirection());
   }
 
-
-  currentPosition(){
-    // returns current position in non-inverted percentage
+  baseCurrentPosition(){
     let position;
     if (this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)){
       position = this.getCoverEntity()?.getCurrentPosition() ?? 0;
     }else{
       position= this.getCoverEntity()?.getState()==SHUTTER_STATE_OPEN ? SHUTTER_OPEN_PCT :  SHUTTER_CLOSED_PCT;
     }
+    return position;
+  }
+
+  currentPosition(){
+    let position = this.baseCurrentPosition();
     position = this.applyInvertPercentageToPosition(position);
     return position;
   }
@@ -2267,10 +2285,16 @@ class shutterCfg {
 
     return setting;
   }
+  applyInvertTest(setting){
+    setting = this.applyInvertOpenClose(setting);
+    //setting = this.applyInvertPercentage(setting);
+    //setting = this.applyInvertDirection(setting);
+
+    return setting;
+  }
   applyInvertDirection(setting){
-    if (this.invertDirection()){
-      setting = Object.keys(INVERT_OPEN_CLOSE).includes(setting) ? INVERT_OPEN_CLOSE[setting] : setting;
-    }
+    if (this.invertDirection()) setting = Object.keys(INVERT_OPEN_CLOSE).includes(setting) ? INVERT_OPEN_CLOSE[setting] : setting;
+
     return setting;
   }
   invertDirection(){
@@ -2432,11 +2456,15 @@ class shutterCfg {
 
         }else{
           let state= this.positionToState(this.applyInvertPercentageToPosition(position));
-          if (state != SHUTTER_STATE_PARTIAL_OPEN){
-            text = this.getLocalize(LOCALIZE_TEXT[(state)]);
-            console.log('positionToText: state:',state,'text:',text, 'position',position);
-          } else{
-            text = position + '%';
+          if (!this.debug()){
+            if (state != SHUTTER_STATE_PARTIAL_OPEN){
+              text = this.getLocalize(LOCALIZE_TEXT[(state)]);
+              //console.log('positionToText: state:',state,'text:',text, 'position',position);
+            } else{
+              text = position + '%';
+            }
+          }else{
+            text = `Card: ${state} (${position}%)\n Dev: ${this.getCoverEntity().getState()} (${this.baseCurrentPosition()}%)`;
           }
         }
       } else {
@@ -2706,8 +2734,8 @@ class htmlCard{
       --esc-buttons-flex-flow: ${!this.cfg.buttonsInRow() ? 'row' : 'column'} wrap;
 
       --esc-movement-overlay-display: ${(escState == SHUTTER_STATE_OPENING || escState == SHUTTER_STATE_CLOSING) ? 'block' : NONE};
-      --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertOpenClose(SHUTTER_STATE_OPENING) ? 'block' : NONE};
-      --esc-movement-overlay-down-display: ${escState == this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSING) ? 'block' : NONE};
+      --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertTest(SHUTTER_STATE_OPENING) ? 'block' : NONE};
+      --esc-movement-overlay-down-display: ${escState == this.cfg.applyInvertTest(SHUTTER_STATE_CLOSING) ? 'block' : NONE};
       --esc-movement-overlay-top: ${this.enhancedShutter.offsetOpenedPx()-7}${UNITY};
       --esc-movement-overlay-height: ${this.enhancedShutter.coverHeightPx() + 7}${UNITY};
 
@@ -2789,7 +2817,7 @@ class htmlCard{
             `:''}
           </div>
           <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
-            <span>${this.positionText}</span>
+            <span style="white-space: pre-line;">${this.positionText}</span>
           </div>
         </div>
     `;
