@@ -31,6 +31,10 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
+### New in version v1.4.0-alpha:
+
+
+---
 ### New in version v1.3.1:
 
 - #### Handling not-found images
