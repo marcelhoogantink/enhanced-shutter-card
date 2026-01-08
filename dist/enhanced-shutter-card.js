@@ -35,21 +35,21 @@ const AUTO_TL = `${AUTO}-${TOP}-${LEFT}`;
 const AUTO_TR = `${AUTO}-${TOP}-${RIGHT}`;
 const AUTO_BL = `${AUTO}-${BOTTOM}-${LEFT}`;
 const AUTO_BR = `${AUTO}-${BOTTOM}-${RIGHT}`;
-//
-//    from https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view
-//    for getLayoutOptions() {
-//      size off cells.
-//      width:
-//         layout: between 80 px and 120 px depending on the screen size
-//      height: 56 px
-//      gap between cells: 8 px
-//
-//    for getGridOptions() (used here)
-//      width:
-//         layout: between 27 px and 40 px depending on the screen size (width for code: size is LayoutWidth/3 )
-//      height: 56px
-//      gap between cells: 8 px
-//*/
+/*
+    from https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view
+    for getLayoutOptions() {
+      size off cells.
+      width:
+         layout: between 80px and 120px depending on the screen size
+      height: 56px
+      gap between cells: 8px
+
+    for getGridOptions() (used here)
+      width:
+         layout: between 27px and 40px depending on the screen size (width for code: size is LayoutWidth/3 )
+      height: 56px
+      gap between cells: 8px
+*/
 const HA_GRID_PX_HEIGHTt = 56;
 const HA_GRID_PX_WIDTH = 24; // beween 17 and 30 ???
 const HA_GRID_PX_GAP = 8;
@@ -209,8 +209,8 @@ const CONFIG_BUTTON_OPENED_HIDE_STATES = 'button_up_hide_states';  // TODO renam
 const CONFIG_BUTTON_CLOSED_HIDE_STATES = 'button_down_hide_states'; // TODO rename down->closed
 
 const DEPRECATED={
-  [CONFIG_INVERT_PCT]: {new: CONFIG_INVERT_PCT_COVER}, // jan 2026
-  [CONFIG_INVERT_OPEN_CLOSE]: {new: CONFIG_INVERT_OPEN_CLOSE_UI}, // jan 2026
+  [CONFIG_INVERT_PCT]: {new: CONFIG_INVERT_PCT_COVER}, // jan 2026 1.4.0-alpha
+  [CONFIG_INVERT_OPEN_CLOSE]: {new: CONFIG_INVERT_OPEN_CLOSE_UI}, // jan 2026 1.4.0-alpha
 };
 const REMOVED={
   [CONFIG_CAN_TILT]: {new: CONFIG_SHOW_TILT},
