@@ -31,8 +31,38 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.4.0-alpha:
+### New in version v1.4.0-beta-1:
 
+This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
+With this changes and new settings all different behavior should be possible to handle.
+
+- #### Improved settings for open/close and percentage setting for controling device invert-settings:
+
+  - ##### invert_percentage_cover (boolean)
+    (from deprecated setting `invert_percentage`)
+    Invert/alter the setting for percentage on device level.
+
+  - ##### invert_open_close_cover (boolean)
+    (new defeniton)
+    Invert/alter the setting for open-close on device level.
+
+  - ##### invert_percentage_ui (boolean)
+    (new defeniton)
+    Invert/alter the setting for percentage on user-interface level.
+
+  - ##### invert_open_close_ui (boolean)
+    (from deprecated setting `invert_open_close`)
+    Invert/alter the setting for open-close on user-interface level.
+    Often used for awnings.
+    <br/>
+
+  See for default and possible settings [in this table](#configuration).
+  With these four options all differnent behavior the different coer-types should be possible to handle
+
+- #### Solved issues:
+
+  - [#123](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/123) Open_close And invert_percentage issue
+  - [#125](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/125) Invert Status does not update image
 
 ---
 ### New in version v1.3.1:
@@ -259,15 +289,17 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 | scale_texts                  | boolean/float | No       | false                                         | Scale the texts according to the window-size (`true`) or scale it with a factor (`0.5` - `2.0`)
 | scale_buttons                | boolean/float | No       | false                                         | Scale the buttons when the windows-image gets smaller then 150px in the direction of the button-placement (`true`), or scale it with a factor (`0.5` - `2.0`).
 | scale_icons                  | boolean/float | No       | true                                          | Scale the icon for battery and signal icons windows-image gets smaller then 150px in the horizonal direction (`true`), or scale it with a factor (`0.5` - `2.0`).
-| title_position               | string        | No       | `top`                                         | Set title on `top` or on `bottom` of the shutter                                                                                                                                                                                                                           | deprecated, use `name_position`
 | name_position                | string        | No       | `top`                                         | Set title/name shutter on `top` or on `bottom` of the shutter image.
 | name_disabled                | boolean       | No       | false                                         | hide title/name of shutter
 | opening_position             | string        | No       | _name_position_                               | set position info of shutter on `top` or `bottom` of the shutter image.
 | opening_disabled             | boolean       | No       | false                                         | hide position info of shutter
 | inline_header                | boolean       | No       | false                                         | place the shutter-header (name and position) in one line.
-| invert_percentage            | boolean       | No       | `false`                                       | Set it to `true` if your shutter is 100% when it is closed, and 0% when it is opened                                                                                                                                                                                       |
-| invert_open_close            | boolean       | No       | `false`                                       | Set it to `true` if your want to invert the `open` and `close` buttons. (for awnings)                                                                                                                                                                                      |
-| can_tilt                     | boolean       | No       | `false`                                       | Set it to `true` if your shutters support tilting.                                                                                                                                                                                                                         | deprecated as of v1.2.0, use `show_tilt` |
+| invert_percentage            | boolean       | No       | `false`                                       | Set it to `true` if your shutter is 100% when it is closed, and 0% when it is opened                                                                                                                                                                                       | deprecated as of 1.4.0, use `invert_percentage_cover` |
+| invert_percentage_ui         | boolean       | No       | `false`                                       | Inverts the percentage on UI-level when set to `true`. Will not change the cover behavior.                                                                                                                                                                                 |
+| invert_percentage_cover      | boolean       | No       | `false`                                       | Inverts the precentage on device-level when set to `true`. Possibly changes to cover behavior.
+| invert_open_close            | boolean       | No       | `false`                                       | Set it to `true` if your want to invert the `open` and `close` buttons. (for awnings)                                                                                                                                                                                      | deprecated as of 1.4.0, use `invert_open_close_ui` |
+| invert_open_close_ui         | boolean       | No       | `false`                                       | Inverts the open-close texts on UI-level when set to `true`. Will not change the cover behavior.
+| invert_open_close_cover      | boolean       | No       | `false`                                       | Inverts the opec-close commands on device-level when set to `true`. Possibly changes to cover behavior.                                                                                                                                                                    |
 | show_tilt                    | boolean       | No       | `true`                                        | Show the `tilt` options and buttons, only active when the shutter supports `tilt`                                                                                                                                                                                          |
 | partial_close_percentage     | int           | No       | `0`                                           | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.                                                                                                                                                       |
 | offset_closed_percentage     | int           | No       | `0`                                           | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.                                                                                                                                                              |
@@ -306,15 +338,17 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 | buttons_position             | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | scale_buttons                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | scale_icons                  | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| title_position               | string      | No       | global item setting, see under _General_ | see under _General_                                                                         | deprecated as of v1.1.0, use `name_position` |
 | name_position                | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | name_disabled                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | opening_position             | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | opening_disabled             | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | inline_header                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_percentage            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_open_close            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| can_tilt                     | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         | deprecated as of v1.2.0, use `show_tilt`     |
+| invert_percentage            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         | deprecated as of 1.4.0
+| invert_percentage_ui         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_percentage_cover      | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_open_close            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         | deprecated as of 1.4.0
+| invert_open_close ui         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_open_close cover      | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | show_tilt                    | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | partial_close_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | offset_closed_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
@@ -331,19 +365,21 @@ _Remark : you can also just give the entity ID (without to specify `entity:`) if
 ### Shutter Presets
 The following `preset_shutter` settings are available:
 
-| **Preset Name** | **Setting**                 | **Value**                 |
-| ---------------- | --------------------------- | ------------------------- |
-| **roller-shutter** | `rotate_slat_image`          | `true`                    |
-| **awning**         | `invert_open_close`          | `true`                    |
-|                   | `shutter_slat_image`         | `esc-awning.png`          |
-|                   | `shutter_slat_bottom_image`  | `esc-awning-bottom.png`   |
-|                   | `bottom_offset_pct`          | `50`                      |
-|                   | `stretch_bottom_image`       | `false`                   |
-| **curtain**        | `closing_direction`          | `right`                   |
-|                   | `shutter_slat_image`         | `esc-curtain.png`         |
-|                   | `shutter_slat_bottom_image`  | `''`                      |
-|                   | `rotate_slat_image`          | `false`                   |
-| **shade**          | `shutter_slat_image`         | `'#00000080'`             |
+| **Preset Name** | **Setting**                    | **Value**                 |
+| ---------------- | ----------------------------- | ------------------------- |
+| **roller-shutter** | `rotate_slat_image`         | `true`                    |
+| **awning**         | `invert_open_close_ui`      | `true`                    |
+|                    | `shutter_slat_image`        | `esc-awning.png`          |
+|                    | `shutter_slat_bottom_image` | `esc-awning-bottom.png`   |
+|                    | `bottom_offset_pct`         | `50`                      |
+|                    | `stretch_bottom_image`      | `false`                   |
+|                    | `closing_direction`         | `down`                    |
+| **curtain**        | `closing_direction`         | `right`                   |
+|                    | `shutter_slat_image`        | `esc-curtain.png`         |
+|                    | `shutter_slat_bottom_image` | `''`                      |
+|                    | `rotate_slat_image`         | `false`                   |
+|                    | `closing_direction`         | `down`                    |
+| **shade**          | `shutter_slat_image`        | `'#00000080'`           |
 
 
 
