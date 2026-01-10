@@ -3,7 +3,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs) [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/marcelhoogantink)
 ---
 
-### Installation:
+## Installation:
 
 Use this button:
 
@@ -64,151 +64,8 @@ With this changes and new settings all different behavior should be possible to 
   - [#123](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/123) Open_close And invert_percentage issue
   - [#125](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/125) Invert Status does not update image
 
----
-### New in version v1.3.1:
+##### For previous releale-changes go to [Previous-release changes](#previous)
 
-- #### Handling not-found images
-  When an image entered in the Card is not found, the default image for the image-type wil be used, and a warning is sent to the console.
-- #### Wrong open/close texts in the position header for awnings.
-  The wrong open/closed/opening/closing texts for awnings are corrected.
-- #### Inactive Buttons improved.
-  When is shutter is (temporary) unavailable the buttons are now still active, so it may trigger the cover to activate.
-- #### battery percentage icon
-  If the battery percentage > 100%, the icon will still be displayed.
-
-- #### Solved issues:
-  - [#115](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/115) shutter-card disappeared
-  - [#117](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/117) Buttons inactive after update
-  - [#118](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/118) Awning problem
-  - [#119](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/119) Fix issue with battery percentage over 100%
-
----
-### New in version v1.3.0:
-
-- #### [BREAKING CHANGES]   <small>*(sorry!!)*</small>
-  - ##### Automatic curtain image setting stops
-    In version 1.2.3, the card automaticly chooses for `esc-curtain.png` for displaying a curtain instead of a cover, when setting `closing-direction` to`left` or `right`. This stops in version 1.3.0 due to the new preset-option `shutter_preset`.
-    Solving this breaking-change starts with adding the setting `shutter_preset = curtain` in your Card-YAML-code.
-    For more inforamtion on this, see this new option below and in the Configuration chapter
-  - ##### Changes in automatic card rescale and fitting
-    The automatic scaling of the card was not very stable and created unpredictable results sometimes. So this is changed.
-    Because of this change cards, might have some size changes, and there is a risc that not all cards still fit in your dashboard unchanged.
-
-- #### New option: [shutter_preset]
-  This version introduces the option `shutter_preset`. Setting this to a type, predefines the Card to display a correct setting of that type.
-  Current types are: `shutter`, `shade`, `curtain` and `awning`.
-  The pre-settings of these shutter_presets can be overridden by or supplemented with other settings.
-  See also the Configuration chapter.
-- #### Image definitions do now accept colors and colorcodes
-  All images settings (except `window_image`) now accept colors and colorcodes besides image-filenames, like `red` or `'#aaf1bb'` like `view_image` already did.
-- #### New option: [invert_open_close].
-  For awnings, a new options is introduced: `invert_open_close` (true/false)  for making the card more logic for this kind of covering. Use `true` for awnings.
-  (This setting is also activated by using a new option `shutter_preset`: `shutter_preset = awning`)
-- #### extending `scale_buttons` and `scale_icons`
-  Extending `scale_buttons` and `scale_iconswith` posibiility to define a scalefactor besides `false` or `true`. Like `scale_buttons: 1.5`
-- #### new option `scale_texts`
-  new option `scale_texts` for scaling tests, options are: `true`, `false` or a factor like `1.5` or `0.7`
-- #### new option `rotate_slat_image`
-  new option `rotate_slat_image` defines whether the `shutter_slat_image` rotates with the set `closing_direction` (`true`) or stays fixed (`false`)
-- #### new option `stretch_bottom_image`
-  new option `stretch_bottom_image` defines whether the `shutter_bottom_image` wil be stretched to the shutter-width (`true`) or will be repeated using fixed image-size (`false`).
-  this streching is only perpendicular to the closing direction.
-- #### Solved issues:
-  - [#52](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/52) [Bug] Icons not scaling, too small to see
-  - [#60](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/60) Title font size
-  - [#88](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/88) Question only
-  - [#91](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/91) Add transparent white Horizontal moving shutters
-  - [#95](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/95) [FEATURE REQUEST] Invert arrow functionality
-  - [#97](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/97) Shutter image horizontal shrink when command buttons are on the left or on the right
-  - [#98](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/98) Invert open/close
-  - [#99](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/99) [Code Share] Really difficult way to get this card to have a control page
-  - [#101](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/101) Awning Buttons & Transparency
-  - [#103](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/103) [Feature Request] Add shade support #103
-  - [#104](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/104) Card as “custom_fields” in a button-card.
-  - [#108](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/108) How disable "partially close" button
-  - [#109](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/109) Dashboard not updating properly. Intermittent incomplete dashboards
-  - [#111](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/111) invert_percentage: true causes appearance of "partial close" button
-  - [#113](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/113) View layout with error: Unknown keyword: [view_layout], check your input!
----
-### New in version v1.2.3:
-
-- #### Enhanced Shutter Card is now part of the default HACS-repositories  :tada: :tada:
-
-- #### Solved ussues:
-  - [#72](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/72) Unable to open/close the shutter in scroll view on mobile.
-  - [#68](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/72) Background colors not working (already solved in v1.2.1)
-
----
-### New in version v1.2.0:
-
-- #### Card funtionality is now controled by the `supported_features` attribute of the shutter.
-  The Card now reads the supported-features attributesof the cover, and acts on it.
-  Therefore the `can_tilt`option is changed into `show_tilt`
-- #### Horizontal moving shutters (left to right, right to left)
-  Horizontal moving shutters are now possible. Add `closing_direction` to your settings, and give it the value `left`, `right` or `down`.
-  Setting `down` is default.
-
-  ![Curtain](Curtain.gif)
-
-  For horizontal moving shutters (curtains), a new image is added: `esc_curtain.png`
-- #### Warnings (unknown/deprected/removed items) while editing the shutters in YAML.
-  To help you with defining your settings, unknown/deprecated/removed messaged are shown when defing your card in YAML.
-- #### can_tilt is deprecated , use show_tilt
-  `can_tilt` option is replace by `show_tilt`, due to the Card is now reading and acting on `supported-features`-attribute of the shutter.
-- #### calculated grid-space for the card (in rows and colums) is displayed while editing the card in yaml.
-  For more control on the size of the Card, the needed Gridsize (rows, columsn) are shown while editing the Card in Yaml.
-  For more information on the Gridsize, see: https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view.
-- #### option `title_position`is removed.
-  after some time `deprecated` this setting is now `removed`,use `name_position`.
-- #### solved issues:
-  - [#59](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/59) Size and Toggle.
-  - [#57](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/57) Stop-button not showing up.
-  - [#56](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/56) Current position of shutter not updated in card with MQTT cover
-  - [#54](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/54) Movement arrow display bug when shutter is in movement
-  - [#49](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/49) Full path option for images
-  - [#48](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/48) 6 buttons on right works inversed and ‘invert_percentage’ true or false has no effect as sliding shutter
-  - [#44](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/44) Vertical space larger than required
-  - [#43](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/43) rotate shutter 90°
-
----
-
-### New in version v1.1.4:
-
-- #### New: Battery and Signal level display
-
-  New settings `battery_entity` and `signal_entity` for displaying battery and signal icon with level-information.
-  New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
-
-- #### Card works now 100% local.
-
-  The card inludes now the lit-libary, no internet-connection needed after downloading.
-
-- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) solved.
-
-  This error is found and removed.
-
-- #### Improved sizing of the Card
-
-  New settings `battery_entity` and `signal_entity` for displaying battery and signal icon with level-information.
-  New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
-  ![image](https://github.com/user-attachments/assets/4c0ad49b-e003-4ca8-a64f-3b1fea6d5b68)
-
-- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist)
-  This bug is found and removed.
-
-- #### Improved sizing of the Card
-  The sizing of the card is further improved. (This can result in little differences in size with previous versions)
-
-### New in version v1.1.3:
-
-- #### New automatic placement of the buttons
-  New automatic placement of the buttons according to Landscape or Portrait format of the visible part of the dashboard. Using the new settings `auto-top-left` (or `auto`), `auto-top-right`, `auto-bottom-left` or `auto-bottom-right` for the optional option `buttons_position`, the card wil change the button positions to top or botton on Portrait and Left or Right in Landscape, automaticly.
-- #### inline_header
-  New setting (`true` of `false`). When set to `true`, the card wil place the Name and Position information in one line, as long as possible. In this mode, only the `opening_position` option will be used for the `bottom`/`top` placement of the full shutter header, the `opening_position`wil be discarded.
-- #### scale_buttons
-  New setting (`true` of `false`). When set to `true` the buttons will be rescaled (smaller) when the windows-image is getting smaller then 150px. The width is taken into account when the resulting button_position is `left` or `right`, the heieght is used when `buttons_position`is `top` or `bottom`. This will work also with the new `auto*` options.
-- #### further improvement of responsiveness.
-  The responsiveness of the card is further improved.
 
 ---
 
@@ -261,7 +118,7 @@ The default map-setting can be found in the Configuration-info below.
 It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is considerd to include a full path.
 And last but not least, the `view_image` and `shutter_slat_image`-settings also accept HTML-color definitions like `red`, `green`, `'#AAFFEE'` or `rgb(255,255,0)` in stead of an image-filename. (The `#` input needs quotes around it in YAML)
 
-## Configuration
+## Configuration {#configuration}
 
 ### General
 
@@ -431,3 +288,151 @@ entities:
     name_position: top
     disable_partial_open_buttons: false
 ```
+
+---
+## Previous release-changes:{#previous}
+---
+### New in version v1.3.1:
+
+- #### Handling not-found images
+  When an image entered in the Card is not found, the default image for the image-type wil be used, and a warning is sent to the console.
+- #### Wrong open/close texts in the position header for awnings.
+  The wrong open/closed/opening/closing texts for awnings are corrected.
+- #### Inactive Buttons improved.
+  When is shutter is (temporary) unavailable the buttons are now still active, so it may trigger the cover to activate.
+- #### battery percentage icon
+  If the battery percentage > 100%, the icon will still be displayed.
+
+- #### Solved issues:
+  - [#115](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/115) shutter-card disappeared
+  - [#117](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/117) Buttons inactive after update
+  - [#118](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/118) Awning problem
+  - [#119](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/119) Fix issue with battery percentage over 100%
+
+---
+### New in version v1.3.0:
+
+- #### [BREAKING CHANGES]   <small>*(sorry!!)*</small>
+  - ##### Automatic curtain image setting stops
+    In version 1.2.3, the card automaticly chooses for `esc-curtain.png` for displaying a curtain instead of a cover, when setting `closing-direction` to`left` or `right`. This stops in version 1.3.0 due to the new preset-option `shutter_preset`.
+    Solving this breaking-change starts with adding the setting `shutter_preset = curtain` in your Card-YAML-code.
+    For more inforamtion on this, see this new option below and in the Configuration chapter
+  - ##### Changes in automatic card rescale and fitting
+    The automatic scaling of the card was not very stable and created unpredictable results sometimes. So this is changed.
+    Because of this change cards, might have some size changes, and there is a risc that not all cards still fit in your dashboard unchanged.
+
+- #### New option: [shutter_preset]
+  This version introduces the option `shutter_preset`. Setting this to a type, predefines the Card to display a correct setting of that type.
+  Current types are: `shutter`, `shade`, `curtain` and `awning`.
+  The pre-settings of these shutter_presets can be overridden by or supplemented with other settings.
+  See also the Configuration chapter.
+- #### Image definitions do now accept colors and colorcodes
+  All images settings (except `window_image`) now accept colors and colorcodes besides image-filenames, like `red` or `'#aaf1bb'` like `view_image` already did.
+- #### New option: [invert_open_close].
+  For awnings, a new options is introduced: `invert_open_close` (true/false)  for making the card more logic for this kind of covering. Use `true` for awnings.
+  (This setting is also activated by using a new option `shutter_preset`: `shutter_preset = awning`)
+- #### extending `scale_buttons` and `scale_icons`
+  Extending `scale_buttons` and `scale_iconswith` posibiility to define a scalefactor besides `false` or `true`. Like `scale_buttons: 1.5`
+- #### new option `scale_texts`
+  new option `scale_texts` for scaling tests, options are: `true`, `false` or a factor like `1.5` or `0.7`
+- #### new option `rotate_slat_image`
+  new option `rotate_slat_image` defines whether the `shutter_slat_image` rotates with the set `closing_direction` (`true`) or stays fixed (`false`)
+- #### new option `stretch_bottom_image`
+  new option `stretch_bottom_image` defines whether the `shutter_bottom_image` wil be stretched to the shutter-width (`true`) or will be repeated using fixed image-size (`false`).
+  this streching is only perpendicular to the closing direction.
+- #### Solved issues:
+  - [#52](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/52) [Bug] Icons not scaling, too small to see
+  - [#60](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/60) Title font size
+  - [#88](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/88) Question only
+  - [#91](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/91) Add transparent white Horizontal moving shutters
+  - [#95](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/95) [FEATURE REQUEST] Invert arrow functionality
+  - [#97](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/97) Shutter image horizontal shrink when command buttons are on the left or on the right
+  - [#98](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/98) Invert open/close
+  - [#99](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/99) [Code Share] Really difficult way to get this card to have a control page
+  - [#101](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/101) Awning Buttons & Transparency
+  - [#103](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/103) [Feature Request] Add shade support #103
+  - [#104](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/104) Card as “custom_fields” in a button-card.
+  - [#108](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/108) How disable "partially close" button
+  - [#109](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/109) Dashboard not updating properly. Intermittent incomplete dashboards
+  - [#111](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/111) invert_percentage: true causes appearance of "partial close" button
+  - [#113](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/113) View layout with error: Unknown keyword: [view_layout], check your input!
+---
+### New in version v1.2.3:
+
+- #### Enhanced Shutter Card is now part of the default HACS-repositories  :tada: :tada:
+
+- #### Solved ussues:
+  - [#72](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/72) Unable to open/close the shutter in scroll view on mobile.
+  - [#68](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/72) Background colors not working (already solved in v1.2.1)
+
+---
+### New in version v1.2.0:
+
+- #### Card funtionality is now controled by the `supported_features` attribute of the shutter.
+  The Card now reads the supported-features attributesof the cover, and acts on it.
+  Therefore the `can_tilt`option is changed into `show_tilt`
+- #### Horizontal moving shutters (left to right, right to left)
+  Horizontal moving shutters are now possible. Add `closing_direction` to your settings, and give it the value `left`, `right` or `down`.
+  Setting `down` is default.
+
+  ![Curtain](Curtain.gif)
+
+  For horizontal moving shutters (curtains), a new image is added: `esc_curtain.png`
+- #### Warnings (unknown/deprected/removed items) while editing the shutters in YAML.
+  To help you with defining your settings, unknown/deprecated/removed messaged are shown when defing your card in YAML.
+- #### can_tilt is deprecated , use show_tilt
+  `can_tilt` option is replace by `show_tilt`, due to the Card is now reading and acting on `supported-features`-attribute of the shutter.
+- #### calculated grid-space for the card (in rows and colums) is displayed while editing the card in yaml.
+  For more control on the size of the Card, the needed Gridsize (rows, columsn) are shown while editing the Card in Yaml.
+  For more information on the Gridsize, see: https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view.
+- #### option `title_position`is removed.
+  after some time `deprecated` this setting is now `removed`,use `name_position`.
+- #### solved issues:
+  - [#59](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/59) Size and Toggle.
+  - [#57](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/57) Stop-button not showing up.
+  - [#56](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/56) Current position of shutter not updated in card with MQTT cover
+  - [#54](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/54) Movement arrow display bug when shutter is in movement
+  - [#49](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/49) Full path option for images
+  - [#48](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/48) 6 buttons on right works inversed and ‘invert_percentage’ true or false has no effect as sliding shutter
+  - [#44](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/44) Vertical space larger than required
+  - [#43](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/43) rotate shutter 90°
+
+---
+
+### New in version v1.1.4:
+
+- #### New: Battery and Signal level display
+
+  New settings `battery_entity` and `signal_entity` for displaying battery and signal icon with level-information.
+  New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
+
+- #### Card works now 100% local.
+
+  The card inludes now the lit-libary, no internet-connection needed after downloading.
+
+- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist) solved.
+
+  This error is found and removed.
+
+- #### Improved sizing of the Card
+
+  New settings `battery_entity` and `signal_entity` for displaying battery and signal icon with level-information.
+  New settings `scale_icons` for activating scaling of the icons when the image is made smaller.
+  ![image](https://github.com/user-attachments/assets/4c0ad49b-e003-4ca8-a64f-3b1fea6d5b68)
+
+- #### Solved [Error#46 ](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/46) (Custom element does not exist)
+  This bug is found and removed.
+
+- #### Improved sizing of the Card
+  The sizing of the card is further improved. (This can result in little differences in size with previous versions)
+
+### New in version v1.1.3:
+
+- #### New automatic placement of the buttons
+  New automatic placement of the buttons according to Landscape or Portrait format of the visible part of the dashboard. Using the new settings `auto-top-left` (or `auto`), `auto-top-right`, `auto-bottom-left` or `auto-bottom-right` for the optional option `buttons_position`, the card wil change the button positions to top or botton on Portrait and Left or Right in Landscape, automaticly.
+- #### inline_header
+  New setting (`true` of `false`). When set to `true`, the card wil place the Name and Position information in one line, as long as possible. In this mode, only the `opening_position` option will be used for the `bottom`/`top` placement of the full shutter header, the `opening_position`wil be discarded.
+- #### scale_buttons
+  New setting (`true` of `false`). When set to `true` the buttons will be rescaled (smaller) when the windows-image is getting smaller then 150px. The width is taken into account when the resulting button_position is `left` or `right`, the heieght is used when `buttons_position`is `top` or `bottom`. This will work also with the new `auto*` options.
+- #### further improvement of responsiveness.
+  The responsiveness of the card is further improved.
