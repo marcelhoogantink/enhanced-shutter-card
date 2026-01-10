@@ -64,7 +64,8 @@ With this changes and new settings all different behavior should be possible to 
   - [#123](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/123) Open_close And invert_percentage issue
   - [#125](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/125) Invert Status does not update image
 
-##### For previous releale-changes go to [Previous-release changes](#previous)
+---
+##### For previous release-changes go to [Previous-release changes](#previous)
 
 
 ---
