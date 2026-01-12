@@ -2282,11 +2282,11 @@ class shutterCfg {
     return position;
   }
   applyInvertToPosition(position){
-    if (this.invertPercentageCover()) this.invertPosition(position);
+    if (this.invertPercentageCover()) position= this.invertPosition(position);
     return position;
   }
   applyInvertToUiPosition(position){
-    if (this.invertPercentageUi()) this.invertPosition(position);
+    if (this.invertPercentageUi()) position = this.invertPosition(position);
     return position;
   }
   invertPosition(position){
@@ -2294,6 +2294,14 @@ class shutterCfg {
     return position;
   }
 
+  applyInvertForPartail(setting,debug=false){
+    if (debug){
+      console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
+      console.log('applyInvertForPartail start:',setting);
+    }
+    setting = this.applyInvertOpenClose(setting,debug);
+    return setting;
+  }
   applyInvertForPositionToText(setting,debug=false){
     if (debug){
       console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
