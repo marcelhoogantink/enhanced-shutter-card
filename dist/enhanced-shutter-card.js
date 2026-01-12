@@ -1706,7 +1706,7 @@ class EnhancedShutter extends LitElement
   defScreenPositionFromCurrentPosition(currentPosition=this.cfg.currentDevicePosition()) { //ui
 
     let visiblePosition = this.cfg.visiblePosition(currentPosition);
-    let screenPosition = this.offsetOpenedPx() + (this.coverSizeMovingDirectionPx() * (100-visiblePosition) / 100) ;
+    let screenPosition = this.offsetOpenedPx() + (this.coverSizeMovingDirectionPx() * (this.cfg.invertPosition(visiblePosition)) / 100) ;
     return screenPosition;
 
   }
@@ -1770,7 +1770,7 @@ class EnhancedShutter extends LitElement
   }
 
   getShutterPosFromScreenPos(screenPosition){
-    let shutterPosition = SHUTTER_OPEN_PCT - Math.round((screenPosition - this.offsetOpenedPx()) * (100-this.cfg.offset()) / this.coverSizeMovingDirectionPx());
+    let shutterPosition = SHUTTER_OPEN_PCT - Math.round((screenPosition - this.offsetOpenedPx()) * (this.cfg.invertPosition(this.cfg.offset())) / this.coverSizeMovingDirectionPx());
     return shutterPosition;
   }
 
@@ -2153,10 +2153,10 @@ class shutterCfg {
   partial(value = null){
     // partial value should be entered in the defined shutter-percentage setting (inverted or not)
     // and is stored in the config as non-inverted.
-    if (value !== null) value =this.applyInvertToPosition(value);
+    //if (value !== null) value =this.applyInvertToPosition(value);
     var partial = this.#getCfg(CONFIG_PARTIAL_CLOSE_PCT,value);
+    partial = this.invertPosition(partial);
     if (partial == SHUTTER_OPEN_PCT ||  partial == SHUTTER_CLOSED_PCT) partial = 0;
-
     // only when cover can set position
     return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial : 0;
   }
@@ -2282,11 +2282,15 @@ class shutterCfg {
     return position;
   }
   applyInvertToPosition(position){
-    if (this.invertPercentageCover()) position = 100-position;
+    if (this.invertPercentageCover()) this.invertPosition(position);
     return position;
   }
   applyInvertToUiPosition(position){
-    if (this.invertPercentageUi()) position = 100-position;
+    if (this.invertPercentageUi()) this.invertPosition(position);
+    return position;
+  }
+  invertPosition(position){
+    position = 100-position;
     return position;
   }
 
@@ -2590,7 +2594,7 @@ class shutterCfg {
     const offset =this.offset();
 
     const visiblePosition = (offset)
-      ? Math.max(0, Math.round((currentPosition - offset)     / (100-offset) * 100 ))
+      ? Math.max(0, Math.round((currentPosition - offset)     / (this.invertPosition(offset)) * 100 ))
       : currentPosition;
     return visiblePosition;
   }
