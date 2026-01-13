@@ -1829,6 +1829,7 @@ class EnhancedShutter extends LitElement
     this.action='user-drag';
     this.screenPosition = this.getScreenPosFromPickPoint(this.getPoint(event)); // this.screenPosition triggers refresh
     let pointedShutterPosition = this.getShutterPosFromScreenPos(this.screenPosition);
+    pointedShutterPosition = this.cfg.applyInvertToUiPosition(pointedShutterPosition); // ui
     this.positionText = this.cfg.computePositionText(pointedShutterPosition);
 
   };
