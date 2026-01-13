@@ -394,6 +394,7 @@ const ESC_PRESET = {
   ,
   [ESC_AWNING]: {
     [CONFIG_INVERT_OPEN_CLOSE_UI]: true,
+    [CONFIG_INVERT_PCT_UI]: true,
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-awning.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'esc-awning-bottom.png',
     [CONFIG_ROTATE_MAIN_SHUTTER_IMAGE]: true,
@@ -2294,14 +2295,6 @@ class shutterCfg {
     return position;
   }
 
-  applyInvertForPartail(setting,debug=false){
-    if (debug){
-      console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
-      console.log('applyInvertForPartail start:',setting);
-    }
-    setting = this.applyInvertOpenClose(setting,debug);
-    return setting;
-  }
   applyInvertForPositionToText(setting,debug=false){
     if (debug){
       console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
@@ -2561,7 +2554,7 @@ class shutterCfg {
           text = position + '%';
 
         }else{
-          let state= this.positionToState(this.applyInvertToPosition(position));
+          let state= this.positionToState(this.applyInvertToUiPosition(position));
           if (!this.debug()){
             if (state != SHUTTER_STATE_PARTIAL_OPEN){
               text = this.getLocalize(LOCALIZE_TEXT[(state)]);
@@ -2569,7 +2562,7 @@ class shutterCfg {
               text = position + '%';
             }
           }else{
-            text = `Card: ${state} (${position}%)\n Dev: ${this.getCoverEntity().getState()} (${this.currentDevicePosition()}%)`;
+            text = `Dev: ${this.getCoverEntity().getState()} (${this.currentDevicePosition()}%)\nCard: ${state} (${position}%)`;
           }
         }
       } else {
@@ -2986,7 +2979,7 @@ class htmlCard{
       ${this.cfg.partial()  /* TODO localize texts */
         ? html`
           <ha-icon-button
-            label="Partially close (${SHUTTER_OPEN_PCT- this.cfg.partial()}% closed)"
+            label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
             .disabled=${this.cfg.disabledGlobaly()}
             @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.partial())}" >
             <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
@@ -3063,19 +3056,19 @@ class htmlCard{
         ? html`
           <div class="${ESC_CLASS_BUTTONS}">
             <ha-icon-button
-              label="Fully opened"
+              label="Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_OPEN)}"
               .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonUpDisabled()}
               @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, SHUTTER_OPEN_PCT)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z">
             </ha-icon-button>
             <ha-icon-button
-              label="Partially close (${25}% closed)"
+              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${25}%)"
               .disabled=${this.cfg.disabledGlobaly()}
               @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 75)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z">
             </ha-icon-button>
             <ha-icon-button
-              label="Partially close (${50}% closed)"
+              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${50}%)"
               .disabled=${this.cfg.disabledGlobaly()}
               @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 50)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z">
@@ -3083,19 +3076,19 @@ class htmlCard{
           </div>
           <div class="${ESC_CLASS_BUTTONS}">
             <ha-icon-button
-              label="Partially close (${75}% closed)"
+              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${75}%)"
               .disabled=${this.cfg.disabledGlobaly()}
               @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 25)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z">
             </ha-icon-button>
             <ha-icon-button
-              label="Partially close (${90}% closed)"
+              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${90}%)"
               .disabled=${this.cfg.disabledGlobaly()}
               @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 10)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z">
             </ha-icon-button>
             <ha-icon-button
-              label="Fully closed"
+              label="Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)}"
               .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonDownDisabled()}
               @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, SHUTTER_CLOSED_PCT)}
               path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z">
