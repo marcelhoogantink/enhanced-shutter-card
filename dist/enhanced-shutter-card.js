@@ -1134,7 +1134,7 @@ class EnhancedShutterCardNew extends LitElement{
       divCard.style.setProperty('--row-size',this.nbRows);
       divCard.style.setProperty('--column-size',this.nbCols);
     }else{
-      console.warn('Could not find div.card to set CSS variables');
+      console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
     }
     return {
       rows: this.nbRows,
