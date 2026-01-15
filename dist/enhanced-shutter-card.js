@@ -2597,14 +2597,6 @@ class shutterCfg {
   visiblePosition(currentPosition) {
     // compute visible position from current position and offset
     const offset =this.offset();
-//    let visiblePosition;
-
-//    if (offset){
-//      let val = Math.round((currentPosition - offset)     / (this.invertPosition(offset)) * 100 )
-//      visiblePosition = Math.max(0, val);
-//   }else{
-//      visiblePosition = currentPosition;
-//    }
     const visiblePosition = (offset)
       ? Math.max(0, Math.round((currentPosition - offset)     / (this.invertPosition(offset)) * 100 ))
       : currentPosition;
