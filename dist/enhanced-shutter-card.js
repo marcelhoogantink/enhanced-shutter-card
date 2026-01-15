@@ -2594,12 +2594,12 @@ class shutterCfg {
     }
     return positionText;
   }
-  visiblePosition(currentPosition) {
+  visiblePosition(currentDevicePosition) {
     // compute visible position from current position and offset
     const offset =this.offset();
     const visiblePosition = (offset)
-      ? Math.max(0, Math.round((currentPosition - offset)     / (this.invertPosition(offset)) * 100 ))
-      : currentPosition;
+      ? Math.max(0, Math.round((currentDevicePosition - offset)     / (this.invertPosition(offset)) * 100 ))
+      : currentDevicePosition;
     return visiblePosition;
   }
   coverIsOpen(){
