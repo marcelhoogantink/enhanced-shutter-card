@@ -1,5 +1,5 @@
 
-const VERSION = 'v1.4.0-beta.1';
+const VERSION = 'v1.4.0-beta.2';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
@@ -1704,9 +1704,9 @@ class EnhancedShutter extends LitElement
   }
 
 
-  defScreenPositionFromCurrentPosition(currentPosition=this.cfg.currentDevicePosition()) { //ui
+  defScreenPositionFromCurrentPosition(currentDevicePosition=this.cfg.currentDevicePosition()) { //ui
 
-    let visiblePosition = this.cfg.visiblePosition(currentPosition);
+    let visiblePosition = this.cfg.visiblePosition(currentDevicePosition);
     let screenPosition = this.offsetOpenedPx() + (this.coverSizeMovingDirectionPx() * (this.cfg.invertPosition(visiblePosition)) / 100) ;
     return screenPosition;
 
@@ -1829,7 +1829,7 @@ class EnhancedShutter extends LitElement
     this.action='user-drag';
     this.screenPosition = this.getScreenPosFromPickPoint(this.getPoint(event)); // this.screenPosition triggers refresh
     let pointedShutterPosition = this.getShutterPosFromScreenPos(this.screenPosition);
-    pointedShutterPosition = this.cfg.applyInvertToUiPosition(pointedShutterPosition); // ui
+
     this.positionText = this.cfg.computePositionText(pointedShutterPosition);
 
   };
@@ -2550,6 +2550,7 @@ class shutterCfg {
   positionToText(position){
     let text='';
     if (this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)) {
+      // position support
       if (typeof position === 'number') {
         if (this.alwaysPercentage()) {
           text = position + '%';
@@ -2570,6 +2571,7 @@ class shutterCfg {
         text = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
       }
     }else{
+      // no position support, so only open/closed
       if (this.applyInvertToPosition(position) > 50 ) {
         text = this.getLocalize(LOCALIZE_TEXT[this.applyInvertForPositionToText(SHUTTER_STATE_OPEN)]);
       } else {
@@ -2578,15 +2580,16 @@ class shutterCfg {
     }
     return text;
   }
-  computePositionText(currentUiPosition =this.currentUiPosition()) {
+  computePositionText(currentDevicePosition =this.currentDevicePosition()) {
     let positionText;
     if (NOT_KNOWN.includes(this.getCoverEntity().getState())){
       positionText = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
     }else{
-      const displayPosition = this.visiblePosition(currentUiPosition);
+      let displayPosition = this.visiblePosition(currentDevicePosition);
+      displayPosition = this.applyInvertToUiPosition(displayPosition);
       positionText = this.positionToText(displayPosition);
       if (this.offset()>0 && this.offset()<100) {
-        positionText += ` (${this.applyInvertToPosition(currentUiPosition)}%)`;
+        positionText += ` (${this.applyInvertToUiPosition(currentDevicePosition)}%)`;
       }
     }
     return positionText;
@@ -2594,7 +2597,14 @@ class shutterCfg {
   visiblePosition(currentPosition) {
     // compute visible position from current position and offset
     const offset =this.offset();
+//    let visiblePosition;
 
+//    if (offset){
+//      let val = Math.round((currentPosition - offset)     / (this.invertPosition(offset)) * 100 )
+//      visiblePosition = Math.max(0, val);
+//   }else{
+//      visiblePosition = currentPosition;
+//    }
     const visiblePosition = (offset)
       ? Math.max(0, Math.round((currentPosition - offset)     / (this.invertPosition(offset)) * 100 ))
       : currentPosition;
