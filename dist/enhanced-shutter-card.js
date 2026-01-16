@@ -1386,7 +1386,7 @@ class EnhancedShutter extends LitElement
   shouldUpdate(changedProperties)
   {
     changedProperties.forEach((oldValue, propName) => {
-      console_log(`Shutter shouldUpdate, Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
+      //console_log(`Shutter shouldUpdate, Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
     });
     return this.escImagesLoaded?true:false;
   }
@@ -1470,7 +1470,7 @@ class EnhancedShutter extends LitElement
 
     let htmlParts = new htmlCard(this,positionText);
 
-    console_log('Shutter Render ready');
+    //console_log('Shutter Render ready');
     return html`
       <div
         class=${ESC_CLASS_SHUTTER}
@@ -1771,7 +1771,7 @@ class EnhancedShutter extends LitElement
   }
 
   getShutterPosFromScreenPos(screenPosition){
-    let shutterPosition = SHUTTER_OPEN_PCT - Math.round((screenPosition - this.offsetOpenedPx()) * (this.cfg.invertPosition(this.cfg.offset())) / this.coverSizeMovingDirectionPx());
+    let shutterPosition = SHUTTER_OPEN_PCT - Math.round((screenPosition - this.offsetOpenedPx()) * (this.cfg.offset()) / this.coverSizeMovingDirectionPx());
     return shutterPosition;
   }
 
@@ -1831,6 +1831,7 @@ class EnhancedShutter extends LitElement
     let pointedShutterPosition = this.getShutterPosFromScreenPos(this.screenPosition);
 
     this.positionText = this.cfg.computePositionText(pointedShutterPosition);
+    console.log('mouseMove: screenPosition:',this.screenPosition,'shutterPosition:',pointedShutterPosition,'positionText:',this.positionText);
 
   };
 
@@ -2157,12 +2158,19 @@ class shutterCfg {
     // and is stored in the config as non-inverted.
     //if (value !== null) value =this.applyInvertToPosition(value);
     var partial = this.#getCfg(CONFIG_PARTIAL_CLOSE_PCT,value);
-    partial = this.invertPosition(partial);
     if (partial == SHUTTER_OPEN_PCT ||  partial == SHUTTER_CLOSED_PCT) partial = 0;
+    partial = this.invertPosition(partial);
     // only when cover can set position
     return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial : 0;
   }
   offset(value = null){
+    var offset = this.#getCfg(CONFIG_OFFSET_IS_CLOSED_PCT,value);
+    if (offset == SHUTTER_OPEN_PCT ||  offset == SHUTTER_CLOSED_PCT) offset = 0;
+    offset = this.invertPosition(offset);
+    // only when cover can set position
+    return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? offset : 0;
+  }
+  offset_old(value = null){
     if (value !== null && value !=0) value =this.applyInvertToPosition(value);
     return this.#getCfg(CONFIG_OFFSET_IS_CLOSED_PCT,value);
   }
@@ -2597,9 +2605,12 @@ class shutterCfg {
   visiblePosition(currentDevicePosition) {
     // compute visible position from current position and offset
     const offset =this.offset();
-    const visiblePosition = (offset)
-      ? Math.max(0, Math.round((currentDevicePosition - offset)     / (this.invertPosition(offset)) * 100 ))
-      : currentDevicePosition;
+    var visiblePosition;
+    if (offset>0 && offset<100) {
+      visiblePosition = Math.max(0, Math.round((currentDevicePosition - this.invertPosition(offset))     / offset * 100 ));
+    }else{
+      visiblePosition = currentDevicePosition;
+    }
     return visiblePosition;
   }
   coverIsOpen(){
@@ -3564,7 +3575,7 @@ function findParentNode(node, selector) {
 
 }
 function console_log(...args){
-  if (VERSION.indexOf('b') > 0){
+  if (VERSION.indexOf('b') > 0 && DEBUG){
     console.log(formatDate("HH:mm:ss.SSS"),...args);
   }
 }
