@@ -1265,14 +1265,14 @@ class EnhancedShutterCardNew extends LitElement{
     /*
     * size tilt-buttons
     */
-    if (cfg.showTilt() || cfg.partial()) {
+    if (cfg.showTilt() || cfg.partialActive()) {
       if (cfg.buttonsInRow()){
         if  (cfg.showTilt()) localHeightPx+=haButtonSize*2;
-        if  (cfg.partial())  localHeightPx+=haButtonSize;
+        if  (cfg.partialActive())  localHeightPx+=haButtonSize;
         localWidthPx += haButtonSize;
       }else{
         if  (cfg.showTilt()) localWidthPx+=haButtonSize*2;
-        if  (cfg.partial())  localWidthPx+=haButtonSize;
+        if  (cfg.partialActive())  localWidthPx+=haButtonSize;
         localHeightPx = haButtonSize;
       }
     }
@@ -2170,6 +2170,13 @@ class shutterCfg {
     // only when cover can set position
     return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? offset : 0;
   }
+  partialActive(){
+    return this.partial() !=SHUTTER_OPEN_PCT && this.partial() != SHUTTER_CLOSED_PCT;
+  }
+  offsetActive(){
+    return this.offset() !=SHUTTER_OPEN_PCT && this.offset() != SHUTTER_CLOSED_PCT;
+  }
+
   offset_old(value = null){
     if (value !== null && value !=0) value =this.applyInvertToPosition(value);
     return this.#getCfg(CONFIG_OFFSET_IS_CLOSED_PCT,value);
@@ -2467,7 +2474,7 @@ class shutterCfg {
   }
 
   buttonsLeftActive(){
-    if (this.disableStandardButtons() && !this.showTilt() && !this.partial())
+    if (this.disableStandardButtons() && !this.showTilt() && !this.partialActive())
       return false;
     else
       return true;
@@ -2596,7 +2603,7 @@ class shutterCfg {
       let displayPosition = this.visiblePosition(currentDevicePosition);
       displayPosition = this.applyInvertToUiPosition(displayPosition);
       positionText = this.positionToText(displayPosition);
-      if (this.offset()>0 && this.offset()<100) {
+      if (this.offsetActive()) {
         positionText += ` (${this.applyInvertToUiPosition(currentDevicePosition)}%)`;
       }
     }
@@ -2604,9 +2611,9 @@ class shutterCfg {
   }
   visiblePosition(currentDevicePosition) {
     // compute visible position from current position and offset
-    const offset =this.offset();
     var visiblePosition;
-    if (offset>0 && offset<100) {
+    if (this.offsetActive()) {
+      const offset =this.offset();
       visiblePosition = Math.max(0, Math.round((currentDevicePosition - this.invertPosition(offset))     / offset * 100 ));
     }else{
       visiblePosition = currentDevicePosition;
@@ -2990,7 +2997,7 @@ class htmlCard{
   }
   showButtonPartial(){
     return html`
-      ${this.cfg.partial()  /* TODO localize texts */
+      ${this.cfg.partialActive()  /* TODO localize texts */
         ? html`
           <ha-icon-button
             label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
@@ -3048,7 +3055,7 @@ class htmlCard{
             <div class="${ESC_CLASS_SELECTOR_SLIDE_MAIN}"></div>
             <div class="${ESC_CLASS_SELECTOR_SLIDE_EDGE}"></div>
           </div>
-          ${this.cfg.partial() && !this.cfg.offset() //  show partial only if no offset is defined
+          ${this.cfg.partialActive()  //  show partial only if no offset is defined
             ? html`<div class="${ESC_CLASS_SELECTOR_PARTIAL}"></div>`
             : ''}
           <div class="${ESC_CLASS_MOVEMENT_OVERLAY}">
