@@ -3072,6 +3072,7 @@ class htmlCard{
       </div>
     `;
   }
+
   showRightButtons(){
 
     const icons= {
@@ -3091,53 +3092,56 @@ class htmlCard{
       4: 10,
       5: SHUTTER_CLOSED_PCT,
     }
+
+    const pointer={
+      0: 0,
+      1: 1,
+      2: 1,
+      3: 1,
+      4: 1,
+      5: 2,
+    };
+
+    const labels={
+      0: `Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_OPEN)}`,
+      1: `Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[1])}% )`,
+      2: `Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[2])}% )`,
+      3: `Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[3])}% )`,
+      4: `Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[4])}% )`,
+      5: `Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)}`,
+    };
+
+    const disabled ={
+      0: this.cfg.disabledGlobaly() || this.cfg.coverButtonUpDisabled(),
+      1: this.cfg.disabledGlobaly(),
+      2: this.cfg.disabledGlobaly() || this.cfg.coverButtonDownDisabled(),
+    };
+    const click ={
+      0: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[0]),
+      1: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[1]),
+      2: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[2]),
+      3: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[3]),
+      4: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[4]),
+      5: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[5]),
+    }
+
     return html`
-      ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons() /* TODO localize texts */
+      ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons()
         ? html`
-          <div class="${ESC_CLASS_BUTTONS}">
-            <ha-icon-button
-              label="Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_OPEN)}"
-              .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonUpDisabled()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[0])}
-              path = ${icons[0]}>
-            </ha-icon-button>
-            <ha-icon-button
-              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${this.cfg.invertPosition(pct[1])}%)"
-              .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[1])}
-              path = ${icons[1]}>
-            </ha-icon-button>
-            <ha-icon-button
-              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${this.cfg.invertPosition(pct[2])}%)"
-              .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[2])}
-              path = ${icons[2]}>
-            </ha-icon-button>
-          </div>
-          <div class="${ESC_CLASS_BUTTONS}">
-            <ha-icon-button
-              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${this.cfg.invertPosition(pct[3])}%)"
-              .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[3])}
-              path = ${icons[3]}>
-            </ha-icon-button>
-            <ha-icon-button
-              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${this.cfg.invertPosition(pct[4])}%)"
-              .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[4])}
-              path = ${icons[4]}>
-            </ha-icon-button>
-            <ha-icon-button
-              label="Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)}"
-              .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonDownDisabled()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[5])}
-              path = ${icons[5]}>
-            </ha-icon-button>
-          </div>
-        `
-        : html`
-        <div class='blankDiv'></div>
-        `
+            ${[0, 1, 2].map(i => html`
+              <div class="${ESC_CLASS_BUTTONS}">
+                ${[i * 3, i * 3 + 1, i * 3 + 2].map(j => html`
+                  <ha-icon-button
+                    label=${labels[j]}
+                    .disabled=${disabled[pointer[j]]}
+                    @click=${click[j]}
+                    path=${icons[j]}>
+                  </ha-icon-button>
+                `)}
+              </div>
+            `)}
+          `
+        : html`<div class='blankDiv'></div>`
       }
     `;
   }
