@@ -2612,12 +2612,13 @@ class shutterCfg {
   visiblePosition(currentDevicePosition) {
     // compute visible position from current position and offset
     var visiblePosition;
+    const offset =this.offset();
     if (this.offsetActive()) {
-      const offset =this.offset();
       visiblePosition = Math.max(0, Math.round((currentDevicePosition - this.invertPosition(offset))     / offset * 100 ));
     }else{
       visiblePosition = currentDevicePosition;
     }
+    console.log(`visiblePosition: currentDevicePosition=${currentDevicePosition} offset=${offset} => visiblePosition=${visiblePosition} (${this.friendlyName()})`);
     return visiblePosition;
   }
   coverIsOpen(){
@@ -3072,6 +3073,24 @@ class htmlCard{
     `;
   }
   showRightButtons(){
+
+    const icons= {
+      0: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z",
+      1: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z",
+      2: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z",
+      3: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z",
+      4: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z",
+      5: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z",
+
+    }
+    const pct= {
+      0: SHUTTER_OPEN_PCT,
+      1: 75,
+      2: 50,
+      3: 25,
+      4: 10,
+      5: SHUTTER_CLOSED_PCT,
+    }
     return html`
       ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons() /* TODO localize texts */
         ? html`
@@ -3079,46 +3098,47 @@ class htmlCard{
             <ha-icon-button
               label="Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_OPEN)}"
               .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonUpDisabled()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, SHUTTER_OPEN_PCT)}
-              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z">
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[0])}
+              path = ${icons[0]}>
             </ha-icon-button>
             <ha-icon-button
-              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${25}%)"
+              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${this.cfg.invertPosition(pct[1])}%)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 75)}
-              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z">
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[1])}
+              path = ${icons[1]}>
             </ha-icon-button>
             <ha-icon-button
-              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${50}%)"
+              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${this.cfg.invertPosition(pct[2])}%)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 50)}
-              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z">
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[2])}
+              path = ${icons[2]}>
             </ha-icon-button>
           </div>
           <div class="${ESC_CLASS_BUTTONS}">
             <ha-icon-button
-              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${75}%)"
+              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${this.cfg.invertPosition(pct[3])}%)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 25)}
-              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z">
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[3])}
+              path = ${icons[3]}>
             </ha-icon-button>
             <ha-icon-button
-              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${90}%)"
+              label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${this.cfg.invertPosition(pct[4])}%)"
               .disabled=${this.cfg.disabledGlobaly()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, 10)}
-              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z">
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[4])}
+              path = ${icons[4]}>
             </ha-icon-button>
             <ha-icon-button
               label="Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)}"
               .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonDownDisabled()}
-              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, SHUTTER_CLOSED_PCT)}
-              path="M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z">
+              @click=${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[5])}
+              path = ${icons[5]}>
             </ha-icon-button>
           </div>
         `
         : html`
         <div class='blankDiv'></div>
-      `}
+        `
+      }
     `;
   }
 }
