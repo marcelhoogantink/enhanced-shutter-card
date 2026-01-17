@@ -35,6 +35,9 @@ Thank you !
 
 This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
 With this changes and new settings all different behavior should be possible to handle.
+It is possible that your cover changes its hehavior with this release. As I do just have one type of cover, I cannot check type I do not have.
+If your cover changed its behavior with this release, you need to play with the four settings below to get te wanted behavior.
+When you do not get it done, please raise an issue for it on Github.
 
 - #### Improved settings for open/close and percentage setting for controling device invert-settings:
 
@@ -57,7 +60,7 @@ With this changes and new settings all different behavior should be possible to 
     <br/>
 
   See for default and possible settings [in this table](#configuration).
-  With these four options all differnent behavior the different coer-types should be possible to handle
+  With these four options all differnent behavior the different coevr-types should be possible to handle
 
 - #### Solved issues:
 
@@ -280,7 +283,8 @@ entities:
     window_image: esc-window3.png
     disable_partial_open_buttons: true
     always_percentage: true
-    invert_percentage: false
+    invert_percentage_ui: false
+    invert_percentage_cover: false
   - entity: cover.demo3
     name: Include Partial Open Buttons
     disable_end_buttons: true
