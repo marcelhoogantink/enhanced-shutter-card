@@ -31,7 +31,7 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.4.0-beta-2:
+### New in version v1.4.1:
 
 This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
 With this changes and new settings all different behavior should be possible to handle.
