@@ -574,7 +574,6 @@ const SHUTTER_CSS =`
         z-index: ${Z_INDEX_PARTIAL};
         position: absolute;
         top: 0;
-        ttop: var(--esc-partial-top);
         left: -50%;
         width: 100%;
         height: 1px;
@@ -1559,7 +1558,7 @@ class EnhancedShutter extends LitElement
     const size_y = this.actualGlobalHeightPx();
     const size_global = new xyPair(size_x,size_y);
     const size_local=this.cfg.switchAxis(size_global);
-    const position = this.defScreenPositionFromCurrentPosition(this.cfg.partial());
+    const position = this.defScreenPositionFromCurrentPosition(this.cfg.calcOffset(this.cfg.partial()));
     return [
       this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
@@ -1704,7 +1703,7 @@ class EnhancedShutter extends LitElement
   }
 
 
-  defScreenPositionFromCurrentPosition(currentDevicePosition=this.cfg.currentDevicePosition()) { //ui
+  defScreenPositionFromCurrentPosition(currentDevicePosition=this.cfg.currentDevicePosition()) {
 
     let visiblePosition = this.cfg.visiblePosition(currentDevicePosition);
     let screenPosition = this.offsetOpenedPx() + (this.coverSizeMovingDirectionPx() * (this.cfg.invertPosition(visiblePosition)) / 100) ;
@@ -2613,13 +2612,27 @@ class shutterCfg {
     // compute visible position from current position and offset
     var visiblePosition;
     const offset =this.offset();
-    if (this.offsetActive()) {
-      visiblePosition = Math.max(0, Math.round((currentDevicePosition - this.invertPosition(offset))     / offset * 100 ));
-    }else{
-      visiblePosition = currentDevicePosition;
-    }
-    console.log(`visiblePosition: currentDevicePosition=${currentDevicePosition} offset=${offset} => visiblePosition=${visiblePosition} (${this.friendlyName()})`);
+    visiblePosition = this.calcVisualOffset(currentDevicePosition)
     return visiblePosition;
+  }
+
+  calcOffset(pct){
+    let pct2;
+    if (this.offsetActive()){
+      pct2 =  Math.round(100 -  this.invertPosition(pct) * this.offset() / 100 );
+      return pct2;
+    }else{
+      return pct;
+    }
+  }
+  calcVisualOffset(pct){
+    let pct2;
+    if (this.offsetActive()) {
+      pct2 = Math.max(0, Math.round((pct - this.invertPosition(this.offset())) * 100 / this.offset() ));
+      return pct2;
+    }else{
+      return pct;
+    }
   }
   coverIsOpen(){
     return (this.currentDevicePosition() == SHUTTER_OPEN_PCT);
@@ -2857,10 +2870,6 @@ class htmlCard{
       --esc-movement-overlay-display: ${(escState == SHUTTER_STATE_OPENING || escState == SHUTTER_STATE_CLOSING) ? 'block' : NONE};
       --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertForOverlayDisplay(SHUTTER_STATE_OPENING) ? 'block' : NONE};
       --esc-movement-overlay-down-display: ${escState == this.cfg.applyInvertForOverlayDisplay(SHUTTER_STATE_CLOSING) ? 'block' : NONE};
-      --esc-movement-overlay-top: ${this.enhancedShutter.offsetOpenedPx()-7}${UNITY};
-      --esc-movement-overlay-height: ${this.enhancedShutter.coverHeightPx() + 7}${UNITY};
-
-      --esc-partial-top: ${this.enhancedShutter.defScreenPositionFromCurrentPosition(this.cfg.partial())}${UNITY};
 
       --esc-slide-background-main-image: ${shutterSlatImage.includes('.') ?  `url(${shutterSlatImage})` : ''};
       --esc-slide-background-edge-image: ${shutterBottomImage.includes('.') ?  `url(${shutterBottomImage})` : ''};
@@ -3003,7 +3012,7 @@ class htmlCard{
           <ha-icon-button
             label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
             .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.partial())}" >
+            @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(this.cfg.partial()))}" >
             <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
           </ha-icon-button>
         ` : ''}
@@ -3111,19 +3120,14 @@ class htmlCard{
       5: `Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)}`,
     };
 
-    const disabled ={
+    const disabled = {
       0: this.cfg.disabledGlobaly() || this.cfg.coverButtonUpDisabled(),
       1: this.cfg.disabledGlobaly(),
       2: this.cfg.disabledGlobaly() || this.cfg.coverButtonDownDisabled(),
     };
-    const click ={
-      0: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[0]),
-      1: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[1]),
-      2: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[2]),
-      3: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[3]),
-      4: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[4]),
-      5: ()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, pct[5]),
-    }
+    const click = Object.fromEntries(
+      [0, 1, 2, 3, 4, 5].map(j => [j, () => this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(pct[j]))])
+    );
 
     return html`
       ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons()
