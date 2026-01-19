@@ -72,7 +72,7 @@ When you do not get it done, please raise an issue for it on Github.
   - [#125](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/125) Invert Status does not update image
 
 ---
-##### For previous release-changes go to [Previous-release changes](#previous)
+##### For previous release-changes go to [Previous-release changes](#previous-release-changes)
 
 
 ---
@@ -126,7 +126,7 @@ The default map-setting can be found in the Configuration-info below.
 It is also possible to enter a full path in the imagename itself. When a '/' is found in the image-name, the image-name is considerd to include a full path.
 And last but not least, the `view_image` and `shutter_slat_image`-settings also accept HTML-color definitions like `red`, `green`, `'#AAFFEE'` or `rgb(255,255,0)` in stead of an image-filename. (The `#` input needs quotes around it in YAML)
 
-## Configuration {#configuration}
+## Configuration
 
 ### General
 
@@ -234,6 +234,7 @@ The following `preset_shutter` settings are available:
 | ---------------- | ----------------------------- | ------------------------- |
 | **roller-shutter** | `rotate_slat_image`         | `true`                    |
 | **awning**         | `invert_open_close_ui`      | `true`                    |
+|                    | `invert_percentage_ui`      | `true`                    |
 |                    | `shutter_slat_image`        | `esc-awning.png`          |
 |                    | `shutter_slat_bottom_image` | `esc-awning-bottom.png`   |
 |                    | `bottom_offset_pct`         | `50`                      |
@@ -299,7 +300,7 @@ entities:
 ```
 
 ---
-## Previous release-changes:{#previous}
+## Previous release-changes
 ---
 ### New in version v1.3.1:
 
