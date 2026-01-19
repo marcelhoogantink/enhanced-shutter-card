@@ -31,12 +31,15 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.4.0-beta-1:
+### New in version v1.4.0-beta-2:
 
 This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
 With this changes and new settings all different behavior should be possible to handle.
-It is possible that your cover changes its hehavior with this release. As I do just have one type of cover, I cannot check type I do not have.
+It is possible that your cover changes its hehavior with this release. As I do just have one type of cover, I cannot check types I do not have.
 If your cover changed its behavior with this release, you need to play with the four settings below to get te wanted behavior.
+
+Typically start with setting all four options to false, and then alter the `invert_percentage_cover` and `invert_open_close_cover` to change the behavior of the cover. When that works OK, alter the visual settings (`invert_percentage_ui` and `invert_open_close_ui`) to your wishes
+
 When you do not get it done, please raise an issue for it on Github.
 
 - #### Improved settings for open/close and percentage setting for controling device invert-settings:
@@ -46,11 +49,11 @@ When you do not get it done, please raise an issue for it on Github.
     Invert/alter the setting for percentage on device level.
 
   - ##### invert_open_close_cover (boolean)
-    (new defeniton)
+    (new definiton)
     Invert/alter the setting for open-close on device level.
 
   - ##### invert_percentage_ui (boolean)
-    (new defeniton)
+    (new definiton)
     Invert/alter the setting for percentage on user-interface level.
 
   - ##### invert_open_close_ui (boolean)
@@ -64,6 +67,7 @@ When you do not get it done, please raise an issue for it on Github.
 
 - #### Solved issues:
 
+  - [#121](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/121) Have a small problem with the buttons on the right ...
   - [#123](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/123) Open_close And invert_percentage issue
   - [#125](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/125) Invert Status does not update image
 
