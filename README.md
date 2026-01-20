@@ -31,7 +31,7 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.4.2:
+### New in version v1.4.3:
 
 This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
 With this changes and new settings all different behavior should be possible to handle.
@@ -70,6 +70,7 @@ When you do not get it done, please raise an issue for it on Github.
   - [#121](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/121) Have a small problem with the buttons on the right ...
   - [#123](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/123) Open_close And invert_percentage issue
   - [#125](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/125) Invert Status does not update image
+  - [#136](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/136) Shutter card no longer visible with v1.4.2
 
 ---
 ##### For previous release-changes go to [Previous-release changes](#previous-release-changes)
