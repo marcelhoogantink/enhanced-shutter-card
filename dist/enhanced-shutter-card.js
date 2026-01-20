@@ -913,8 +913,12 @@ class EnhancedShutterCardNew extends LitElement{
     //const parent = this.parentElement;
 
     const gridContainer = this.defGridContainer();
-    if (!gridContainer) return;
-
+    if (!gridContainer) {
+      if (!this.isShutterConfigLoaded) {
+        this.#defAllShutterConfig();
+      }
+      this.getGridOptionsInternal();
+    }
     let lastCols = '';
     //console.log('Card connectedCallback: observing parent:',gridContainer);
     // Check grid layout changes
