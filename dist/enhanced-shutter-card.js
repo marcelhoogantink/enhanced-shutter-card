@@ -688,7 +688,58 @@ const SHUTTER_CSS =`
         line-height: var(--esc-top-icon-text-line-height);
         font-size: var(--esc-top-icon-text-font-size);
       }
-   `;
+`+
+      // TILT test
+`
+    .tilt-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .tilt-slider-wrap {
+      height: 200px;
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed #ccc;
+    }
+
+    #tilt-slider {
+      width: 200px;
+      transform: rotate(-90deg);
+    }
+
+    .tilt-circle-container {
+      width: 200px;
+      height: 200px;
+      border: 2px solid black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9f9f9;
+    }
+
+    #tilt-circle {
+      width: 120px;
+      height: 120px;
+      border: 6px solid green;
+      border-radius: 50%;
+      position: relative;
+      background: white;
+    }
+
+    .tilt-line {
+      width: 4px;
+      height: 120px;
+      background: red;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+`;
 
 class EnhancedShutterCardNew extends LitElement{
   //reactive properties
@@ -1425,6 +1476,27 @@ class EnhancedShutter extends LitElement
       picker.addEventListener('pointerdown', this.mouseDown);
       picker.addEventListener('mousedown',  this.mouseDown);
     }
+    // TILT test
+    const slider = findElement(this,'#tilt-slider');
+    const circle = findElement(this,'#tilt-circle');
+    let angle = 0;
+    let lastValue = 0;
+
+    slider.addEventListener('input', () => {
+      const delta = slider.value - lastValue;
+      angle += delta;
+      circle.style.transform = `rotate(${angle}deg)`;
+      lastValue = slider.value;
+    });
+
+    function resetSlider() {
+      slider.value = 0;
+      lastValue = 0;
+      angle = 0;
+    }
+
+    slider.addEventListener('mouseup', resetSlider);
+    slider.addEventListener('touchend', resetSlider);
 
     this.startResizeObserver();
   }
@@ -1489,6 +1561,7 @@ class EnhancedShutter extends LitElement
           ${htmlParts.showLeftButtons()}
           ${htmlParts.showCentralWindow()}
           ${htmlParts.showRightButtons()}
+          ${htmlParts.showTiltButtons()} <!-- TILT test -->
         </div>
 
         ${htmlParts.showBottomDiv()}
@@ -3151,6 +3224,24 @@ class htmlCard{
           `
         : html`<div class='blankDiv'></div>`
       }
+    `;
+  }
+
+
+  // TILT test
+  showTiltButtons(){
+    return html`
+      <div class="tilt-wrapper">
+        <div class="tilt-slider-wrap">
+          <input type="range" id="tilt-slider" class ="tilt-slider-class" min="00" max="180" value="0">
+        </div>
+
+        <div class="tilt-circle-container">
+          <div id="tilt-circle" class="tilt-circle-class">
+            <div class="tilt-line"></div>
+          </div>
+        </div>
+      </div>
     `;
   }
 }
