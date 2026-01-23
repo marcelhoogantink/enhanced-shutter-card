@@ -444,15 +444,8 @@ const IMAGE_TYPES = [
 ];
 const SHUTTER_CSS =`
 
-      .${ESC_CLASS_BUTTON} {
-        height: 36px;
-        width: 36px;
-      }
       .${ESC_CLASS_SHUTTER} {
         overflow: visible;
-        --mdc-icon-button-size: 48px;
-        --mdc-icon-size: 24px;
-
       }
       .${ESC_CLASS_MIDDLE} {
         display: flex;
@@ -694,49 +687,53 @@ const SHUTTER_CSS =`
     .tilt-wrapper {
       display: flex;
       align-items: center;
-      gap: 40px;
+      gap: 4px;
+      border: 2px solid black;
     }
 
     .tilt-slider-wrap {
-      height: 200px;
-      width: 40px;
+      height: ${ESC_BASE_HEIGHT_PX}px;
+      width: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       border: 1px dashed #ccc;
     }
 
-    #tilt-slider {
-      width: 200px;
+    .tilt-slider-class {
+      width: ${ESC_BASE_HEIGHT_PX}px;
       transform: rotate(-90deg);
     }
 
     .tilt-circle-container {
-      width: 200px;
-      height: 200px;
-      border: 2px solid black;
+      width: ${ICON_BUTTON_SIZE}px;
+      height: ${3*ICON_BUTTON_SIZE}px;
+      border: 1px solid grey;
       display: flex;
+      flex: none;
+      flex-flow: column wrap;
       align-items: center;
       justify-content: center;
       background: #f9f9f9;
     }
 
-    #tilt-circle {
-      width: 120px;
-      height: 120px;
-      border: 6px solid green;
-      border-radius: 50%;
+    .tilt-circle-class {
+      width: ${ICON_SIZE}px;
+      height: ${ICON_SIZE}px;
+      bborder: 1px solid green;
+      bborder-radius: 50%;
       position: relative;
-      background: white;
+      border: 1px dashed #ccc;
+
     }
 
     .tilt-line {
-      width: 4px;
-      height: 120px;
+      width: 2px;
+      height: ${ICON_BUTTON_SIZE}px;
       background: red;
       position: absolute;
-      top: 0;
-      left: 50%;
+      top: -6px;
+      left: 12px;
       transform: translateX(-50%);
     }
 `;
@@ -1476,29 +1473,35 @@ class EnhancedShutter extends LitElement
       picker.addEventListener('pointerdown', this.mouseDown);
       picker.addEventListener('mousedown',  this.mouseDown);
     }
+    this.startResizeObserver();
+
+
     // TILT test
-    const slider = findElement(this,'#tilt-slider');
-    const circle = findElement(this,'#tilt-circle');
-    let angle = 0;
+    const slider = findElement(this,'.tilt-slider-class');
+    const circle1 = findElement(this,'#tilt-circle1');
+    const circle2 = findElement(this,'#tilt-circle2');
+    const circle3 = findElement(this,'#tilt-circle3');
+        let angle = 0;
     let lastValue = 0;
 
     slider.addEventListener('input', () => {
       const delta = slider.value - lastValue;
       angle += delta;
-      circle.style.transform = `rotate(${angle}deg)`;
+      circle1.style.transform = `rotate(${angle}deg)`;
+      circle2.style.transform = `rotate(${angle}deg)`;
+      circle3.style.transform = `rotate(${angle}deg)`;
       lastValue = slider.value;
     });
 
     function resetSlider() {
-      slider.value = 0;
-      lastValue = 0;
-      angle = 0;
+      slider.value = 100;
+      lastValue = 100;
+      angle = 100;
     }
 
     slider.addEventListener('mouseup', resetSlider);
     slider.addEventListener('touchend', resetSlider);
 
-    this.startResizeObserver();
   }
 
   startResizeObserver() {
@@ -3095,7 +3098,7 @@ class htmlCard{
         ` : ''}
     `;
   }
-  showButtonTilt(){
+  showButtonsTilt(){
     return html`
       ${this.cfg.showTilt() ? html`
           <ha-icon-button
@@ -3112,6 +3115,25 @@ class htmlCard{
         ` : ''}
     `;
   }
+  showButtonsTiltUp(){
+    return html`
+          <ha-icon-button
+            label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_OPEN_TILT])}"
+            .disabled=${this.cfg.disabledGlobaly()}
+            @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_OPEN_TILT}`)}">
+            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-top-right"></ha-icon>
+          </ha-icon-button>
+    `;
+  }
+  showButtonsTiltDown(){
+    return html`
+          <ha-icon-button
+            label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_CLOSE_TILT])}"
+            .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_CLOSE_TILT}`)}">
+            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-bottom-left"></ha-icon>
+          </ha-icon-button>
+    `;
+  }
   showLeftButtons(){
     return html`
       ${this.cfg.buttonsLeftActive()
@@ -3123,7 +3145,7 @@ class htmlCard{
         </div>
         <div class="${ESC_CLASS_BUTTONS}">
           ${this.showButtonPartial()}
-          ${this.showButtonTilt()}
+          ${this.showButtonsTilt()}
         </div>
         ` : html`
         <div class='blankDiv'></div>
@@ -3232,14 +3254,19 @@ class htmlCard{
   showTiltButtons(){
     return html`
       <div class="tilt-wrapper">
-        <div class="tilt-slider-wrap">
-          <input type="range" id="tilt-slider" class ="tilt-slider-class" min="00" max="180" value="0">
-        </div>
-
         <div class="tilt-circle-container">
-          <div id="tilt-circle" class="tilt-circle-class">
+          <div id="tilt-circle1" class="tilt-circle-class">
             <div class="tilt-line"></div>
           </div>
+          <div id="tilt-circle2" class="tilt-circle-class">
+            <div class="tilt-line"></div>
+          </div>
+          <div id="tilt-circle3" class="tilt-circle-class">
+            <div class="tilt-line"></div>
+          </div>
+        </div>
+        <div class="tilt-slider-wrap">
+          <input type="range" id="tilt-slider" class ="tilt-slider-class" min="00" max="180" value="0">
         </div>
       </div>
     `;
