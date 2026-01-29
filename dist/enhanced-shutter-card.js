@@ -282,8 +282,8 @@ const ESC_INVERT_OPEN_CLOSE_COVER = false
 
 const ESC_CAN_TILT = false;
 const ESC_SHOW_TILT = true;
-const ESC_TILT_ANGLE_MIN = 5;
-const ESC_TILT_ANGLE_MAX = 175;
+const ESC_TILT_ANGLE_MIN = 10;
+const ESC_TILT_ANGLE_MAX = 170;
 
 const ESC_CLOSING_DIRECTION = DOWN;
 const ESC_PARTIAL_CLOSE_PCT = 0;
@@ -708,8 +708,8 @@ const SHUTTER_CSS =`
     }
 
     .tilt-slat-container {
-      width: ${ICON_BUTTON_SIZE-2}px;
-      height: ${2.5*ICON_BUTTON_SIZE}px;
+      width: ${ICON_BUTTON_SIZE-6}px;
+      height: ${ESC_BASE_HEIGHT_PX-2*ICON_BUTTON_SIZE}px;
       border: 1px solid grey;
       border-radius: 5px;
       display: flex;
@@ -724,11 +724,12 @@ const SHUTTER_CSS =`
       width: ${ICON_SIZE}px;
       height: ${ICON_SIZE}px;
       position: relative;
+      transform: rotate(var(--esc-tilt-angle-deg));
     }
 
     .tilt-line {
       width: 2px;
-      height: ${ICON_BUTTON_SIZE-8}px;
+      height: ${ICON_BUTTON_SIZE-9}px;
       background: red;
       position: absolute;
       top: ${-(ICON_BUTTON_SIZE-ICON_SIZE)/2+4}px;
@@ -850,7 +851,7 @@ class EnhancedShutterCardNew extends LitElement{
 */
   shouldUpdate(changedProperties) {
 
-    console.log('Card shouldUpdate Start');
+    //console.log('Card shouldUpdate Start');
     let doUpdate =false;
 
     if (this.isShutterConfigLoaded){
@@ -1272,16 +1273,19 @@ class EnhancedShutterCardNew extends LitElement{
     let sizeTiltButtons = this.gridSizeTiltButtons(cfg);
     let sizeWindowImage = this.gridSizeWindowImage(cfg);
     let sizePartialOpenButtons = this.gridSizePartialOpenButtons(cfg);
+    let sizeTiltSection = this.gridSizeTiltSection(cfg);
 
     let cardSize;
     if (cfg.buttonsInRow()){
       cardSize = this.gridAddHorizontal(sizeStandardButtons,sizeTiltButtons);
       cardSize = this.gridAddHorizontal(cardSize,sizeWindowImage);
       cardSize = this.gridAddHorizontal(cardSize,sizePartialOpenButtons);
+      cardSize = this.gridAddHorizontal(cardSize,sizeTiltSection);
     }else{
       cardSize = this.gridAddVertical(sizeStandardButtons,sizeTiltButtons);
       cardSize = this.gridAddVertical(cardSize,sizeWindowImage);
       cardSize = this.gridAddVertical(cardSize,sizePartialOpenButtons);
+      cardSize = this.gridAddVertical(cardSize,sizeTiltSection);
     }
     return cardSize;
   }
@@ -1347,6 +1351,15 @@ class EnhancedShutterCardNew extends LitElement{
     */
     let localHeightPx = cfg.windowHeightPx();
     let localWidthPx = cfg.windowWidthPx();
+
+    return {localWidthPx,localHeightPx};
+  };
+  gridSizeTiltSection(cfg){
+    /*
+    * size image
+    */
+    let localHeightPx = cfg.windowHeightPx();
+    let localWidthPx = 60;
 
     return {localWidthPx,localHeightPx};
   };
@@ -1436,6 +1449,7 @@ class EnhancedShutter extends LitElement
     //console_log('Shutter constructor');
     super(); //  mandetory by Lit-element
     this.screenPosition=-1;
+    this.tiltPosition=-1;
     this.resizeDivShutterSelector= false;
     this.actualScreenPosition=-1; // position on the computerscreen
     this.actualTiltPosition=-1; // real tilt position
@@ -1450,9 +1464,8 @@ class EnhancedShutter extends LitElement
   }
   shouldUpdate(changedProperties)
   {
-    console.log('Shutter shouldUpdate Start',this.cfg.friendlyName());
     changedProperties.forEach((oldValue, propName) => {
-      console.log(`Shutter shouldUpdate, Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
+      console.log(`Shutter shouldUpdate (${this.cfg.friendlyName()}), Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
     });
     return this.escImagesLoaded?true:false;
   }
@@ -1490,23 +1503,27 @@ class EnhancedShutter extends LitElement
 
   render()
   {
-    //console_log('Shutter Render',this.cfg.entityId(),this.cfg.friendlyName(),this.action,this.cfg);
-    //console_log('Shutter Render actualGlobalWidthPx:',this[ESC_CLASS_SELECTOR]?.getBoundingClientRect().width);
-    //console_log('Shutter Render actualWidth2:',this.actualGlobalWidthPx());
-    //console_log('Shutter Resize detected',this[ESC_CLASS_SELECTOR]?.getBoundingClientRect());
     let entityId = this.cfg.entityId();
     let positionText;
-
     if (this.action=='user-drag'){
       // position from screen-dragging shown
       positionText =  this.positionText;
       this.actualScreenPosition = this.screenPosition
+      this.actualTiltPosition = this.cfg.currentTiltPosition();
+    }else if (this.action=='user-drag-tilt'){
+      this.actualScreenPosition =  this.defScreenPositionFromCurrentPosition();
+      this.actualTiltPosition = this.tiltPosition;
+
+      positionText =  this.positionText;
     }else{
       // position cover shown.
-      positionText =  this.cfg.computePositionText();
+      positionText =  this.cfg.computePositionText(this.cfg.currentDevicePosition());
       this.actualScreenPosition =  this.defScreenPositionFromCurrentPosition();
+      //this.actualTiltPosition = this.cfg.currentTiltPosition();
+      this.actualTiltPosition = this.cfg.getCoverEntity()?.getCurrentTiltPosition() ?? 0;
+      this.tiltPosition = this.actualTiltPosition;
+
     }
-    this.actualTiltPosition = this.cfg.currentTiltPosition();
 
     let htmlParts = new htmlCard(this,positionText);
 
@@ -1539,6 +1556,7 @@ class EnhancedShutter extends LitElement
     this.slat2 = findElement(this,'#tilt-slat2');
     this.slat3 = findElement(this,'#tilt-slat3');
     this.slider = findElement(this,'.tilt-slider-class');
+    this.textPosition = findElement(this,`.${ESC_CLASS_POSITION}>span`);
     // NOTE: drop the old lit‐decorated @touchstart from the template
     //      so we can re‑attach it manually below
     const picker = findElement(this, `.${ESC_CLASS_SELECTOR_PICKER}`);
@@ -1554,18 +1572,23 @@ class EnhancedShutter extends LitElement
     this.startResizeObserver();
 
 
-    // TILT test JavaScript
-    let sliderPosition = this.cfg.getCoverEntity()?.getCurrentTiltPosition() ?? 0;
-    this.slider.value = sliderPosition;
-    this.setTilt(sliderPosition);
 
     this.slider.addEventListener('input', () => {
-      this.setTilt(this.slider.value);
+      this.action='user-drag-tilt';
+      //console.log('Slider input value=',this.slider.value);
+      this.tiltPosition = this.slider.value;
+      this.positionText = this.cfg.computePositionText(this.cfg.currentDevicePosition(),this.slider.value);
+      //console.log('Slider input positionText,tiltPosition=',this.positionText,this.tiltPosition);
     });
 
-    let resetSlider = (event) => {
+    let resetSlider = (event) => { // mousUpTilt
       const sliderPosition = this.slider.value ;
+      this.action='user-pick';
       this.sendShutterTiltPosition(this.cfg.entityId(),sliderPosition);
+
+      this.removeEventListener('mouseup', resetSlider);
+      this.removeEventListener('touchend', resetSlider);
+
     }
 
     this.slider.addEventListener('mouseup', resetSlider);
@@ -1573,17 +1596,8 @@ class EnhancedShutter extends LitElement
 
 
   }
-  setTilt(sliderPosition){
-
-    // this.slider.value = sliderPosition;
-
-    let angle = -(ESC_TILT_ANGLE_MIN + (sliderPosition / 100) * (ESC_TILT_ANGLE_MAX - ESC_TILT_ANGLE_MIN));
-    this.setTiltRotation(this.slat1,angle);
-    this.setTiltRotation(this.slat2,angle);
-    this.setTiltRotation(this.slat3,angle);
-  }
-  setTiltRotation(slat,angle){
-    slat.style.transform = `rotate(${angle}deg)`;
+  getTiltAngle(sliderPosition){
+    return -(ESC_TILT_ANGLE_MIN + (sliderPosition / 100) * (ESC_TILT_ANGLE_MAX - ESC_TILT_ANGLE_MIN))+'deg';
   }
 
   updated(changedProperties) {
@@ -1593,12 +1607,11 @@ class EnhancedShutter extends LitElement
     // Log the properties that were updated
     //console_log('Shutter Updated');
     super.updated(changedProperties);
+
+    this.slider.value = this.tiltPosition; // !!!!! Special .....
+
     this.action='cover-update';
 
-    let sliderPosition = this.cfg.getCoverEntity()?.getCurrentTiltPosition() ?? 0;
-    this.slider.value = sliderPosition;
-    this.setTilt(sliderPosition);
-    //console_log('Shutter Updated ready');
   }
 
 /**
@@ -1870,8 +1883,9 @@ class EnhancedShutter extends LitElement
       [ACTION_SHUTTER_SET_POS] : {'args': {position: position}},
       [ACTION_SHUTTER_OPEN_TILT] : {'args': ''},
       [ACTION_SHUTTER_CLOSE_TILT] : {'args': ''},
+      [ACTION_SHUTTER_SET_POS_TILT] : {'args': {tilt_position: position}},
     }
-    console.log('=> doOnclick: command:',command,'position:',position,'entityId:',entityId);
+    //console.log('=> doOnclick: command:',command,'position:',position,'entityId:',entityId);
     this.callHassCoverService(entityId,command,services[command].args);
   }
   getBasePickPoint(event){
@@ -1935,16 +1949,16 @@ class EnhancedShutter extends LitElement
 
   mouseMove = (event) =>
   {
-    console_log('mouseMove:',event.type,event);
+    //console_log('mouseMove:',event.type,event);
+    //console.log('mouseMove: this.action',this.action);
     if (event.pageY === undefined) return;
-    // console_log('mouseMove: this.action',this.action);
 
     this.action='user-drag';
     this.screenPosition = this.getScreenPosFromPickPoint(this.getPoint(event)); // this.screenPosition triggers refresh
     let pointedShutterPosition = this.getShutterPosFromScreenPos(this.screenPosition);
 
-    this.positionText = this.cfg.computePositionText(pointedShutterPosition);
-    console.log('mouseMove: screenPosition:',this.screenPosition,'shutterPosition:',pointedShutterPosition,'positionText:',this.positionText);
+    this.positionText = this.cfg.computePositionText(pointedShutterPosition,this.slider.value);
+    //console.log('mouseMove: screenPosition:',this.screenPosition,'shutterPosition:',pointedShutterPosition,'positionText:',this.positionText);
 
   };
 
@@ -1977,11 +1991,11 @@ class EnhancedShutter extends LitElement
 
   sendShutterPosition( entityId, position)
   {
-    this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS, { position: this.cfg.applyInvertToPosition(position) }); //ui
+    this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS, { position: this.cfg.applyInvertToPosition(position) });
   }
   sendShutterTiltPosition( entityId, position)
   {
-    this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS_TILT, { tilt_position: position }); //ui
+    this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS_TILT, { tilt_position: position });
   }
   callHassCoverService(entityId,command,args='')
   {
@@ -2723,7 +2737,7 @@ class shutterCfg {
     }
     return text;
   }
-  computePositionText(currentDevicePosition =this.currentDevicePosition()) {
+  computePositionText(currentDevicePosition,currentTiltPosition = this.currentTiltPosition()){
     let positionText;
     if (NOT_KNOWN.includes(this.getCoverEntity().getState())){
       positionText = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
@@ -2733,6 +2747,9 @@ class shutterCfg {
       positionText = this.positionToText(displayPosition);
       if (this.offsetActive()) {
         positionText += ` (${this.applyInvertToUiPosition(currentDevicePosition)}%)`;
+      }
+      if (this.showTilt() && this.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)) {
+        positionText += ` / Tilt: ${currentTiltPosition}%`;
       }
     }
     return positionText;
@@ -2953,7 +2970,6 @@ class htmlCard{
     this.actualTiltPosition = enhancedShutter.actualTiltPosition;
     this.escImages= enhancedShutter.escImages;
     this.cfg = enhancedShutter.cfg;
-    //this.screenPosition =screenPosition;
   }
 
   defStyleVars(){
@@ -2964,7 +2980,7 @@ class htmlCard{
     const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.entityId());
     const shutterBottomImage=this.escImages.getShutterBottomImageSrc(this.cfg.entityId());
 
-
+    //console.log(`defStyleVars: this.actualTiltPosition: ${this.actualTiltPosition} `,this.enhancedShutter.tiltPosition);
     return `
       --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
       --mdc-icon-size: ${this.cfg.iconSize()}${UNITY};
@@ -2984,6 +3000,7 @@ class htmlCard{
       --esc-transform-slide:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};
       --esc-transform-picker: ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
       --esc-tilt-value: ${this.actualTiltPosition};
+      --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngle(this.enhancedShutter.tiltPosition)};
 
       --esc-transform-undo-rotate:  ${this.enhancedShutter.transformUndoMainRotate()};
       --esc-transform-movement: ${this.enhancedShutter.transformMovement()};
@@ -3152,17 +3169,8 @@ class htmlCard{
   showButtonsTilt(){
     return html`
       ${this.cfg.showTilt() ? html`
-          <ha-icon-button
-            label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_OPEN_TILT])}"
-            .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_OPEN_TILT}`)}">
-            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-top-right"></ha-icon>
-          </ha-icon-button>
-          <ha-icon-button
-            label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_CLOSE_TILT])}"
-            .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_CLOSE_TILT}`)}">
-            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-bottom-left"></ha-icon>
-          </ha-icon-button>
+        ${this.showButtonsTiltUp()}
+        ${this.showButtonsTiltDown()}
         ` : ''}
     `;
   }
@@ -3282,7 +3290,7 @@ class htmlCard{
     return html`
       ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons()
         ? html`
-            ${[0, 1, 2].map(i => html`
+            ${[0, 1].map(i => html`
               <div class="${ESC_CLASS_BUTTONS}">
                 ${[i * 3, i * 3 + 1, i * 3 + 2].map(j => html`
                   <ha-icon-button
@@ -3320,6 +3328,7 @@ class htmlCard{
     `;
   }
   showTiltPosition(){
+    //console.log("showTiltPosition:", this.actualTiltPosition,this.enhancedShutter.tiltPosition);
     return html`
       <div class="tilt-slat-container">
         <div id="tilt-slat1" class="tilt-slat-class">
