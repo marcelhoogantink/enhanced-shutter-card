@@ -1270,15 +1270,13 @@ class EnhancedShutterCardNew extends LitElement{
     * size image
     */
     let sizeStandardButtons = this.gridSizeStandardButtons(cfg);
-    let sizeTiltButtons = this.gridSizeTiltButtons(cfg);
     let sizeWindowImage = this.gridSizeWindowImage(cfg);
     let sizePartialOpenButtons = this.gridSizePartialOpenButtons(cfg);
     let sizeTiltSection = this.gridSizeTiltSection(cfg);
 
     let cardSize;
     if (cfg.buttonsInRow()){
-      cardSize = this.gridAddHorizontal(sizeStandardButtons,sizeTiltButtons);
-      cardSize = this.gridAddHorizontal(cardSize,sizeWindowImage);
+      cardSize = this.gridAddHorizontal(sizeStandardButtons,sizeWindowImage);
       cardSize = this.gridAddHorizontal(cardSize,sizePartialOpenButtons);
       cardSize = this.gridAddHorizontal(cardSize,sizeTiltSection);
     }else{
@@ -1542,10 +1540,14 @@ class EnhancedShutter extends LitElement
         <div class="${ESC_CLASS_MIDDLE}">
           ${htmlParts.showLeftButtons()}
           ${htmlParts.showCentralWindow()}
-          ${htmlParts.showRightButtons()}
-          ${htmlParts.showTiltSection()} <!-- TILT test -->
+          ${!this.cfg.disablePartialOpenButtons() || this.cfg.showTilt()
+            ? html`
+              ${!this.cfg.disablePartialOpenButtons() ? htmlParts.showRightButtons():''}
+              ${this.cfg.showTilt() ? htmlParts.showTiltSection():''} <!-- TILT test -->
+            `
+            : html`<div class='blankDiv'></div>`
+          }
         </div>
-
         ${htmlParts.showBottomDiv()}
       </div>
     `;
@@ -2335,9 +2337,9 @@ class shutterCfg {
   }
 
 
-  // TODO: setting can_tilt should be show_tilt. can_tilt() should depend on ESC_FEATURE_OPEN_TILT and/or ESC_FEATURE_CLOSE_TILT
+  // TODO: setting can_tilt should be show_tilt. can_tilt() should depend on ESC_FEATURE_OPEN_TILT and/or ESC_FEATURE_CLOSE_TILT and ESC_FEATURE_SET_TILT_POSITION
   showTilt(value=null){
-    return (this.canTilt()|| this.#getCfg(CONFIG_SHOW_TILT,value)) && this.isCoverFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT) ;
+    return (this.canTilt()|| this.#getCfg(CONFIG_SHOW_TILT,value)) && this.isCoverFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT | ESC_FEATURE_SET_TILT_POSITION) ;
   }
   canTilt(value = null){
     return this.#getCfg(CONFIG_CAN_TILT,value );
@@ -2622,12 +2624,6 @@ class shutterCfg {
       return true;
   }
 
-  buttonsRightActive(){
-    if (this.disablePartialOpenButtons())
-      return false;
-    else
-      return true;
-  }
   buttonsInRow(){
     return this.getButtonsPosition() == LEFT || this.getButtonsPosition() == RIGHT;
   }
@@ -3201,10 +3197,7 @@ class htmlCard{
           ${this.showButtonUp()}
           ${this.showButtonStop()}
           ${this.showButtonDown()}
-        </div>
-        <div class="${ESC_CLASS_BUTTONS}">
           ${this.showButtonPartial()}
-          ${this.showButtonsTilt()}
         </div>
         ` : html`
         <div class='blankDiv'></div>
@@ -3288,23 +3281,18 @@ class htmlCard{
     );
 
     return html`
-      ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons()
-        ? html`
-            ${[0, 1].map(i => html`
-              <div class="${ESC_CLASS_BUTTONS}">
-                ${[i * 3, i * 3 + 1, i * 3 + 2].map(j => html`
-                  <ha-icon-button
-                    label=${labels[j]}
-                    .disabled=${disabled[pointer[j]]}
-                    @click=${click[j]}
-                    path=${icons[j]}>
-                  </ha-icon-button>
-                `)}
-              </div>
+        ${[0, 1].map(i => html`
+          <div class="${ESC_CLASS_BUTTONS}">
+            ${[i * 3, i * 3 + 1, i * 3 + 2].map(j => html`
+              <ha-icon-button
+                label=${labels[j]}
+                .disabled=${disabled[pointer[j]]}
+                @click=${click[j]}
+                path=${icons[j]}>
+              </ha-icon-button>
             `)}
-          `
-        : html`<div class='blankDiv'></div>`
-      }
+          </div>
+        `)}
     `;
   }
 
