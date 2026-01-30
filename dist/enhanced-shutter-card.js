@@ -2008,6 +2008,7 @@ class EnhancedShutter extends LitElement
           entity_id: entityId,
           ...args
         });
+        //console.log(`Service call: '${domain}'-'${command}' for entity '${entityId}' with args:`,args);
       } else {
         console.warn(`Service '${domain}'-'${command}' not available`);
       }
@@ -3113,9 +3114,6 @@ class htmlCard{
           label="${this.cfg.getLocalize(LOCALIZE_TEXT[this.cfg.applyInvertForShowButtonUpDownLabel(action)])}"
           .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonDisabled(upDown)}
           @click=${()=> this.enhancedShutter.doOnclick(`${this.cfg.applyInvertForShowButtonUpDownClick(action,true)}`)} >
-          <!--
-          @click=${()=> this.enhancedShutter.doOnclick(`${this.cfg.applyAll(action)}`)} >
-          -->
           <ha-icon
             class="${ESC_CLASS_HA_ICON}"
             icon="${icon}">
@@ -3160,33 +3158,6 @@ class htmlCard{
             <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
           </ha-icon-button>
         ` : ''}
-    `;
-  }
-  showButtonsTilt(){
-    return html`
-      ${this.cfg.showTilt() ? html`
-        ${this.showButtonsTiltUp()}
-        ${this.showButtonsTiltDown()}
-        ` : ''}
-    `;
-  }
-  showButtonsTiltUp(){
-    return html`
-          <ha-icon-button
-            label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_OPEN_TILT])}"
-            .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_OPEN_TILT}`)}">
-            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-top-right"></ha-icon>
-          </ha-icon-button>
-    `;
-  }
-  showButtonsTiltDown(){
-    return html`
-          <ha-icon-button
-            label="${this.cfg.getLocalize(LOCALIZE_TEXT[ACTION_SHUTTER_CLOSE_TILT])}"
-            .disabled=${this.cfg.disabledGlobaly()} @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_CLOSE_TILT}`)}">
-            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-bottom-right"></ha-icon>
-          </ha-icon-button>
     `;
   }
   showLeftButtons(){
@@ -3309,11 +3280,22 @@ class htmlCard{
   showTiltButtonColumn(){
     return html`
       <div class="${ESC_CLASS_BUTTONS}">
-        ${this.showButtonsTiltUp()}
+        ${this.showButtonTiltUp()}
         ${this.showTiltPosition()}
-        ${this.showButtonsTiltDown()}
+        ${this.showButtonTiltDown()}
       </div>
     `;
+  }
+  showTiltSliderColumn(){
+    return html`
+      <div class="tilt-slider-wrap">
+        <input type="range" id="tilt-slider" class ="tilt-slider-class" min="0" max="100" value="${this.actualTiltPosition}">
+      </div>
+    `;
+  }
+  showButtonTiltUp(){
+    const icon = "mdi:arrow-top-right";
+    return this.showButtonTilt(ACTION_SHUTTER_OPEN_TILT,icon);
   }
   showTiltPosition(){
     //console.log("showTiltPosition:", this.actualTiltPosition,this.enhancedShutter.tiltPosition);
@@ -3331,14 +3313,21 @@ class htmlCard{
       </div>
     `;
   }
-
-  showTiltSliderColumn(){
+  showButtonTiltDown(){
+    const icon = "mdi:arrow-bottom-right";
+    return this.showButtonTilt(ACTION_SHUTTER_CLOSE_TILT,icon);
+  }
+  showButtonTilt(action,icon){
     return html`
-      <div class="tilt-slider-wrap">
-        <input type="range" id="tilt-slider" class ="tilt-slider-class" min="0" max="100" value="${this.actualTiltPosition}">
-      </div>
+          <ha-icon-button
+            label="${this.cfg.getLocalize(LOCALIZE_TEXT[action])}"
+            .disabled=${this.cfg.disabledGlobaly()}
+            @click="${()=> this.enhancedShutter.doOnclick(`${action}`)}">
+            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="${icon}"></ha-icon>
+          </ha-icon-button>
     `;
   }
+
 }
 
 class xyPair{
