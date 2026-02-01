@@ -3136,7 +3136,7 @@ class htmlCard{
     return html`
       ${this.cfg.buttonsRightActive() && !this.cfg.disablePartialOpenButtons()
         ? html`
-            ${[0, 1, 2].map(i => html`
+            ${[0, 1].map(i => html`
               <div class="${ESC_CLASS_BUTTONS}">
                 ${[i * 3, i * 3 + 1, i * 3 + 2].map(j => html`
                   <ha-icon-button
