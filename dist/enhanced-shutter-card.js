@@ -194,6 +194,7 @@ const CONFIG_INVERT_OPEN_CLOSE_COVER = 'invert_open_close_cover';
 
 const CONFIG_CAN_TILT = 'can_tilt';
 const CONFIG_SHOW_TILT = 'show_tilt';
+const CONFIG_TILT_MAX_ANGLE = 'tilt_max_angle';
 const CONFIG_CLOSING_DIRECTION = 'closing_direction'
 const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
 const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
@@ -281,6 +282,7 @@ const ESC_INVERT_OPEN_CLOSE_UI = false
 const ESC_INVERT_OPEN_CLOSE_COVER = false
 const ESC_CAN_TILT = false;
 const ESC_SHOW_TILT = true;
+const ESC_TILT_MAX_ANGLE = 80;
 const ESC_CLOSING_DIRECTION = DOWN;
 const ESC_PARTIAL_CLOSE_PCT = 0;
 const ESC_OFFSET_CLOSED_PCT = 0;
@@ -365,6 +367,7 @@ const CONFIG_DEFAULT ={
 
   [CONFIG_CAN_TILT]: ESC_CAN_TILT,
   [CONFIG_SHOW_TILT]: ESC_SHOW_TILT,
+  [CONFIG_TILT_MAX_ANGLE]: ESC_TILT_MAX_ANGLE,
 
   [CONFIG_CLOSING_DIRECTION]: ESC_CLOSING_DIRECTION,
   [CONFIG_PARTIAL_CLOSE_PCT]: ESC_PARTIAL_CLOSE_PCT,
@@ -559,6 +562,12 @@ const SHUTTER_CSS =`
 
         background-repeat: repeat;
         background-size: var(--esc-slide-background-main-size);
+        -webkit-mask-image: var(--esc-slide-tilt-mask);
+        mask-image: var(--esc-slide-tilt-mask);
+        -webkit-mask-position: var(--esc-slide-tilt-mask-position);
+        mask-position: var(--esc-slide-tilt-mask-position);
+        -webkit-mask-repeat: repeat;
+        mask-repeat: repeat;
         transform: var(--esc-transform-undo-rotate);
       }
       .${ESC_CLASS_SELECTOR_SLIDE_EDGE} {
@@ -808,7 +817,8 @@ class EnhancedShutterCardNew extends LitElement{
               const liveEntityFromHass = liveStates[entityId];
               if (liveEntityFromHass) {
                 const cfg = this.localCfgs[entityId];
-                let shutterState = `${liveEntityFromHass.state}-${liveEntityFromHass.attributes.current_position}`;
+                const tiltPosition = liveEntityFromHass.attributes.current_tilt_position ?? liveEntityFromHass.attributes.tilt_position;
+                let shutterState = `${liveEntityFromHass.state}-${liveEntityFromHass.attributes.current_position}-${tiltPosition}`;
                 if (shutterState != cfg.shutterState){
                   doUpdate =true;
                   cfg.shutterState = shutterState;
@@ -1654,6 +1664,37 @@ class EnhancedShutter extends LitElement
     let size = `${imagePercentage.x} ${imagePercentage.y}`;
     return size;
   }
+  shutterSlatImageSizeAdjusted(){
+    const imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId());
+    if (!imageSize) return new xyPair(0,0);
+    if (!this.cfg.rotateMainImage() && !this.cfg.verticalMovement()) {
+      return new xyPair(imageSize.y, imageSize.x);
+    }
+    return imageSize;
+  }
+  shutterSlatTiltMask(){
+    if (!this.cfg.tiltSupported()) return 'none';
+    const angle = this.cfg.tiltAngle();
+    if (angle === null || angle <= 0) return 'none';
+    const imageSize = this.shutterSlatImageSizeAdjusted();
+    if (!imageSize || (!imageSize.x && !imageSize.y)) return 'none';
+    const horizontalSlat = imageSize.x >= imageSize.y;
+    const tileSize = horizontalSlat ? imageSize.y : imageSize.x;
+    if (!tileSize || tileSize <= 0) return 'none';
+    const scale = this.cfg.tiltScale();
+    if (!Number.isFinite(scale) || scale >= 0.999) return 'none';
+    const visible = Math.max(1, tileSize * scale);
+    const padding = Math.max(0, (tileSize - visible) / 2);
+    const direction = horizontalSlat ? 'bottom' : 'right';
+    const roundPx = (value) => `${Math.round(value * 100) / 100}px`;
+    const paddingPx = roundPx(padding);
+    const visibleEndPx = roundPx(padding + visible);
+    const tilePx = roundPx(tileSize);
+    return `repeating-linear-gradient(to ${direction}, transparent 0px, transparent ${paddingPx}, #fff ${paddingPx}, #fff ${visibleEndPx}, transparent ${visibleEndPx}, transparent ${tilePx})`;
+  }
+  shutterSlatTiltMaskPosition(){
+    return this.shutterMainBackgroundPosition();
+  }
   shutterBottomSizePercentage(){
     const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.entityId())
     let size;
@@ -1954,6 +1995,7 @@ class shutterCfg {
 
       this.canTilt(!!escConfig[CONFIG_CAN_TILT]);  // deprecated
       this.showTilt(!!escConfig[CONFIG_SHOW_TILT]);
+      this.tiltMaxAngle(escConfig[CONFIG_TILT_MAX_ANGLE]);
 
       this.defButtonPosition(escConfig);
 
@@ -2214,6 +2256,15 @@ class shutterCfg {
   canTilt(value = null){
     return this.#getCfg(CONFIG_CAN_TILT,value );
   }
+  tiltMaxAngle(value = null){
+    const angle = Number(this.#getCfg(CONFIG_TILT_MAX_ANGLE,value));
+    return Number.isFinite(angle) ? boundary(angle,0,90) : ESC_TILT_MAX_ANGLE;
+  }
+  tiltSupported(){
+    const tilt = this.getCoverEntity()?.getCurrentTiltPosition();
+    const hasTiltAttribute = !(tilt === null || typeof tilt === 'undefined');
+    return hasTiltAttribute || this.isCoverFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT | ESC_FEATURE_SET_TILT_POSITION);
+  }
 
 
   unrollUnfoldDirection(value = null){
@@ -2300,6 +2351,23 @@ class shutterCfg {
     let position = this.currentBasePosition();
     position = this.applyInvertToPosition(position);
     return position;
+  }
+  currentTiltPosition(){
+    const tilt = this.getCoverEntity()?.getCurrentTiltPosition();
+    if (tilt === null || typeof tilt === 'undefined') return null;
+    const tiltValue = Number(tilt);
+    return Number.isFinite(tiltValue) ? boundary(tiltValue,0,100) : null;
+  }
+  tiltAngle(){
+    const tilt = this.currentTiltPosition();
+    if (tilt === null || !this.tiltSupported()) return null;
+    return (tilt / 100) * this.tiltMaxAngle();
+  }
+  tiltScale(){
+    const angle = this.tiltAngle();
+    if (angle === null) return 1;
+    const scale = Math.cos(angle * Math.PI / 180);
+    return Number.isFinite(scale) ? Math.max(0, scale) : 1;
   }
   applyInvertToPosition(position){
     if (this.invertPercentageCover()) position= this.invertPosition(position);
@@ -2886,6 +2954,8 @@ class htmlCard{
 
       --esc-slide-background-main-position: ${this.enhancedShutter.shutterMainBackgroundPosition()};
       --esc-slide-background-edge-position: ${this.enhancedShutter.shutterEdgeBackgroundPosition()};
+      --esc-slide-tilt-mask: ${this.enhancedShutter.shutterSlatTiltMask()};
+      --esc-slide-tilt-mask-position: ${this.enhancedShutter.shutterSlatTiltMaskPosition()};
 
       --esc-top-right-color: ${this.cfg.signalIconColor()};
       --esc-top-left-color: ${this.cfg.batteryIconColor()};
@@ -3202,6 +3272,10 @@ class haEntity{
   }
   getCurrentPosition(){
     return this.getAttributes()?.current_position ?? null;
+  }
+  getCurrentTiltPosition(){
+    const attrs = this.getAttributes() || {};
+    return attrs.current_tilt_position ?? attrs.tilt_position ?? null;
   }
   getFriendlyName(){
     return this.getAttributes()?.friendly_name ?? UNAVAILABLE;
@@ -3683,7 +3757,3 @@ async function readImageDimensions(escImages) {
       throw error;
   }
 }
-
-
-
-
