@@ -31,48 +31,26 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.4.3:
+### New in version v1.5.0beta0:
 
-This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
-With this changes and new settings all different behavior should be possible to handle.
-It is possible that your cover changes its hehavior with this release. As I do just have one type of cover, I cannot check types I do not have.
-If your cover changed its behavior with this release, you need to play with the four settings below to get te wanted behavior.
+This __beta.0__ of __Release v1.5.0__ contains full Tilt functionality. A new (optional) button-menu is displayed when Tilt is a feature of the cover.
+The already existing Tilt buttons are moved to the new menu and the `partial_close_percentage`  button is moved into the default buttons menu.
 
-Typically start with setting all four options to false, and then alter the `invert_percentage_cover` and `invert_open_close_cover` to change the behavior of the cover. When that works OK, alter the visual settings (`invert_percentage_ui` and `invert_open_close_ui`) to your wishes
+  ![FullTiltOptions](FullTiltOptions.gif)
 
-When you do not get it done, please raise an issue for it on Github.
+Default there is no need to add any option to your config. If the cover can tilt, the options will be shown. (you optionally disable this with `show_tilt: false`)
 
-- #### Improved settings for open/close and percentage setting for controling device invert-settings:
+Two new settings are added:
 
-  - ##### invert_percentage_cover (boolean)
-    (from deprecated setting `invert_percentage`)
-    Invert/alter the setting for percentage on device level.
+#### [tilt_angle_min]
+values between [0] and [180] and less then `tilt_angle_max` (default 5)
+#### [tilt_angle_max]
+values between [0] and [180] and greater than then `tilt_angle_min` (default 175)
 
-  - ##### invert_open_close_cover (boolean)
-    (new definiton)
-    Invert/alter the setting for open-close on device level.
-
-  - ##### invert_percentage_ui (boolean)
-    (new definiton)
-    Invert/alter the setting for percentage on user-interface level.
-
-  - ##### invert_open_close_ui (boolean)
-    (from deprecated setting `invert_open_close`)
-    Invert/alter the setting for open-close on user-interface level.
-    Often used for awnings.
-    <br/>
-
-  See for default and possible settings [in this table](#configuration).
-  With these four options all differnent behavior the different coevr-types should be possible to handle
-
-- #### Solved issues:
-
-  - [#121](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/121) Have a small problem with the buttons on the right ...
-  - [#123](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/123) Open_close And invert_percentage issue
-  - [#125](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/125) Invert Status does not update image
-  - [#136](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/136) Shutter card no longer visible with v1.4.2
+These values are just for visualisation, the values send to the cover are always  from 100% (`tilt_angle_max`) to 0% (`tilt_angle_min`)
 
 ---
+
 ##### For previous release-changes go to [Previous-release changes](#previous-release-changes)
 
 
@@ -167,12 +145,14 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 | invert_open_close_ui         | boolean       | No       | `false`                                       | Inverts the open-close texts on UI-level when set to `true`. Will not change the cover behavior.
 | invert_open_close_cover      | boolean       | No       | `false`                                       | Inverts the opec-close commands on device-level when set to `true`. Possibly changes to cover behavior.                                                                                                                                                                    |
 | show_tilt                    | boolean       | No       | `true`                                        | Show the `tilt` options and buttons, only active when the shutter supports `tilt`                                                                                                                                                                                          |
-| partial_close_percentage     | int           | No       | `0`                                           | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.                                                                                                                                                       |
-| offset_closed_percentage     | int           | No       | `0`                                           | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.                                                                                                                                                              |
+| tilt_angle_max               | int           | No       | 175                                           | Maximum angle for visualiation of the tilt-function. This is representation for the 100% value of the tilt-value. |
+| tilt_angle_min               | int           | No       | 5                                             | Minimum angle for visualiation of the tilt-function. This is representation for the 0% value of the tilt-value. |
+| partial_close_percentage     | int           | No       | 0                                             | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.                                                                                                                                                       |
+| offset_closed_percentage     | int           | No       | 0                                             | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.                                                                                                                                                              |
 | always_percentage            | boolean       | No       | `false`                                       | If set to `true`, the end states (opened/closed) will be also as numbers (0 / 100 % ) instead of a text                                                                                                                                                                    |
 | disable_end_buttons          | boolean       | No       | `false`                                       | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button                                                                                                                                                 |
 | disable_standard_buttons     | boolean       | No       | false                                         | Show or hide the default up, down and stop buttons                                                                                                                                                                                                                         |
-| disable_partial_open_buttons | boolean       | No       | true                                          | Show or hide the partail open buttons.                                                                                                                                                                                                                                     |
+| disable_partial_open_buttons | boolean       | No       | true                                          | Show or hide the partial open buttons.                                                                                                                                                                                                                                     |
 | button_up_hide_states        | string list   | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                   |
 | button_stop_hide_states      | string list   | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |
 | button_down_hide_states      | string list   | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |
@@ -216,6 +196,8 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 | invert_open_close ui         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | invert_open_close cover      | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | show_tilt                    | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| tilt_angle_max               | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| tilt_angle_min               | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | partial_close_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | offset_closed_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | always_percentage            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
@@ -302,6 +284,47 @@ entities:
 
 ---
 ## Previous release-changes
+---
+### New in version v1.4.3:
+
+This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
+With this changes and new settings all different behavior should be possible to handle.
+It is possible that your cover changes its hehavior with this release. As I do just have one type of cover, I cannot check types I do not have.
+If your cover changed its behavior with this release, you need to play with the four settings below to get te wanted behavior.
+
+Typically start with setting all four options to false, and then alter the `invert_percentage_cover` and `invert_open_close_cover` to change the behavior of the cover. When that works OK, alter the visual settings (`invert_percentage_ui` and `invert_open_close_ui`) to your wishes
+
+When you do not get it done, please raise an issue for it on Github.
+
+- #### Improved settings for open/close and percentage setting for controling device invert-settings:
+
+  - ##### invert_percentage_cover (boolean)
+    (from deprecated setting `invert_percentage`)
+    Invert/alter the setting for percentage on device level.
+
+  - ##### invert_open_close_cover (boolean)
+    (new definiton)
+    Invert/alter the setting for open-close on device level.
+
+  - ##### invert_percentage_ui (boolean)
+    (new definiton)
+    Invert/alter the setting for percentage on user-interface level.
+
+  - ##### invert_open_close_ui (boolean)
+    (from deprecated setting `invert_open_close`)
+    Invert/alter the setting for open-close on user-interface level.
+    Often used for awnings.
+    <br/>
+
+  See for default and possible settings [in this table](#configuration).
+  With these four options all differnent behavior the different coevr-types should be possible to handle
+
+- #### Solved issues:
+
+  - [#121](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/121) Have a small problem with the buttons on the right ...
+  - [#123](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/123) Open_close And invert_percentage issue
+  - [#125](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/125) Invert Status does not update image
+  - [#136](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/136) Shutter card no longer visible with v1.4.2
 ---
 ### New in version v1.3.1:
 

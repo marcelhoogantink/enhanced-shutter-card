@@ -1,5 +1,5 @@
 
-const VERSION = 'v1.4.3';
+const VERSION = 'v1.5.0-beta-0';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
@@ -192,8 +192,10 @@ const CONFIG_INVERT_OPEN_CLOSE       = 'invert_open_close'; // deprecated
 const CONFIG_INVERT_OPEN_CLOSE_UI    = 'invert_open_close_ui'; // new
 const CONFIG_INVERT_OPEN_CLOSE_COVER = 'invert_open_close_cover';
 
-const CONFIG_CAN_TILT = 'can_tilt';
 const CONFIG_SHOW_TILT = 'show_tilt';
+const CONFIG_TILT_ANGLE_MIN = 'tilt_angle_min';
+const CONFIG_TILT_ANGLE_MAX = 'tilt_angle_max';
+
 const CONFIG_CLOSING_DIRECTION = 'closing_direction'
 const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
 const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
@@ -213,7 +215,6 @@ const DEPRECATED={
   [CONFIG_INVERT_OPEN_CLOSE]: {new: CONFIG_INVERT_OPEN_CLOSE_UI}, // jan 2026 1.4.0-alpha
 };
 const REMOVED={
-  [CONFIG_CAN_TILT]: {new: CONFIG_SHOW_TILT},
   [CONFIG_TITLE_POSITION]: {new: CONFIG_NAME_POSITION},
 };
     const ICONCOLORS = {
@@ -280,7 +281,6 @@ const ESC_INVERT_PCT_UI = false;
 const ESC_INVERT_OPEN_CLOSE_UI = false
 const ESC_INVERT_OPEN_CLOSE_COVER = false
 
-const ESC_CAN_TILT = false;
 const ESC_SHOW_TILT = true;
 const ESC_TILT_ANGLE_MIN = 10;
 const ESC_TILT_ANGLE_MAX = 170;
@@ -366,9 +366,9 @@ const CONFIG_DEFAULT ={
   [CONFIG_INVERT_OPEN_CLOSE_UI]   : ESC_INVERT_OPEN_CLOSE_UI,
   [CONFIG_INVERT_OPEN_CLOSE_COVER]: ESC_INVERT_OPEN_CLOSE_COVER,
 
-
-  [CONFIG_CAN_TILT]: ESC_CAN_TILT,
   [CONFIG_SHOW_TILT]: ESC_SHOW_TILT,
+  [CONFIG_TILT_ANGLE_MIN]: ESC_TILT_ANGLE_MIN,
+  [CONFIG_TILT_ANGLE_MAX]: ESC_TILT_ANGLE_MAX,
 
   [CONFIG_CLOSING_DIRECTION]: ESC_CLOSING_DIRECTION,
   [CONFIG_PARTIAL_CLOSE_PCT]: ESC_PARTIAL_CLOSE_PCT,
@@ -1599,7 +1599,7 @@ class EnhancedShutter extends LitElement
 
   }
   getTiltAngle(sliderPosition){
-    return -(ESC_TILT_ANGLE_MIN + (sliderPosition / 100) * (ESC_TILT_ANGLE_MAX - ESC_TILT_ANGLE_MIN))+'deg';
+    return -(this.cfg.tiltAngleMin() + (sliderPosition / 100) * (this.cfg.tiltAngleMax() - this.cfg.tiltAngleMin()))+'deg';
   }
 
   updated(changedProperties) {
@@ -2083,8 +2083,10 @@ class shutterCfg {
       this.offsetOpenedPct(boundary(escConfig[CONFIG_OFFSET_OPENED_PCT]));
       this.offsetClosedPct(boundary(escConfig[CONFIG_OFFSET_CLOSED_PCT]));
 
-      this.canTilt(!!escConfig[CONFIG_CAN_TILT]);  // deprecated
       this.showTilt(!!escConfig[CONFIG_SHOW_TILT]);
+
+      this.tiltAngleMin(escConfig[CONFIG_TILT_ANGLE_MIN]);
+      this.tiltAngleMax(escConfig[CONFIG_TILT_ANGLE_MAX]);
 
       this.defButtonPosition(escConfig);
 
@@ -2336,14 +2338,14 @@ class shutterCfg {
   offsetClosedPct(value = null){
     return this.#getCfg(CONFIG_OFFSET_CLOSED_PCT,value);
   }
-
-
-  // TODO: setting can_tilt should be show_tilt. can_tilt() should depend on ESC_FEATURE_OPEN_TILT and/or ESC_FEATURE_CLOSE_TILT and ESC_FEATURE_SET_TILT_POSITION
   showTilt(value=null){
-    return (this.canTilt()|| this.#getCfg(CONFIG_SHOW_TILT,value)) && this.isCoverFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT | ESC_FEATURE_SET_TILT_POSITION) ;
+    return (this.#getCfg(CONFIG_SHOW_TILT,value)) && this.isCoverFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT | ESC_FEATURE_SET_TILT_POSITION) ;
   }
-  canTilt(value = null){
-    return this.#getCfg(CONFIG_CAN_TILT,value );
+  tiltAngleMin(value = null){
+    return this.#getCfg(CONFIG_TILT_ANGLE_MIN,value );
+  }
+  tiltAngleMax(value = null){
+    return this.#getCfg(CONFIG_TILT_ANGLE_MAX,value );
   }
 
 
