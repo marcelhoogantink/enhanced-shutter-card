@@ -5,6 +5,7 @@ const DEBUG = false;
 // https://www.jsdelivr.com/package/gh/lit/dist
 
 import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
+import { unsafeHTML } from 'https://unpkg.com/lit@latest/directives/unsafe-html.js?module';
 
 // import {html, css, unsafeCSS } from './lit/lit-core.min.js';
 // import {LitElement} from './lit/lit-debug.js'; // <-- dit is nu de debug versie
@@ -106,7 +107,7 @@ const ESC_CLASS_SELECTOR_PICTURE = `${ESC_CLASS_BASE_NAME}-selector-picture`;
 const ESC_CLASS_SELECTOR_PICKER = `${ESC_CLASS_BASE_NAME}-selector-picker`;
 const ESC_CLASS_SELECTOR_PARTIAL = `${ESC_CLASS_BASE_NAME}-selector-partial`;
 const ESC_CLASS_SELECTOR_SLIDE = `${ESC_CLASS_BASE_NAME}-selector-slide`;
-const ESC_CLASS_SELECTOR_SLIDE_MAIN = `${ESC_CLASS_SELECTOR_SLIDE}-main`;
+const ESC_CLASS_SELECTOR_SLIDE_SLATS = `${ESC_CLASS_SELECTOR_SLIDE}-slats`;
 const ESC_CLASS_SELECTOR_SLIDE_EDGE = `${ESC_CLASS_SELECTOR_SLIDE}-edge`;
 const ESC_CLASS_MOVEMENT_OVERLAY = `${ESC_CLASS_BASE_NAME}-movement-overlay`;
 const ESC_CLASS_MOVEMENT_UP = `${ESC_CLASS_BASE_NAME}-movement-up`;
@@ -164,7 +165,7 @@ const CONFIG_WINDOW_IMAGE = 'window_image';
 const CONFIG_VIEW_IMAGE = 'view_image';
 const CONFIG_SHUTTER_SLAT_IMAGE = 'shutter_slat_image';
 const CONFIG_SHUTTER_BOTTOM_IMAGE = 'shutter_bottom_image';
-const CONFIG_ROTATE_MAIN_SHUTTER_IMAGE = 'rotate_slat_image';
+const CONFIG_ROTATE_SLATS_SHUTTER_IMAGE = 'rotate_slat_image';
 const CONFIG_STRETCH_EDGE_SHUTTER_IMAGE = 'stretch_bottom_image';
 const CONFIG_BASE_HEIGHT_PX = 'base_height_px';
 const CONFIG_BASE_WIDTH_PX = 'base_width_px';
@@ -282,8 +283,8 @@ const ESC_INVERT_OPEN_CLOSE_UI = false
 const ESC_INVERT_OPEN_CLOSE_COVER = false
 
 const ESC_SHOW_TILT = true;
-const ESC_TILT_ANGLE_MIN = 10;
-const ESC_TILT_ANGLE_MAX = 170;
+const ESC_TILT_ANGLE_MIN = 0;
+const ESC_TILT_ANGLE_MAX = 180;
 
 const ESC_CLOSING_DIRECTION = DOWN;
 const ESC_PARTIAL_CLOSE_PCT = 0;
@@ -339,7 +340,7 @@ const CONFIG_DEFAULT ={
   [CONFIG_VIEW_IMAGE]: ESC_IMAGE_VIEW,
   [CONFIG_SHUTTER_SLAT_IMAGE]: ESC_IMAGE_SHUTTER_SLAT,
   [CONFIG_SHUTTER_BOTTOM_IMAGE]: ESC_IMAGE_SHUTTER_BOTTOM,
-  [CONFIG_ROTATE_MAIN_SHUTTER_IMAGE]: ESC_ROTATE_MAIN_SHUTTER_IMAGE,
+  [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: ESC_ROTATE_MAIN_SHUTTER_IMAGE,
   [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: ESC_STRETCH_EDGE_SHUTTER_IMAGE,
   [CONFIG_BASE_HEIGHT_PX]: ESC_BASE_HEIGHT_PX,
   [CONFIG_BASE_WIDTH_PX]: ESC_BASE_WIDTH_PX,
@@ -393,7 +394,7 @@ const CONFIG_DEFAULT ={
 };
 const ESC_PRESET = {
   [ESC_ROLLER_SHUTTER] : {
-    [CONFIG_ROTATE_MAIN_SHUTTER_IMAGE]: true,
+    [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: true,
   }  // default is using CONFIG_DEFAULT
   ,
   [ESC_AWNING]: {
@@ -401,7 +402,7 @@ const ESC_PRESET = {
     [CONFIG_INVERT_PCT_UI]: true,
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-awning.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'esc-awning-bottom.png',
-    [CONFIG_ROTATE_MAIN_SHUTTER_IMAGE]: true,
+    [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: true,
     [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: false,
     [CONFIG_OFFSET_CLOSED_PCT]: 50,
     [CONFIG_CLOSING_DIRECTION]: DOWN,
@@ -411,7 +412,7 @@ const ESC_PRESET = {
     [CONFIG_CLOSING_DIRECTION]: RIGHT,
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-curtain.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
-    [CONFIG_ROTATE_MAIN_SHUTTER_IMAGE]: false,
+    [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
   },
   [ESC_SHADE]: {
     [CONFIG_SHUTTER_SLAT_IMAGE]: '#00000080',
@@ -540,7 +541,7 @@ const SHUTTER_CSS =`
         width: 100%;
         overflow: hidden;
         bottom: 100%;
-        height: var(--esc-slide-height);
+        hheight: var(--esc-slide-height);` /* remove for better working tilt dd 4-2-2026 */+`
         transform-origin: bottom;
         transform: var(--esc-transform-slide);
         image-rendering: auto;
@@ -548,16 +549,68 @@ const SHUTTER_CSS =`
         image-rendering: crisp-edges;
         image-rendering: -webkit-optimize-contrast;
       }
-      .${ESC_CLASS_SELECTOR_SLIDE_MAIN} {
-        height: var(--esc-slide-main-height);
+
+
+      .${ESC_CLASS_SELECTOR_SLIDE_SLATS} {
+        height: var(--esc-slide-slats-height);
         background-position: var(--esc-slide-background-main-position);
         background-image: var(--esc-slide-background-main-image);
         background-color: var(--esc-slide-background-main-color);
 
         background-repeat: repeat;
-        background-size: var(--esc-slide-background-main-size);
-        transform: var(--esc-transform-undo-rotate);
+        background-size: var(--esc-slide-background-slats-size);
+        transform: var(--esc-transform-undo-slats-rotate);
       }
+      .iso-slat1 {
+        height: var(--esc-slide-slats-height);
+        display: flex;
+        flex-direction: column-reverse;
+        overflow: hidden;
+      }
+      .iso-slat2 {
+        height: var(--esc-slat-height2);
+        width: 100%;
+        flex-shrink: 0;
+        overflow: hidden;
+        bborder: 1px solid purple;
+        transform: rotateX(var(--esc-tilt-angle-deg))
+      }
+      .iso-slat3 {
+        position: relative;
+
+        height: var(--esc-iso-slat3-height);
+        width: var(--esc-iso-slat3-width);
+        background-size: var(--esc-iso-slat3-background-size);
+
+        transform-origin: 50px 50px;
+        transform: var(--esc-transform-slat-rotate);
+        background-repeat: repeat;
+        background-position: var(--esc-slide-background-main-position);
+        background-color: var(--esc-slide-background-main-color);
+        background-image: var(--esc-slide-background-main-image);
+      }
+      .iso-slat::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+
+        bbackground-position: var(--esc-slide-background-main-position);
+        background-image: var(--esc-slide-background-main-image);
+        background-color: var(--esc-slide-background-main-color);
+        bbackground-size: var(--esc-slide-background-slats-size);
+
+        transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-undo-slats-rotate);
+        transform-origin: center;
+      }
+      .iso-slat {
+        position: relative;
+        height: var(--esc-slat-height);
+        overflow: visible;
+        bbackground-position: var(--esc-slide-background-main-position);
+      }
+
+
+
       .${ESC_CLASS_SELECTOR_SLIDE_EDGE} {
         height: var(--esc-slide-edge-height);
         background-position: var(--esc-slide-background-edge-position);
@@ -736,6 +789,7 @@ const SHUTTER_CSS =`
       left: ${ICON_SIZE/2}px;
       transform: translateX(-50%);
     }
+
 `;
 
 /**
@@ -857,7 +911,7 @@ class EnhancedShutterCardNew extends LitElement{
     if (this.isShutterConfigLoaded){
 
       changedProperties.forEach((oldValue, propName) => {
-        console.log(`Card shouldUpdate, Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
+        //console.log(`Card shouldUpdate, Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
         // ******
         // TODO: improve select/search states
         // ******
@@ -904,8 +958,8 @@ class EnhancedShutterCardNew extends LitElement{
         }
       });
     }
-    console_log('Card shouldUpdate End: doUpdate=',doUpdate);
-    console_log('Card shouldUpdate ========================\n');
+    //console_log('Card shouldUpdate End: doUpdate=',doUpdate);
+    //console_log('Card shouldUpdate ========================\n');
     return doUpdate;
   //    return changedProperties.has('prop1');
   }
@@ -1057,7 +1111,7 @@ class EnhancedShutterCardNew extends LitElement{
   }
   // Check the orientation based on the window and div visibility
   disconnectedCallback() {
-    console.log('Card disconnectedCallback Start');
+    //console.log('Card disconnectedCallback Start');
     super.disconnectedCallback();
     this.resizeObserver?.disconnect();
   }
@@ -1463,7 +1517,7 @@ class EnhancedShutter extends LitElement
   shouldUpdate(changedProperties)
   {
     changedProperties.forEach((oldValue, propName) => {
-      console.log(`Shutter shouldUpdate (${this.cfg.friendlyName()}), Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
+      //console.log(`Shutter shouldUpdate (${this.cfg.friendlyName()}), Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
     });
     return this.escImagesLoaded?true:false;
   }
@@ -1554,11 +1608,6 @@ class EnhancedShutter extends LitElement
   }
   firstUpdated(changedProperties) {
     this[ESC_CLASS_SELECTOR] = findElement(this, `.${ESC_CLASS_SELECTOR}`);
-    this.slat1 = findElement(this,'#tilt-slat1');
-    this.slat2 = findElement(this,'#tilt-slat2');
-    this.slat3 = findElement(this,'#tilt-slat3');
-    this.slider = findElement(this,'.tilt-slider-class');
-    this.textPosition = findElement(this,`.${ESC_CLASS_POSITION}>span`);
     // NOTE: drop the old lit‐decorated @touchstart from the template
     //      so we can re‑attach it manually below
     const picker = findElement(this, `.${ESC_CLASS_SELECTOR_PICKER}`);
@@ -1573,33 +1622,38 @@ class EnhancedShutter extends LitElement
     }
     this.startResizeObserver();
 
+    // tilt .....
+    if (this.cfg.showTilt()){
+      this.slider = findElement(this,'.tilt-slider-class');
+      this.slat1 = findElement(this,'#tilt-slat1');
+      this.slat2 = findElement(this,'#tilt-slat2');
+      this.slat3 = findElement(this,'#tilt-slat3');
+      this.textPosition = findElement(this,`.${ESC_CLASS_POSITION}>span`);
+      this.slider.addEventListener('input', () => {
+        this.action='user-drag-tilt';
+        //console.log('Slider input value=',this.slider.value);
+        this.tiltPosition = this.slider.value;
+        this.positionText = this.cfg.computePositionText(this.cfg.currentDevicePosition(),this.slider.value);
+        //console.log('Slider input positionText,tiltPosition=',this.positionText,this.tiltPosition);
+      });
+      let resetSlider = (event) => { // mousUpTilt
+        const sliderPosition = this.slider.value ;
+        this.action='user-pick';
+        this.sendShutterTiltPosition(this.cfg.entityId(),sliderPosition);
 
-
-    this.slider.addEventListener('input', () => {
-      this.action='user-drag-tilt';
-      //console.log('Slider input value=',this.slider.value);
-      this.tiltPosition = this.slider.value;
-      this.positionText = this.cfg.computePositionText(this.cfg.currentDevicePosition(),this.slider.value);
-      //console.log('Slider input positionText,tiltPosition=',this.positionText,this.tiltPosition);
-    });
-
-    let resetSlider = (event) => { // mousUpTilt
-      const sliderPosition = this.slider.value ;
-      this.action='user-pick';
-      this.sendShutterTiltPosition(this.cfg.entityId(),sliderPosition);
-
-      this.removeEventListener('mouseup', resetSlider);
-      this.removeEventListener('touchend', resetSlider);
-
+        this.removeEventListener('mouseup', resetSlider);
+        this.removeEventListener('touchend', resetSlider);
+      }
+      this.slider.addEventListener('mouseup', resetSlider);
+      this.slider.addEventListener('touchend',resetSlider);
     }
-
-    this.slider.addEventListener('mouseup', resetSlider);
-    this.slider.addEventListener('touchend',resetSlider);
-
 
   }
   getTiltAngle(sliderPosition){
-    return -(this.cfg.tiltAngleMin() + (sliderPosition / 100) * (this.cfg.tiltAngleMax() - this.cfg.tiltAngleMin()))+'deg';
+
+    const angle = -(this.cfg.tiltAngleMin() + (sliderPosition / 100) * (this.cfg.tiltAngleMax() - this.cfg.tiltAngleMin()))+'deg';
+    console.log('getTiltAngle: sliderPosition=',sliderPosition,' angle=',angle);
+    return angle;
   }
 
   updated(changedProperties) {
@@ -1610,8 +1664,9 @@ class EnhancedShutter extends LitElement
     //console_log('Shutter Updated');
     super.updated(changedProperties);
 
-    this.slider.value = this.tiltPosition; // !!!!! Special .....
-
+    if (this.cfg.showTilt()){
+      this.slider.value = this.tiltPosition; // !!!!! Special .....
+    }
     this.action='cover-update';
 
   }
@@ -1662,24 +1717,44 @@ class EnhancedShutter extends LitElement
 
     ].join(SPACE);
   }
-  transformUndoMainRotate(){
+  transformUndoSlatsRotate(){
 
-    let rotate = this.cfg.rotateMainImage() ? 0 : -this.cfg.getCloseAngle();
-    let size_global;
+    let rotate;
     let size_x;
     let size_y;
-    if (this.cfg.rotateMainImage()){
+    if (this.cfg.rotateSlatsImage()){
       size_x = 1;
       size_y = 1;
       rotate =  0;
     }else{
       size_x = this.actualGlobalWidthPx();
-      size_y = this.mainSlideHeightPx();
+      size_y = this.slatsSlideHeightPx();
       rotate = -this.cfg.getCloseAngle();
     }
     return [
       this.cfg.transformRotate(rotate), // rotate around div transform-origin
       this.cfg.transformScale(size_x,size_y), // correct local width of the main
+    ].join(SPACE);
+  }
+  transformSlatRotate(){
+
+    const debugName = this.cfg.friendlyName();
+    let size_x=1;
+    let size_y=1;
+    let rotate=0;
+    if (this.cfg.rotateSlatsImage()){
+      size_x = 1;
+      size_y = 1;
+      rotate =  0;
+    }else{
+      size_x = this.actualGlobalWidthPx();
+      size_y = this.slatsSlideHeightPx();
+      rotate = -this.cfg.getCloseAngle();
+    }
+    return [
+      //'rotateX(var(--esc-tilt-angle-deg))',
+      this.cfg.transformRotate(rotate), // rotate around div transform-origin
+      //this.cfg.transformScale(1,1 ), // correct local width of the main
     ].join(SPACE);
   }
   transformPartial(){
@@ -1718,6 +1793,20 @@ class EnhancedShutter extends LitElement
       ? this.actualGlobalHeightPx()
       : this.actualGlobalWidthPx();
   }
+  slatSizeMovingDirectionPx(){
+    //const value = this.cfg.verticalMovement() || this.cfg.rotateSlatsImage()
+    const value = this.cfg.rotateSlatsImage()
+      ? this.shutterSlatSize().y
+      : this.shutterSlatSize().x;
+    return value;
+  }
+  slatsSizeMovingDirectionPx(){
+    let debugName = this.cfg.friendlyName();
+    const value = this.cfg.rotateSlatsImage()
+      ? this.slideHeightPx()-this.shutterBottomSize().y
+      : this.slideHeightPx();
+    return value;
+  }
 
   coverHeightPx(){
     return this.actualGlobalHeightPx()-this.offsetClosedPx() - this.offsetOpenedPx();
@@ -1739,7 +1828,7 @@ class EnhancedShutter extends LitElement
       [LEFT]:LEFT,
       [RIGHT]:RIGHT
     };
-    const position = this.cfg.rotateMainImage() ? BOTTOM : dirs[direction] || BOTTOM;
+    const position = this.cfg.rotateSlatsImage() ? BOTTOM : dirs[direction] || BOTTOM;
     return position;
   }
   shutterMainBackgroundPosition(){
@@ -1751,7 +1840,7 @@ class EnhancedShutter extends LitElement
       [LEFT]:LEFT,
       [RIGHT]:RIGHT
     };
-    const position = this.cfg.rotateMainImage() ? BOTTOM : dirs[direction] || BOTTOM;
+    const position = this.cfg.rotateSlatsImage() ? BOTTOM : dirs[direction] || BOTTOM;
     return position;
   }
   shutterEdgeBackgroundPosition(){
@@ -1767,9 +1856,25 @@ class EnhancedShutter extends LitElement
 */
 
   shutterSlatSizePercentage(){
-    let imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId())
+    let debugName = this.cfg.friendlyName();
+    let imageSize = this.shutterSlatSize();
     let imagePercentage;
-    if (this.cfg.rotateMainImage()) {
+    if (this.cfg.rotateSlatsImage()) {
+      imagePercentage = this.sizePercentageSlat(imageSize);
+    }else{
+      if (!this.cfg.verticalMovement()) imageSize =  new xyPair(imageSize.y, imageSize.x);
+      imagePercentage = this.sizePercentageSlat(imageSize);
+      if (!this.cfg.verticalMovement()) imagePercentage = new xyPair(imagePercentage.y, imagePercentage.x);
+      imagePercentage = new xyPair("50%","50%");
+    }
+    let size = `${imagePercentage.x} ${imagePercentage.y}`;
+    return size;
+  }
+  shutterSlatsSizePercentage(){
+    let debugName = this.cfg.friendlyName();
+    let imageSize = this.shutterSlatSize();
+    let imagePercentage;
+    if (this.cfg.rotateSlatsImage()) {
       imagePercentage = this.sizePercentage(imageSize);
     }else{
       if (!this.cfg.verticalMovement()) imageSize =  new xyPair(imageSize.y, imageSize.x);
@@ -1778,6 +1883,15 @@ class EnhancedShutter extends LitElement
     }
     let size = `${imagePercentage.x} ${imagePercentage.y}`;
     return size;
+  }
+  shutterSlatSize(){
+    let imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId())
+    return imageSize;
+  }
+  shutterSlatSizeTest(){
+    let imageSize = new xyPair(100,40);
+
+    return imageSize;
   }
   shutterBottomSizePercentage(){
     const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.entityId())
@@ -1791,18 +1905,34 @@ class EnhancedShutter extends LitElement
     return size;
   }
   sizePercentage(imageSize){
-    //const min=Math.max(Math.min( imageSize.x,imageSize.y),6); // TODO why 6 here?
+    let debugName = this.cfg.friendlyName();
     let width;
-    //if (!this.cfg.rotateMainImage()){
+    let height = this.slatsSlideHeightPx();
+    if (this.cfg.verticalMovement()) {
+      width = this.cfg.windowWidthPx();
+    }else{
+      width = this.cfg.windowHeightPx();
+    }
+    // let factor = width / imageSize.x;
+    let x = `calc(100% / (${width}/${imageSize.x}))`; // TODO stretch_bottom_image
+    let y = `calc(100% / (${height}/${imageSize.y}))`; // TODO stretch_bottom_image
+    let size = new xyPair(x,y);
+    return size;
+
+  }
+  sizePercentageSlat(imageSize){
+    let debugName = this.cfg.friendlyName();
+    let width;
+    let height = this.shutterSlatSize().y;
     if (this.cfg.verticalMovement()) {
       width = this.cfg.windowWidthPx();
     }else{
       width = this.cfg.windowHeightPx();
     }
 
-    let factor = width / imageSize.x;
+    // let factor = width / imageSize.x;
     let x = `calc(100% / (${width}/${imageSize.x}))`; // TODO stretch_bottom_image
-    let y= imageSize.y+ 'px';
+    let y = `calc(100% / (${height}/${imageSize.y}))`; // TODO stretch_bottom_image
     let size = new xyPair(x,y);
     return size;
 
@@ -1815,11 +1945,26 @@ class EnhancedShutter extends LitElement
   offsetClosedPx(){
     return Math.round(this.cfg.offsetClosedPct())/ 100 * this.windowSizeMovingDirectionPx();
   }
-  mainSlideHeightPx(){
+  /**
+   *
+   * @returns Netto local height of the slats-part (= total - edge)
+   */
+  slatsSlideHeightPx(){
     return this.slideHeightPx()-this.shutterBottomSize().y;
   }
+  /**
+   * @return Local height of the slide-part
+   */
   slideHeightPx(){
-    return this.windowSizeMovingDirectionPx();
+    let debugName = this.cfg.friendlyName();
+    const size = this.windowSizeMovingDirectionPx();
+    return size;
+  }
+  slatHeightPx(){
+    return this.slatSizeMovingDirectionPx();
+  }
+  slatHeightPx1(){
+    return this.slatsSizeMovingDirectionPx();
   }
   coverOpenedPx(){
     return this.offsetOpenedPx();
@@ -1830,7 +1975,40 @@ class EnhancedShutter extends LitElement
 
     return size_local.y-this.offsetClosedPx();
   }
+  isoSlat3HeightPx(){
+    let value;
+    if (this.cfg.rotateSlatsImage()){
+      value = this.shutterSlatSize().y;
+    }else{
+      value =this.slatHeightPx1();
+    }
+    return value;
+  }
+  isoSlat3WidthPx(){
+    let value;
+    let value2;
+    let debugName = this.cfg.friendlyName();
 
+    if (this.cfg.rotateSlatsImage()){
+      value = '';
+    }else{
+      value = (this.shutterSlatSize().x/this.cfg.windowWidthPx()*100)+'%';
+      value2 = '40%';
+    }
+    return value;
+  }
+  isoSlat3BackgroundSize(){
+    let debugName = this.cfg.friendlyName();
+    let value;
+    let value2;
+    if (this.cfg.rotateSlatsImage()){
+      value = this.shutterSlatSizePercentage();
+    }else{
+      value = '100% '+(this.shutterSlatSize().y/this.cfg.windowHeightPx()*100)+'%';
+      value2 ='100% 16%';
+    }
+    return value;
+  }
 
   defScreenPositionFromCurrentPosition(currentDevicePosition=this.cfg.currentDevicePosition()) {
 
@@ -1958,8 +2136,9 @@ class EnhancedShutter extends LitElement
     this.action='user-drag';
     this.screenPosition = this.getScreenPosFromPickPoint(this.getPoint(event)); // this.screenPosition triggers refresh
     let pointedShutterPosition = this.getShutterPosFromScreenPos(this.screenPosition);
+    let sliderPosition = (this.slider!==undefined) ? this.slider.value : 0;
 
-    this.positionText = this.cfg.computePositionText(pointedShutterPosition,this.slider.value);
+    this.positionText = this.cfg.computePositionText(pointedShutterPosition,sliderPosition);
     //console.log('mouseMove: screenPosition:',this.screenPosition,'shutterPosition:',pointedShutterPosition,'positionText:',this.positionText);
 
   };
@@ -2070,7 +2249,7 @@ class shutterCfg {
       let resize_width_pct  = escConfig[CONFIG_RESIZE_WIDTH_PCT];
       this.windowWidthPx(Math.round(boundary(resize_width_pct, ESC_MIN_RESIZE_WIDTH_PCT ,ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
 
-      this.rotateMainImage(escConfig[CONFIG_ROTATE_MAIN_SHUTTER_IMAGE]);
+      this.rotateSlatsImage(escConfig[CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]);
       this.stretchEdgeImage(escConfig[CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]);
 
       this.scaleButtons(escConfig[CONFIG_SCALE_BUTTONS]);
@@ -2230,6 +2409,10 @@ class shutterCfg {
     let transform =`${this.verticalMovement() ? '': `scale(${y/x},${x/y})`}`;
     return transform;
    }
+  transformScale2(x = this.actualGlobalWidthPx(),y = this.actualGlobalHeightPx()){
+    let transform =`${this.verticalMovement() ? '': `scale(${x},${y})`}`;
+    return transform;
+   }
   transformTranslate(x=this.actualGlobalWidthPx(),y=this.actualGlobalHeightPx()){
     let transform =`translate(${x}px,${y}px)`;
     return transform;
@@ -2317,8 +2500,8 @@ class shutterCfg {
     if (value !== null && value !=0) value =this.applyInvertToPosition(value);
     return this.#getCfg(CONFIG_OFFSET_IS_CLOSED_PCT,value);
   }
-  rotateMainImage(value = null){
-    return this.#getCfg(CONFIG_ROTATE_MAIN_SHUTTER_IMAGE,value);
+  rotateSlatsImage(value = null){
+    return this.#getCfg(CONFIG_ROTATE_SLATS_SHUTTER_IMAGE,value);
   }
   stretchEdgeImage(value = null){
     return this.#getCfg(CONFIG_STRETCH_EDGE_SHUTTER_IMAGE,value);
@@ -2989,8 +3172,9 @@ class htmlCard{
       --esc-display-position-top: ${this.cfg.displayOpening(TOP)};
       --esc-display-position-bottom: ${this.cfg.displayOpening(BOTTOM)};
       --esc-flex-flow-middle: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
-      --esc-window-width: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
       --esc-window-height: ${this.cfg.windowHeightPx()+UNITY};
+      --esc-window-width: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
+      --esc-window-width2: ${this.cfg.windowWidthPx()+UNITY};
       --esc-window-background-image: ${viewImage.includes('.') ?  `url(${viewImage})` : ''};
       --esc-window-background-color: ${viewImage.includes('.') ? '' : `${viewImage}`};
       --esc-window-rotate: ${this.cfg.viewImageRotate()};
@@ -3001,13 +3185,24 @@ class htmlCard{
       --esc-tilt-value: ${this.actualTiltPosition};
       --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngle(this.enhancedShutter.tiltPosition)};
 
-      --esc-transform-undo-rotate:  ${this.enhancedShutter.transformUndoMainRotate()};
+      --esc-transform-undo-slats-rotate:  ${this.enhancedShutter.transformUndoSlatsRotate()};
+      --esc-transform-slat-rotate:  ${this.enhancedShutter.transformSlatRotate()};
       --esc-transform-movement: ${this.enhancedShutter.transformMovement()};
 
       --esc-picker-top: -${this.cfg.pickerOverlapPx()+UNITY};
       --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+UNITY};
       --esc-slide-height: ${this.enhancedShutter.slideHeightPx()+UNITY};
-      --esc-slide-main-height: ${(this.enhancedShutter.mainSlideHeightPx())+UNITY};
+      --esc-slat-width: ${this.enhancedShutter.shutterSlatSize().x+UNITY};
+      --esc-slat-height: ${this.enhancedShutter.shutterSlatSize().y+UNITY};
+      --esc-slat-height1: ${this.enhancedShutter.slatHeightPx1()+UNITY};
+      --esc-slat-height2: ${this.enhancedShutter.slatHeightPx()+UNITY};
+
+      --esc-iso-slat3-height: ${this.enhancedShutter.isoSlat3HeightPx()+UNITY};
+      --esc-iso-slat3-width: ${this.enhancedShutter.isoSlat3WidthPx()};
+      --esc-iso-slat3-background-size: ${this.enhancedShutter.isoSlat3BackgroundSize()};
+
+
+      --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+UNITY};
       --esc-slide-edge-height: ${this.enhancedShutter.shutterBottomSize().y+UNITY};
 
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
@@ -3024,7 +3219,8 @@ class htmlCard{
       --esc-slide-background-main-color: ${shutterSlatImage.includes('.') ? '' : `${shutterSlatImage}`};
       --esc-slide-background-edge-color: ${shutterBottomImage.includes('.') ? '' : `${shutterBottomImage}`};
 
-      --esc-slide-background-main-size: ${this.enhancedShutter.shutterSlatSizePercentage()};
+      --esc-slide-background-slat-size: ${this.enhancedShutter.shutterSlatSizePercentage()};
+      --esc-slide-background-slats-size: ${this.enhancedShutter.shutterSlatsSizePercentage()};
       --esc-slide-background-edge-size: ${this.enhancedShutter.shutterBottomSizePercentage()};
 
       --esc-slide-background-main-position: ${this.enhancedShutter.shutterMainBackgroundPosition()};
@@ -3185,10 +3381,7 @@ class htmlCard{
 
         ${this.escImages.getWindowImageSrc(this.cfg.entityId()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.entityId())} ">` : ''}
 
-          <div class="${ESC_CLASS_SELECTOR_SLIDE}">
-            <div class="${ESC_CLASS_SELECTOR_SLIDE_MAIN}"></div>
-            <div class="${ESC_CLASS_SELECTOR_SLIDE_EDGE}"></div>
-          </div>
+          ${this.showSlide()}
           ${this.cfg.partialActive()  //  show partial only if no offset is defined
             ? html`<div class="${ESC_CLASS_SELECTOR_PARTIAL}"></div>`
             : ''}
@@ -3206,6 +3399,52 @@ class htmlCard{
     `;
   }
 
+  showSlide(){
+     return html`
+        <div class="${ESC_CLASS_SELECTOR_SLIDE}">
+          ${this.showSlideSlats()}
+          <div class="${ESC_CLASS_SELECTOR_SLIDE_EDGE}"></div>
+        </div>
+      `;
+  }
+  showSlideSlats(){
+    const output = this.cfg.showTilt()
+     ? html`
+        ${this.showSlatsTilt()}
+      `
+     : html`
+        ${this.showSlats()}
+      `;
+    return output;
+  }
+  showSlatsTilt(){
+
+    const name = this.cfg.friendlyName();
+    const sizeSlide = this.enhancedShutter.windowSizeMovingDirectionPx();
+    const sizeSlat = this.enhancedShutter.shutterSlatSize() ;
+
+    //const sizeSlat = new xyPair(100,51);
+    const number1 = 1; // Math.ceil(sizeSlide / sizeSlat.y);
+    const number = Math.ceil(sizeSlide / sizeSlat.y);
+
+    return html`
+      <div class="iso-slat1">
+      ${Array.from({ length: number }, () =>
+        html`<div class="iso-slat2">
+          <div class="iso-slat3">
+          </div>
+        </div>`
+      )}
+      </div>
+    `;
+  }
+  showSlats(){
+
+    return html`
+        <div class="${ESC_CLASS_SELECTOR_SLIDE_SLATS}">
+        </div>
+      `;
+  }
   showRightButtons(){
 
     const icons= {
