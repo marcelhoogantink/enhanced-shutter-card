@@ -51,7 +51,7 @@ const AUTO_BR = `${AUTO}-${BOTTOM}-${RIGHT}`;
       height: 56px
       gap between cells: 8px
 */
-const HA_GRID_PX_HEIGHTt = 56;
+const HA_GRID_PX_HEIGHT = 56;
 const HA_GRID_PX_WIDTH = 24; // beween 17 and 30 ???
 const HA_GRID_PX_GAP = 8;
 
@@ -421,7 +421,6 @@ const ESC_PRESET = {
   [ESC_TEST]: {
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'rode_rechthoek.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'gele_rechthoek.png',
-    [CONFIG_CLOSING_DIRECTION]: DOWN,
   },
 }
 
@@ -572,8 +571,7 @@ const SHUTTER_CSS =`
         width: 100%;
         flex-shrink: 0;
         overflow: hidden;
-        bborder: 1px solid purple;
-        transform: rotateX(var(--esc-tilt-angle-deg))
+        transform: rotateX(var(--esc-tilt-angle-deg));
       }
       .iso-slat3 {
         position: relative;
@@ -582,8 +580,9 @@ const SHUTTER_CSS =`
         width: var(--esc-iso-slat3-width);
         background-size: var(--esc-iso-slat3-background-size);
 
-        transform-origin: 50px 50px;
+        transform-origin: var(--esc-iso-slat3-origin);
         transform: var(--esc-transform-slat-rotate);
+
         background-repeat: repeat;
         background-position: var(--esc-slide-background-main-position);
         background-color: var(--esc-slide-background-main-color);
@@ -830,7 +829,7 @@ class EnhancedShutterCardNew extends LitElement{
     this.screenOrientation= LANDSCAPE;
 
     this.gridPixelWidth = HA_GRID_PX_WIDTH;
-    this.gridPixelHeight = HA_GRID_PX_HEIGHTt;
+    this.gridPixelHeight = HA_GRID_PX_HEIGHT;
     this.gridPixelGap = HA_GRID_PX_GAP;
     this.gridContainer = null;
 
@@ -1327,6 +1326,7 @@ class EnhancedShutterCardNew extends LitElement{
     let sizeWindowImage = this.gridSizeWindowImage(cfg);
     let sizePartialOpenButtons = this.gridSizePartialOpenButtons(cfg);
     let sizeTiltSection = this.gridSizeTiltSection(cfg);
+    let sizeTiltButtons = this.gridSizeTiltButtons(cfg);
 
     let cardSize;
     if (cfg.buttonsInRow()){
@@ -1737,25 +1737,23 @@ class EnhancedShutter extends LitElement
     ].join(SPACE);
   }
   transformSlatRotate(){
-
-    const debugName = this.cfg.friendlyName();
-    let size_x=1;
-    let size_y=1;
+    // --esc-transform-slat-rotate
     let rotate=0;
     if (this.cfg.rotateSlatsImage()){
-      size_x = 1;
-      size_y = 1;
-      rotate =  0;
+      rotate = 0;
     }else{
-      size_x = this.actualGlobalWidthPx();
-      size_y = this.slatsSlideHeightPx();
-      rotate = -this.cfg.getCloseAngle();
+      rotate = -90;
     }
     return [
-      //'rotateX(var(--esc-tilt-angle-deg))',
       this.cfg.transformRotate(rotate), // rotate around div transform-origin
-      //this.cfg.transformScale(1,1 ), // correct local width of the main
     ].join(SPACE);
+  }
+isoSlat3Origin(){
+    //        ttransform-origin: var(--esc-slat-width-2) var(--esc-slat-width-2);
+    const width = ((this.shutterSlatSize().x)/2)+UNITY;
+    const origin = `${width} ${width}`;
+
+    return origin;
   }
   transformPartial(){
     const size_x = this.actualGlobalWidthPx();
@@ -1819,18 +1817,6 @@ class EnhancedShutter extends LitElement
     return imageSize;
   };
 
-  shutterBackgroundPosition(){
-
-    const direction=this.cfg.unrollUnfoldDirection();
-    const dirs={
-      [DOWN]:BOTTOM,
-      [UP]:TOP,
-      [LEFT]:LEFT,
-      [RIGHT]:RIGHT
-    };
-    const position = this.cfg.rotateSlatsImage() ? BOTTOM : dirs[direction] || BOTTOM;
-    return position;
-  }
   shutterMainBackgroundPosition(){
 
     const direction=this.cfg.unrollUnfoldDirection();
@@ -1888,19 +1874,15 @@ class EnhancedShutter extends LitElement
     let imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId())
     return imageSize;
   }
-  shutterSlatSizeTest(){
-    let imageSize = new xyPair(100,40);
 
-    return imageSize;
-  }
+
   shutterBottomSizePercentage(){
     const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.entityId())
     let size;
     if (this.cfg.stretchEdgeImage()){
       size= `100% ${imageSize.y}px`;
     }else{
-       let imagePercentage = this.sizePercentage(imageSize);
-       size = `${imagePercentage.x} ${imagePercentage.y}`;
+      size= `${imageSize.x}px ${imageSize.y}px`;
     }
     return size;
   }
@@ -1913,9 +1895,8 @@ class EnhancedShutter extends LitElement
     }else{
       width = this.cfg.windowHeightPx();
     }
-    // let factor = width / imageSize.x;
-    let x = `calc(100% / (${width}/${imageSize.x}))`; // TODO stretch_bottom_image
-    let y = `calc(100% / (${height}/${imageSize.y}))`; // TODO stretch_bottom_image
+    let x = 100/(width/imageSize.x)+ "%"; // TODO stretch_bottom_image
+    let y = 100/(height/imageSize.y)+ "%"; // TODO stretch_bottom_image
     let size = new xyPair(x,y);
     return size;
 
@@ -2409,10 +2390,6 @@ class shutterCfg {
     let transform =`${this.verticalMovement() ? '': `scale(${y/x},${x/y})`}`;
     return transform;
    }
-  transformScale2(x = this.actualGlobalWidthPx(),y = this.actualGlobalHeightPx()){
-    let transform =`${this.verticalMovement() ? '': `scale(${x},${y})`}`;
-    return transform;
-   }
   transformTranslate(x=this.actualGlobalWidthPx(),y=this.actualGlobalHeightPx()){
     let transform =`translate(${x}px,${y}px)`;
     return transform;
@@ -2496,10 +2473,6 @@ class shutterCfg {
     return this.offset() !=SHUTTER_OPEN_PCT && this.offset() != SHUTTER_CLOSED_PCT;
   }
 
-  offset_old(value = null){
-    if (value !== null && value !=0) value =this.applyInvertToPosition(value);
-    return this.#getCfg(CONFIG_OFFSET_IS_CLOSED_PCT,value);
-  }
   rotateSlatsImage(value = null){
     return this.#getCfg(CONFIG_ROTATE_SLATS_SHUTTER_IMAGE,value);
   }
@@ -2645,14 +2618,6 @@ class shutterCfg {
     if (debug){
       console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
       console.log('applyInvertForPositionToText start:',setting);
-    }
-    setting = this.applyInvertOpenClose(setting,debug);
-    return setting;
-  }
-  applyInvertForPositionToState(setting,debug=false){ // ??
-    if (debug){
-      console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
-      console.log('applyInvertForPositionToState start:',setting);
     }
     setting = this.applyInvertOpenClose(setting,debug);
     return setting;
@@ -3192,8 +3157,13 @@ class htmlCard{
       --esc-picker-top: -${this.cfg.pickerOverlapPx()+UNITY};
       --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+UNITY};
       --esc-slide-height: ${this.enhancedShutter.slideHeightPx()+UNITY};
+
       --esc-slat-width: ${this.enhancedShutter.shutterSlatSize().x+UNITY};
       --esc-slat-height: ${this.enhancedShutter.shutterSlatSize().y+UNITY};
+      --esc-slat-width-2: ${((this.enhancedShutter.shutterSlatSize().x)/2)+UNITY};
+      --esc-slat-height-2: ${((this.enhancedShutter.shutterSlatSize().y)/2)+UNITY};
+      --esc-iso-slat3-origin: ${this.enhancedShutter.isoSlat3Origin()};
+
       --esc-slat-height1: ${this.enhancedShutter.slatHeightPx1()+UNITY};
       --esc-slat-height2: ${this.enhancedShutter.slatHeightPx()+UNITY};
 
@@ -3421,11 +3391,11 @@ class htmlCard{
 
     const name = this.cfg.friendlyName();
     const sizeSlide = this.enhancedShutter.windowSizeMovingDirectionPx();
-    const sizeSlat = this.enhancedShutter.shutterSlatSize() ;
+    const sizeSlat = this.enhancedShutter.slatSizeMovingDirectionPx() ;
 
     //const sizeSlat = new xyPair(100,51);
     const number1 = 1; // Math.ceil(sizeSlide / sizeSlat.y);
-    const number = Math.ceil(sizeSlide / sizeSlat.y);
+    const number = Math.ceil(sizeSlide / sizeSlat);
 
     return html`
       <div class="iso-slat1">
