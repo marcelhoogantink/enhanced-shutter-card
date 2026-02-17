@@ -1,5 +1,5 @@
 
-const VERSION = 'v1.5.0-beta-0';
+const VERSION = 'v1.5.0-beta-1';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
@@ -245,6 +245,7 @@ const ESC_AWNING = 'awning';
 const ESC_CURTAIN = 'curtain';
 const ESC_TEST = 'test'; // used for testing purposes
 const ESC_SHADE = 'shade';
+const ESC_BLINDS = 'blinds';
 const ESC_ROLLER_SHUTTER = 'roller-shutter';
 const ESC_TYPES =
   [ESC_AWNING, ESC_CURTAIN, ESC_ROLLER_SHUTTER,ESC_SHADE];
@@ -406,6 +407,7 @@ const ESC_PRESET = {
     [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: false,
     [CONFIG_OFFSET_CLOSED_PCT]: 50,
     [CONFIG_CLOSING_DIRECTION]: DOWN,
+    [CONFIG_NAME]: 'Awning',
 
   },
   [ESC_CURTAIN]: {
@@ -413,15 +415,26 @@ const ESC_PRESET = {
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-curtain.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
+    [CONFIG_NAME]: 'Curtain',
   },
   [ESC_SHADE]: {
     [CONFIG_SHUTTER_SLAT_IMAGE]: '#00000080',
     [CONFIG_CLOSING_DIRECTION]: DOWN,
+    [CONFIG_NAME]: 'Shade',
   },
   [ESC_TEST]: {
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'rode_rechthoek.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'gele_rechthoek.png',
+    [CONFIG_NAME]: 'Test',
   },
+  [ESC_BLINDS]: {
+    [CONFIG_CLOSING_DIRECTION]: RIGHT,
+    [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-blinds.png',
+    [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
+    [CONFIG_WINDOW_IMAGE]: 'esc-window2.png',
+    [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
+    [CONFIG_NAME]: 'Blinds',
+  }
 }
 
 const LOCALIZE_TEXT= {
@@ -864,12 +877,12 @@ class EnhancedShutterCardNew extends LitElement{
     };
     // handle PRESET TYPE
     //
-    let config = { ...ESC_PRESET[configSub[CONFIG_SHUTTER_PRESET]]} || {};
+    let configPreset = { ...ESC_PRESET[configSub[CONFIG_SHUTTER_PRESET]]} || {};
 
+    let config = { ...configBase, ...configPreset, ...configSub};
+
+/*
     Object.keys(configBase).forEach(keyMain =>{
-      //if (keyMain === CONFIG_SHUTTER_PRESET) return; // skip shutter type
-      // first, handle deprecations ....
-      let keySub = keyMain;
 
       if (keyMain in DEPRECATED && configSub[keyMain] != null){
         this.messageManager.addMessage(`Deprecated: [${keyMain}], use '${DEPRECATED[keyMain].new}'!`,HA_ALERT_WARNING,entityId);
@@ -878,14 +891,14 @@ class EnhancedShutterCardNew extends LitElement{
         this.messageManager.addMessage(`Removed: [${keyMain}], use '${REMOVED[keyMain].new}'!`,HA_ALERT_ERROR,entityId);
       }
       // check already defined by deprecation handling ...
-      //if (!config[keySub]) {
-      if (!(keySub in config)) {
-        config[keySub] =
+      if (!(keyMain in config)) {
+        config[keyMain] =
           (typeof configSub[keyMain] === 'undefined' || configSub[keyMain]=== null || configSub[keyMain]==='null')
             ? configBase[keyMain]
             : configSub[keyMain];
       }
     });
+*/
     return config;
   }
   getUniqueKeysFromObjects(obj1, obj2) {
@@ -1636,7 +1649,7 @@ class EnhancedShutter extends LitElement
         this.positionText = this.cfg.computePositionText(this.cfg.currentDevicePosition(),this.slider.value);
         //console.log('Slider input positionText,tiltPosition=',this.positionText,this.tiltPosition);
       });
-      let resetSlider = (event) => { // mousUpTilt
+      let resetSlider = (event) => { // mouseUpTilt
         const sliderPosition = this.slider.value ;
         this.action='user-pick';
         this.sendShutterTiltPosition(this.cfg.entityId(),sliderPosition);
@@ -3698,9 +3711,10 @@ class EscImages{
       for (const entityConfig of config.entities)
       {
         let shutter_preset = entityConfig[CONFIG_SHUTTER_PRESET];
-        let presetImage = (shutter_preset && ESC_PRESET[shutter_preset] && ESC_PRESET[shutter_preset][image_type]!== undefined)
-          ? ESC_PRESET[shutter_preset][image_type]
-          : entityConfig[image_type];
+
+        let presetImage = (entityConfig[image_type]  || ESC_PRESET[shutter_preset] == undefined)
+          ? entityConfig[image_type]
+          : ESC_PRESET[shutter_preset][image_type];
 
         let image_map = entityConfig[CONFIG_IMAGE_MAP] || base_image_map;
         const entityId = entityConfig[CONFIG_ENTITY_ID] || entityConfig;
