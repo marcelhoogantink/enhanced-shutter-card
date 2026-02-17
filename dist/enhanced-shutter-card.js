@@ -396,6 +396,7 @@ const CONFIG_DEFAULT ={
 const ESC_PRESET = {
   [ESC_ROLLER_SHUTTER] : {
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: true,
+    [CONFIG_NAME]: 'Roller Shutter',
   }  // default is using CONFIG_DEFAULT
   ,
   [ESC_AWNING]: {
@@ -408,7 +409,6 @@ const ESC_PRESET = {
     [CONFIG_OFFSET_CLOSED_PCT]: 50,
     [CONFIG_CLOSING_DIRECTION]: DOWN,
     [CONFIG_NAME]: 'Awning',
-
   },
   [ESC_CURTAIN]: {
     [CONFIG_CLOSING_DIRECTION]: RIGHT,
@@ -422,18 +422,18 @@ const ESC_PRESET = {
     [CONFIG_CLOSING_DIRECTION]: DOWN,
     [CONFIG_NAME]: 'Shade',
   },
-  [ESC_TEST]: {
-    [CONFIG_SHUTTER_SLAT_IMAGE]: 'rode_rechthoek.png',
-    [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'gele_rechthoek.png',
-    [CONFIG_NAME]: 'Test',
-  },
   [ESC_BLINDS]: {
     [CONFIG_CLOSING_DIRECTION]: RIGHT,
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-blinds.png',
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
     [CONFIG_WINDOW_IMAGE]: 'esc-window2.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
-    [CONFIG_NAME]: 'Blinds',
+    [CONFIG_NAME]: 'Blind',
+  },
+  [ESC_TEST]: {
+    [CONFIG_SHUTTER_SLAT_IMAGE]: 'rode_rechthoek.png',
+    [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'gele_rechthoek.png',
+    [CONFIG_NAME]: 'Test',
   }
 }
 

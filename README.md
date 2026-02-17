@@ -31,7 +31,16 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.5.0beta0:
+### New in version v1.5.0-beta-1:
+
+This __beta.1__ of __Release v1.5.0__ , contains full Tilt functionality, now including animation:
+
+  ![FullTiltOptions](FullTiltOptions2.gif)
+
+Also a new preset setting-option is added: `shutter_preset: blinds`. Thsi one is used in the example above.
+
+---
+### New in version v1.5.0-beta-0:
 
 This __beta.0__ of __Release v1.5.0__ contains full Tilt functionality. A new (optional) button-menu is displayed when Tilt is a feature of the cover.
 The already existing Tilt buttons are moved to the new menu and the `partial_close_percentage`  button is moved into the default buttons menu.
@@ -213,23 +222,33 @@ _Remark : you can also just give the entity ID (without to specify `entity:`) if
 ### Shutter Presets
 The following `preset_shutter` settings are available:
 
-| **Preset Name** | **Setting**                    | **Value**                 |
-| ---------------- | ----------------------------- | ------------------------- |
+| **Preset Name**    | **Setting**                 | **Value**                 |
+| ------------------ | --------------------------- | ------------------------- |
 | **roller-shutter** | `rotate_slat_image`         | `true`                    |
+|                    | `name`                      | `Roller Shutter`          |
 | **awning**         | `invert_open_close_ui`      | `true`                    |
 |                    | `invert_percentage_ui`      | `true`                    |
 |                    | `shutter_slat_image`        | `esc-awning.png`          |
-|                    | `shutter_slat_bottom_image` | `esc-awning-bottom.png`   |
+|                    | `shutter_bottom_image`      | `esc-awning-bottom.png`   |
 |                    | `bottom_offset_pct`         | `50`                      |
 |                    | `stretch_bottom_image`      | `false`                   |
 |                    | `closing_direction`         | `down`                    |
+|                    | `name`                      | `Awning`                  |
 | **curtain**        | `closing_direction`         | `right`                   |
 |                    | `shutter_slat_image`        | `esc-curtain.png`         |
-|                    | `shutter_slat_bottom_image` | `''`                      |
+|                    | `shutter_bottom_image`      | `''`                      |
 |                    | `rotate_slat_image`         | `false`                   |
 |                    | `closing_direction`         | `down`                    |
+|                    | `name`                      | `Curtain`                 |
 | **shade**          | `shutter_slat_image`        | `'#00000080'`           |
-
+|                    | `closing_direction`         | `down`                    |
+|                    | `name`                      | `Shade`                   |
+| **blind**          | `closing_direction`         | `right`                   |
+|                    | `shutter_slat_image`        | `esc-awning.png`          |
+|                    | `rotate_slat_image`         | `false`                   |
+|                    | `windows_image`             | `esc-windows2.png`        |
+|                    | `shutter_bottom_image`      | `''`                      |
+|                    | `name`                      | `Blind`                   |
 
 
 
