@@ -31,13 +31,17 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
+### New in version v1.5.0-beta-2:
+
+Just bug-fixes and code-improvements
+---
 ### New in version v1.5.0-beta-1:
 
 This __beta.1__ of __Release v1.5.0__ , contains full Tilt functionality, now including animation:
 
   ![FullTiltOptions](FullTiltOptions2.gif)
 
-Also a new preset setting-option is added: `shutter_preset: blinds`. Thsi one is used in the example above.
+Also a new preset setting-option is added: `shutter_preset: blind`. This one is used in the example above.
 
 ---
 ### New in version v1.5.0-beta-0:
@@ -220,7 +224,7 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 _Remark : you can also just give the entity ID (without to specify `entity:`) if you don't need to specify the other configurations._
 
 ### Shutter Presets
-The following `preset_shutter` settings are available:
+The following `shutter_preset` settings are available:
 
 | **Preset Name**    | **Setting**                 | **Value**                 |
 | ------------------ | --------------------------- | ------------------------- |

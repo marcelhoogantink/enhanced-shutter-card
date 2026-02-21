@@ -1,5 +1,5 @@
 
-const VERSION = 'v1.5.0-beta-1';
+const VERSION = 'v1.5.0-beta-2';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
@@ -97,6 +97,7 @@ const ESC_CLASS_LABEL_DISABLED = `${ESC_CLASS_LABEL}-disabled`;
 const ESC_CLASS_TITLE_DISABLED = `${ESC_CLASS_BASE_NAME}-title-disabled`
 const ESC_CLASS_POSITION = `${ESC_CLASS_BASE_NAME}-position`;
 const ESC_CLASS_BUTTONS = `${ESC_CLASS_BASE_NAME}-buttons`;
+const ESC_CLASS_TILT_BUTTONS = `${ESC_CLASS_BASE_NAME}-tilt-buttons`;
 const ESC_CLASS_BUTTONS_TOP = `${ESC_CLASS_BUTTONS}-${TOP}`;
 const ESC_CLASS_BUTTONS_BOTTOM = `${ESC_CLASS_BUTTONS}-${BOTTOM}`;
 const ESC_CLASS_BUTTONS_LEFT = `${ESC_CLASS_BUTTONS}-${LEFT}`;
@@ -114,6 +115,7 @@ const ESC_CLASS_MOVEMENT_UP = `${ESC_CLASS_BASE_NAME}-movement-up`;
 const ESC_CLASS_MOVEMENT_DOWN = `${ESC_CLASS_BASE_NAME}-movement-down`;
 const ESC_CLASS_HA_ICON = `${ESC_CLASS_BASE_NAME}-ha-icon`;
 const ESC_CLASS_HA_ICON_LOCK = `${ESC_CLASS_HA_ICON}-lock`;
+const ESC_CLASS_HA_ICON_TILT = `${ESC_CLASS_HA_ICON}-tilt`;
 const ESC_CLASS_TOP_LEFT = `${ESC_CLASS_BASE_NAME}-${TOP}-${LEFT}`;
 const ESC_CLASS_TOP_RIGHT = `${ESC_CLASS_BASE_NAME}-${TOP}-${RIGHT}`;
 const ESC_CLASS_TOP_ICON_TEXT = `${ESC_CLASS_BASE_NAME}-icon-text`;
@@ -245,7 +247,7 @@ const ESC_AWNING = 'awning';
 const ESC_CURTAIN = 'curtain';
 const ESC_TEST = 'test'; // used for testing purposes
 const ESC_SHADE = 'shade';
-const ESC_BLINDS = 'blinds';
+const ESC_BLIND = 'blind';
 const ESC_ROLLER_SHUTTER = 'roller-shutter';
 const ESC_TYPES =
   [ESC_AWNING, ESC_CURTAIN, ESC_ROLLER_SHUTTER,ESC_SHADE];
@@ -396,6 +398,7 @@ const CONFIG_DEFAULT ={
 const ESC_PRESET = {
   [ESC_ROLLER_SHUTTER] : {
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: true,
+    [CONFIG_SHOW_TILT]: false,
     [CONFIG_NAME]: 'Roller Shutter',
   }  // default is using CONFIG_DEFAULT
   ,
@@ -408,6 +411,7 @@ const ESC_PRESET = {
     [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: false,
     [CONFIG_OFFSET_CLOSED_PCT]: 50,
     [CONFIG_CLOSING_DIRECTION]: DOWN,
+    [CONFIG_SHOW_TILT]: false,
     [CONFIG_NAME]: 'Awning',
   },
   [ESC_CURTAIN]: {
@@ -415,19 +419,22 @@ const ESC_PRESET = {
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-curtain.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
+    [CONFIG_SHOW_TILT]: false,
     [CONFIG_NAME]: 'Curtain',
   },
   [ESC_SHADE]: {
     [CONFIG_SHUTTER_SLAT_IMAGE]: '#00000080',
     [CONFIG_CLOSING_DIRECTION]: DOWN,
+    [CONFIG_SHOW_TILT]: false,
     [CONFIG_NAME]: 'Shade',
   },
-  [ESC_BLINDS]: {
+  [ESC_BLIND]: {
     [CONFIG_CLOSING_DIRECTION]: RIGHT,
-    [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-blinds.png',
+    [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-blind.png',
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
     [CONFIG_WINDOW_IMAGE]: 'esc-window2.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
+    [CONFIG_SHOW_TILT]: true,
     [CONFIG_NAME]: 'Blind',
   },
   [ESC_TEST]: {
@@ -477,6 +484,14 @@ const SHUTTER_CSS =`
         display: flex;
         flex: none;
         flex-flow: var(--esc-buttons-flex-flow);
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+      }
+      .${ESC_CLASS_TILT_BUTTONS} {
+        display: flex;
+        flex: none;
+        flex-flow: var(--esc-buttons-flex-flow2);
         justify-content: center;
         align-items: center;
         max-width: 100%;
@@ -553,7 +568,6 @@ const SHUTTER_CSS =`
         width: 100%;
         overflow: hidden;
         bottom: 100%;
-        hheight: var(--esc-slide-height);` /* remove for better working tilt dd 4-2-2026 */+`
         transform-origin: bottom;
         transform: var(--esc-transform-slide);
         image-rendering: auto;
@@ -573,55 +587,34 @@ const SHUTTER_CSS =`
         background-size: var(--esc-slide-background-slats-size);
         transform: var(--esc-transform-undo-slats-rotate);
       }
-      .iso-slat1 {
+      .tilt-slat1 {
         height: var(--esc-slide-slats-height);
         display: flex;
         flex-direction: column-reverse;
         overflow: hidden;
       }
-      .iso-slat2 {
-        height: var(--esc-slat-height2);
+      .tilt-slat2 {
+        height: var(--esc-slat-height);
         width: 100%;
         flex-shrink: 0;
         overflow: hidden;
         transform: rotateX(var(--esc-tilt-angle-deg));
       }
-      .iso-slat3 {
+      .tilt-slat3 {
         position: relative;
 
-        height: var(--esc-iso-slat3-height);
-        width: var(--esc-iso-slat3-width);
-        background-size: var(--esc-iso-slat3-background-size);
+        height: var(--esc-tilt-slat-height);
+        width: var(--esc-tilt-slat-width);
+        background-size: var(--esc-tilt-slat-background-size);
 
-        transform-origin: var(--esc-iso-slat3-origin);
-        transform: var(--esc-transform-slat-rotate);
+        transform-origin: var(--esc-tilt-slat-origin);
+        transform: var(--esc-transform-tilt-slat-rotate);
 
         background-repeat: repeat;
         background-position: var(--esc-slide-background-main-position);
         background-color: var(--esc-slide-background-main-color);
         background-image: var(--esc-slide-background-main-image);
       }
-      .iso-slat::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-
-        bbackground-position: var(--esc-slide-background-main-position);
-        background-image: var(--esc-slide-background-main-image);
-        background-color: var(--esc-slide-background-main-color);
-        bbackground-size: var(--esc-slide-background-slats-size);
-
-        transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-undo-slats-rotate);
-        transform-origin: center;
-      }
-      .iso-slat {
-        position: relative;
-        height: var(--esc-slat-height);
-        overflow: visible;
-        bbackground-position: var(--esc-slide-background-main-position);
-      }
-
-
 
       .${ESC_CLASS_SELECTOR_SLIDE_EDGE} {
         height: var(--esc-slide-edge-height);
@@ -722,6 +715,9 @@ const SHUTTER_CSS =`
         transform: var(--esc-button-rotate);
 
       }
+      .${ESC_CLASS_HA_ICON_TILT} {
+        padding-bottom: 10px;
+      }
       .${ESC_CLASS_HA_ICON_LOCK} {
         position: relative;
         top: -0.3em;
@@ -760,48 +756,47 @@ const SHUTTER_CSS =`
     }
 
     .tilt-slider-wrap {
-      height: ${ESC_BASE_HEIGHT_PX}px;
       width: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
+      transform: var(--esc-tilt-slider-rotate);
     }
 
     .tilt-slider-class {
       width: ${ESC_BASE_HEIGHT_PX}px;
-      transform: rotate(-90deg);
+      transform: scale(var(--esc-button-scale));
     }
 
     .tilt-slat-container {
-      width: ${ICON_BUTTON_SIZE-6}px;
-      height: ${ESC_BASE_HEIGHT_PX-2*ICON_BUTTON_SIZE}px;
+      position: relative;
+      box-sizing: border-box;
       border: 1px solid grey;
       border-radius: 5px;
       display: flex;
       flex: none;
-      flex-flow: column wrap;
+      flex-flow: var(--esc-buttons-flex-flow2);
       align-items: center;
       justify-content: center;
       background: #f9f9f9;
     }
 
     .tilt-slat-class {
-      width: ${ICON_SIZE}px;
-      height: ${ICON_SIZE}px;
+      width: calc(var(--esc-button-scale)*${ICON_SIZE}px);
+      height: calc(var(--esc-button-scale)*${ICON_SIZE}px);
       position: relative;
-      transform: rotate(var(--esc-tilt-angle-deg));
+      transform: rotate(var(--esc-tilt-angle-deg-graph));
     }
 
     .tilt-line {
-      width: 2px;
-      height: ${ICON_BUTTON_SIZE-9}px;
+      width: calc(var(--esc-button-scale)*2px);
+      height: calc(var(--esc-button-scale)*${ICON_BUTTON_SIZE-ICON_SIZE/2}px);
       background: red;
       position: absolute;
-      top: ${-(ICON_BUTTON_SIZE-ICON_SIZE)/2+4}px;
-      left: ${ICON_SIZE/2}px;
+      top: calc(var(--esc-button-scale)*${ -(ICON_BUTTON_SIZE-ICON_SIZE)/2 +ICON_SIZE/4}px);
+      left: calc(var(--esc-button-scale)*${ICON_SIZE/2}px);
       transform: translateX(-50%);
     }
-
 `;
 
 /**
@@ -879,28 +874,39 @@ class EnhancedShutterCardNew extends LitElement{
     //
     let configPreset = { ...ESC_PRESET[configSub[CONFIG_SHUTTER_PRESET]]} || {};
 
-    let config = { ...configBase, ...configPreset, ...configSub};
+    let newConfigSub = { ...configSub };
 
-/*
-    Object.keys(configBase).forEach(keyMain =>{
-
-      if (keyMain in DEPRECATED && configSub[keyMain] != null){
-        this.messageManager.addMessage(`Deprecated: [${keyMain}], use '${DEPRECATED[keyMain].new}'!`,HA_ALERT_WARNING,entityId);
-      }
-      if (keyMain in REMOVED && configSub[keyMain] != null){
-        this.messageManager.addMessage(`Removed: [${keyMain}], use '${REMOVED[keyMain].new}'!`,HA_ALERT_ERROR,entityId);
-      }
-      // check already defined by deprecation handling ...
-      if (!(keyMain in config)) {
-        config[keyMain] =
-          (typeof configSub[keyMain] === 'undefined' || configSub[keyMain]=== null || configSub[keyMain]==='null')
-            ? configBase[keyMain]
-            : configSub[keyMain];
+    // check deprecated and removed
+    // TODO: combine:
+    Object.keys(DEPRECATED).forEach(key => {
+      if (newConfigSub[key] != null) {
+        this.messageManager.addMessage(
+          `Deprecated: [${key}], use '${DEPRECATED[key].new}'!`,
+          HA_ALERT_WARNING,
+          entityId
+        );
+        newConfigSub[DEPRECATED[key].new] = newConfigSub[key];
+        delete newConfigSub[key];
       }
     });
-*/
+
+    Object.keys(REMOVED).forEach(key => {
+      if (newConfigSub[key] != null) {
+        this.messageManager.addMessage(
+          `Removed: [${key}], use '${REMOVED[key].new}'!`,
+          HA_ALERT_ERROR,
+          entityId
+        );
+        newConfigSub[REMOVED[key].new] = newConfigSub[key];
+        delete newConfigSub[key];
+      }
+    });
+
+    let config = { ...configBase, ...configPreset, ...newConfigSub};
+
     return config;
   }
+
   getUniqueKeysFromObjects(obj1, obj2) {
     // Get all keys from both objects
     const keysObj1 = Object.keys(obj1);
@@ -1049,10 +1055,11 @@ class EnhancedShutterCardNew extends LitElement{
       this.defGridContainer();
     }
     if (this.gridContainer) {
+      //console.log('GridContainer');
       const style = getComputedStyle(this.gridContainer);
       const previousGridWidth = this.gridPixelWidth;
       const columns = style.getPropertyValue('grid-template-columns');
-      this.gridPixelWidth =Math.ceil(parseFloat(columns.split(/\s+/)[0]));
+      this.gridPixelWidth = Math.ceil(parseFloat(columns.split(/\s+/)[0]));
       if (previousGridWidth !== this.gridPixelWidth) {
         //console.log(`#@#@ Card getGrid: changed from ${previousGridWidth} to ${this.gridPixelWidth} `);
         this.getGridOptions('from getGrid()');
@@ -1252,9 +1259,10 @@ class EnhancedShutterCardNew extends LitElement{
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
-
+    //console.log(`getGridOptionsInternal: cardSize: `,cardSize);
     this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
     this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
+    //console.log(cardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
 
     const divCard= this.closest('div.card');
     /* Set CSS variables for number of rows and columns */
@@ -1266,6 +1274,7 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
       console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
     }
+    //console.log(`getGridOptionsInternal: calculated nbRows: ${this.nbRows}, nbCols: ${this.nbCols} for card '${tempCardName}'`);
     return {
       rows: this.nbRows,
       columns: this.nbCols,
@@ -1321,7 +1330,7 @@ class EnhancedShutterCardNew extends LitElement{
     * Size shutter-opening row
     */
     if (!cfg.openingDisabled() && !cfg.inlineHeader()){
-      let pctSize = getTextSize(cfg.computePositionText(),haTitleFont,FONT_SIZE_POSITION * cfg.textScaleFactor());
+      let pctSize = getTextSize(cfg.computePositionText(cfg.currentDevicePosition()),haTitleFont,FONT_SIZE_POSITION * cfg.textScaleFactor());
       let partHeightPx = LINE_HEIGHT_POSITION * cfg.textScaleFactor() + 2*MARGIN_POSITION;  // including margin
       let partWidthPx = pctSize.width;
       localHeightPx += partHeightPx;
@@ -1352,6 +1361,7 @@ class EnhancedShutterCardNew extends LitElement{
       cardSize = this.gridAddVertical(cardSize,sizePartialOpenButtons);
       cardSize = this.gridAddVertical(cardSize,sizeTiltSection);
     }
+    //console.log('gridSizeCardMiddle: ',cardSize);
     return cardSize;
   }
   gridSizeCardBottom(cfg){
@@ -1384,6 +1394,7 @@ class EnhancedShutterCardNew extends LitElement{
         localWidthPx = haButtonSize*3;
       }
     }
+    //console.log('gridSizeStandardButtons: ',{localWidthPx,localHeightPx});
     return {localWidthPx,localHeightPx};
   };
   gridSizeTiltButtons(cfg){
@@ -1610,7 +1621,7 @@ class EnhancedShutter extends LitElement
           ${!this.cfg.disablePartialOpenButtons() || this.cfg.showTilt()
             ? html`
               ${!this.cfg.disablePartialOpenButtons() ? htmlParts.showRightButtons():''}
-              ${this.cfg.showTilt() ? htmlParts.showTiltSection():''} <!-- TILT test -->
+              ${(this.cfg.showTilt()) ? htmlParts.showTiltSection():''}
             `
             : html`<div class='blankDiv'></div>`
           }
@@ -1638,16 +1649,12 @@ class EnhancedShutter extends LitElement
     // tilt .....
     if (this.cfg.showTilt()){
       this.slider = findElement(this,'.tilt-slider-class');
-      this.slat1 = findElement(this,'#tilt-slat1');
-      this.slat2 = findElement(this,'#tilt-slat2');
-      this.slat3 = findElement(this,'#tilt-slat3');
+
       this.textPosition = findElement(this,`.${ESC_CLASS_POSITION}>span`);
       this.slider.addEventListener('input', () => {
         this.action='user-drag-tilt';
-        //console.log('Slider input value=',this.slider.value);
         this.tiltPosition = this.slider.value;
         this.positionText = this.cfg.computePositionText(this.cfg.currentDevicePosition(),this.slider.value);
-        //console.log('Slider input positionText,tiltPosition=',this.positionText,this.tiltPosition);
       });
       let resetSlider = (event) => { // mouseUpTilt
         const sliderPosition = this.slider.value ;
@@ -1662,10 +1669,14 @@ class EnhancedShutter extends LitElement
     }
 
   }
+  getTiltAngleDeg(sliderPosition){
+
+    const angleDeg = this.getTiltAngle(sliderPosition)+'deg';
+    return angleDeg;
+  }
   getTiltAngle(sliderPosition){
 
-    const angle = -(this.cfg.tiltAngleMin() + (sliderPosition / 100) * (this.cfg.tiltAngleMax() - this.cfg.tiltAngleMin()))+'deg';
-    console.log('getTiltAngle: sliderPosition=',sliderPosition,' angle=',angle);
+    const angle = -(this.cfg.tiltAngleMin() + (sliderPosition / 100) * (this.cfg.tiltAngleMax() - this.cfg.tiltAngleMin()));
     return angle;
   }
 
@@ -1749,8 +1760,8 @@ class EnhancedShutter extends LitElement
       this.cfg.transformScale(size_x,size_y), // correct local width of the main
     ].join(SPACE);
   }
-  transformSlatRotate(){
-    // --esc-transform-slat-rotate
+  transformTiltSlatRotate(){
+    // --esc-transform-tilt-slat-rotate
     let rotate=0;
     if (this.cfg.rotateSlatsImage()){
       rotate = 0;
@@ -1761,11 +1772,21 @@ class EnhancedShutter extends LitElement
       this.cfg.transformRotate(rotate), // rotate around div transform-origin
     ].join(SPACE);
   }
-isoSlat3Origin(){
-    //        ttransform-origin: var(--esc-slat-width-2) var(--esc-slat-width-2);
+  tiltSliderRotate(){
+    let rotate= this.cfg.buttonsInRow() ? -90 : 0;
+    return this.cfg.transformRotate(rotate);
+  }
+  tiltIconRotate2(){
+    let rotate= this.cfg.buttonsInRow() ? 0 : -90;
+    return rotate;
+  }
+  tiltIconRotate3(){
+    let rotate= -this.tiltIconRotate2();
+    return this.cfg.transformRotate(rotate);
+  }
+  isoSlat3Origin(){
     const width = ((this.shutterSlatSize().x)/2)+UNITY;
     const origin = `${width} ${width}`;
-
     return origin;
   }
   transformPartial(){
@@ -1787,7 +1808,6 @@ isoSlat3Origin(){
     const size_global = new xyPair(size_x,size_y);
     const size_local=this.cfg.switchAxis(size_global);
     const position = this.offsetOpenedPx()+this.coverSizeMovingDirectionPx()/2.0;
-    //const rotate = this.cfg.getCloseAngle()= this.invertPercentage()?180:0 // ##TODO: check if this is correct
     return [
       'translate(-50%, -50%)',
       this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
@@ -1812,7 +1832,6 @@ isoSlat3Origin(){
     return value;
   }
   slatsSizeMovingDirectionPx(){
-    let debugName = this.cfg.friendlyName();
     const value = this.cfg.rotateSlatsImage()
       ? this.slideHeightPx()-this.shutterBottomSize().y
       : this.slideHeightPx();
@@ -1855,7 +1874,6 @@ isoSlat3Origin(){
 */
 
   shutterSlatSizePercentage(){
-    let debugName = this.cfg.friendlyName();
     let imageSize = this.shutterSlatSize();
     let imagePercentage;
     if (this.cfg.rotateSlatsImage()) {
@@ -1870,7 +1888,6 @@ isoSlat3Origin(){
     return size;
   }
   shutterSlatsSizePercentage(){
-    let debugName = this.cfg.friendlyName();
     let imageSize = this.shutterSlatSize();
     let imagePercentage;
     if (this.cfg.rotateSlatsImage()) {
@@ -1886,6 +1903,10 @@ isoSlat3Origin(){
   shutterSlatSize(){
     let imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId())
     return imageSize;
+  }
+  canShowTilt(){
+    // when no size, no Tilt show possible
+    return this.slatSizeMovingDirectionPx()? true:false;
   }
 
 
@@ -1915,7 +1936,6 @@ isoSlat3Origin(){
 
   }
   sizePercentageSlat(imageSize){
-    let debugName = this.cfg.friendlyName();
     let width;
     let height = this.shutterSlatSize().y;
     if (this.cfg.verticalMovement()) {
@@ -1950,7 +1970,6 @@ isoSlat3Origin(){
    * @return Local height of the slide-part
    */
   slideHeightPx(){
-    let debugName = this.cfg.friendlyName();
     const size = this.windowSizeMovingDirectionPx();
     return size;
   }
@@ -1980,26 +1999,20 @@ isoSlat3Origin(){
   }
   isoSlat3WidthPx(){
     let value;
-    let value2;
-    let debugName = this.cfg.friendlyName();
 
     if (this.cfg.rotateSlatsImage()){
       value = '';
     }else{
       value = (this.shutterSlatSize().x/this.cfg.windowWidthPx()*100)+'%';
-      value2 = '40%';
     }
     return value;
   }
   isoSlat3BackgroundSize(){
-    let debugName = this.cfg.friendlyName();
     let value;
-    let value2;
     if (this.cfg.rotateSlatsImage()){
       value = this.shutterSlatSizePercentage();
     }else{
       value = '100% '+(this.shutterSlatSize().y/this.cfg.windowHeightPx()*100)+'%';
-      value2 ='100% 16%';
     }
     return value;
   }
@@ -2174,6 +2187,7 @@ isoSlat3Origin(){
   }
   callHassCoverService(entityId,command,args='')
   {
+    //console.log(`callHassCoverService: command: ${command}, position: ${args.position ?? args.tilt_position}, entityId: ${entityId}`);
     if (!this.cfg.passiveMode()){
       const domain= 'cover';
       if (this.checkServiceAvailability(domain, command)) {
@@ -2596,10 +2610,10 @@ class shutterCfg {
     let position;
     if (this.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)){
       // known position
-      position = this.getCoverEntity()?.getCurrentTiltPosition() ?? 0;
+      position = this.getCoverEntity()?.getCurrentTiltPosition() ?? null;
     }else{
       // unknown position, so estimate from state
-      position= 0;
+      position= null;
     }
     return position;
   }
@@ -2673,6 +2687,7 @@ class shutterCfg {
       console.log('applyInvertForButtonOpenCloseHideStates start:',setting);
     }
     setting = this.applyInvertOpenClose(setting,debug);
+    setting = this.applyInvertDirection(setting,debug);
     return setting;
   }
 
@@ -2768,14 +2783,17 @@ class shutterCfg {
       }
     }else  {
       //  shutter is moving,
-      escState = this.applyInvertOpenCloseAndPercentage(state);
+      escState = this.applyInvertOpenClose(state);
+      //escState = this.applyInvertOpenCloseAndPercentage(state);
 
     }
     // solve issue #54
+    let escState2
     if (position == this.applyInvertToPosition(SHUTTER_OPEN_PCT) && escState == (this.applyInvertOpenCloseAndPercentage(SHUTTER_STATE_OPENING))) {
-      escState = this.applyInvertAll(SHUTTER_STATE_OPEN);
+      escState = this.applyInvertOpenCloseAndPercentage(SHUTTER_STATE_OPEN);
+
     }else if (position == this.applyInvertToPosition(SHUTTER_CLOSED_PCT) && escState== (this.applyInvertOpenCloseAndPercentage(SHUTTER_STATE_CLOSING))) {
-      escState = this.applyInvertAll(SHUTTER_STATE_CLOSED);
+      escState = this.applyInvertOpenCloseAndPercentage(SHUTTER_STATE_CLOSED);
     }
     //console.log(`positionToState: Cover=${this.getCoverEntity()?.getFriendlyName()}  state=${state} position=${position} => escSstate=${escState}`);
     return escState;
@@ -2873,7 +2891,8 @@ class shutterCfg {
           text = position + '%';
 
         }else{
-          let state= this.positionToState(this.applyInvertToUiPosition(position));
+          const UiPosition = this.applyInvertToUiPosition(position)
+          let state= this.positionToState(UiPosition);
           if (!this.debug()){
             if (state != SHUTTER_STATE_PARTIAL_OPEN){
               text = this.getLocalize(LOCALIZE_TEXT[(state)]);
@@ -2912,6 +2931,7 @@ class shutterCfg {
         positionText += ` / Tilt: ${currentTiltPosition}%`;
       }
     }
+    //console.log(`${this.friendlyName()}=> computePositionText: currentDevicePosition=${currentDevicePosition}, currentTiltPosition=${currentTiltPosition} => positionText='${positionText}'`);
     return positionText;
   }
   visiblePosition(currentDevicePosition) {
@@ -2996,8 +3016,28 @@ class shutterCfg {
         size = boundary(scale_setting,0.1,2)*ICON_BUTTON_SIZE;
         break;
     }
-
     return size;
+  }
+  buttonScaleFactor(){
+    let scale=1;
+    let scale_setting = this.scaleButtons();
+    switch(typeof(scale_setting)){
+      case 'boolean':
+        if (scale_setting){
+          let px;
+          if (this.buttonsInRow()){
+            px = this.windowHeightPx();
+          }else{
+            px = this.windowWidthPx();
+          }
+          scale = Math.min(px/3.0/ICON_BUTTON_SIZE,1);
+        }
+        break;
+      case 'number':
+        scale = boundary(scale_setting,0.1,2);
+        break;
+    }
+    return scale;
   }
   iconSize(){
     let size = ICON_SIZE;
@@ -3145,6 +3185,7 @@ class htmlCard{
       --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
       --mdc-icon-size: ${this.cfg.iconSize()}${UNITY};
       --icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${UNITY};
+
       --esc-display-name-top: ${this.cfg.displayName(TOP)};
       --esc-display-name-bottom: ${this.cfg.displayName(BOTTOM)};
       --esc-display-position-top: ${this.cfg.displayOpening(TOP)};
@@ -3160,37 +3201,32 @@ class htmlCard{
 
       --esc-transform-slide:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};
       --esc-transform-picker: ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
-      --esc-tilt-value: ${this.actualTiltPosition};
-      --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngle(this.enhancedShutter.tiltPosition)};
+      --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngleDeg(this.enhancedShutter.tiltPosition)};
+      --esc-tilt-angle-deg-graph: ${Math.min(-2,(Math.max(-178,this.enhancedShutter.getTiltAngle(this.enhancedShutter.tiltPosition))))+this.enhancedShutter.tiltIconRotate2()+'deg'};
 
       --esc-transform-undo-slats-rotate:  ${this.enhancedShutter.transformUndoSlatsRotate()};
-      --esc-transform-slat-rotate:  ${this.enhancedShutter.transformSlatRotate()};
+      --esc-transform-tilt-slat-rotate:  ${this.enhancedShutter.transformTiltSlatRotate()};
       --esc-transform-movement: ${this.enhancedShutter.transformMovement()};
 
       --esc-picker-top: -${this.cfg.pickerOverlapPx()+UNITY};
       --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+UNITY};
-      --esc-slide-height: ${this.enhancedShutter.slideHeightPx()+UNITY};
 
-      --esc-slat-width: ${this.enhancedShutter.shutterSlatSize().x+UNITY};
-      --esc-slat-height: ${this.enhancedShutter.shutterSlatSize().y+UNITY};
-      --esc-slat-width-2: ${((this.enhancedShutter.shutterSlatSize().x)/2)+UNITY};
-      --esc-slat-height-2: ${((this.enhancedShutter.shutterSlatSize().y)/2)+UNITY};
-      --esc-iso-slat3-origin: ${this.enhancedShutter.isoSlat3Origin()};
+      --esc-slat-height: ${this.enhancedShutter.slatHeightPx()+UNITY};
 
-      --esc-slat-height1: ${this.enhancedShutter.slatHeightPx1()+UNITY};
-      --esc-slat-height2: ${this.enhancedShutter.slatHeightPx()+UNITY};
-
-      --esc-iso-slat3-height: ${this.enhancedShutter.isoSlat3HeightPx()+UNITY};
-      --esc-iso-slat3-width: ${this.enhancedShutter.isoSlat3WidthPx()};
-      --esc-iso-slat3-background-size: ${this.enhancedShutter.isoSlat3BackgroundSize()};
-
+      --esc-tilt-slat-height: ${this.enhancedShutter.isoSlat3HeightPx()+UNITY};
+      --esc-tilt-slat-width: ${this.enhancedShutter.isoSlat3WidthPx()};
+      --esc-tilt-slat-origin: ${this.enhancedShutter.isoSlat3Origin()};
+      --esc-tilt-slat-background-size: ${this.enhancedShutter.isoSlat3BackgroundSize()};
+      --esc-tilt-slider-rotate: ${this.enhancedShutter.tiltSliderRotate()};
+      --esc-tilt-icon-rotate: ${(this.enhancedShutter.tiltIconRotate3())};
 
       --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+UNITY};
       --esc-slide-edge-height: ${this.enhancedShutter.shutterBottomSize().y+UNITY};
 
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
 
-      --esc-buttons-flex-flow: ${!this.cfg.buttonsInRow() ? 'row' : 'column'} wrap;
+      --esc-buttons-flex-flow: ${!this.cfg.buttonsInRow() ? 'row' : 'column'} nowrap;
+      --esc-buttons-flex-flow2: ${!this.cfg.buttonsInRow() ? 'row-reverse' : 'column'} nowrap;
 
       --esc-movement-overlay-display: ${(escState == SHUTTER_STATE_OPENING || escState == SHUTTER_STATE_CLOSING) ? 'block' : NONE};
       --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertForOverlayDisplay(SHUTTER_STATE_OPENING) ? 'block' : NONE};
@@ -3215,6 +3251,7 @@ class htmlCard{
       --esc-top-icon-text-line-height: ${this.cfg.iconScalePercent()};
       --esc-top-icon-text-font-size: ${this.cfg.iconScalePercent()};
       --esc-text-scale: ${this.cfg.textScaleFactor()};
+      --esc-button-scale: ${this.cfg.buttonScaleFactor()};
 
       --esc-selector-flex-basis: ${this.cfg.buttonsInRow() ? this.enhancedShutter.actualGlobalWidthPx():this.enhancedShutter.actualGlobalHeightPx()}${UNITY};
 `;
@@ -3286,6 +3323,12 @@ class htmlCard{
     return this.showButtonUpDown(ESC_FEATURE_CLOSE,ACTION_SHUTTER_CLOSE,DOWN,'mdi:arrow-down');
   }
   showButtonUpDown(feature,action,upDown,icon){
+
+    //console.log('==>>',this.cfg.friendlyName(), 'feature:',feature,', action:',action,', upDown:',upDown);
+    //console.log('HideStates:', this.cfg.buttonOpenCloseHideStates(upDown));
+    //console.log('positionToState:', this.cfg.positionToState());
+    //console.log('Hide:',(this.cfg.buttonOpenCloseHideStates(upDown).includes(this.cfg.positionToState())))
+
     return html`
       ${!this.cfg.disableStandardButtons() &&
         !this.cfg.buttonOpenCloseHideStates(upDown).includes(this.cfg.positionToState()) &&
@@ -3391,7 +3434,8 @@ class htmlCard{
       `;
   }
   showSlideSlats(){
-    const output = this.cfg.showTilt()
+    // Only Tilt when SHowTilt and there is a size
+    const output = this.cfg.showTilt() && this.enhancedShutter.canShowTilt()
      ? html`
         ${this.showSlatsTilt()}
       `
@@ -3402,21 +3446,19 @@ class htmlCard{
   }
   showSlatsTilt(){
 
-    const name = this.cfg.friendlyName();
     const sizeSlide = this.enhancedShutter.windowSizeMovingDirectionPx();
     const sizeSlat = this.enhancedShutter.slatSizeMovingDirectionPx() ;
 
     //const sizeSlat = new xyPair(100,51);
-    const number1 = 1; // Math.ceil(sizeSlide / sizeSlat.y);
-    const number = Math.ceil(sizeSlide / sizeSlat);
+    const number = sizeSlat ? Math.ceil(sizeSlide / sizeSlat): 1;
 
     return html`
-      <div class="iso-slat1">
+      <div class="tilt-slat1">
       ${Array.from({ length: number }, () =>
-        html`<div class="iso-slat2">
-          <div class="iso-slat3">
-          </div>
-        </div>`
+        html`
+          <div class="tilt-slat2">
+            <div class="tilt-slat3"></div>
+          </div>`
       )}
       </div>
     `;
@@ -3495,15 +3537,13 @@ class htmlCard{
   // TILT test HTML
   showTiltSection(){
     return html`
-      <div class="tilt-wrapper">
         ${this.showTiltButtonColumn()}
         ${this.showTiltSliderColumn()}
-      </div>
     `;
   }
   showTiltButtonColumn(){
     return html`
-      <div class="${ESC_CLASS_BUTTONS}">
+      <div class="${ESC_CLASS_TILT_BUTTONS}">
         ${this.showButtonTiltUp()}
         ${this.showTiltPosition()}
         ${this.showButtonTiltDown()}
@@ -3518,27 +3558,28 @@ class htmlCard{
     `;
   }
   showButtonTiltUp(){
-    const icon = "mdi:arrow-top-right";
+    const icon = this.cfg.buttonsInRow() ? "mdi:arrow-top-right":"mdi:arrow-bottom-right" ;
     return this.showButtonTilt(ACTION_SHUTTER_OPEN_TILT,icon);
   }
   showTiltPosition(){
     //console.log("showTiltPosition:", this.actualTiltPosition,this.enhancedShutter.tiltPosition);
     return html`
       <div class="tilt-slat-container">
-        <div id="tilt-slat1" class="tilt-slat-class">
+        <div class="tilt-slat-class">
           <div class="tilt-line"></div>
         </div>
-        <div id="tilt-slat2" class="tilt-slat-class">
+        <div class="tilt-slat-class">
           <div class="tilt-line"></div>
         </div>
-        <div id="tilt-slat3" class="tilt-slat-class">
+        <div class="tilt-slat-class">
           <div class="tilt-line"></div>
         </div>
       </div>
     `;
   }
   showButtonTiltDown(){
-    const icon = "mdi:arrow-bottom-right";
+
+    const icon = this.cfg.buttonsInRow() ? "mdi:arrow-bottom-right":"mdi:arrow-bottom-left" ;
     return this.showButtonTilt(ACTION_SHUTTER_CLOSE_TILT,icon);
   }
   showButtonTilt(action,icon){
@@ -3547,7 +3588,7 @@ class htmlCard{
             label="${this.cfg.getLocalize(LOCALIZE_TEXT[action])}"
             .disabled=${this.cfg.disabledGlobaly()}
             @click="${()=> this.enhancedShutter.doOnclick(`${action}`)}">
-            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="${icon}"></ha-icon>
+            <ha-icon class="${ESC_CLASS_HA_ICON_TILT}" icon="${icon}"></ha-icon>
           </ha-icon-button>
     `;
   }
@@ -3893,7 +3934,7 @@ function findElementInBody(selector) {
   return findElement(document.body,selector);
 }
 
-
+// TODO: merge FinElement and findElements into one
 function findElement(base,selector) {
   // Search in the regular DOM
   let foundInDom = base.querySelector(selector);
@@ -3963,6 +4004,54 @@ function findElement(base,selector) {
   }
 
 }
+
+function findElements(base, selector) {
+  const results = [];
+
+  recursiveSearch(base);
+
+  return results;
+
+  function recursiveSearch(node) {
+    if (!node) return;
+
+    // 1. Search in the regular DOM of this node
+    if (node.querySelectorAll) {
+      const matches = node.querySelectorAll(selector);
+      for (const el of matches) {
+        if (!results.includes(el)) {
+          results.push(el);
+        }
+      }
+    }
+
+    // 2. If this node has a shadow root, search inside it
+    if (node.shadowRoot) {
+      const shadowMatches = node.shadowRoot.querySelectorAll(selector);
+      for (const el of shadowMatches) {
+        if (!results.includes(el)) {
+          results.push(el);
+        }
+      }
+
+      // Recurse into shadow root children
+      for (const child of node.shadowRoot.children) {
+        recursiveSearch(child);
+      }
+    }
+
+    // 3. Recurse into regular children
+    if (node.children) {
+      for (const child of node.children) {
+        recursiveSearch(child);
+      }
+    }
+  }
+}
+
+
+
+
 function displayNodePathToTopIncludingShadowAndClass(node) {
   let currentNode = node;
   const path = [];
