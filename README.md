@@ -31,7 +31,7 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.5.0-beta-2:
+### New in version v1.5.1-beta-2:
 
 Just bug-fixes and code-improvements
 ---
