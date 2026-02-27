@@ -3,7 +3,7 @@ name: "Release"
 on:
   release:
     types:
-      - "published" 
+      - "published"
 
 permissions: {}
 
@@ -32,11 +32,11 @@ jobs:
       - name: "Upload the ZIP file to the release"
         uses: softprops/action-gh-release@v2.2.1
         with:
-          files: | 
+          files: |
             ${{ github.workspace }}/dist/enhanced-shutter-card.zip
             dist/enhanced-shutter-card.js
-            dist/lit          
-            dist/lit/          
-            dist/lit/*.*            
+            dist/lit
+            dist/lit/
+            dist/lit/*.*
             dist/images/*.*
             dist/*.*
