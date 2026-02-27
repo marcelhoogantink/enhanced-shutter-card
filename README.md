@@ -31,40 +31,41 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.5.1-beta-2:
+### New in version v1.5.1:
 
-Just bug-fixes and code-improvements
----
-### New in version v1.5.0-beta-1:
+Version `v1.5.1` is the Tilt-version !!!
+Now, fully tilt capacities are included:
 
-This __beta.1__ of __Release v1.5.0__ , contains full Tilt functionality, now including animation:
-
-  ![FullTiltOptions](FullTiltOptions2.gif)
+  ![FullTiltOptions](FullTiltOptions.gif) ![FullTiltOptions](FullTiltOptions2.gif)
 
 Also a new preset setting-option is added: `shutter_preset: blind`. This one is used in the example above.
 
----
-### New in version v1.5.0-beta-0:
+- #### New tilt-setting options are added:
 
-This __beta.0__ of __Release v1.5.0__ contains full Tilt functionality. A new (optional) button-menu is displayed when Tilt is a feature of the cover.
-The already existing Tilt buttons are moved to the new menu and the `partial_close_percentage`  button is moved into the default buttons menu.
+- ##### New option [invert_percentage_tilt_ui]
+  (boolean) Invert/alter the setting for tilt-percentage on user-interface level. (default `false`)
+- ##### New option [invert_percentage_tilt_cover]
+  (boolean) Invert/alter the setting for tilt-percentage on device level. (default `false`)
+- ##### New option [tilt_slider_only]
+  (boolean) Display only the tilt-silder, not the buttons and visualisation (default `false`)
+  Only active when the cover has a tilt option and `show_tilt` equals `true`
+- ##### New option [tilt_angle_min]
+  (int) Set the maximum tilt-level (in degrees)
+  values between [0] and [180] and less then `tilt_angle_max` (default 0)
+  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
+- ##### New option [tilt_angle_max]
+  (int) Set the minimum tilt-level (in degrees)
+  values between [0] and [180] and greater then `tilt_angle_min` (default 180)
+  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
 
-  ![FullTiltOptions](FullTiltOptions.gif)
+- #### Solved issues:
 
-Default there is no need to add any option to your config. If the cover can tilt, the options will be shown. (you optionally disable this with `show_tilt: false`)
+  - [#100](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/100) Roller Shades with Tilt
+  - [#45](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/45) [Feature Request] Add tilt positional options and icons to the Card
+  - [#145](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/145) Extra options for new tilt function
 
-Two new settings are added:
 
-#### [tilt_angle_min]
-values between [0] and [180] and less then `tilt_angle_max` (default 5)
-#### [tilt_angle_max]
-values between [0] and [180] and greater than then `tilt_angle_min` (default 175)
-
-These values are just for visualisation, the values send to the cover are always  from 100% (`tilt_angle_max`) to 0% (`tilt_angle_min`)
-
----
-
-##### For previous release-changes go to [Previous-release changes](#previous-release-changes)
+### For previous release-changes go to [Previous-release changes](#previous-release-changes)
 
 
 ---
@@ -151,15 +152,16 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 | opening_position             | string        | No       | _name_position_                               | set position info of shutter on `top` or `bottom` of the shutter image.
 | opening_disabled             | boolean       | No       | false                                         | hide position info of shutter
 | inline_header                | boolean       | No       | false                                         | place the shutter-header (name and position) in one line.
-| invert_percentage            | boolean       | No       | `false`                                       | Set it to `true` if your shutter is 100% when it is closed, and 0% when it is opened                                                                                                                                                                                       | deprecated as of 1.4.0, use `invert_percentage_cover` |
 | invert_percentage_ui         | boolean       | No       | `false`                                       | Inverts the percentage on UI-level when set to `true`. Will not change the cover behavior.                                                                                                                                                                                 |
 | invert_percentage_cover      | boolean       | No       | `false`                                       | Inverts the precentage on device-level when set to `true`. Possibly changes to cover behavior.
-| invert_open_close            | boolean       | No       | `false`                                       | Set it to `true` if your want to invert the `open` and `close` buttons. (for awnings)                                                                                                                                                                                      | deprecated as of 1.4.0, use `invert_open_close_ui` |
 | invert_open_close_ui         | boolean       | No       | `false`                                       | Inverts the open-close texts on UI-level when set to `true`. Will not change the cover behavior.
 | invert_open_close_cover      | boolean       | No       | `false`                                       | Inverts the opec-close commands on device-level when set to `true`. Possibly changes to cover behavior.                                                                                                                                                                    |
+| invert_percentage_tilt_ui    | boolean       | No       | `false`                                       | Inverts the tilt-percentage on UI-level when set to `true`. Will not change the cover-tilt behavior.
+| invert_percentage_tilt_cover | boolean       | No       | `false`                                       | Inverts the tilt-percentage on device-level when set to `true`. Possibly changes to cover-tilt behavior.                                                                                                                                                                    |
 | show_tilt                    | boolean       | No       | `true`                                        | Show the `tilt` options and buttons, only active when the shutter supports `tilt`                                                                                                                                                                                          |
-| tilt_angle_max               | int           | No       | 175                                           | Maximum angle for visualiation of the tilt-function. This is representation for the 100% value of the tilt-value. |
-| tilt_angle_min               | int           | No       | 5                                             | Minimum angle for visualiation of the tilt-function. This is representation for the 0% value of the tilt-value. |
+| tilt_slider_only             | boolean       | No       | `true`                                        | Display only the tilt-silder, not the buttons and visualisation. Only active when the cover supports`tilt` and `show_tilt` equals `true`                                                                                                                                                                                           |
+| tilt_angle_max               | int           | No       | 180                                           | Maximum angle for visualiation of the tilt-function. This is representation for the 100% value of the tilt-value. |
+| tilt_angle_min               | int           | No       | 0                                             | Minimum angle for visualiation of the tilt-function. This is representation for the 0% value of the tilt-value. |
 | partial_close_percentage     | int           | No       | 0                                             | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.                                                                                                                                                       |
 | offset_closed_percentage     | int           | No       | 0                                             | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.                                                                                                                                                              |
 | always_percentage            | boolean       | No       | `false`                                       | If set to `true`, the end states (opened/closed) will be also as numbers (0 / 100 % ) instead of a text                                                                                                                                                                    |
@@ -202,13 +204,14 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 | opening_position             | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | opening_disabled             | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | inline_header                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_percentage            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         | deprecated as of 1.4.0
 | invert_percentage_ui         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | invert_percentage_cover      | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_open_close            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         | deprecated as of 1.4.0
-| invert_open_close ui         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_open_close cover      | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_open_close_ui         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_open_close_cover      | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_open_close_tilt_ui    | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| invert_open_close_tilt_cover | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | show_tilt                    | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
+| titl_slider_only             | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | tilt_angle_max               | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | tilt_angle_min               | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | partial_close_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
