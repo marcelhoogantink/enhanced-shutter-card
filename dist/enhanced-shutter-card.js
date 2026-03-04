@@ -1,5 +1,5 @@
 
-const VERSION = 'v1.5.1';
+const VERSION = 'v1.5.2';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
