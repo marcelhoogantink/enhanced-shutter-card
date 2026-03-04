@@ -1,11 +1,10 @@
 
-const VERSION = 'v1.5.1';
+const VERSION = 'v1.5.2';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
 
 import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
-import { unsafeHTML } from 'https://unpkg.com/lit@latest/directives/unsafe-html.js?module';
 
 // import {html, css, unsafeCSS } from './lit/lit-core.min.js';
 // import {LitElement} from './lit/lit-debug.js'; // <-- dit is nu de debug versie
@@ -461,6 +460,7 @@ const ESC_PRESET = {
     [CONFIG_NAME]: 'Blind',
   },
   [ESC_TEST]: {
+    [CONFIG_WINDOW_IMAGE]: '',
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'rode_rechthoek.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'gele_rechthoek.png',
     [CONFIG_NAME]: 'Test',
@@ -558,7 +558,7 @@ const SHUTTER_CSS =`
         position: relative;
         margin: auto;
         line-height: 0;
-        overflow: hidden; /* prevents image overflow */
+        overflow: var(--esc-overflow); /* prevents image overflow */
         image-rendering: auto;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
@@ -589,7 +589,7 @@ const SHUTTER_CSS =`
         position: absolute;
         left: -50%;
         width: 100%;
-        overflow: hidden;
+        overflow: var(--esc-overflow);
         bottom: 100%;
         transform-origin: bottom;
         transform: var(--esc-transform-slide);
@@ -614,24 +614,35 @@ const SHUTTER_CSS =`
         height: var(--esc-slide-slats-height);
         display: flex;
         flex-direction: column-reverse;
-        overflow: hidden;
+        overflow: var(--esc-overflow);
       }
       .tilt-slat2 {
         height: var(--esc-slat-height);
         width: 100%;
         flex-shrink: 0;
-        overflow: hidden;
-        transform: rotateX(var(--esc-tilt-angle-deg));
+        overflow: var(--esc-overflow);
+        perspective: 500px;
+      }
+      .tilt-slat-edge {
+        z-index: 1;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: grey;
       }
       .tilt-slat3 {
-        position: relative;
+        z-index: 2;
+        position: absolute;
 
         height: var(--esc-tilt-slat-height);
         width: var(--esc-tilt-slat-width);
         background-size: var(--esc-tilt-slat-background-size);
 
         transform-origin: var(--esc-tilt-slat-origin);
-        transform: var(--esc-transform-tilt-slat-rotate);
+
+        transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-tilt-slat-rotate);
 
         background-repeat: repeat;
         background-position: var(--esc-slide-background-main-position);
@@ -1354,7 +1365,9 @@ class EnhancedShutterCardNew extends LitElement{
     * Size shutter-opening row
     */
     if (!cfg.openingDisabled() && !cfg.inlineHeader()){
-      let pctSize = getTextSize(cfg.computePositionText(cfg.currentDevicePosition()),haTitleFont,FONT_SIZE_POSITION * cfg.textScaleFactor());
+      let position =cfg.currentDevicePosition();
+      let tiltPosition = cfg.currentDeviceTiltPosition();
+      let pctSize = getTextSize(cfg.computePositionText(position,tiltPosition),haTitleFont,FONT_SIZE_POSITION * cfg.textScaleFactor());
       let partHeightPx = LINE_HEIGHT_POSITION * cfg.textScaleFactor() + 2*MARGIN_POSITION;  // including margin
       let partWidthPx = pctSize.width;
       localHeightPx += partHeightPx;
@@ -1707,6 +1720,9 @@ class EnhancedShutter extends LitElement
       }
     }
   }
+  getOverflow(){
+    return this.cfg.debug()?'visible':'hidden';
+  }
 
   getTiltAngleDeg(sliderPosition){
     const angleDeg = this.getTiltAngle(sliderPosition)+'deg';
@@ -1825,8 +1841,14 @@ class EnhancedShutter extends LitElement
     return this.cfg.transformRotate(rotate);
   }
   tiltSlatOrigin(){
-    const width = ((this.shutterSlatSize().x)/2)+UNITY;
-    const origin = `${width} ${width}`;
+    // --esc-tilt-slat-origin
+    var origin;
+    if (this.cfg.rotateSlatsImage()) {
+      origin = '50% 50%';
+    }else{
+      const width = ((this.shutterSlatSize().x)/2)+UNITY;
+      origin = `${width} ${width}`;
+    }
     return origin;
   }
   transformPartial(){
@@ -2041,7 +2063,7 @@ class EnhancedShutter extends LitElement
     let value;
 
     if (this.cfg.rotateSlatsImage()){
-      value = '';
+      value = '100%';
     }else{
       value = (this.shutterSlatSize().x/this.cfg.windowWidthPx()*100)+'%';
     }
@@ -2207,6 +2229,14 @@ class EnhancedShutter extends LitElement
     const shutterPosition = this.cfg.currentDevicePosition();
     this.positionText = this.cfg.computePositionText(shutterPosition,this.react_TiltPosition);
   }
+mouseUpTilt = (event) => {
+    this.action='user-pick';
+    this.manageEvents(REMOVE_EVENT, MOUSEUP, this, this.mouseUpTilt);
+    this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveTilt);
+
+    const tiltPosition = this.getTiltPosition(event);
+    this.sendShutterTiltPosition(this.cfg.entityId(),tiltPosition);
+  }
 
   mouseUp = (event) =>
   {
@@ -2228,14 +2258,6 @@ class EnhancedShutter extends LitElement
       this.callHassCoverService(this.cfg.entityId(),actionToSend);
     }
   };
-  mouseUpTilt = (event) => { // mouseUpTilt
-    this.action='user-pick';
-    this.manageEvents(REMOVE_EVENT, MOUSEUP, this, this.mouseUpTilt);
-    this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveTilt);
-
-    const tiltPosition = this.getTiltPosition(event);
-    this.sendShutterTiltPosition(this.cfg.entityId(),tiltPosition);
-  }
 
   sendShutterPosition( entityId, position)
   {
@@ -2999,6 +3021,7 @@ class shutterCfg {
     return text;
   }
   computePositionText(position,tiltPosition){
+    //console.log(`computePositionText: position=${position}, tiltPosition=${tiltPosition}`);
     let positionText;
     if (NOT_KNOWN.includes(this.getCoverEntity().getState())){
       positionText = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
@@ -3266,6 +3289,8 @@ class htmlCard{
       --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
       --mdc-icon-size: ${this.cfg.iconSize()}${UNITY};
       --icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${UNITY};
+
+      --esc-overflow: ${this.enhancedShutter.getOverflow()};
 
       --esc-display-name-top: ${this.cfg.displayName(TOP)};
       --esc-display-name-bottom: ${this.cfg.displayName(BOTTOM)};
@@ -3538,8 +3563,11 @@ class htmlCard{
       ${Array.from({ length: number }, () =>
         html`
           <div class="tilt-slat2">
-            <div class="tilt-slat3"></div>
-          </div>`
+            <div class="tilt-slat-edge"></div>
+            <div class="tilt-slat3">
+            </div>
+          </div>
+          `
       )}
       </div>
     `;
