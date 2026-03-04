@@ -31,6 +31,15 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
+### New in version v1.5.2:
+
+Improved Tilt (3d-tilt) and tilt slat visible at 90 degrees.
+
+- #### Solved issues:
+
+    [#151](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/151) Does not work anymore without internet access
+
+---
 ### New in version v1.5.1:
 
 Version `v1.5.1` is the Tilt-version !!!
