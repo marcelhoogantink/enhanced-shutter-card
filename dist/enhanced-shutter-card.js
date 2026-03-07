@@ -2146,13 +2146,13 @@ class EnhancedShutter extends LitElement
     console_log('screenPos: basePickPoint:',this.basePickPoint);
   }
 
-  getShutterPosition(event){
+  getShutterOnScreenPosition(event){
     const screenPosition = this.getScreenPosFromPickPoint(event);
     const shutterPosition = this.getShutterPosFromScreenPos(screenPosition);
     return shutterPosition;
   }
-  getTiltPosition(event){
-    // since Tilt uses Silder, event is not needed
+  getTiltOnScreenPosition(event){
+    // since Tilt uses Slider, event is not needed
     const  tiltPosition = this.tiltSlider.value ?? 0;
     return tiltPosition;
   }
@@ -2215,7 +2215,7 @@ class EnhancedShutter extends LitElement
 
     this.action='user-drag';
     this.screenPosition = this.getScreenPosFromPickPoint(event); //old
-    this.react_ShutterPosition = this.getShutterPosition(event);
+    this.react_ShutterPosition = this.getShutterOnScreenPosition(event);
 
     const tiltPosition = this.cfg.currentDeviceTiltPosition();
     this.positionText = this.cfg.computePositionText(this.react_ShutterPosition,tiltPosition);
@@ -2224,18 +2224,29 @@ class EnhancedShutter extends LitElement
     //console.log('event',event.pageY);
     this.manageEvents(ADD_EVENT, MOUSEUP, this, this.mouseUpTilt);
     this.action='user-drag-tilt';
-    this.react_TiltPosition = this.getTiltPosition(event);
+    this.react_TiltPosition = this.getTiltOnScreenPosition(event);
 
     const shutterPosition = this.cfg.currentDevicePosition();
     this.positionText = this.cfg.computePositionText(shutterPosition,this.react_TiltPosition);
   }
-mouseUpTilt = (event) => {
+  mouseUpTilt = (event) => {
     this.action='user-pick';
     this.manageEvents(REMOVE_EVENT, MOUSEUP, this, this.mouseUpTilt);
     this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveTilt);
 
-    const tiltPosition = this.getTiltPosition(event);
+    const tiltPosition = this.getTiltOnScreenPosition(event);
+    console.log('mouseUpTilt: tiltPosition:',tiltPosition);
     this.sendShutterTiltPosition(this.cfg.entityId(),tiltPosition);
+
+    if (this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)){
+      // send position to shutter
+      this.sendShutterTiltPosition(this.cfg.entityId(),tiltPosition);
+    }else{
+      // no ESC_FEATURE_SET_POSITION, so send open- or close-action
+      const actionToSend = (tiltPosition > 50) ? ACTION_SHUTTER_OPEN_TILT : ACTION_SHUTTER_CLOSE_TILT;
+      this.callHassCoverService(this.cfg.entityId(),actionToSend);
+    }
+
   }
 
   mouseUp = (event) =>
@@ -2247,7 +2258,7 @@ mouseUpTilt = (event) => {
     this.manageEvents(REMOVE_EVENT, MOUSEUP, this, this.mouseUp);
     this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMove);
 
-    const shutterPosition = this.getShutterPosition(event);
+    const shutterPosition = this.getShutterOnScreenPosition(event);
 
     if (this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)){
       // send position to shutter
@@ -2265,12 +2276,14 @@ mouseUpTilt = (event) => {
   }
   sendShutterTiltPosition( entityId, position)
   {
+    console.log('sendShutterTiltPosition: position:',position,'entityId:',entityId);
     this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS_TILT, { tilt_position: this.cfg.applyInvertToTiltPosition(position) });
   }
   callHassCoverService(entityId,command,args='')
   {
     //console.log(`callHassCoverService: command: ${command}, position: ${args.position ?? args.tilt_position}, entityId: ${entityId}`);
     if (!this.cfg.passiveMode()){
+      console.log(`callHassCoverService: command: ${command}, args:`, args, `entityId: ${entityId}`);
       const domain= 'cover';
       if (this.checkServiceAvailability(domain, command)) {
         this.hass.callService(domain, command, {
