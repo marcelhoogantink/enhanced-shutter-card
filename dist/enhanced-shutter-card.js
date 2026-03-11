@@ -165,6 +165,7 @@ const CONFIG_ENTITY_ID = 'entity';
 const CONFIG_HEIGHT_PX = 'height_px';
 const CONFIG_WIDTH_PX = 'width_px';
 
+const CONFIG_SUPPORTED_FEATURES = 'supported_features';
 const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
 const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
 
@@ -256,6 +257,8 @@ const ESC_ENTITY_ID = null;
 const ESC_BATTERY_ENTITY_ID = null;
 const ESC_SIGNAL_ENTITY_ID = null;
 
+const ESC_SUPPORTED_FEATURES = ESC_FEATURE_ALL;
+
 const ESC_AWNING = 'awning';
 const ESC_CURTAIN = 'curtain';
 const ESC_TEST = 'test'; // used for testing purposes
@@ -342,6 +345,7 @@ const INVERT_OPEN_CLOSE_SETTING ={
 };
 
 const CONFIG_DEFAULT ={
+  [CONFIG_SUPPORTED_FEATURES]: ESC_SUPPORTED_FEATURES,
   [CONFIG_TYPE]: "",
   [CONFIG_TITLE]: "",
   [CONFIG_ENTITIES]: "",
@@ -514,7 +518,7 @@ const SHUTTER_CSS =`
       .${ESC_CLASS_TILT_BUTTONS} {
         display: flex;
         flex: none;
-        flex-flow: var(--esc-buttons-flex-flow2);
+        flex-flow: var(--esc-buttons-flex-flow-tilt);
         justify-content: center;
         align-items: center;
         max-width: 100%;
@@ -809,7 +813,7 @@ const SHUTTER_CSS =`
       border-radius: 5px;
       display: flex;
       flex: none;
-      flex-flow: var(--esc-buttons-flex-flow2);
+      flex-flow: var(--esc-buttons-flex-flow-tilt);
       align-items: center;
       justify-content: center;
       background: #f9f9f9;
@@ -1206,18 +1210,18 @@ class EnhancedShutterCardNew extends LitElement{
 
   static get styles() {
     const CSS = `
-     .${ESC_CLASS_SHUTTERS} {
-      padding: ${16}px;
-     }
-    .${ESC_CLASS_SHUTTER_SEPERATE}:not(:last-child) {
-      height: ${5}px;
-      margin-left: auto;
-      margin-right: auto;
-      width: 25%;
-      border-width: 3px 0 0 0;
-      border-style: solid;
-      border-color: var(--divider-color);
-    }
+      .${ESC_CLASS_SHUTTERS} {
+        padding: ${16}px;
+      }
+      .${ESC_CLASS_SHUTTER_SEPERATE}:not(:last-child) {
+        height: ${5}px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 25%;
+        border-width: 3px 0 0 0;
+        border-style: solid;
+        border-color: var(--divider-color);
+      }
     `;
     return css`${unsafeCSS(CSS)}`;
   }
@@ -2200,10 +2204,12 @@ class EnhancedShutter extends LitElement
     this.getBasePickPoint(event);
 
     this.manageEvents(ADD_EVENT, MOUSEMOVE, this, this.mouseMove);
+    this.manageEvents(ADD_EVENT, MOUSEUP, window, this.mouseUp);
   };
   mouseDownTilt = () => {
     this.action='user-drag-tilt';
     this.manageEvents(ADD_EVENT, MOUSEMOVE, this, this.mouseMoveTilt);
+    this.manageEvents(ADD_EVENT, MOUSEUP, window, this.mouseUpTilt);
   }
 
 
@@ -2211,7 +2217,6 @@ class EnhancedShutter extends LitElement
   {
     if (event.pageY === undefined) return;
 
-    this.manageEvents(ADD_EVENT, MOUSEUP, this, this.mouseUp);
 
     this.action='user-drag';
     this.screenPosition = this.getScreenPosFromPickPoint(event); //old
@@ -2222,7 +2227,6 @@ class EnhancedShutter extends LitElement
   };
   mouseMoveTilt = (event) => { // mouseMoveTilt
     //console.log('event',event.pageY);
-    this.manageEvents(ADD_EVENT, MOUSEUP, this, this.mouseUpTilt);
     this.action='user-drag-tilt';
     this.react_TiltPosition = this.getTiltOnScreenPosition(event);
 
@@ -2231,7 +2235,7 @@ class EnhancedShutter extends LitElement
   }
   mouseUpTilt = (event) => {
     this.action='user-pick';
-    this.manageEvents(REMOVE_EVENT, MOUSEUP, this, this.mouseUpTilt);
+    this.manageEvents(REMOVE_EVENT, MOUSEUP, window, this.mouseUpTilt);
     this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveTilt);
 
     const tiltPosition = this.getTiltOnScreenPosition(event);
@@ -2245,6 +2249,8 @@ class EnhancedShutter extends LitElement
       // no ESC_FEATURE_SET_POSITION, so send open- or close-action
       const actionToSend = (tiltPosition > 50) ? ACTION_SHUTTER_OPEN_TILT : ACTION_SHUTTER_CLOSE_TILT;
       this.callHassCoverService(this.cfg.entityId(),actionToSend);
+      // possinlity that position is not changed => request Update
+      this.requestUpdate();
     }
 
   }
@@ -2255,7 +2261,7 @@ class EnhancedShutter extends LitElement
     if (event.pageY === undefined) return;
 
     this.action='user-pick';
-    this.manageEvents(REMOVE_EVENT, MOUSEUP, this, this.mouseUp);
+    this.manageEvents(REMOVE_EVENT, MOUSEUP, window, this.mouseUp);
     this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMove);
 
     const shutterPosition = this.getShutterOnScreenPosition(event);
@@ -2267,6 +2273,9 @@ class EnhancedShutter extends LitElement
       // no ESC_FEATURE_SET_POSITION, so send open- or close-action
       const actionToSend = (shutterPosition > 50) ? ACTION_SHUTTER_OPEN : ACTION_SHUTTER_CLOSE;
       this.callHassCoverService(this.cfg.entityId(),actionToSend);
+      // possinlity that position is not changed => request Update
+      this.requestUpdate();
+
     }
   };
 
@@ -2332,6 +2341,7 @@ class shutterCfg {
 
       this.friendlyName(escConfig[CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || UNKNOWN);
 
+      this.supportedFeatures(escConfig[CONFIG_SUPPORTED_FEATURES]);
       this.invertPercentageCover(escConfig[CONFIG_INVERT_PCT_COVER]);
       this.invertPercentageUi(escConfig[CONFIG_INVERT_PCT_UI]);
       this.invertPercentageTiltCover(escConfig[CONFIG_INVERT_PCT_TILT_COVER]);
@@ -2402,7 +2412,8 @@ class shutterCfg {
     return this.#cfg[key];
   }
   isCoverFeatureActive(feature=ESC_FEATURE_ALL){
-    return Boolean((this.getCoverEntity()?.getSupportedFeatures() ?? ESC_FEATURE_NO_TILT) & feature);
+    const features =(this.getCoverEntity()?.getSupportedFeatures() ?? ESC_FEATURE_NO_TILT) & feature & this.supportedFeatures();
+    return Boolean(features);
   }
   #setLocalize(localize){
     this.#localize=localize;
@@ -2532,6 +2543,9 @@ class shutterCfg {
     const disable = this.#getCfg(CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS,value);
     return disable || !this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION);
   }
+  supportedFeatures(value = null){
+    return this.#getCfg(CONFIG_SUPPORTED_FEATURES,value);
+  }
   disableEndButtons(value = null){
     return this.#getCfg(CONFIG_DISABLE_END_BUTTONS,value);
   }
@@ -2622,7 +2636,11 @@ class shutterCfg {
     return this.#getCfg(CONFIG_OFFSET_CLOSED_PCT,value);
   }
   showTilt(value=null){
-    return (this.#getCfg(CONFIG_SHOW_TILT,value)) && this.isCoverFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT | ESC_FEATURE_SET_TILT_POSITION) ;
+    return (this.#getCfg(CONFIG_SHOW_TILT,value)) && this.canTilt()
+  }
+  canTilt(){
+    return this.isCoverFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT | ESC_FEATURE_SET_TILT_POSITION ) ;
+
   }
   tiltAngleMin(value = null){
     return this.#getCfg(CONFIG_TILT_ANGLE_MIN,value );
@@ -2728,7 +2746,7 @@ class shutterCfg {
   }
   currentBaseTiltPosition(){
     let position;
-    if (this.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)){
+    if (this.canTilt()){
       // known position
       position = this.getCoverEntity()?.getCurrentTiltPosition() ?? null;
     }else{
@@ -3045,7 +3063,7 @@ class shutterCfg {
       if (this.offsetActive()) {
         positionText += ` (${this.currentUiPosition(position)}%)`;
       }
-      if (this.showTilt() && this.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)) {
+      if (this.showTilt()) {
         tiltPosition = this.currentUiTiltPosition(tiltPosition);
         positionText += ` / Tilt: ${tiltPosition}%`;
       }
@@ -3345,7 +3363,7 @@ class htmlCard{
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
 
       --esc-buttons-flex-flow: ${!this.cfg.buttonsInRow() ? 'row' : 'column'} nowrap;
-      --esc-buttons-flex-flow2: ${!this.cfg.buttonsInRow() ? 'row-reverse' : 'column'} nowrap;
+      --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonsInRow() ? 'row-reverse' : 'column'} nowrap;
 
       --esc-movement-overlay-display: ${(escState == SHUTTER_STATE_OPENING || escState == SHUTTER_STATE_CLOSING) ? 'block' : NONE};
       --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertForOverlayDisplay(SHUTTER_STATE_OPENING) ? 'block' : NONE};
