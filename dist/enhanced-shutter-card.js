@@ -1055,20 +1055,24 @@ class EnhancedShutterCardNew extends LitElement{
                 this.localCfgs[entityId].setSignalEntity(this.hass,currEntity.signal_entity);
 
                 return html`
-                  <enhanced-shutter
-                    .react_ShutterState=${this.localCfgs[entityId].shutterState}
-                    .react_BatteryState=${this.localCfgs[entityId].batteryState}
-                    .react_SignalState=${this.localCfgs[entityId].signalState}
-                    .react_ScreenOrientation=${this.screenOrientation}
-                    .react_EscImagesLoaded=${this.escImagesLoaded}
+                  <div class="${ESC_CLASS_SHUTTER_FLEX}">
+                    <enhanced-shutter
+                      .react_ShutterState=${this.localCfgs[entityId].shutterState}
+                      .react_BatteryState=${this.localCfgs[entityId].batteryState}
+                      .react_SignalState=${this.localCfgs[entityId].signalState}
+                      .react_ScreenOrientation=${this.screenOrientation}
+                      .react_EscImagesLoaded=${this.escImagesLoaded}
 
-                    .hass=${this.hass}
-                    .cfg=${this.localCfgs[entityId]}
-                    .escImages=${this.escImages}
-                  >
-                  </enhanced-shutter>
-                  ${showMessages ? html`${this.messageManager.displayGroupMessages(entityId)} ` : ''}
-                  <div class="${ESC_CLASS_SHUTTER_SEPERATE}"></div>
+                      .hass=${this.hass}
+                      .cfg=${this.localCfgs[entityId]}
+                      .escImages=${this.escImages}
+                    >
+                    </enhanced-shutter>
+                    ${showMessages ? html`${this.messageManager.displayGroupMessages(entityId)} ` : ''}
+                  </div>
+                  <div class="${ESC_CLASS_SHUTTER_FLEX}">
+                    <div class="${ESC_CLASS_SHUTTER_SEPERATE}"></div>
+                  </div>
                 `;$
               }
             )}
@@ -1212,6 +1216,7 @@ class EnhancedShutterCardNew extends LitElement{
     const CSS = `
       .${ESC_CLASS_SHUTTERS} {
         padding: ${16}px;
+        display: flex;
       }
       .${ESC_CLASS_SHUTTER_SEPERATE}:not(:last-child) {
         height: ${5}px;
