@@ -97,6 +97,7 @@ const ESC_CLASS_BASE_NAME = 'esc-shutter';
 const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}`;
 const ESC_CLASS_SHUTTER_SEPERATE = `${ESC_CLASS_BASE_NAME}-seperate`
 const ESC_CLASS_SHUTTERS = `${ESC_CLASS_BASE_NAME}s`;
+const ESC_CLASS_SHUTTER_FLEX = `${ESC_CLASS_BASE_NAME}-flex`;
 const ESC_CLASS_TOP = `${ESC_CLASS_BASE_NAME}-${TOP}`;
 const ESC_CLASS_MIDDLE = `${ESC_CLASS_BASE_NAME}-middle`;
 const ESC_CLASS_BOTTOM = `${ESC_CLASS_BASE_NAME}-${BOTTOM}`;
@@ -795,14 +796,14 @@ const SHUTTER_CSS =`
 
     .tilt-slider-wrap {
       width: 20px;
+      height: ${ESC_BASE_HEIGHT_PX}px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transform: var(--esc-tilt-slider-rotate);
+      writing-mode: var(--esc-tilt-slider-writing-mode);
     }
 
     .tilt-slider-class {
-      width: ${ESC_BASE_HEIGHT_PX}px;
       transform: scale(var(--esc-button-scale));
     }
 
@@ -1070,9 +1071,7 @@ class EnhancedShutterCardNew extends LitElement{
                     </enhanced-shutter>
                     ${showMessages ? html`${this.messageManager.displayGroupMessages(entityId)} ` : ''}
                   </div>
-                  <div class="${ESC_CLASS_SHUTTER_FLEX}">
-                    <div class="${ESC_CLASS_SHUTTER_SEPERATE}"></div>
-                  </div>
+                  <div class="${ESC_CLASS_SHUTTER_SEPERATE}"></div>
                 `;$
               }
             )}
@@ -1217,6 +1216,7 @@ class EnhancedShutterCardNew extends LitElement{
       .${ESC_CLASS_SHUTTERS} {
         padding: ${16}px;
         display: flex;
+        flex-direction: row;
       }
       .${ESC_CLASS_SHUTTER_SEPERATE}:not(:last-child) {
         height: ${5}px;
@@ -1280,12 +1280,15 @@ class EnhancedShutterCardNew extends LitElement{
         let cfg = this.localCfgs[key];
         if (!tempCardName) tempCardName= cfg.friendlyName();
         let sizeCardTop = this.gridSizeCardTop(cfg);
+        console.log('sizeCardTop: ',sizeCardTop);
         cardSize = this.gridAddVertical(cardSize,sizeCardTop);
 
         let sizeCardMiddle = this.gridSizeCardMiddle(cfg);
+        console.log('sizeCardMiddle: ',sizeCardMiddle);
         cardSize = this.gridAddVertical(cardSize,sizeCardMiddle);
 
         let sizeCardBottom = this.gridSizeCardBottom(cfg);
+        console.log('sizeCardBottom: ',sizeCardBottom);
         cardSize = this.gridAddVertical(cardSize,sizeCardBottom);
 
         cardSize = this.gridAddVertical(cardSize,{localWidthPx: 0,localHeightPx: seperate});
@@ -1303,10 +1306,10 @@ class EnhancedShutterCardNew extends LitElement{
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
-    //console.log(`getGridOptionsInternal: cardSize: `,cardSize);
+    console.log(`getGridOptionsInternal: cardSize: `,cardSize);
     this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
     this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
-    //console.log(cardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
+    console.log(cardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
 
     const divCard= this.closest('div.card');
     /* Set CSS variables for number of rows and columns */
@@ -1318,7 +1321,7 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
       console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
     }
-    //console.log(`getGridOptionsInternal: calculated nbRows: ${this.nbRows}, nbCols: ${this.nbCols} for card '${tempCardName}'`);
+    console.log(`getGridOptionsInternal: calculated nbRows: ${this.nbRows}, nbCols: ${this.nbCols} for card '${tempCardName}'`);
     return {
       rows: this.nbRows,
       columns: this.nbCols,
@@ -1391,9 +1394,14 @@ class EnhancedShutterCardNew extends LitElement{
     * size image
     */
     let sizeStandardButtons = this.gridSizeStandardButtons(cfg);
+    console.log('gridSizeStandardButtons: ',sizeStandardButtons);
     let sizeWindowImage = this.gridSizeWindowImage(cfg);
+    console.log('gridSizeWindowImage: ',sizeWindowImage);
+
     let sizePartialOpenButtons = this.gridSizePartialOpenButtons(cfg);
+    console.log('gridSizePartialOpenButtons: ',sizePartialOpenButtons);
     let sizeTiltSection = this.gridSizeTiltSection(cfg);
+    console.log('gridSizeTiltSection: ',sizeTiltSection);
 
     let cardSize;
     if (cfg.buttonsInRow()){
@@ -1837,9 +1845,9 @@ class EnhancedShutter extends LitElement
       this.cfg.transformRotate(rotate), // rotate around div transform-origin
     ].join(SPACE);
   }
-  tiltSliderRotate(){
-    let rotate= this.cfg.buttonsInRow() ? -90 : 0;
-    return this.cfg.transformRotate(rotate);
+  tiltSliderWritingMode(){
+    const mode= this.cfg.buttonsInRow() ? 'vertical-rl' : 'horizontal';
+    return mode;
   }
   tiltIconRotate2(){
     let rotate= this.cfg.buttonsInRow() ? 0 : -90;
@@ -3359,7 +3367,7 @@ class htmlCard{
       --esc-tilt-slat-width: ${this.enhancedShutter.tiltSlatWidthPx()};
       --esc-tilt-slat-origin: ${this.enhancedShutter.tiltSlatOrigin()};
       --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};
-      --esc-tilt-slider-rotate: ${this.enhancedShutter.tiltSliderRotate()};
+      --esc-tilt-slider-writing-mode: ${this.enhancedShutter.tiltSliderWritingMode()};
       --esc-tilt-icon-rotate: ${(this.enhancedShutter.tiltIconRotate3())};
 
       --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+UNITY};
