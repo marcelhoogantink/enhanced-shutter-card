@@ -1102,6 +1102,7 @@ class EnhancedShutterCardNew extends LitElement{
       const previousGridWidth = this.gridPixelWidth;
       const columns = style.getPropertyValue('grid-template-columns');
       this.gridPixelWidth = Math.ceil(parseFloat(columns.split(/\s+/)[0]));
+
       if (previousGridWidth !== this.gridPixelWidth) {
         //console.log(`#@#@ Card getGrid: changed from ${previousGridWidth} to ${this.gridPixelWidth} `);
         this.getGridOptions('from getGrid()');
@@ -1213,6 +1214,8 @@ class EnhancedShutterCardNew extends LitElement{
 
   static get styles() {
     const CSS = `
+      .${ESC_CLASS_SHUTTER_FLEX} {
+        justify-content: center;
       .${ESC_CLASS_SHUTTERS} {
         padding: ${16}px;
         display: flex;
@@ -1308,7 +1311,7 @@ class EnhancedShutterCardNew extends LitElement{
     */
     console.log(`getGridOptionsInternal: cardSize: `,cardSize);
     this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
-    this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
+    this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap)+0.5);
     console.log(cardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
 
     const divCard= this.closest('div.card');
