@@ -152,6 +152,7 @@ const MARGIN_POSITION = 5;
 const UNITY= 'px';
 
 const CONFIG_TYPE = "type";
+const CONFIG_STACKED = "stacked";
 const CONFIG_SHUTTER_PRESET = 'shutter_preset';
 const CONFIG_TITLE = "title";
 const CONFIG_ENTITIES = 'entities';
@@ -267,9 +268,10 @@ const ESC_SHADE = 'shade';
 const ESC_BLIND = 'blind';
 const ESC_ROLLER_SHUTTER = 'roller-shutter';
 const ESC_TYPES =
-  [ESC_AWNING, ESC_CURTAIN, ESC_ROLLER_SHUTTER,ESC_SHADE];
+  [ESC_AWNING, ESC_CURTAIN, ESC_ROLLER_SHUTTER,ESC_SHADE.ESC_BLIND];
 
 const ESC_SHUTTER_PRESET = ESC_ROLLER_SHUTTER;
+const ESC_STACKED = VERTICAL;
 const ESC_NAME = null;
 const ESC_PASSIVE_MODE = false;
 const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}/images`;
@@ -352,6 +354,7 @@ const CONFIG_DEFAULT ={
   [CONFIG_ENTITIES]: "",
 
   [CONFIG_DEBUG]: ESC_DEBUG,
+  [CONFIG_STACKED]: ESC_STACKED,
 
   [CONFIG_SHUTTER_PRESET]: ESC_SHUTTER_PRESET,
   [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
@@ -888,6 +891,7 @@ class EnhancedShutterCardNew extends LitElement{
   #defAllShutterConfig()
   {
     this.globalCfg = this.#buildConfig(CONFIG_DEFAULT,this.config);
+    this.cardCfg = new cardCfg(this.globalCfg);
     this.config.entities.map((currEntityCfg) => {
       let escCfg = this.#buildConfig(this.globalCfg,currEntityCfg);
       this.localCfgs[escCfg.entity] = new shutterCfg(this.hass,escCfg);
@@ -955,6 +959,9 @@ class EnhancedShutterCardNew extends LitElement{
     const uniqueKeysInObj1 = keysObj1.filter(key => !keysObj2.includes(key));
 
     return uniqueKeysInObj1;
+  }
+  getCardFlexDirection(){
+    return this.cardCfg.stacked() == VERTICAL ? 'column' : 'row';
   }
 
 /*
@@ -1034,19 +1041,30 @@ class EnhancedShutterCardNew extends LitElement{
     });
     console_log('Card Update ready');
   }
-  render() {
+  render()
+  {
     //console.log('#@ CARD RENDER !!!!!!');
     if (!this.config || !this.hass || !this.isShutterConfigLoaded) {
       console.warn('ShutterCard  .. no content ..');
       return html`Waiting ...`;
     }
     let showMessages = this.messageManager.countMessages() && this.closestElement('.element-preview',this) !== null;
-
+    let htmlParts = new htmlCard(this);
+/*
+    const coverGroupTest = this.config.entities.map(
+      (currEntity) => {
+        const entityId = currEntity.entity || currEntity;
+        return entityId;
+      });
+*/
     let htmlout = html`
         ${showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
         ${showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
         <ha-card .header=${this.config.title}>
-          <div class="${ESC_CLASS_SHUTTERS}">
+          <div
+            class="${ESC_CLASS_SHUTTERS}"
+            style = "${htmlParts.defStyleVarsCard()}"
+          >
             ${this.config.entities.map( // TODO replace config by global.cfg ??
               (currEntity) => {
                 const entityId = currEntity.entity || currEntity;
@@ -1071,7 +1089,7 @@ class EnhancedShutterCardNew extends LitElement{
                     </enhanced-shutter>
                     ${showMessages ? html`${this.messageManager.displayGroupMessages(entityId)} ` : ''}
                   </div>
-                  <div class="${ESC_CLASS_SHUTTER_SEPERATE}"></div>
+                  <div class="${ESC_CLASS_SHUTTER_SEPERATE}-${this.cardCfg.stacked()}"></div>
                 `;$
               }
             )}
@@ -1216,17 +1234,28 @@ class EnhancedShutterCardNew extends LitElement{
     const CSS = `
       .${ESC_CLASS_SHUTTER_FLEX} {
         justify-content: center;
+      }
       .${ESC_CLASS_SHUTTERS} {
         padding: ${16}px;
         display: flex;
-        flex-direction: row;
+        flex-direction: var(--esc-card-flex-direction);
       }
-      .${ESC_CLASS_SHUTTER_SEPERATE}:not(:last-child) {
+      .${ESC_CLASS_SHUTTER_SEPERATE}-${VERTICAL}:not(:last-child) {
         height: ${5}px;
+        width: ${50}px;
         margin-left: auto;
         margin-right: auto;
-        width: 25%;
         border-width: 3px 0 0 0;
+        border-style: solid;
+        border-color: var(--divider-color);
+      }
+      .${ESC_CLASS_SHUTTER_SEPERATE}-${HORIZONTAL}:not(:last-child) {
+        height: ${50}px;
+        width: ${5}px;
+        margin-top: auto;
+        margin-left: 7px;
+        margin-bottom: auto;
+        border-width: 0 0 0 3px;
         border-style: solid;
         border-color: var(--divider-color);
       }
@@ -1271,46 +1300,49 @@ class EnhancedShutterCardNew extends LitElement{
 
     const debug=0;
 
-    let cardSize;
-    let seperate=0;
+    let cardSize= this.gridSizeCardTitle();
 
 
-    if (this.config && this.config.entities && this.isShutterConfigLoaded){
+    if (this.config && this.config.entities && this.isShutterConfigLoaded)
+    {
+      let allShuttersSize = {localWidthPx: 0,localHeightPx: 0};
+      let seperate=0;
       var tempCardName="";
-      cardSize= this.gridSizeCardTitle();
 
-      Object.keys(this.localCfgs).forEach(key =>{
+      Object.keys(this.localCfgs).forEach(key =>
+      {
         let cfg = this.localCfgs[key];
         if (!tempCardName) tempCardName= cfg.friendlyName();
-        let sizeCardTop = this.gridSizeCardTop(cfg);
-        console.log('sizeCardTop: ',sizeCardTop);
-        cardSize = this.gridAddVertical(cardSize,sizeCardTop);
+        let shutterSize = this.gridSizeCardTop(cfg);
 
         let sizeCardMiddle = this.gridSizeCardMiddle(cfg);
-        console.log('sizeCardMiddle: ',sizeCardMiddle);
-        cardSize = this.gridAddVertical(cardSize,sizeCardMiddle);
+        shutterSize = this.gridAddVertical(shutterSize,sizeCardMiddle);
 
         let sizeCardBottom = this.gridSizeCardBottom(cfg);
-        console.log('sizeCardBottom: ',sizeCardBottom);
-        cardSize = this.gridAddVertical(cardSize,sizeCardBottom);
+        shutterSize = this.gridAddVertical(shutterSize,sizeCardBottom);
 
-        cardSize = this.gridAddVertical(cardSize,{localWidthPx: 0,localHeightPx: seperate});
+        if (this.cardCfg.stacked() == VERTICAL){
+          allShuttersSize = this.gridAddVertical(allShuttersSize,shutterSize);
+          allShuttersSize = this.gridAddVertical(allShuttersSize,{localWidthPx: 0,localHeightPx: seperate});
+        }else{
+          allShuttersSize = this.gridAddHorizontal(allShuttersSize,shutterSize);
+          allShuttersSize = this.gridAddHorizontal(allShuttersSize,{localWidthPx: seperate,localHeightPx: 0});
+        }
         seperate=8;  // size of seperation bar
 
       });
+      cardSize = this.gridAddVertical(cardSize,allShuttersSize);
       // add padding
       cardSize = this.gridAddBoth(cardSize,{localWidthPx: 16,localHeightPx: 32});
     }else{
       console.warn('ShutterCard  .. no content ??..');
     }
-    const gridContainer = this.closest('.container');
     /*
-    *
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
     console.log(`getGridOptionsInternal: cardSize: `,cardSize);
-    this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
+    this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap)+0.5);
     this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap)+0.5);
     console.log(cardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
 
@@ -1668,16 +1700,15 @@ class EnhancedShutter extends LitElement
       this.actualTiltPosition = this.cfg.currentDeviceTiltPosition() ?? 0;
       this.react_TiltPosition = this.actualTiltPosition; // TODO: logical not needed, but actual it does: check
     }
-    positionText =  this.cfg.computePositionText(this.actualShutterPosition,this.actualTiltPosition);
 
-    let htmlParts = new htmlCard(this,positionText);
+    let htmlParts = new htmlShutter(this);
 
     //console_log('Shutter Render ready');
     return html`
       <div
         class=${ESC_CLASS_SHUTTER}
         data-shutter="${entityId}"
-        style = "${htmlParts.defStyleVars()}"
+        style = "${htmlParts.defStyleVarsShutter()}"
       >
         ${htmlParts.showBatteryIcon()}
         ${htmlParts.showSignalIcon()}
@@ -2330,6 +2361,29 @@ class EnhancedShutter extends LitElement
   static get styles() {
     return css`${unsafeCSS(SHUTTER_CSS)}
     `
+  }
+}
+class cardCfg {
+
+  #cfg={};
+
+  constructor(cfg)
+  {
+    this.stacked(cfg[CONFIG_STACKED]);
+    Object.preventExtensions(this);
+  }
+
+  /*
+   ** getters/setters
+   */
+  #getCfg(key,value= null){
+    if (value!== null && this.#cfg[key]!=value){
+      this.#cfg[key]= value;
+    }
+    return this.#cfg[key];
+  }
+  stacked(value = null){
+    return this.#getCfg(CONFIG_STACKED,value);
   }
 }
 class shutterCfg {
@@ -3310,21 +3364,31 @@ class shutterCfg {
   }
 
 }
-
-
 class htmlCard{
+  constructor(enhancedShutterCard){
+    this.enhancedShutterCard=enhancedShutterCard;
+  }
+  defStyleVarsCard(){
 
-  constructor(enhancedShutter,positionText){
+    return `
+      --esc-card-flex-direction: ${this.enhancedShutterCard.getCardFlexDirection()};
+    `;
+  }
+}
+
+class htmlShutter{
+
+  constructor(enhancedShutter){
     this.enhancedShutter=enhancedShutter;
     this.cfg =enhancedShutter.cfg;
-    this.positionText =positionText;
     this.actualScreenPosition = enhancedShutter.actualScreenPosition;
     this.actualTiltPosition = enhancedShutter.actualTiltPosition;
+    this.positionText =this.cfg.computePositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
     this.escImages= enhancedShutter.escImages;
     this.cfg = enhancedShutter.cfg;
   }
 
-  defStyleVars(){
+  defStyleVarsShutter(){
     let escState=this.cfg.positionToState();
     const viewImage=this.escImages.getViewImageSrc(this.cfg.entityId());
 
@@ -3407,7 +3471,7 @@ class htmlCard{
       --esc-button-scale: ${this.cfg.buttonScaleFactor()};
 
       --esc-selector-flex-basis: ${this.cfg.buttonsInRow() ? this.enhancedShutter.actualGlobalWidthPx():this.enhancedShutter.actualGlobalHeightPx()}${UNITY};
-`;
+    `;
   }
 
 
