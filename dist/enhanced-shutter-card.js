@@ -290,7 +290,7 @@ const ESC_DEBUG = DEBUG || false;
 const ESC_SCALE_ICONS = true;
 const ESC_SCALE_TEXTS = false;
 const ESC_SCALE_BUTTONS = false;
-const ESC_OPENED_OFFSET_PCT = 0;
+const ESC_OPENED_OFFSET_PCT = 13;
 const ESC_CLOSED_OFFSET_PCT = 0;
 const ESC_BUTTONS_POSITION = LEFT;
 const ESC_TITLE_POSITION = null;  // deprecated
@@ -426,11 +426,7 @@ const CONFIG_DEFAULT ={
 
 };
 const ESC_PRESET = {
-  [ESC_ROLLER_SHUTTER] : {
-    [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: true,
-    [CONFIG_SHOW_TILT]: false,
-    [CONFIG_NAME]: 'Roller Shutter',
-  }  // default is using CONFIG_DEFAULT
+  [ESC_ROLLER_SHUTTER] : CONFIG_DEFAULT //  using CONFIG_DEFAULT
   ,
   [ESC_AWNING]: {
     [CONFIG_INVERT_OPEN_CLOSE_UI]: true,
@@ -501,6 +497,7 @@ const SHUTTER_CSS =`
 
       .${ESC_CLASS_SHUTTER} {
         overflow: visible;
+        position: relative;
       }
       .${ESC_CLASS_MIDDLE} {
         display: flex;
@@ -772,16 +769,16 @@ const SHUTTER_CSS =`
       .${ESC_CLASS_TOP_LEFT}, .${ESC_CLASS_TOP_RIGHT} {
         --mdc-icon-size: var(--icon-size-wifi-battery, 24px);
         position: absolute;
-        padding: 0 10px 10px 10px;
+        ppadding: 0 10px 10px 10px;
         text-align: center;
       }
       .${ESC_CLASS_TOP_LEFT} {
         color: var(--esc-top-left-color);
-        left: 0;
+        left: -6px;
       }
       .${ESC_CLASS_TOP_RIGHT} {
         color: var(--esc-top-right-color);
-        right: 0;
+        right: -6px;
       }
       .${ESC_CLASS_TOP_ICON_TEXT} {
         text-align: center;
@@ -1238,8 +1235,9 @@ class EnhancedShutterCardNew extends LitElement{
         flex-direction: var(--esc-card-flex-direction);
       }
       .${ESC_CLASS_SHUTTER_SEPERATE}-${VERTICAL}:not(:last-child) {
-        height: ${5}px;
-        width: ${50}px;
+        height: ${10}px;
+        width: ${100}px;
+        box-sizing: border-box;
         margin-left: auto;
         margin-right: auto;
         border-width: 3px 0 0 0;
@@ -1247,8 +1245,9 @@ class EnhancedShutterCardNew extends LitElement{
         border-color: var(--divider-color);
       }
       .${ESC_CLASS_SHUTTER_SEPERATE}-${HORIZONTAL}:not(:last-child) {
-        height: ${50}px;
-        width: ${5}px;
+        height: ${100}px;
+        width: ${10}px;
+        box-sizing: border-box;
         margin-top: auto;
         margin-left: 7px;
         margin-bottom: auto;
@@ -3529,7 +3528,8 @@ class htmlShutter{
             <ha-icon
               icon=${this.cfg.batteryLevelIcon()}
               class="${ESC_CLASS_HA_ICON}"
-            ></ha-icon>
+            >
+            </ha-icon>
             <div class="${ESC_CLASS_TOP_ICON_TEXT}">
               ${this.cfg.batteryLevelText()}
             </div>
@@ -3545,7 +3545,8 @@ class htmlShutter{
             <ha-icon
               class="${ESC_CLASS_HA_ICON}"
               icon=${this.cfg.signalLevelIcon()}
-            ></ha-icon>
+            >
+            </ha-icon>
             <div class="${ESC_CLASS_TOP_ICON_TEXT}">
               ${this.cfg.signalLevelText()}
             </div>
