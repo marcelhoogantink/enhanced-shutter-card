@@ -975,7 +975,6 @@ class EnhancedShutterCardNew extends LitElement{
     if (this.isShutterConfigLoaded){
 
       changedProperties.forEach((oldValue, propName) => {
-        //console.log(`Card shouldUpdate, Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
         // ******
         // TODO: improve select/search states
         // ******
@@ -1800,6 +1799,70 @@ class EnhancedShutter extends LitElement
       this.tiltSlider.value = this.react_TiltPosition; // !!!!! Special ..Bug ??...
     }
     this.action='cover-update';
+    // TODO: better testing and employing _resolveEntities(), basicly it works ...
+    //this.TEST_resolveEntities(this.hass);
+
+  }
+
+  async TEST_resolveEntities(hass) {
+
+    const ENTITY_REGISTRY_LIST = "config/entity_registry/list";
+    if (!this._registryCache) {
+      try {
+        this._registryCache = await hass.callWS({ type: ENTITY_REGISTRY_LIST });
+      } catch (e) {
+        console.warn("device-group-card: entity registry lookup failed", e);
+        return;
+      }
+    }
+
+    const newMap = {};
+    let entityIds= [this.cfg.entityId()];
+
+
+    //for (const item of this.config.entities) {
+    for (const item of entityIds) {
+      const entityId = item; //.entity;
+
+      // Full manual override — skip discovery entirely
+      if (item.battery_entity && item.signal_entity) {
+        newMap[entityId] = {
+          battery_entity: item.battery_entity,
+          signal_entity:  item.signal_entity,
+        };
+        continue;
+      }
+
+      const primary = this._registryCache.find(e => e.entity_id === entityId);
+      if (!primary?.device_id) {
+        newMap[entityId] = { battery_entity: null, signal_entity: null };
+        continue;
+      }
+
+      const siblings = this._registryCache.filter(
+        e => e.device_id === primary.device_id && e.entity_id !== entityId
+      );
+      const currentHass = hass;
+      // Helper: check registry entry AND live state attributes
+      const hasDeviceClass = (entry, targetClass) => {
+        const stateObj = currentHass.states[entry.entity_id];
+        return stateObj?.attributes?.device_class === targetClass;
+      };
+
+      const batteryEntry = siblings.find(e => hasDeviceClass(e, "battery"));
+      const signalEntry  = siblings.find(e => hasDeviceClass(e, "signal_strength"));
+
+      // Manual override wins per-field; discovery fills the rest
+      newMap[entityId] = {
+        battery_entity: item.battery_entity ?? batteryEntry?.entity_id ?? null,
+        signal_entity:  item.signal_entity  ?? signalEntry?.entity_id  ?? null,
+      };
+    }
+
+    // Assigning a new object triggers LitElement's reactive update.
+    // This is why we build 'newMap' separately rather than mutating this._entityMap in place —
+    // mutating the same object reference would NOT trigger a re-render.
+    this._entityMap = newMap;
   }
 
 /**
@@ -3936,15 +3999,15 @@ class Message {
   }
 }
 class EscImages{
+    #width=[];
+    #height=[];
+    #escImagesLoaded = false; // Mark images as not loaded
+    #escImageInfo={};
+    #images=[];
 
   constructor(config){
-    this.escImagesLoaded = false; // Mark images as not loaded
-    this.images=[];
     this.imageTypes=[];
-    this.width=[];
-    this.height=[];
     var nImages=0;
-    this.escImages={};
     let base_image_map = config[CONFIG_IMAGE_MAP] || ESC_IMAGE_MAP;
     let shutter_preset = config[CONFIG_SHUTTER_PRESET];
 
@@ -3982,12 +4045,12 @@ class EscImages{
         if (image){
           let src = image.replace(/([^:]\/)\/+/g, "/").trim(); // Remove double slashes and trim
           var key;
-          if (!(this.images.includes(src))){
-            this.images[nImages]=src;
+          if (!(this.#images.includes(src))){
+            this.#images[nImages]=src;
             this.imageTypes[nImages]=image_type;
             key= nImages++;
           }else{
-            key = this.images.findIndex(element => element == src);
+            key = this.#images.findIndex(element => element == src);
           }
           imageRefs[entityId]={entityId,key};
         }else{
@@ -3995,7 +4058,7 @@ class EscImages{
 
         }
       };
-      this.escImages[image_type]=imageRefs;
+      this.#escImageInfo[image_type]=imageRefs;
 
     };
   }
@@ -4012,11 +4075,11 @@ class EscImages{
     return this.getImageSrc(CONFIG_SHUTTER_BOTTOM_IMAGE,entityId);
   }
   getImageSrc(image_type,entityId){
-    const key = this.escImages[image_type][entityId].key;
-    if (key < 0 || key >= this.images.length) {
+    const key = this.#escImageInfo[image_type][entityId].key;
+    if (key < 0 || key >= this.#images.length) {
       return ''; // Return a default empty string if the key is invalid
     }
-    return this.images[key];
+    return this.#images[key];
   }
 
   getWindowImageSize(entityId){
@@ -4033,31 +4096,88 @@ class EscImages{
     return this.getImageSize(CONFIG_SHUTTER_BOTTOM_IMAGE,entityId);
   }
   getImageSize(image_type, entityId) {
-    const key = this.escImages[image_type][entityId]?.key;
-    if (key == null || key < 0 || key >= this.images.length) {
+    const key = this.#escImageInfo[image_type][entityId]?.key;
+    if (key == null || key < 0 || key >= this.#images.length) {
       return new xyPair(0, 0);
     }
-    const  xy = new xyPair(this.width[key] || 0, this.height[key] || 0);
+    const  xy = new xyPair(this.#width[key] || 0, this.#height[key] || 0);
     return xy;
   }
 
   async processImages() {
     try {
-      const images=this.images;
-      const imageDimensions = await readImageDimensions(this);
-      imageDimensions.forEach((value,key,array)=>{
-        //this.width[key] = value.width;
-        //this.height[key]= value.height;
-        this.width[value.index] = value.width;
-        this.height[value.index]= value.height;
+      const imageDimensions = await this.readImageDimensions(this);
+      imageDimensions.forEach((value)=>{
+        this.#width[value.index] = value.width;
+        this.#height[value.index]= value.height;
       });
 
-      this.escImagesLoaded = true; // Mark images as loaded
+      this.#escImagesLoaded = true; // Mark images as loaded
     } catch (error) {
         console.error('Failed to load image dimensions:', error);
     }
-    return this.escImagesLoaded;
+    return this.#escImagesLoaded;
   }
+
+  async readImageDimensions() {
+    const promises = [];
+    // Loop through each file URL in the provided array
+
+
+    for (let i = 0; i < this.#images.length; i++) {
+      const fileUrl = this.#images[i];
+      if (isUrl(fileUrl)) {
+        const promise = new Promise((resolve, reject) => {
+          const img = new Image();
+
+          img.onload = function() {
+              resolve({
+                  url: fileUrl,
+                  width: img.width,
+                  height: img.height,
+                  index: i // Store the index of the image in the original array
+              });
+          };
+          img.onerror = function() {
+  //          hass.callService("persistent_notification", "create", {
+  //            title: "Notitie",
+  //            message: "Dit is mijn melding vanuit de card"
+  //          });
+            const baseImage = `${ESC_IMAGE_MAP}/${CONFIG_DEFAULT[this.imageTypes[i]]}`;
+            this.images[i]= baseImage; // Replace with default image on error
+
+            console.warn(`Failed to load image: ${fileUrl}, using default image: ${baseImage}`);
+
+            const fallbackImg = new Image();
+
+            fallbackImg.onload = function () {
+              resolve({
+                url: baseImage,
+                width: fallbackImg.width,
+                height: fallbackImg.height,
+                index: i
+              });
+            };
+            fallbackImg.src = baseImage;
+          };
+
+          img.src = fileUrl; // Set the src to the image URL directly
+
+        });
+        promises.push(promise);
+      }
+    }
+
+    try {
+        // Wait for all image dimensions to be loaded
+        const results = await Promise.all(promises);
+        return results;  // Return results with dimensions
+    } catch (error) {
+        console.error('Error loading images:', error);
+        throw error;
+    }
+  }
+
 }
 /**
  * global functions
@@ -4333,64 +4453,6 @@ function isUrl(fileName){
   return fileName.includes('.');
 }
 
-async function readImageDimensions(escImages) {
-  const promises = [];
-  // Loop through each file URL in the provided array
-
-
-  for (let i = 0; i < escImages.images.length; i++) {
-    const fileUrl = escImages.images[i];
-    if (isUrl(fileUrl)) {
-      const promise = new Promise((resolve, reject) => {
-        const img = new Image();
-
-        img.onload = function() {
-            resolve({
-                url: fileUrl,
-                width: img.width,
-                height: img.height,
-                index: i // Store the index of the image in the original array
-            });
-        };
-        img.onerror = function() {
-//          hass.callService("persistent_notification", "create", {
-//            title: "Notitie",
-//            message: "Dit is mijn melding vanuit de card"
-//          });
-          const baseImage = `${ESC_IMAGE_MAP}/${CONFIG_DEFAULT[escImages.imageTypes[i]]}`;
-          escImages.images[i]= baseImage; // Replace with default image on error
-
-          console.warn(`Failed to load image: ${fileUrl}, using default image: ${baseImage}`);
-
-          const fallbackImg = new Image();
-
-          fallbackImg.onload = function () {
-            resolve({
-              url: baseImage,
-              width: fallbackImg.width,
-              height: fallbackImg.height,
-              index: i
-            });
-          };
-          fallbackImg.src = baseImage;
-        };
-
-        img.src = fileUrl; // Set the src to the image URL directly
-
-      });
-      promises.push(promise);
-    }
-  }
-
-  try {
-      // Wait for all image dimensions to be loaded
-      const results = await Promise.all(promises);
-      return results;  // Return results with dimensions
-  } catch (error) {
-      console.error('Error loading images:', error);
-      throw error;
-  }
-}
 
 
 
