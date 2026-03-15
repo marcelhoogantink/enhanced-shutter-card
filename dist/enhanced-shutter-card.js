@@ -798,8 +798,6 @@ const SHUTTER_CSS =`
     }
 
     .tilt-slider-wrap {
-      width: 20px;
-      height: ${ESC_BASE_HEIGHT_PX}px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1118,7 +1116,7 @@ class EnhancedShutterCardNew extends LitElement{
       const style = getComputedStyle(this.gridContainer);
       const previousGridWidth = this.gridPixelWidth;
       const columns = style.getPropertyValue('grid-template-columns');
-      this.gridPixelWidth = Math.ceil(parseFloat(columns.split(/\s+/)[0]));
+      this.gridPixelWidth = (parseFloat(columns.split(/\s+/)[0]));
 
       if (previousGridWidth !== this.gridPixelWidth) {
         //console.log(`#@#@ Card getGrid: changed from ${previousGridWidth} to ${this.gridPixelWidth} `);
@@ -1299,12 +1297,12 @@ class EnhancedShutterCardNew extends LitElement{
 
     const debug=0;
 
-    let cardSize= this.gridSizeCardTitle();
+    let totalCardSize= this.gridSizeCardTitle();
 
 
     if (this.config && this.config.entities && this.isShutterConfigLoaded)
     {
-      let allShuttersSize = {localWidthPx: 0,localHeightPx: 0};
+      let totalShuttersSize = {localWidthPx: 0,localHeightPx: 0};
       let seperate=0;
       var tempCardName="";
 
@@ -1315,24 +1313,25 @@ class EnhancedShutterCardNew extends LitElement{
         let shutterSize = this.gridSizeCardTop(cfg);
 
         let sizeCardMiddle = this.gridSizeCardMiddle(cfg);
+        console.log(`getGridOptionsInternal: sizeCardMiddle: `,sizeCardMiddle);
         shutterSize = this.gridAddVertical(shutterSize,sizeCardMiddle);
 
         let sizeCardBottom = this.gridSizeCardBottom(cfg);
         shutterSize = this.gridAddVertical(shutterSize,sizeCardBottom);
 
         if (this.cardCfg.stacked() == VERTICAL){
-          allShuttersSize = this.gridAddVertical(allShuttersSize,shutterSize);
-          allShuttersSize = this.gridAddVertical(allShuttersSize,{localWidthPx: 0,localHeightPx: seperate});
+          totalShuttersSize = this.gridAddVertical(totalShuttersSize,shutterSize);
+          totalShuttersSize = this.gridAddVertical(totalShuttersSize,{localWidthPx: 0,localHeightPx: seperate});
         }else{
-          allShuttersSize = this.gridAddHorizontal(allShuttersSize,shutterSize);
-          allShuttersSize = this.gridAddHorizontal(allShuttersSize,{localWidthPx: seperate,localHeightPx: 0});
+          totalShuttersSize = this.gridAddHorizontal(totalShuttersSize,shutterSize);
+          totalShuttersSize = this.gridAddHorizontal(totalShuttersSize,{localWidthPx: seperate,localHeightPx: 0});
         }
-        seperate=8;  // size of seperation bar
+        seperate=10;  // size of seperation bar (7 margin + 3 border)
 
       });
-      cardSize = this.gridAddVertical(cardSize,allShuttersSize);
+      totalCardSize = this.gridAddVertical(totalCardSize,totalShuttersSize);
       // add padding
-      cardSize = this.gridAddBoth(cardSize,{localWidthPx: 16,localHeightPx: 32});
+      totalCardSize = this.gridAddBoth(totalCardSize,{localWidthPx: 32,localHeightPx: 32});
     }else{
       console.warn('ShutterCard  .. no content ??..');
     }
@@ -1340,10 +1339,10 @@ class EnhancedShutterCardNew extends LitElement{
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
-    console.log(`getGridOptionsInternal: cardSize: `,cardSize);
-    this.nbRows= Math.ceil((cardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap)+0.5);
-    this.nbCols= Math.ceil((cardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap)+0.5);
-    console.log(cardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
+    console.log(`getGridOptionsInternal: cardSize: `,totalCardSize);
+    this.nbRows= Math.ceil((totalCardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap)+0.5);
+    this.nbCols= Math.ceil((totalCardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap)+0.5);
+    console.log(totalCardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
 
     const divCard= this.closest('div.card');
     /* Set CSS variables for number of rows and columns */
@@ -1483,36 +1482,12 @@ class EnhancedShutterCardNew extends LitElement{
     //console.log('gridSizeStandardButtons: ',{localWidthPx,localHeightPx});
     return {localWidthPx,localHeightPx};
   };
-  gridSizeTiltButtons(cfg){
-    // HA basic sizes for calculations:
-
-    let localHeightPx=0;
-    let localWidthPx =0;
-
-    const haButtonSize = cfg.iconButtonSize();
-
-    /*
-    * size tilt-buttons
-    */
-    if (cfg.showTilt() || cfg.partialActive()) {
-      if (cfg.buttonsInRow()){
-        if  (cfg.showTilt()) localHeightPx+=haButtonSize*2;
-        if  (cfg.partialActive())  localHeightPx+=haButtonSize;
-        localWidthPx += haButtonSize;
-      }else{
-        if  (cfg.showTilt()) localWidthPx+=haButtonSize*2;
-        if  (cfg.partialActive())  localWidthPx+=haButtonSize;
-        localHeightPx = haButtonSize;
-      }
-    }
-    return {localWidthPx,localHeightPx};
-  };
   gridSizeWindowImage(cfg){
     /*
     * size image
     */
-    let localHeightPx = cfg.windowHeightPx();
-    let localWidthPx = cfg.windowWidthPx();
+    let localHeightPx = cfg.windowHeightPx()+4;  // margin is 2
+    let localWidthPx = cfg.windowWidthPx()+4;
 
     return {localWidthPx,localHeightPx};
   };
@@ -1520,9 +1495,18 @@ class EnhancedShutterCardNew extends LitElement{
     /*
     * size of tilt options
     */
-    let localHeightPx = cfg.windowHeightPx();
-    let localWidthPx = cfg.tiltSliderOnly() ? 20 : 56;  // TODO: to be improved
+    let localHeightPx=0;
+    let localWidthPx =0;
 
+    if (cfg.showTilt()) {
+      if (cfg.buttonsInRow()){
+        localHeightPx += cfg.windowHeightPx();
+        localWidthPx += cfg.tiltSliderOnly() ? 20 : 56;  // TODO: to be improved
+      }else{
+        localHeightPx += cfg.tiltSliderOnly() ? 20 : 56;  // TODO: to be improved
+        localWidthPx += cfg.windowWidthPx();
+      }
+    }
     return {localWidthPx,localHeightPx};
   };
   gridSizePartialOpenButtons(cfg){
