@@ -98,6 +98,7 @@ const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}`;
 const ESC_CLASS_SHUTTER_SEPERATE = `${ESC_CLASS_BASE_NAME}-seperate`
 const ESC_CLASS_SHUTTERS = `${ESC_CLASS_BASE_NAME}s`;
 const ESC_CLASS_SHUTTER_FLEX = `${ESC_CLASS_BASE_NAME}-flex`;
+const ESC_CLASS_TOP_BOTTOM = `${ESC_CLASS_BASE_NAME}-${TOP}-${BOTTOM}`;
 const ESC_CLASS_TOP = `${ESC_CLASS_BASE_NAME}-${TOP}`;
 const ESC_CLASS_MIDDLE = `${ESC_CLASS_BASE_NAME}-middle`;
 const ESC_CLASS_BOTTOM = `${ESC_CLASS_BASE_NAME}-${BOTTOM}`;
@@ -125,8 +126,8 @@ const ESC_CLASS_MOVEMENT_DOWN = `${ESC_CLASS_BASE_NAME}-movement-down`;
 const ESC_CLASS_HA_ICON = `${ESC_CLASS_BASE_NAME}-ha-icon`;
 const ESC_CLASS_HA_ICON_LOCK = `${ESC_CLASS_HA_ICON}-lock`;
 const ESC_CLASS_HA_ICON_TILT = `${ESC_CLASS_HA_ICON}-tilt`;
-const ESC_CLASS_TOP_LEFT = `${ESC_CLASS_BASE_NAME}-${TOP}-${LEFT}`;
-const ESC_CLASS_TOP_RIGHT = `${ESC_CLASS_BASE_NAME}-${TOP}-${RIGHT}`;
+const ESC_CLASS_ICON_LEFT = `${ESC_CLASS_BASE_NAME}-icon-${LEFT}`;
+const ESC_CLASS_ICON_RIGHT = `${ESC_CLASS_BASE_NAME}-icon-${RIGHT}`;
 const ESC_CLASS_TOP_ICON_TEXT = `${ESC_CLASS_BASE_NAME}-icon-text`;
 
 const POSITIONS =[AUTO,AUTO_BL,AUTO_BR,AUTO_TL,AUTO_TR,LEFT,RIGHT,TOP,BOTTOM,NONE];
@@ -142,6 +143,7 @@ const ACTION_SHUTTER_SET_POS_TILT = 'set_cover_tilt_position';
 
 const ICON_BUTTON_SIZE = 36; // original: 48
 const ICON_SIZE = 24;
+const ICON_DIV_SIZE = 34;
 
 const FONT_SIZE_LABEL = 20;
 const FONT_SIZE_POSITION = 14;
@@ -195,6 +197,7 @@ const CONFIG_TITLE_POSITION = 'title_position';  // removed
 const CONFIG_NAME_POSITION = 'name_position';
 const CONFIG_NAME_DISABLED = 'name_disabled';
 const CONFIG_OPENING_POSITION = 'opening_position';
+const CONFIG_ICONS_POSITION = 'icons_position';
 const CONFIG_OPENING_DISABLED = 'opening_disabled';
 const CONFIG_INLINE_HEADER = 'inline_header';
 
@@ -297,6 +300,7 @@ const ESC_TITLE_POSITION = null;  // deprecated
 const ESC_NAME_POSITION =TOP;
 const ESC_NAME_DISABLED = false;
 const ESC_OPENING_POSITION = TOP;
+const ESC_ICONS_POSITION = TOP;
 const ESC_OPENING_DISABLED = false;
 const ESC_INLINE_HEADER = false;
 const ESC_INVERT_PCT_COVER = false;
@@ -386,6 +390,7 @@ const CONFIG_DEFAULT ={
   [CONFIG_NAME_POSITION]: ESC_NAME_POSITION, // new
   [CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,
   [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION,
+  [CONFIG_ICONS_POSITION]: ESC_ICONS_POSITION,
   [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,
   [CONFIG_INLINE_HEADER]: ESC_INLINE_HEADER,
 
@@ -426,8 +431,8 @@ const CONFIG_DEFAULT ={
 
 };
 const ESC_PRESET = {
-  [ESC_ROLLER_SHUTTER] : CONFIG_DEFAULT //  using CONFIG_DEFAULT
-  ,
+  [ESC_ROLLER_SHUTTER] :
+    CONFIG_DEFAULT, //  using CONFIG_DEFAULT
   [ESC_AWNING]: {
     [CONFIG_INVERT_OPEN_CLOSE_UI]: true,
     [CONFIG_INVERT_PCT_UI]: true,
@@ -465,6 +470,7 @@ const ESC_PRESET = {
   },
   [ESC_TEST]: {
     [CONFIG_WINDOW_IMAGE]: '',
+    [CONFIG_OFFSET_OPENED_PCT]: 2,
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'rode_rechthoek.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'gele_rechthoek.png',
     [CONFIG_NAME]: 'Test',
@@ -701,7 +707,25 @@ const SHUTTER_CSS =`
       .${ESC_CLASS_MOVEMENT_DOWN} {
         display: var(--esc-movement-overlay-down-display);
       }
+      .${ESC_CLASS_TOP_BOTTOM} {
+        display: flex;
+        white-space: nowrap;
+      }
+
+      .${ESC_CLASS_TOP_BOTTOM} > :last-child {
+        margin-left: auto;
+      }
+      .${ESC_CLASS_TOP_BOTTOM} > :first-child {
+        margin-right: auto;
+      }
+      .${ESC_CLASS_TOP_BOTTOM} > :only-child {
+        margin-left: auto;
+        margin-right: auto;
+      }
       .${ESC_CLASS_TOP}, .${ESC_CLASS_BOTTOM} {
+        display: inline-block;
+        white-space: nowrap;
+        position: relative;
         text-align: center;
         padding-top: calc(${8}px*var(--esc-text-scale));
         padding-bottom: calc(${8}px*var(--esc-text-scale));
@@ -719,7 +743,6 @@ const SHUTTER_CSS =`
          display: var(--esc-display-position-bottom);
       }
       .${ESC_CLASS_LABEL} {
-        display: inline-block;
         clear: both;
         font-size: calc(${FONT_SIZE_LABEL}px*var(--esc-text-scale));
         line-height: calc(${LINE_HEIGHT_LABEL}px*var(--esc-text-scale));
@@ -735,7 +758,6 @@ const SHUTTER_CSS =`
         display: hidden;
       }
       .${ESC_CLASS_POSITION} {
-        display: inline-block;
         vertical-align: top;
         clear: both;
         font-size: calc(${FONT_SIZE_POSITION}px*var(--esc-text-scale));
@@ -766,19 +788,20 @@ const SHUTTER_CSS =`
         width: calc(var(--mdc-icon-size)*1.5);
         height: 1px;
       }
-      .${ESC_CLASS_TOP_LEFT}, .${ESC_CLASS_TOP_RIGHT} {
-        --mdc-icon-size: var(--icon-size-wifi-battery, 24px);
-        position: absolute;
-        ppadding: 0 10px 10px 10px;
+      .${ESC_CLASS_ICON_LEFT}, .${ESC_CLASS_ICON_RIGHT} {
+        --mdc-icon-size: var(--esc-icon-size-wifi-battery, 24px);
+        margin: var(--esc-icons-margins);
+        display: inline-block;
         text-align: center;
+        width: var(--esc-icon-div-size);
       }
-      .${ESC_CLASS_TOP_LEFT} {
+      .${ESC_CLASS_ICON_LEFT} {
         color: var(--esc-top-left-color);
-        left: -6px;
+        left: -3px;
       }
-      .${ESC_CLASS_TOP_RIGHT} {
+      .${ESC_CLASS_ICON_RIGHT} {
         color: var(--esc-top-right-color);
-        right: -6px;
+        right: -3px;
       }
       .${ESC_CLASS_TOP_ICON_TEXT} {
         text-align: center;
@@ -1226,34 +1249,34 @@ class EnhancedShutterCardNew extends LitElement{
 
   static get styles() {
     const CSS = `
-      .${ESC_CLASS_SHUTTER_FLEX} {
-        justify-content: center;
-      }
       .${ESC_CLASS_SHUTTERS} {
         padding: ${16}px;
         display: flex;
+        align-items: center;
+        justify-content: center;
         flex-direction: var(--esc-card-flex-direction);
       }
+      .${ESC_CLASS_SHUTTER_FLEX} {
+        justify-content: center;
+      }
       .${ESC_CLASS_SHUTTER_SEPERATE}-${VERTICAL}:not(:last-child) {
-        height: ${10}px;
-        width: ${100}px;
         box-sizing: border-box;
+        border: 2px solid var(--divider-color);
+
+        width: ${100}px;
         margin-left: auto;
         margin-right: auto;
-        border-width: 3px 0 0 0;
-        border-style: solid;
-        border-color: var(--divider-color);
       }
       .${ESC_CLASS_SHUTTER_SEPERATE}-${HORIZONTAL}:not(:last-child) {
-        height: ${100}px;
-        width: ${10}px;
         box-sizing: border-box;
+
+        border: 2px solid var(--divider-color);
+
+        height: ${100}px;
         margin-top: auto;
-        margin-left: 7px;
+        margin-left: 8px;
+        margin-right: 8px;
         margin-bottom: auto;
-        border-width: 0 0 0 3px;
-        border-style: solid;
-        border-color: var(--divider-color);
       }
     `;
     return css`${unsafeCSS(CSS)}`;
@@ -1339,8 +1362,8 @@ class EnhancedShutterCardNew extends LitElement{
     * Use sizes from calculated cardSize and HA grid sizes
     */
     console.log(`getGridOptionsInternal: cardSize: `,totalCardSize);
-    this.nbRows= Math.ceil((totalCardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap)+0.5);
-    this.nbCols= Math.ceil((totalCardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap)+0.5);
+    this.nbRows= Math.ceil((totalCardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
+    this.nbCols= Math.ceil((totalCardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
     console.log(totalCardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
 
     const divCard= this.closest('div.card');
@@ -1393,6 +1416,11 @@ class EnhancedShutterCardNew extends LitElement{
 
     let localHeightPx=0;
     let localWidthPx =0;
+
+    if (cfg.getIconsActive()){
+      localWidthPx += ICON_DIV_SIZE*2; // estimated width of icons including text
+    }
+
     /*
     * Size shutter title row
     */
@@ -1440,10 +1468,18 @@ class EnhancedShutterCardNew extends LitElement{
       cardSize = this.gridAddHorizontal(sizeStandardButtons,sizeWindowImage);
       cardSize = this.gridAddHorizontal(cardSize,sizePartialOpenButtons);
       cardSize = this.gridAddHorizontal(cardSize,sizeTiltSection);
+      // TODO: improve
+      if (cfg.disablePartialOpenButtons() && !cfg.showTilt()) {
+        cardSize = this.gridAddHorizontal(cardSize,{localWidthPx: 36,localHeightPx: 0});
+      }
     }else{
       cardSize = this.gridAddVertical(sizeStandardButtons,sizeWindowImage);
       cardSize = this.gridAddVertical(cardSize,sizePartialOpenButtons);
       cardSize = this.gridAddVertical(cardSize,sizeTiltSection);
+      // TODO: improve
+      if (cfg.disablePartialOpenButtons() && !cfg.showTilt()) {
+        cardSize = this.gridAddVertical(cardSize,{localWidthPx: 0,localHeightPx: 36});
+      }
     }
     //console.log('gridSizeCardMiddle: ',cardSize);
     return cardSize;
@@ -1692,9 +1728,6 @@ class EnhancedShutter extends LitElement
         data-shutter="${entityId}"
         style = "${htmlParts.defStyleVarsShutter()}"
       >
-        ${htmlParts.showBatteryIcon()}
-        ${htmlParts.showSignalIcon()}
-
         ${htmlParts.showTopDiv()}
 
         <div class="${ESC_CLASS_MIDDLE}">
@@ -2501,6 +2534,8 @@ class shutterCfg {
       this.namePosition(escConfig[CONFIG_NAME_POSITION]);
       this.nameDisabled(escConfig[CONFIG_NAME_DISABLED]);
 
+      this.iconsPosition(escConfig[CONFIG_ICONS_POSITION]);
+
       this.openingPosition(escConfig[CONFIG_OPENING_POSITION]);
       this.openingDisabled(escConfig[CONFIG_OPENING_DISABLED]);
       this.inlineHeader(escConfig[CONFIG_INLINE_HEADER]);
@@ -2556,7 +2591,9 @@ class shutterCfg {
   getSignalEntity(){
     return this.#signalEntity;
   }
-
+  getIconsActive(){
+    return (this.getBatteryEntity() || this.getSignalEntity()) ? true : false;
+  }
 
   batteryLevel(){
     let state = this.#batteryEntity?.getState()?? UNAVAILABLE;
@@ -2815,6 +2852,9 @@ class shutterCfg {
       value = this.#getCfg(CONFIG_NAME_POSITION);
     }
     return this.#getCfg(CONFIG_OPENING_POSITION,value);
+  }
+  iconsPosition(value = null){
+    return this.#getCfg(CONFIG_ICONS_POSITION,value);
   }
   alwaysPercentage(value = null){
     return this.#getCfg(CONFIG_ALWAYS_PCT,value);
@@ -3445,7 +3485,9 @@ class htmlShutter{
     return `
       --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
       --mdc-icon-size: ${this.cfg.iconSize()}${UNITY};
-      --icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${UNITY};
+      --esc-icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${UNITY};
+      --esc-icon-div-size: ${ICON_DIV_SIZE/ICON_SIZE*this.cfg.iconSizeWifiBattery()}${UNITY};
+      --esc-icons-margins: ${this.cfg.iconsPosition()==TOP?'0 0 auto 0':'auto 0 0 0'};
 
       --esc-overflow: ${this.enhancedShutter.getOverflow()};
 
@@ -3523,60 +3565,85 @@ class htmlShutter{
 
   showBatteryIcon(){
     return html`
-        ${this.cfg.getBatteryEntity() ? html`
-          <div class="${ESC_CLASS_TOP_LEFT}">
-            <ha-icon
-              icon=${this.cfg.batteryLevelIcon()}
-              class="${ESC_CLASS_HA_ICON}"
-            >
-            </ha-icon>
-            <div class="${ESC_CLASS_TOP_ICON_TEXT}">
-              ${this.cfg.batteryLevelText()}
+        ${this.cfg.getIconsActive() ? html`
+          ${this.cfg.getBatteryEntity() ? html`
+            <div class="${ESC_CLASS_ICON_LEFT}">
+              <ha-icon
+                icon=${this.cfg.batteryLevelIcon()}
+                class="${ESC_CLASS_HA_ICON}"
+              >
+              </ha-icon>
+              <div class="${ESC_CLASS_TOP_ICON_TEXT}">
+                ${this.cfg.batteryLevelText()}
+              </div>
             </div>
-          </div>
+            ` : html`
+            <div class="${ESC_CLASS_ICON_LEFT}">
+              <ha-icon
+                icon="mdi:blank"
+                class="${ESC_CLASS_HA_ICON}"
+              >
+              </ha-icon>
+            </div>`
+          }
           ` : ''
         }
     `;
   }
   showSignalIcon(){
     return html`
-        ${this.cfg.getSignalEntity() ? html`
-          <div class="${ESC_CLASS_TOP_RIGHT}">
-            <ha-icon
-              class="${ESC_CLASS_HA_ICON}"
-              icon=${this.cfg.signalLevelIcon()}
-            >
-            </ha-icon>
-            <div class="${ESC_CLASS_TOP_ICON_TEXT}">
-              ${this.cfg.signalLevelText()}
+        ${this.cfg.getIconsActive() ? html`
+          ${this.cfg.getSignalEntity() ? html`
+            <div class="${ESC_CLASS_ICON_RIGHT}">
+              <ha-icon
+                class="${ESC_CLASS_HA_ICON}"
+                icon=${this.cfg.signalLevelIcon()}
+              >
+              </ha-icon>
+              <div class="${ESC_CLASS_TOP_ICON_TEXT}">
+                ${this.cfg.signalLevelText()}
+              </div>
             </div>
-          </div>
+            ` : html`
+            <div class="${ESC_CLASS_ICON_RIGHT}">
+              <ha-icon
+                icon="mdi:blank"
+                class="${ESC_CLASS_HA_ICON}"
+              >
+              </ha-icon>
+            </div>`
+          }
           ` : ''
         }
     `;
   }
   showTopDiv(){
-    return this.showTopBottomDiv(ESC_CLASS_TOP);
+    return this.showTopBottomDiv(TOP);
   }
   showBottomDiv(){
-    return this.showTopBottomDiv(ESC_CLASS_BOTTOM);
+    return this.showTopBottomDiv(BOTTOM);
   }
-  showTopBottomDiv(escClassName){
+  showTopBottomDiv(position){
+    const escClassName = position == TOP ? ESC_CLASS_TOP : ESC_CLASS_BOTTOM;
     return html`
-        <div class="${escClassName}">
-          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
-            @click="${() => this.enhancedShutter.doHassMoreInfoOpen(this.cfg.entityId())}"
-          >
-            ${this.cfg.friendlyName()}
-            ${this.cfg.passiveMode() ? html`
-              <span class="${ESC_CLASS_HA_ICON_LOCK}">
-                <ha-icon icon="mdi:lock"></ha-icon>
-              </span>
-            `:''}
+        <div class="${ESC_CLASS_TOP_BOTTOM}">
+          ${position == this.cfg.iconsPosition() ? this.showBatteryIcon() : ''}
+          <div class = "${escClassName}">
+            <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
+              @click="${() => this.enhancedShutter.doHassMoreInfoOpen(this.cfg.entityId())}"
+            >
+              ${this.cfg.friendlyName()}
+              ${this.cfg.passiveMode() ? html`
+                <span class="${ESC_CLASS_HA_ICON_LOCK}">
+                  <ha-icon icon="mdi:lock"></ha-icon>
+                </span>
+              `:''}
+            </div>
+            <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
+              <span style="white-space: pre-line;">${this.positionText}</span>
+            </div>
           </div>
-          <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
-            <span style="white-space: pre-line;">${this.positionText}</span>
-          </div>
+          ${position == this.cfg.iconsPosition() ? this.showSignalIcon() : ''}
         </div>
     `;
   }
