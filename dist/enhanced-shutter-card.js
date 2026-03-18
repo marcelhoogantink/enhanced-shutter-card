@@ -1264,8 +1264,10 @@ class EnhancedShutterCardNew extends LitElement{
         border: 2px solid var(--divider-color);
 
         width: ${100}px;
+        margin-top: 0px;
         margin-left: auto;
         margin-right: auto;
+        margin-bottom: 2px;
       }
       .${ESC_CLASS_SHUTTER_SEPERATE}-${HORIZONTAL}:not(:last-child) {
         box-sizing: border-box;
