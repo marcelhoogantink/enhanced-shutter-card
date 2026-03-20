@@ -27,9 +27,9 @@ const TOP = 'top';
 const UP = 'up';
 const DOWN = 'down';
 
-const MOUSEUP = 'up';
-const MOUSEDOWN = 'down';
-const MOUSEMOVE = 'move';
+const MOUSEUP = 'mouse-up';
+const MOUSEDOWN = 'mouse-down';
+const MOUSEMOVE = 'mouse-move';
 
 const ADD_EVENT = 'add';
 const REMOVE_EVENT = 'remove';
@@ -95,7 +95,7 @@ const SHUTTER_CLOSED_PCT = 0;
 const ESC_CLASS_BASE_NAME = 'esc-shutter';
 
 const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}`;
-const ESC_CLASS_SHUTTER_SEPERATE = `${ESC_CLASS_BASE_NAME}-seperate`
+const ESC_CLASS_SHUTTER_SEPARATE = `${ESC_CLASS_BASE_NAME}-separate`
 const ESC_CLASS_SHUTTERS = `${ESC_CLASS_BASE_NAME}s`;
 const ESC_CLASS_SHUTTER_FLEX = `${ESC_CLASS_BASE_NAME}-flex`;
 const ESC_CLASS_TOP_BOTTOM = `${ESC_CLASS_BASE_NAME}-${TOP}-${BOTTOM}`;
@@ -129,6 +129,19 @@ const ESC_CLASS_HA_ICON_TILT = `${ESC_CLASS_HA_ICON}-tilt`;
 const ESC_CLASS_ICON_LEFT = `${ESC_CLASS_BASE_NAME}-icon-${LEFT}`;
 const ESC_CLASS_ICON_RIGHT = `${ESC_CLASS_BASE_NAME}-icon-${RIGHT}`;
 const ESC_CLASS_TOP_ICON_TEXT = `${ESC_CLASS_BASE_NAME}-icon-text`;
+const ESC_CLASS_TILT = `${ESC_CLASS_BASE_NAME}-tilt`;
+const ESC_CLASS_TILT_CONTAINER = `${ESC_CLASS_TILT}-container`;
+const ESC_CLASS_TILT_CLASS = `${ESC_CLASS_TILT}-class`;
+const ESC_CLASS_TILT_LINE = `${ESC_CLASS_TILT}-line`;
+const ESC_CLASS_TILT_SLIDER = `${ESC_CLASS_TILT}-slider`;
+const ESC_CLASS_TILT_SLIDER_WRAP = `${ESC_CLASS_TILT_SLIDER}-wrap`;
+const ESC_CLASS_TILT_SLIDER_CLASS = `${ESC_CLASS_TILT_SLIDER}-class`;
+const ESC_CLASS_TILT_SLAT1 = `${ESC_CLASS_TILT}-slat1`;
+const ESC_CLASS_TILT_SLAT2 = `${ESC_CLASS_TILT}-slat2`;
+const ESC_CLASS_TILT_SLAT3 = `${ESC_CLASS_TILT}-slat3`;
+const ESC_CLASS_TILT_EDGE = `${ESC_CLASS_TILT}-slat-edge`;
+
+
 
 const POSITIONS =[AUTO,AUTO_BL,AUTO_BR,AUTO_TL,AUTO_TR,LEFT,RIGHT,TOP,BOTTOM,NONE];
 
@@ -271,7 +284,7 @@ const ESC_SHADE = 'shade';
 const ESC_BLIND = 'blind';
 const ESC_ROLLER_SHUTTER = 'roller-shutter';
 const ESC_TYPES =
-  [ESC_AWNING, ESC_CURTAIN, ESC_ROLLER_SHUTTER,ESC_SHADE.ESC_BLIND];
+  [ESC_AWNING, ESC_CURTAIN, ESC_ROLLER_SHUTTER,ESC_SHADE,ESC_BLIND];
 
 const ESC_SHUTTER_PRESET = ESC_ROLLER_SHUTTER;
 const ESC_STACKED = VERTICAL;
@@ -616,25 +629,24 @@ const SHUTTER_CSS =`
         background-position: var(--esc-slide-background-main-position);
         background-image: var(--esc-slide-background-main-image);
         background-color: var(--esc-slide-background-main-color);
-
         background-repeat: repeat;
         background-size: var(--esc-slide-background-slats-size);
         transform: var(--esc-transform-undo-slats-rotate);
       }
-      .tilt-slat1 {
+      .${ESC_CLASS_TILT_SLAT1} {
         height: var(--esc-slide-slats-height);
         display: flex;
         flex-direction: column-reverse;
         overflow: var(--esc-overflow);
       }
-      .tilt-slat2 {
+      .${ESC_CLASS_TILT_SLAT2} {
         height: var(--esc-slat-height);
         width: 100%;
         flex-shrink: 0;
         overflow: var(--esc-overflow);
         perspective: 500px;
       }
-      .tilt-slat-edge {
+      .${ESC_CLASS_TILT_EDGE} {
         z-index: 1;
         position: absolute;
         top: 50%;
@@ -643,30 +655,24 @@ const SHUTTER_CSS =`
         height: 1px;
         background-color: grey;
       }
-      .tilt-slat3 {
+      .${ESC_CLASS_TILT_SLAT3} {
         z-index: 2;
         position: absolute;
-
         height: var(--esc-tilt-slat-height);
         width: var(--esc-tilt-slat-width);
         background-size: var(--esc-tilt-slat-background-size);
-
         transform-origin: var(--esc-tilt-slat-origin);
-
         transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-tilt-slat-rotate);
-
         background-repeat: repeat;
         background-position: var(--esc-slide-background-main-position);
         background-color: var(--esc-slide-background-main-color);
         background-image: var(--esc-slide-background-main-image);
       }
-
       .${ESC_CLASS_SELECTOR_SLIDE_EDGE} {
         height: var(--esc-slide-edge-height);
         background-position: var(--esc-slide-background-edge-position);
         background-image: var(--esc-slide-background-edge-image);
         background-color: var(--esc-slide-background-edge-color);
-
         background-repeat: repeat;
         background-size: var(--esc-slide-background-edge-size);
       }
@@ -684,7 +690,6 @@ const SHUTTER_CSS =`
       .${ESC_CLASS_MOVEMENT_OVERLAY} {
         z-index: ${Z_INDEX_OVERLAY};
         display: var(--esc-movement-overlay-display);
-
         top : 0;
         height: 100%;
         width: 100%;
@@ -755,7 +760,7 @@ const SHUTTER_CSS =`
         color: var(--secondary-text-color);
       }
       .${ESC_CLASS_TITLE_DISABLED} {
-        display: hidden;
+        display: none;
       }
       .${ESC_CLASS_POSITION} {
         vertical-align: top;
@@ -817,18 +822,19 @@ const SHUTTER_CSS =`
       gap: 4px;
     }
 
-    .tilt-slider-wrap {
+    .${ESC_CLASS_TILT_SLIDER_WRAP} {
       display: flex;
       align-items: center;
       justify-content: center;
       writing-mode: var(--esc-tilt-slider-writing-mode);
+      direction: rtl;
     }
 
-    .tilt-slider-class {
+    .${ESC_CLASS_TILT_SLIDER} {
       transform: scale(var(--esc-button-scale));
     }
 
-    .tilt-slat-container {
+    .${ESC_CLASS_TILT_CONTAINER} {
       position: relative;
       box-sizing: border-box;
       border: 1px solid grey;
@@ -841,14 +847,14 @@ const SHUTTER_CSS =`
       background: #f9f9f9;
     }
 
-    .tilt-slat-class {
+    .${ESC_CLASS_TILT_CLASS} {
       width: calc(var(--esc-button-scale)*${ICON_SIZE}px);
       height: calc(var(--esc-button-scale)*${ICON_SIZE}px);
       position: relative;
       transform: rotate(var(--esc-tilt-angle-deg-graph));
     }
 
-    .tilt-line {
+    .${ESC_CLASS_TILT_LINE} {
       width: calc(var(--esc-button-scale)*2px);
       height: calc(var(--esc-button-scale)*${ICON_BUTTON_SIZE-ICON_SIZE/2}px);
       background: red;
@@ -881,7 +887,7 @@ class EnhancedShutterCardNew extends LitElement{
     config: {type: Object},
     // local reactive variables
     isShutterConfigLoaded: {type: Boolean, state: true},
-    localCfgs: {type: Object, state: true},
+    shutterCfgs: {type: Object, state: true},
     screenOrientation: {type: Object, state: true},
     escImagesLoaded: {type: Boolean, state: true},
     gridPixelWidth: {type: Number, state: true},
@@ -889,10 +895,10 @@ class EnhancedShutterCardNew extends LitElement{
 
   constructor() {
     super(); //  mandetory by Lit-element
-    console_log('Card constructor');
+    console.log('Card constructor');
 
     this.isShutterConfigLoaded = false;
-    this.localCfgs = {};
+    this.shutterCfgs = {};
     this.screenOrientation= LANDSCAPE;
     this.escImagesLoaded = false;
     this.gridPixelWidth = HA_GRID_PX_WIDTH;
@@ -908,11 +914,11 @@ class EnhancedShutterCardNew extends LitElement{
   }
   #defAllShutterConfig()
   {
-    this.globalCfg = this.#buildConfig(CONFIG_DEFAULT,this.config);
-    this.cardCfg = new cardCfg(this.globalCfg);
-    this.config.entities.map((currEntityCfg) => {
-      let escCfg = this.#buildConfig(this.globalCfg,currEntityCfg);
-      this.localCfgs[escCfg.entity] = new shutterCfg(this.hass,escCfg);
+    const cardConfig = this.#buildConfig(CONFIG_DEFAULT,this.config);
+    this.cardCfg = new cardCfg(cardConfig);
+    this.config.entities.map((subConfig) => {
+      let shutterConfig = this.#buildConfig(cardConfig,subConfig);
+      this.shutterCfgs[shutterConfig.entity] = new shutterCfg(this.hass,shutterConfig);
     });
     this.isShutterConfigLoaded = true;
   }
@@ -986,68 +992,61 @@ class EnhancedShutterCardNew extends LitElement{
 * OVERRIDE FUNCTIONS LIT ELEMENT
 */
   shouldUpdate(changedProperties) {
-
-    //console.log('Card shouldUpdate Start');
     let doUpdate =false;
-
     if (this.isShutterConfigLoaded){
-
+      console.log('Card shouldUpdate Start');
       changedProperties.forEach((oldValue, propName) => {
-        // ******
-        // TODO: improve select/search states
-        // ******
-
-        if (propName=='hass'){
+        console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
+        if (propName==='hass'){
           /* On hass update, check if there is a cover change */
-            const liveStates = this[propName].states;
+            //console.log('Card shouldUpdate on hass change, check if cover state change');
+            Object.keys(this.shutterCfgs).forEach(coverEntityId =>{
+              const cfg = this.shutterCfgs[coverEntityId];
+              const currentShutterEntity =cfg.getCoverEntity();
+              if (currentShutterEntity) {
+                const liveCoverEntity = new haEntity(this.hass,coverEntityId);
+                let shutterStateOld= cfg.getCoverState();
+                let shutterStateNew= cfg.getCoverState(liveCoverEntity);
 
-            Object.keys(this.localCfgs).forEach(entityId =>{
-              const liveEntityFromHass = liveStates[entityId];
-              if (liveEntityFromHass) {
-                const cfg = this.localCfgs[entityId];
-                let shutterState = `${liveEntityFromHass.state}-${liveEntityFromHass.attributes.current_position}-${liveEntityFromHass.attributes.current_tilt_position}`;
-                if (shutterState != cfg.shutterState){
+                if (shutterStateNew != shutterStateOld){
+                  console.log(`  A Cover in this Card changed: ${coverEntityId}, old: ${shutterStateOld}, new: ${shutterStateNew}`);
                   doUpdate =true;
-                  cfg.shutterState = shutterState;
+                  cfg.updateCoverEntity(liveCoverEntity);
                 }
-                // check battery entity change
+                // check battery entity state change
                 const currentBatteryEntity = cfg.getBatteryEntity();
                 const batteryEntityId = currentBatteryEntity?.getEntityId() ?? null;
                 if (batteryEntityId) {
-                  const batteryEntityFromHass = liveStates[batteryEntityId];
-                  if (batteryEntityFromHass && batteryEntityFromHass.state !== currentBatteryEntity?.getState() ){
+                  const liveBatteryEntity = new haEntity(this.hass,batteryEntityId);
+                  if (liveBatteryEntity && liveBatteryEntity.getState() !== currentBatteryEntity?.getState() ){
+                    console.log(`    Cover Battery state change detected for ${batteryEntityId}`);
                     doUpdate =true;
-                    cfg.setBatteryEntity(this.hass,batteryEntityId);
-                    cfg.batteryState = NOT_KNOWN.includes(batteryEntityFromHass.state) ? UNAVAILABLE : batteryEntityFromHass.state;
+                    cfg.updateBatteryEntity(liveBatteryEntity);
                   }
                 }
-                // check signal entity change
+                // check signal entity state change
                 const currentSignalEntity = cfg.getSignalEntity();
-                const signalEntityId = currentSignalEntity?.getEntityId();
+                const signalEntityId = currentSignalEntity?.getEntityId() ?? null;
                 if (signalEntityId) {
-                  const signalEntityFromHass = liveStates[signalEntityId];
-                  if (signalEntityFromHass && signalEntityFromHass.state !== currentSignalEntity?.getState() ){
+                  const liveSignalEntity = new haEntity(this.hass,signalEntityId);
+                  if (liveSignalEntity && liveSignalEntity.getState() !== currentSignalEntity?.getState() ){
+                    console.log(`    Cover Signal state change detected for ${signalEntityId}`);
                     doUpdate =true;
-                    cfg.setSignalEntity(this.hass,signalEntityId);
-                    cfg.signalState = NOT_KNOWN.includes(signalEntityFromHass.state) ? UNAVAILABLE : signalEntityFromHass.state;
+                    cfg.updateSignalEntity(liveSignalEntity);
                   }
                 }
               }
             });
-
         }else{
           /* On any other property change, do the update */
           doUpdate =true;
         }
       });
     }
-    //console_log('Card shouldUpdate End: doUpdate=',doUpdate);
-    //console_log('Card shouldUpdate ========================\n');
     return doUpdate;
-  //    return changedProperties.has('prop1');
   }
   willUpdate(changedProperties){
-    super.willUpdate();
+    super.willUpdate(changedProperties);
   }
   update(changedProperties){
     console_log('Card Update');
@@ -1082,32 +1081,27 @@ class EnhancedShutterCardNew extends LitElement{
             class="${ESC_CLASS_SHUTTERS}"
             style = "${htmlParts.defStyleVarsCard()}"
           >
-            ${this.config.entities.map( // TODO replace config by global.cfg ??
-              (currEntity) => {
-                const entityId = currEntity.entity || currEntity;
-
-                this.localCfgs[entityId].setCoverEntity(this.hass,entityId);
-                this.localCfgs[entityId].setBatteryEntity(this.hass,currEntity.battery_entity);
-                this.localCfgs[entityId].setSignalEntity(this.hass,currEntity.signal_entity);
-
+            ${Object.keys(this.shutterCfgs).map(entityId =>{
+                const cfg = this.shutterCfgs[entityId];
+                // update the live states and attributes
                 return html`
                   <div class="${ESC_CLASS_SHUTTER_FLEX}">
                     <enhanced-shutter
-                      .react_ShutterState=${this.localCfgs[entityId].shutterState}
-                      .react_BatteryState=${this.localCfgs[entityId].batteryState}
-                      .react_SignalState=${this.localCfgs[entityId].signalState}
+                      .react_ShutterState=${cfg.getCoverState()}
+                      .react_BatteryState=${cfg.getState(cfg.getBatteryEntity())}
+                      .react_SignalState=${cfg.getState(cfg.getSignalEntity())}
                       .react_ScreenOrientation=${this.screenOrientation}
                       .react_EscImagesLoaded=${this.escImagesLoaded}
 
                       .hass=${this.hass}
-                      .cfg=${this.localCfgs[entityId]}
+                      .cfg=${cfg}
                       .escImages=${this.escImages}
                     >
                     </enhanced-shutter>
                     ${showMessages ? html`${this.messageManager.displayGroupMessages(entityId)} ` : ''}
                   </div>
-                  <div class="${ESC_CLASS_SHUTTER_SEPERATE}-${this.cardCfg.stacked()}"></div>
-                `;$
+                  <div class="${ESC_CLASS_SHUTTER_SEPARATE}-${this.cardCfg.stacked()}"></div>
+                `;
               }
             )}
           </div>
@@ -1259,7 +1253,7 @@ class EnhancedShutterCardNew extends LitElement{
       .${ESC_CLASS_SHUTTER_FLEX} {
         justify-content: center;
       }
-      .${ESC_CLASS_SHUTTER_SEPERATE}-${VERTICAL}:not(:last-child) {
+      .${ESC_CLASS_SHUTTER_SEPARATE}-${VERTICAL}:not(:last-child) {
         box-sizing: border-box;
         border: 2px solid var(--divider-color);
 
@@ -1269,7 +1263,7 @@ class EnhancedShutterCardNew extends LitElement{
         margin-right: auto;
         margin-bottom: 2px;
       }
-      .${ESC_CLASS_SHUTTER_SEPERATE}-${HORIZONTAL}:not(:last-child) {
+      .${ESC_CLASS_SHUTTER_SEPARATE}-${HORIZONTAL}:not(:last-child) {
         box-sizing: border-box;
 
         border: 2px solid var(--divider-color);
@@ -1328,16 +1322,16 @@ class EnhancedShutterCardNew extends LitElement{
     {
       let totalShuttersSize = {localWidthPx: 0,localHeightPx: 0};
       let seperate=0;
-      var tempCardName="";
+      let tempCardName="";
 
-      Object.keys(this.localCfgs).forEach(key =>
+      Object.keys(this.shutterCfgs).forEach(key =>
       {
-        let cfg = this.localCfgs[key];
+        let cfg = this.shutterCfgs[key];
         if (!tempCardName) tempCardName= cfg.friendlyName();
         let shutterSize = this.gridSizeCardTop(cfg);
 
         let sizeCardMiddle = this.gridSizeCardMiddle(cfg);
-        console.log(`getGridOptionsInternal: sizeCardMiddle: `,sizeCardMiddle);
+        //console.log(`getGridOptionsInternal: sizeCardMiddle: `,sizeCardMiddle);
         shutterSize = this.gridAddVertical(shutterSize,sizeCardMiddle);
 
         let sizeCardBottom = this.gridSizeCardBottom(cfg);
@@ -1363,10 +1357,10 @@ class EnhancedShutterCardNew extends LitElement{
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
-    console.log(`getGridOptionsInternal: cardSize: `,totalCardSize);
+    //console.log(`getGridOptionsInternal: cardSize: `,totalCardSize);
     this.nbRows= Math.ceil((totalCardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
     this.nbCols= Math.ceil((totalCardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
-    console.log(totalCardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
+    //console.log(totalCardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
 
     const divCard= this.closest('div.card');
     /* Set CSS variables for number of rows and columns */
@@ -1378,7 +1372,7 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
       console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
     }
-    console.log(`getGridOptionsInternal: calculated nbRows: ${this.nbRows}, nbCols: ${this.nbCols} for card '${tempCardName}'`);
+    //console.log(`getGridOptionsInternal: calculated nbRows: ${this.nbRows}, nbCols: ${this.nbCols} for card '${tempCardName}'`);
     return {
       rows: this.nbRows,
       columns: this.nbCols,
@@ -1401,7 +1395,7 @@ class EnhancedShutterCardNew extends LitElement{
 
     let titleSize;
     if (this.config.title){
-      // TODO: Add Card title to globalCfg
+      // TODO: Add Card title to cardConfig
       titleSize= getTextSize(this.config.title,haTitleFont,haCardTitleFontHeight);
       localHeightPx = haTitleHeightPx;
       localWidthPx  = titleSize.width;
@@ -1456,14 +1450,14 @@ class EnhancedShutterCardNew extends LitElement{
     * size image
     */
     let sizeStandardButtons = this.gridSizeStandardButtons(cfg);
-    console.log('gridSizeStandardButtons: ',sizeStandardButtons);
+    //console.log('gridSizeStandardButtons: ',sizeStandardButtons);
     let sizeWindowImage = this.gridSizeWindowImage(cfg);
-    console.log('gridSizeWindowImage: ',sizeWindowImage);
+    //console.log('gridSizeWindowImage: ',sizeWindowImage);
 
     let sizePartialOpenButtons = this.gridSizePartialOpenButtons(cfg);
-    console.log('gridSizePartialOpenButtons: ',sizePartialOpenButtons);
+    //console.log('gridSizePartialOpenButtons: ',sizePartialOpenButtons);
     let sizeTiltSection = this.gridSizeTiltSection(cfg);
-    console.log('gridSizeTiltSection: ',sizeTiltSection);
+    //console.log('gridSizeTiltSection: ',sizeTiltSection);
 
     let cardSize;
     if (cfg.buttonsInRow()){
@@ -1626,26 +1620,22 @@ class EnhancedShutter extends LitElement
   // - escImages
 
   //reactive properties
-  static properties = {
+    static properties = {
     // reactive variables from parent card
     react_ShutterState: {type: String},        // for detecting state of shutter (open close etc)
     react_BatteryState: {type: String},        // for detecting battery state change
     react_SignalState: {type: String},         // for detecting signal state change
-    react_ScreenOrientation: {type: Object},   // for chnage in screen orientation  by resize window or rotate device
+    react_ScreenOrientation: {type: Object},   // for change in screen orientation  by resize window or rotate device
     react_EscImagesLoaded: {type: Boolean},
 
     // local reactive variables
-    react_ShutterPosition: {state: true},       // for dragging shutter onscreen
+    react_ShutterPosition: {state: true},      // for dragging shutter onscreen
     react_TiltPosition: {state: true},         // for dragging tilt-shutter onscreen
     react_ResizeDivShutterSelector: {state: true,type: Boolean}, // for detecting resize of shutter div by responsive design
   };
   constructor(){
-    //console_log('Shutter constructor');
+    console.log('Shutter constructor');
     super(); //  mandetory by Lit-element
-      // local reactive variables
-    this.react_ShutterPosition=-1;
-    this.react_TiltPosition=-1;
-    this.react_ResizeDivShutterSelector= false;
 
     this.screenPosition=-1;
     this.actualScreenPosition=-1; // position on the computerscreen
@@ -1661,8 +1651,9 @@ class EnhancedShutter extends LitElement
   }
   shouldUpdate(changedProperties)
   {
+    console.log('  Cover shouldUpdate Start',this.cfg.friendlyName());
     changedProperties.forEach((oldValue, propName) => {
-      //console.log(`Shutter shouldUpdate (${this.cfg.friendlyName()}), Property ${propName} changed. oldValue: `,oldValue,`; new: `,this[propName]);
+        console.log(`  Cover shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
     });
     return this.react_EscImagesLoaded ? true : false;
   }
@@ -1757,7 +1748,7 @@ class EnhancedShutter extends LitElement
 
     // tilt .....
     if (this.cfg.showTilt()){
-      this.tiltSlider = findElement(this,'.tilt-slider-class');
+      this.tiltSlider = findElement(this,`.${ESC_CLASS_TILT_SLIDER_CLASS}`);
 
       this.manageEvents(ADD_EVENT, MOUSEDOWN, this.tiltSlider, this.mouseDownTilt);
 
@@ -1974,7 +1965,7 @@ class EnhancedShutter extends LitElement
   }
   tiltSlatOrigin(){
     // --esc-tilt-slat-origin
-    var origin;
+    let origin;
     if (this.cfg.rotateSlatsImage()) {
       origin = '50% 50%';
     }else{
@@ -2255,7 +2246,6 @@ class EnhancedShutter extends LitElement
     let entityId= this.cfg.entityId();
 
     if (position !==null) position = this.cfg.applyInvertToPosition(position);
-    //command = this.cfg.applyInvertToCommand(command);
 
     const services ={
       [ACTION_SHUTTER_OPEN] : {'args': ''},
@@ -2368,7 +2358,6 @@ class EnhancedShutter extends LitElement
 
     const tiltPosition = this.getTiltOnScreenPosition(event);
     console.log('mouseUpTilt: tiltPosition:',tiltPosition);
-    this.sendShutterTiltPosition(this.cfg.entityId(),tiltPosition);
 
     if (this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)){
       // send position to shutter
@@ -2474,85 +2463,85 @@ class shutterCfg {
   #batteryEntity=null;
   #signalEntity=null;
   #localize={};
-  shutterState = NONE;
-  batteryState = NONE;
-  signalState = NONE;
 
   constructor(hass,escConfig)
   {
     let entityId = this.entityId(escConfig[CONFIG_ENTITY_ID] ? escConfig[CONFIG_ENTITY_ID] : escConfig);
 
-      this.#setLocalize(hass.localize);
-      this.setCoverEntity(hass,entityId);
+    this.#setLocalize(hass.localize);
+    this.setCoverEntity(hass,entityId);
 
-      this.setBatteryEntity(hass,escConfig[CONFIG_BATTERY_ENTITY_ID]);
-      this.setSignalEntity(hass,escConfig[CONFIG_SIGNAL_ENTITY_ID]);
+    this.setBatteryEntity(hass,escConfig[CONFIG_BATTERY_ENTITY_ID]);
+    this.setSignalEntity(hass,escConfig[CONFIG_SIGNAL_ENTITY_ID]);
 
-      this.debug(!!escConfig[CONFIG_DEBUG]);
+    this.batteryEntityId(escConfig[CONFIG_BATTERY_ENTITY_ID]);
+    this.signalEntityId(escConfig[CONFIG_SIGNAL_ENTITY_ID]);
 
-      this.friendlyName(escConfig[CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || UNKNOWN);
+    this.debug(!!escConfig[CONFIG_DEBUG]);
 
-      this.supportedFeatures(escConfig[CONFIG_SUPPORTED_FEATURES]);
-      this.invertPercentageCover(escConfig[CONFIG_INVERT_PCT_COVER]);
-      this.invertPercentageUi(escConfig[CONFIG_INVERT_PCT_UI]);
-      this.invertPercentageTiltCover(escConfig[CONFIG_INVERT_PCT_TILT_COVER]);
-      this.invertPercentageTiltUi(escConfig[CONFIG_INVERT_PCT_TILT_UI]);
-      this.invertOpenCloseUi(escConfig[CONFIG_INVERT_OPEN_CLOSE_UI]);
-      this.invertOpenCloseCover(escConfig[CONFIG_INVERT_OPEN_CLOSE_COVER]);
-      this.tiltSliderOnly(escConfig[CONFIG_TILT_SLIDER_ONLY]);
-      this.passiveMode(escConfig[CONFIG_PASSIVE_MODE]);
+    this.friendlyName(escConfig[CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || UNKNOWN);
 
-      this.unrollUnfoldDirection(escConfig[CONFIG_CLOSING_DIRECTION]);
+    this.supportedFeatures(escConfig[CONFIG_SUPPORTED_FEATURES]);
+    this.invertPercentageCover(escConfig[CONFIG_INVERT_PCT_COVER]);
+    this.invertPercentageUi(escConfig[CONFIG_INVERT_PCT_UI]);
+    this.invertPercentageTiltCover(escConfig[CONFIG_INVERT_PCT_TILT_COVER]);
+    this.invertPercentageTiltUi(escConfig[CONFIG_INVERT_PCT_TILT_UI]);
+    this.invertOpenCloseUi(escConfig[CONFIG_INVERT_OPEN_CLOSE_UI]);
+    this.invertOpenCloseCover(escConfig[CONFIG_INVERT_OPEN_CLOSE_COVER]);
+    this.tiltSliderOnly(escConfig[CONFIG_TILT_SLIDER_ONLY]);
+    this.passiveMode(escConfig[CONFIG_PASSIVE_MODE]);
 
-      let base_height_px = escConfig[CONFIG_BASE_HEIGHT_PX];
-      let resize_height_pct = escConfig[CONFIG_RESIZE_HEIGHT_PCT];
-      this.windowHeightPx(Math.round(boundary(resize_height_pct,ESC_MIN_RESIZE_HEIGHT_PCT,ESC_MAX_RESIZE_HEIGHT_PCT) / 100 * base_height_px));
+    this.unrollUnfoldDirection(escConfig[CONFIG_CLOSING_DIRECTION]);
 
-      let base_width_px  = escConfig[CONFIG_BASE_WIDTH_PX];
-      let resize_width_pct  = escConfig[CONFIG_RESIZE_WIDTH_PCT];
-      this.windowWidthPx(Math.round(boundary(resize_width_pct, ESC_MIN_RESIZE_WIDTH_PCT ,ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
+    let base_height_px = escConfig[CONFIG_BASE_HEIGHT_PX];
+    let resize_height_pct = escConfig[CONFIG_RESIZE_HEIGHT_PCT];
+    this.windowHeightPx(Math.round(boundary(resize_height_pct,ESC_MIN_RESIZE_HEIGHT_PCT,ESC_MAX_RESIZE_HEIGHT_PCT) / 100 * base_height_px));
 
-      this.rotateSlatsImage(escConfig[CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]);
-      this.stretchEdgeImage(escConfig[CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]);
+    let base_width_px  = escConfig[CONFIG_BASE_WIDTH_PX];
+    let resize_width_pct  = escConfig[CONFIG_RESIZE_WIDTH_PCT];
+    this.windowWidthPx(Math.round(boundary(resize_width_pct, ESC_MIN_RESIZE_WIDTH_PCT ,ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
 
-      this.scaleButtons(escConfig[CONFIG_SCALE_BUTTONS]);
-      this.scaleIcons(escConfig[CONFIG_SCALE_ICONS]);
-      this.scaleTexts(escConfig[CONFIG_SCALE_TEXTS]);
+    this.rotateSlatsImage(escConfig[CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]);
+    this.stretchEdgeImage(escConfig[CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]);
 
-      this.partial(boundary(escConfig[CONFIG_PARTIAL_CLOSE_PCT]));
-      this.offset(boundary(escConfig[CONFIG_OFFSET_IS_CLOSED_PCT]));
+    this.scaleButtons(escConfig[CONFIG_SCALE_BUTTONS]);
+    this.scaleIcons(escConfig[CONFIG_SCALE_ICONS]);
+    this.scaleTexts(escConfig[CONFIG_SCALE_TEXTS]);
 
-      this.offsetOpenedPct(boundary(escConfig[CONFIG_OFFSET_OPENED_PCT]));
-      this.offsetClosedPct(boundary(escConfig[CONFIG_OFFSET_CLOSED_PCT]));
+    this.partial(boundary(escConfig[CONFIG_PARTIAL_CLOSE_PCT]));
+    this.offset(boundary(escConfig[CONFIG_OFFSET_IS_CLOSED_PCT]));
 
-      this.showTilt(!!escConfig[CONFIG_SHOW_TILT]);
+    this.offsetOpenedPct(boundary(escConfig[CONFIG_OFFSET_OPENED_PCT]));
+    this.offsetClosedPct(boundary(escConfig[CONFIG_OFFSET_CLOSED_PCT]));
 
-      this.tiltAngleMin(escConfig[CONFIG_TILT_ANGLE_MIN]);
-      this.tiltAngleMax(escConfig[CONFIG_TILT_ANGLE_MAX]);
+    this.showTilt(!!escConfig[CONFIG_SHOW_TILT]);
 
-      this.defButtonPosition(escConfig);
+    this.tiltAngleMin(escConfig[CONFIG_TILT_ANGLE_MIN]);
+    this.tiltAngleMax(escConfig[CONFIG_TILT_ANGLE_MAX]);
 
-      this.titlePosition(escConfig[CONFIG_TITLE_POSITION]);  //deprecated
-      this.namePosition(escConfig[CONFIG_NAME_POSITION]);
-      this.nameDisabled(escConfig[CONFIG_NAME_DISABLED]);
+    this.defButtonPosition(escConfig);
 
-      this.iconsPosition(escConfig[CONFIG_ICONS_POSITION]);
+    this.titlePosition(escConfig[CONFIG_TITLE_POSITION]);  //deprecated
+    this.namePosition(escConfig[CONFIG_NAME_POSITION]);
+    this.nameDisabled(escConfig[CONFIG_NAME_DISABLED]);
 
-      this.openingPosition(escConfig[CONFIG_OPENING_POSITION]);
-      this.openingDisabled(escConfig[CONFIG_OPENING_DISABLED]);
-      this.inlineHeader(escConfig[CONFIG_INLINE_HEADER]);
+    this.iconsPosition(escConfig[CONFIG_ICONS_POSITION]);
 
-      this.alwaysPercentage(!!escConfig[CONFIG_ALWAYS_PCT]);
-      this.disableEndButtons(!!escConfig[CONFIG_DISABLE_END_BUTTONS]);
-      this.pickerOverlapPx(ESC_PICKER_OVERLAP_PX);
-      this.disableStandardButtons(escConfig[CONFIG_DISABLE_STANDARD_BUTTONS]);
-      this.disablePartialOpenButtons(escConfig[CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]);
+    this.openingPosition(escConfig[CONFIG_OPENING_POSITION]);
+    this.openingDisabled(escConfig[CONFIG_OPENING_DISABLED]);
+    this.inlineHeader(escConfig[CONFIG_INLINE_HEADER]);
 
-      this.buttonStopHideStates(escConfig[CONFIG_BUTTON_STOP_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_STOP_HIDE_STATES] : ESC_BUTTON_STOP_HIDE_STATES);
-      this.buttonOpenHideStates(escConfig[CONFIG_BUTTON_OPENED_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_OPENED_HIDE_STATES] : ESC_BUTTON_OPENED_HIDE_STATES);
-      this.buttonCloseHideStates(escConfig[CONFIG_BUTTON_CLOSED_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_CLOSED_HIDE_STATES] : ESC_BUTTON_CLOSED_HIDE_STATES);
+    this.alwaysPercentage(!!escConfig[CONFIG_ALWAYS_PCT]);
+    this.disableEndButtons(!!escConfig[CONFIG_DISABLE_END_BUTTONS]);
+    this.pickerOverlapPx(ESC_PICKER_OVERLAP_PX);
+    this.disableStandardButtons(escConfig[CONFIG_DISABLE_STANDARD_BUTTONS]);
+    this.disablePartialOpenButtons(escConfig[CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]);
 
-      Object.preventExtensions(this);
+    this.buttonStopHideStates(escConfig[CONFIG_BUTTON_STOP_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_STOP_HIDE_STATES] : ESC_BUTTON_STOP_HIDE_STATES);
+    this.buttonOpenHideStates(escConfig[CONFIG_BUTTON_OPENED_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_OPENED_HIDE_STATES] : ESC_BUTTON_OPENED_HIDE_STATES);
+    this.buttonCloseHideStates(escConfig[CONFIG_BUTTON_CLOSED_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_CLOSED_HIDE_STATES] : ESC_BUTTON_CLOSED_HIDE_STATES);
+
+    Object.preventExtensions(this);
   }
 
   /*
@@ -2577,17 +2566,34 @@ class shutterCfg {
   setCoverEntity(hass,entityId){
     this.#coverEntity = entityId ? new haEntity(hass,entityId) : null;
   }
+  updateCoverEntity(haEntity){
+    this.#coverEntity = haEntity;
+  }
   getCoverEntity(){
     return this.#coverEntity;
   }
+  getCoverState(haEntity=this.getCoverEntity()){
+     let coverState = `${haEntity.getState()}-${haEntity.getCurrentPosition()}-${haEntity.getCurrentTiltPosition()}`;
+     return coverState;
+  }
+  getState(haEntity){
+     const state = NOT_KNOWN.includes(haEntity?.getState()) ? UNAVAILABLE : haEntity.getState();
+     return state;
+  }
   setBatteryEntity(hass,entityId){
     this.#batteryEntity = entityId ? new haEntity(hass,entityId) : null;
+  }
+  updateBatteryEntity(haEntity){
+    this.#batteryEntity = haEntity;
   }
   getBatteryEntity(){
     return this.#batteryEntity;
   }
   setSignalEntity(hass,entityId){
     this.#signalEntity = entityId ? new haEntity(hass,entityId) : null;
+  }
+  updateSignalEntity(haEntity){
+    this.#signalEntity = haEntity;
   }
   // Get SignalInfo
   getSignalEntity(){
@@ -2707,6 +2713,13 @@ class shutterCfg {
   entityId(value = null){
     return this.#getCfg(CONFIG_ENTITY_ID,value);
   }
+  batteryEntityId(value = null){
+    return this.#getCfg(CONFIG_BATTERY_ENTITY_ID,value);
+  }
+  signalEntityId(value = null){
+    return this.#getCfg(CONFIG_SIGNAL_ENTITY_ID,value);
+  }
+
   friendlyName(value = null){
     return this.#getCfg(CONFIG_NAME,value);
   }
@@ -2734,10 +2747,17 @@ class shutterCfg {
   tiltSliderOnly(value = null){
     return this.#getCfg(CONFIG_TILT_SLIDER_ONLY,value);
   }
+  //openingDisabled(value = null){
+  //  return this.#getCfg(CONFIG_OPENING_DISABLED,value);
+  // }
   openingDisabled(value = null){
+    if (value !== null  && this.#getCfg(CONFIG_OPENING_DISABLED,value) === null)
+    {
+      value = this.#getCfg(CONFIG_NAME_DISABLED);
+    }
     return this.#getCfg(CONFIG_OPENING_DISABLED,value);
   }
-  passiveMode(value = null){
+passiveMode(value = null){
     let mode = this.#getCfg(CONFIG_PASSIVE_MODE,value)
     if (value!== null && mode) console.warn('Passive mode, no action');
     return mode;
@@ -2749,14 +2769,14 @@ class shutterCfg {
     return this.#getCfg(CONFIG_WIDTH_PX,value);
   }
   partial(value = null){
-    var partial = this.#getCfg(CONFIG_PARTIAL_CLOSE_PCT,value);
+    let partial = this.#getCfg(CONFIG_PARTIAL_CLOSE_PCT,value);
     if (partial == SHUTTER_OPEN_PCT ||  partial == SHUTTER_CLOSED_PCT) partial = 0;
     partial = this.invertPosition(partial);
     // only when cover can set position
     return this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION) ? partial : 0;
   }
   offset(value = null){
-    var offset = this.#getCfg(CONFIG_OFFSET_IS_CLOSED_PCT,value);
+    let offset = this.#getCfg(CONFIG_OFFSET_IS_CLOSED_PCT,value);
     if (offset == SHUTTER_OPEN_PCT ||  offset == SHUTTER_CLOSED_PCT) offset = 0;
     offset = this.invertPosition(offset);
     // only when cover can set position
@@ -2840,13 +2860,6 @@ class shutterCfg {
   }
   inlineHeader(value = null){
     return this.#getCfg(CONFIG_INLINE_HEADER,value);
-  }
-  openingDisabled(value = null){
-    if (value !== null  && this.#getCfg(CONFIG_OPENING_DISABLED,value) === null)
-    {
-      value = this.#getCfg(CONFIG_NAME_DISABLED);
-    }
-    return this.#getCfg(CONFIG_OPENING_DISABLED,value);
   }
   openingPosition(value = null){
     if (value !== null  && this.#getCfg(CONFIG_OPENING_POSITION,value) === null)
@@ -3038,13 +3051,6 @@ class shutterCfg {
     return this.unrollUnfoldDirection() == RIGHT || this.unrollUnfoldDirection() == UP;
   }
 
-  applyInvertToCommand(command){  // not used ....
-    if (this.invertPercentageCover()) {
-      if (command == ACTION_SHUTTER_OPEN) command = ACTION_SHUTTER_CLOSE;
-      else if (command == ACTION_SHUTTER_CLOSE) command = ACTION_SHUTTER_OPEN;
-    }
-    return command;
-  }
   getCloseAngle(){
     const direction= {
       [DOWN]:0,
@@ -3081,7 +3087,6 @@ class shutterCfg {
 
     }
     // solve issue #54
-    let escState2
     if (position == this.applyInvertToPosition(SHUTTER_OPEN_PCT) && escState == (this.applyInvertOpenCloseAndPercentage(SHUTTER_STATE_OPENING))) {
       escState = this.applyInvertOpenCloseAndPercentage(SHUTTER_STATE_OPEN);
 
@@ -3230,7 +3235,7 @@ class shutterCfg {
   }
   visiblePosition(currentDevicePosition) {
     // compute visible position from current position and offset
-    var visiblePosition;
+    let visiblePosition;
     const offset =this.offset();
     visiblePosition = this.calcVisualOffset(currentDevicePosition)
     return visiblePosition;
@@ -3430,7 +3435,7 @@ class shutterCfg {
 
       return levelIndex;
     }
-    return 99;
+    return -1;
   }
   signalLevelIcon(){
     let unit = this.signalUnit();
@@ -3473,7 +3478,6 @@ class htmlShutter{
     this.actualTiltPosition = enhancedShutter.actualTiltPosition;
     this.positionText =this.cfg.computePositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
     this.escImages= enhancedShutter.escImages;
-    this.cfg = enhancedShutter.cfg;
   }
 
   defStyleVarsShutter(){
@@ -3739,7 +3743,7 @@ class htmlShutter{
         <div class="${ESC_CLASS_SELECTOR_PICTURE}">
 
 
-        ${this.escImages.getWindowImageSrc(this.cfg.entityId()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.entityId())} ">` : ''}
+        ${this.escImages.getWindowImageSrc(this.cfg.entityId()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.entityId())}">` : ''}
 
           ${this.showSlide()}
           ${this.cfg.partialActive()  //  show partial only if no offset is defined
@@ -3787,12 +3791,12 @@ class htmlShutter{
     const number = sizeSlat ? Math.ceil(sizeSlide / sizeSlat): 1;
 
     return html`
-      <div class="tilt-slat1">
+      <div class="${ESC_CLASS_TILT_SLAT1}">
       ${Array.from({ length: number }, () =>
         html`
-          <div class="tilt-slat2">
-            <div class="tilt-slat-edge"></div>
-            <div class="tilt-slat3">
+          <div class="${ESC_CLASS_TILT_SLAT2}">
+            <div class="${ESC_CLASS_TILT_EDGE}"></div>
+            <div class="${ESC_CLASS_TILT_SLAT3}">
             </div>
           </div>
           `
@@ -3888,8 +3892,8 @@ class htmlShutter{
   }
   showTiltSliderColumn(){
     return html`
-      <div class="tilt-slider-wrap">
-        <input type="range" id="tilt-slider" class ="tilt-slider-class" min="0" max="100" value="${this.actualTiltPosition}">
+      <div class="${ESC_CLASS_TILT_SLIDER_WRAP}">
+        <input type="range" id="tilt-slider" class ="${ESC_CLASS_TILT_SLIDER_CLASS}" min="0" max="100" value="${this.actualTiltPosition}">
       </div>
     `;
   }
@@ -3899,15 +3903,15 @@ class htmlShutter{
   }
   showTiltPosition(){
     return html`
-      <div class="tilt-slat-container">
-        <div class="tilt-slat-class">
-          <div class="tilt-line"></div>
+      <div class="${ESC_CLASS_TILT_CONTAINER}">
+        <div class="${ESC_CLASS_TILT_CLASS}">
+          <div class="${ESC_CLASS_TILT_LINE}"></div>
         </div>
-        <div class="tilt-slat-class">
-          <div class="tilt-line"></div>
+        <div class="${ESC_CLASS_TILT_CLASS}">
+          <div class="${ESC_CLASS_TILT_LINE}"></div>
         </div>
-        <div class="tilt-slat-class">
-          <div class="tilt-line"></div>
+        <div class="${ESC_CLASS_TILT_CLASS}">
+          <div class="${ESC_CLASS_TILT_LINE}"></div>
         </div>
       </div>
     `;
@@ -4052,186 +4056,156 @@ class Message {
     this.subject = subject;
   }
 }
-class EscImages{
-    #width=[];
-    #height=[];
-    #escImagesLoaded = false; // Mark images as not loaded
-    #escImageInfo={};
-    #images=[];
+class EscImages {
+    #escImagesLoaded = false;
+    #escImageInfo = {};
+    #uniqueImages = new Set();   // unique srcs to load — Set handles deduplication automatically
+    #dimensions = new Map();     // src → xyPair(width, height)
+    #srcImageType = new Map();   // src → image_type, needed for fallback lookup on load error
 
-  constructor(config){
-    this.imageTypes=[];
-    var nImages=0;
-    let base_image_map = config[CONFIG_IMAGE_MAP] || ESC_IMAGE_MAP;
-    let shutter_preset = config[CONFIG_SHUTTER_PRESET];
+    constructor(config) {
+        let baseImageMap = config[CONFIG_IMAGE_MAP] || ESC_IMAGE_MAP;
+        let shutterPreset = config[CONFIG_SHUTTER_PRESET];
 
-    //IMAGE_TYPES.forEach((image_type) =>
-    for (const image_type of IMAGE_TYPES)
-    {
-      let imageRefs={};
+        for (const imageType of IMAGE_TYPES) {
+            let imageRefs = {};
 
-      // Determine the initial image from CONFIG_DEFAULT
-      let initImage = CONFIG_DEFAULT[image_type];
+            let initImage = CONFIG_DEFAULT[imageType];
 
-      // Check if a preset image exists for the shutter type, otherwise use the initial image
-      let presetImage = (shutter_preset && ESC_PRESET[shutter_preset] && ESC_PRESET[shutter_preset][image_type]!== undefined)
-        ? ESC_PRESET[shutter_preset][image_type]
-        : initImage;
+            let presetImage = (shutterPreset && ESC_PRESET[shutterPreset] && ESC_PRESET[shutterPreset][imageType] !== undefined)
+                ? ESC_PRESET[shutterPreset][imageType]
+                : initImage;
 
-      // Use the config image if provided, otherwise use the preset image
-      let configImage = (config[image_type]) ? config[image_type] : presetImage;
+            let configImage = config[imageType] ? config[imageType] : presetImage;
+            let baseImage = defImagePathOrColor(baseImageMap, configImage, imageType);
 
-      // Resolve the final base image path or color
-      let base_image = defImagePathOrColor(base_image_map, configImage, image_type);
+            for (const entityConfig of config.entities) {
+                let entityShutterPreset = entityConfig[CONFIG_SHUTTER_PRESET];
 
-      for (const entityConfig of config.entities)
-      {
-        let shutter_preset = entityConfig[CONFIG_SHUTTER_PRESET];
+                let entityPresetImage = (entityConfig[imageType] || ESC_PRESET[entityShutterPreset] == undefined)
+                    ? entityConfig[imageType]
+                    : ESC_PRESET[entityShutterPreset][imageType];
 
-        let presetImage = (entityConfig[image_type]  || ESC_PRESET[shutter_preset] == undefined)
-          ? entityConfig[image_type]
-          : ESC_PRESET[shutter_preset][image_type];
+                let imageMap = entityConfig[CONFIG_IMAGE_MAP] || baseImageMap;
+                const entityId = entityConfig[CONFIG_ENTITY_ID] || entityConfig;
 
-        let image_map = entityConfig[CONFIG_IMAGE_MAP] || base_image_map;
-        const entityId = entityConfig[CONFIG_ENTITY_ID] || entityConfig;
+                let image = NOT_KNOWN.includes(entityPresetImage)
+                    ? baseImage
+                    : defImagePathOrColor(imageMap, entityPresetImage, imageType);
 
-        let image = NOT_KNOWN.includes(presetImage)  ? base_image : defImagePathOrColor(image_map,presetImage,image_type);
-        if (image){
-          let src = image.replace(/([^:]\/)\/+/g, "/").trim(); // Remove double slashes and trim
-          var key;
-          if (!(this.#images.includes(src))){
-            this.#images[nImages]=src;
-            this.imageTypes[nImages]=image_type;
-            key= nImages++;
-          }else{
-            key = this.#images.findIndex(element => element == src);
-          }
-          imageRefs[entityId]={entityId,key};
-        }else{
-          imageRefs[entityId]={entityId,key: -1};
+                if (image) {
+                    let src = image.replace(/([^:]\/)\/+/g, "/").trim();
+                    // Set.add is a no-op for duplicates — no if/else needed
+                    this.#uniqueImages.add(src);
+                    // Only record the first image_type seen for this src (used for fallback)
+                    if (!this.#srcImageType.has(src)) {
+                        this.#srcImageType.set(src, imageType);
+                    }
+                    imageRefs[entityId] = { entityId, src };
+                } else {
+                    imageRefs[entityId] = { entityId, src: '' };
+                }
+            }
 
+            this.#escImageInfo[imageType] = imageRefs;
         }
-      };
-      this.#escImageInfo[image_type]=imageRefs;
-
-    };
-  }
-  getWindowImageSrc(entityId){
-    return this.getImageSrc(CONFIG_WINDOW_IMAGE,entityId);
-  }
-  getViewImageSrc(entityId){
-    return this.getImageSrc(CONFIG_VIEW_IMAGE,entityId);
-  }
-  getShutterSlatImageSrc(entityId){
-    return this.getImageSrc(CONFIG_SHUTTER_SLAT_IMAGE,entityId);
-  }
-  getShutterBottomImageSrc(entityId){
-    return this.getImageSrc(CONFIG_SHUTTER_BOTTOM_IMAGE,entityId);
-  }
-  getImageSrc(image_type,entityId){
-    const key = this.#escImageInfo[image_type][entityId].key;
-    if (key < 0 || key >= this.#images.length) {
-      return ''; // Return a default empty string if the key is invalid
-    }
-    return this.#images[key];
-  }
-
-  getWindowImageSize(entityId){
-    return this.getImageSize(CONFIG_WINDOW_IMAGE,entityId);
-  }
-  getViewImageSize(entityId){
-    return this.getImageSize(CONFIG_VIEW_IMAGE,entityId);
-  }
-  getShutterSlatImageSize(entityId){
-    let imageSize = this.getImageSize(CONFIG_SHUTTER_SLAT_IMAGE,entityId);
-    return imageSize;
-  }
-  getShutterBottomImageSize(entityId){
-    return this.getImageSize(CONFIG_SHUTTER_BOTTOM_IMAGE,entityId);
-  }
-  getImageSize(image_type, entityId) {
-    const key = this.#escImageInfo[image_type][entityId]?.key;
-    if (key == null || key < 0 || key >= this.#images.length) {
-      return new xyPair(0, 0);
-    }
-    const  xy = new xyPair(this.#width[key] || 0, this.#height[key] || 0);
-    return xy;
-  }
-
-  async processImages() {
-    try {
-      const imageDimensions = await this.readImageDimensions(this);
-      imageDimensions.forEach((value)=>{
-        this.#width[value.index] = value.width;
-        this.#height[value.index]= value.height;
-      });
-
-      this.#escImagesLoaded = true; // Mark images as loaded
-    } catch (error) {
-        console.error('Failed to load image dimensions:', error);
-    }
-    return this.#escImagesLoaded;
-  }
-
-  async readImageDimensions() {
-    const promises = [];
-    // Loop through each file URL in the provided array
-
-
-    for (let i = 0; i < this.#images.length; i++) {
-      const fileUrl = this.#images[i];
-      if (isUrl(fileUrl)) {
-        const promise = new Promise((resolve, reject) => {
-          const img = new Image();
-
-          img.onload = function() {
-              resolve({
-                  url: fileUrl,
-                  width: img.width,
-                  height: img.height,
-                  index: i // Store the index of the image in the original array
-              });
-          };
-          img.onerror = function() {
-  //          hass.callService("persistent_notification", "create", {
-  //            title: "Notitie",
-  //            message: "Dit is mijn melding vanuit de card"
-  //          });
-            const baseImage = `${ESC_IMAGE_MAP}/${CONFIG_DEFAULT[this.imageTypes[i]]}`;
-            this.images[i]= baseImage; // Replace with default image on error
-
-            console.warn(`Failed to load image: ${fileUrl}, using default image: ${baseImage}`);
-
-            const fallbackImg = new Image();
-
-            fallbackImg.onload = function () {
-              resolve({
-                url: baseImage,
-                width: fallbackImg.width,
-                height: fallbackImg.height,
-                index: i
-              });
-            };
-            fallbackImg.src = baseImage;
-          };
-
-          img.src = fileUrl; // Set the src to the image URL directly
-
-        });
-        promises.push(promise);
-      }
     }
 
-    try {
-        // Wait for all image dimensions to be loaded
-        const results = await Promise.all(promises);
-        return results;  // Return results with dimensions
-    } catch (error) {
-        console.error('Error loading images:', error);
-        throw error;
-    }
-  }
+    // --- src getters ---
 
+    getWindowImageSrc(entityId) {
+        return this.getImageSrc(CONFIG_WINDOW_IMAGE, entityId);
+    }
+    getViewImageSrc(entityId) {
+        return this.getImageSrc(CONFIG_VIEW_IMAGE, entityId);
+    }
+    getShutterSlatImageSrc(entityId) {
+        return this.getImageSrc(CONFIG_SHUTTER_SLAT_IMAGE, entityId);
+    }
+    getShutterBottomImageSrc(entityId) {
+        return this.getImageSrc(CONFIG_SHUTTER_BOTTOM_IMAGE, entityId);
+    }
+    getImageSrc(image_type, entityId) {
+        return this.#escImageInfo[image_type][entityId]?.src ?? '';
+    }
+
+    // --- size getters ---
+
+    getWindowImageSize(entityId) {
+        return this.getImageSize(CONFIG_WINDOW_IMAGE, entityId);
+    }
+    getViewImageSize(entityId) {
+        return this.getImageSize(CONFIG_VIEW_IMAGE, entityId);
+    }
+    getShutterSlatImageSize(entityId) {
+        return this.getImageSize(CONFIG_SHUTTER_SLAT_IMAGE, entityId);
+    }
+    getShutterBottomImageSize(entityId) {
+        return this.getImageSize(CONFIG_SHUTTER_BOTTOM_IMAGE, entityId);
+    }
+    getImageSize(image_type, entityId) {
+        const src = this.#escImageInfo[image_type][entityId]?.src;
+        if (!src) return new xyPair(0, 0);
+        return this.#dimensions.get(src) ?? new xyPair(0, 0);
+    }
+
+    // --- loading ---
+
+    async processImages() {
+        try {
+            await this.#readImageDimensions();
+            this.#escImagesLoaded = true;
+        } catch (error) {
+            console.error('Failed to load image dimensions:', error);
+        }
+        return this.#escImagesLoaded;
+    }
+
+    async #readImageDimensions() {
+        const promises = [];
+
+        for (const src of this.#uniqueImages) {
+            if (!isUrl(src)) continue;
+
+            const promise = new Promise((resolve) => {
+                const img = new Image();
+
+                img.onload = () => {
+                    this.#dimensions.set(src, new xyPair(img.width, img.height));
+                    resolve();
+                };
+
+                img.onerror = () => {
+                    // Arrow function: `this` correctly refers to the EscImages instance
+                    const imageType = this.#srcImageType.get(src);
+                    const fallbackSrc = `${ESC_IMAGE_MAP}/${CONFIG_DEFAULT[imageType]}`;
+                    console.warn(`Failed to load image: ${src}, using default: ${fallbackSrc}`);
+
+                    const fallbackImg = new Image();
+
+                    fallbackImg.onload = () => {
+                        // Store fallback dimensions under the original src key
+                        // so all existing references in #escImageInfo remain valid
+                        this.#dimensions.set(src, new xyPair(fallbackImg.width, fallbackImg.height));
+                        resolve();
+                    };
+                    fallbackImg.onerror = () => {
+                        // Fallback also failed — store zero size and move on
+                        // Never reject: we want Promise.all to load as much as possible
+                        this.#dimensions.set(src, new xyPair(0, 0));
+                        resolve();
+                    };
+                    fallbackImg.src = fallbackSrc;
+                };
+
+                img.src = src;
+            });
+
+            promises.push(promise);
+        }
+
+        await Promise.all(promises);
+    }
 }
 /**
  * global functions
@@ -4345,7 +4319,6 @@ function findElement(base,selector) {
         return foundInShadow;
       }
       // Recurse into any shadow DOMs within this shadow root
-      const shadowHost = node.shadowRoot.host;
       for (const child of node.shadowRoot.children) {
         const result = searchInShadowDom(child);
         if (result) {
