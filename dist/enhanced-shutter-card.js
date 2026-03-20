@@ -1314,6 +1314,7 @@ class EnhancedShutterCardNew extends LitElement{
   getGridOptionsInternal(){
 
     const debug=0;
+    let tempCardName="";
 
     let totalCardSize= this.gridSizeCardTitle();
 
@@ -1322,7 +1323,6 @@ class EnhancedShutterCardNew extends LitElement{
     {
       let totalShuttersSize = {localWidthPx: 0,localHeightPx: 0};
       let seperate=0;
-      let tempCardName="";
 
       Object.keys(this.shutterCfgs).forEach(key =>
       {
