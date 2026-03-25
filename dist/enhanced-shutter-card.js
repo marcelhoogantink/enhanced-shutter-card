@@ -1,5 +1,5 @@
 
-const VERSION = 'v1.5.2';
+const VERSION = 'v1.5.3b0';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
@@ -63,8 +63,12 @@ const HA_GRID_PX_HEIGHT = 56;
 const HA_GRID_PX_WIDTH = 24; // beween 17 and 30 ???
 const HA_GRID_PX_GAP = 8;
 
+const ENTITY_REGISTRY_LIST = "config/entity_registry/list";
 
+const DEVICE_CLASS_BATTERY = "battery";
+const DEVICE_CLASS_SIGNAL = "signal_strength";
 
+const DEVICES_CLASSES_SUB_ENTITIES =[DEVICE_CLASS_BATTERY, DEVICE_CLASS_SIGNAL];
 const PORTRAIT ="P";
 const LANDSCAPE ="L";
 
@@ -886,6 +890,7 @@ class EnhancedShutterCardNew extends LitElement{
     hass: {type: Object},
     config: {type: Object},
     // local reactive variables
+    isSubEntitiesChecked: {type: Boolean, state: true},
     isShutterConfigLoaded: {type: Boolean, state: true},
     shutterCfgs: {type: Object, state: true},
     screenOrientation: {type: Object, state: true},
@@ -907,6 +912,7 @@ class EnhancedShutterCardNew extends LitElement{
     this.gridPixelGap = HA_GRID_PX_GAP;
     this.gridContainer = null;
     this.isResizeInProgress = false;
+    this.isSubEntitiesChecked = false;
 
     this.messageManager= new MessageManager();
 
@@ -987,6 +993,10 @@ class EnhancedShutterCardNew extends LitElement{
   getCardFlexDirection(){
     return this.cardCfg.stacked() == VERTICAL ? 'column' : 'row';
   }
+  getCoverEntities(){
+    let keys = Object.keys(this.shutterCfgs);
+    return keys;
+  }
 
 /*
 * OVERRIDE FUNCTIONS LIT ELEMENT
@@ -994,14 +1004,14 @@ class EnhancedShutterCardNew extends LitElement{
   shouldUpdate(changedProperties) {
     let doUpdate =false;
     if (this.isShutterConfigLoaded){
-      console.log('Card shouldUpdate Start');
+      console.log('Card shouldUpdate Start:', this.config.title);
       changedProperties.forEach((oldValue, propName) => {
         console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
-        if (propName==='hass'){
+        switch (propName){
+          case 'hass':
           /* On hass update, check if there is a cover change */
             //console.log('Card shouldUpdate on hass change, check if cover state change');
-            Object.keys(this.shutterCfgs).forEach(coverEntityId =>{
-              const cfg = this.shutterCfgs[coverEntityId];
+            Object.entries(this.shutterCfgs).forEach(([coverEntityId, cfg]) => {
               const currentShutterEntity =cfg.getCoverEntity();
               if (currentShutterEntity) {
                 const liveCoverEntity = new haEntity(this.hass,coverEntityId);
@@ -1013,36 +1023,43 @@ class EnhancedShutterCardNew extends LitElement{
                   doUpdate =true;
                   cfg.updateCoverEntity(liveCoverEntity);
                 }
-                // check battery entity state change
-                const currentBatteryEntity = cfg.getBatteryEntity();
-                const batteryEntityId = currentBatteryEntity?.getEntityId() ?? null;
-                if (batteryEntityId) {
-                  const liveBatteryEntity = new haEntity(this.hass,batteryEntityId);
-                  if (liveBatteryEntity && liveBatteryEntity.getState() !== currentBatteryEntity?.getState() ){
-                    console.log(`    Cover Battery state change detected for ${batteryEntityId}`);
-                    doUpdate =true;
-                    cfg.updateBatteryEntity(liveBatteryEntity);
-                  }
-                }
-                // check signal entity state change
-                const currentSignalEntity = cfg.getSignalEntity();
-                const signalEntityId = currentSignalEntity?.getEntityId() ?? null;
-                if (signalEntityId) {
-                  const liveSignalEntity = new haEntity(this.hass,signalEntityId);
-                  if (liveSignalEntity && liveSignalEntity.getState() !== currentSignalEntity?.getState() ){
-                    console.log(`    Cover Signal state change detected for ${signalEntityId}`);
-                    doUpdate =true;
-                    cfg.updateSignalEntity(liveSignalEntity);
+
+                for (let type of DEVICES_CLASSES_SUB_ENTITIES) {
+                  const subEntity = cfg.subEntity[type];
+                  const test= null;
+                  const currentEntity = subEntity?.entity;
+                  const entityId = subEntity?.entityId;
+                  if (currentEntity) {
+                    const liveEntity = new haEntity(this.hass,entityId);
+                    if (liveEntity && liveEntity.getState() !== currentEntity?.getState() ){
+                      console.log(`    Cover state change detected for ${coverEntityId},${type}; ${entityId}`);
+                      doUpdate =true;
+                      subEntity.update(liveEntity);
+                    }
                   }
                 }
               }
             });
-        }else{
+
+            break
+          case ("isShutterConfigLoaded"):
+          case ("escImagesLoaded"):
+          case ("isSubEntitiesChecked"):
+            if (
+              this.isShutterConfigLoaded &&
+              this.escImagesLoaded &&
+              this.isSubEntitiesChecked){
+              doUpdate =true;
+            }
+            break;
+          default:
           /* On any other property change, do the update */
-          doUpdate =true;
+            console.log(`propName: ${propName}`)
+            doUpdate =true;
         }
       });
     }
+    console.log('Card shouldUpdate: ',this.config.title, doUpdate);
     return doUpdate;
   }
   willUpdate(changedProperties){
@@ -1059,7 +1076,7 @@ class EnhancedShutterCardNew extends LitElement{
   }
   render()
   {
-    //console.log('#@ CARD RENDER !!!!!!');
+    console.log('CARD RENDER start: ',this.config.title);
     if (!this.config || !this.hass || !this.isShutterConfigLoaded) {
       console.warn('ShutterCard  .. no content ..');
       return html`Waiting ...`;
@@ -1277,6 +1294,61 @@ class EnhancedShutterCardNew extends LitElement{
     `;
     return css`${unsafeCSS(CSS)}`;
   }
+  async getDeviceEntities(entityIds) {
+    let deviceEntities = null;
+    try {
+      const registry = await this.hass.callWS({ type: ENTITY_REGISTRY_LIST });
+      const deviceIds = [
+        ...new Set(
+          registry
+            .filter(e => entityIds.includes(e.entity_id))
+            .map(e => e.device_id)
+            .filter(Boolean)
+        ),
+      ];
+      deviceEntities = registry.filter(e => deviceIds.includes(e.device_id));
+    } catch (e) {
+      console.warn("device-group-card: entity registry lookup failed", e);
+
+    }
+    return deviceEntities;
+  }
+
+  async resolveSubEntities() {
+
+    const entityIds = this.getCoverEntities();
+
+    // helper
+    const hasDeviceClass = (entry, targetClass) =>
+      this.hass.states[entry.entity_id]?.attributes?.device_class === targetClass;
+
+    for (const entityId of entityIds) {
+      const cfg = this.shutterCfgs[entityId];
+      let siblings =null;
+
+      for (let type of DEVICES_CLASSES_SUB_ENTITIES) {
+        const subEntity = cfg.subEntity[type];
+
+        if (subEntity.entityId === AUTO){
+
+          if (!this.deviceEntities) {
+            this.deviceEntities = await this.getDeviceEntities(entityIds);
+          }
+          if (!siblings){
+            const primary = this.deviceEntities.find(e => e.entity_id === entityId);
+            // siblings: all entities of the device of the primary entity
+            siblings = this.deviceEntities.filter(
+              e => e.device_id === primary?.device_id && e.entity_id !== entityId
+            );
+          }
+          const subId = siblings.find(e => hasDeviceClass(e, type))?.entity_id ?? null;
+          subEntity.set(subId);
+
+        }
+     }
+   }
+    return true;
+  }
 /*
 * OVERRIDE FUNCTIONS HA CARD
 */
@@ -1291,6 +1363,9 @@ class EnhancedShutterCardNew extends LitElement{
     this.config = config;
     this.escImages = new EscImages(this.config);
     this.escImagesLoaded = await this.escImages.processImages();
+
+    this.isSubEntitiesChecked = await this.resolveSubEntities();
+    console_log('setconfig End');
   }
   getCardSize() {
     console_log('Card getCardSize');
@@ -1651,11 +1726,13 @@ class EnhancedShutter extends LitElement
   }
   shouldUpdate(changedProperties)
   {
-    console.log('  Cover shouldUpdate Start',this.cfg.friendlyName());
+    console.log('  Cover shouldUpdate Start: ',this.cfg.friendlyName());
     changedProperties.forEach((oldValue, propName) => {
         console.log(`  Cover shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
     });
-    return this.react_EscImagesLoaded ? true : false;
+    let doUpdate =this.react_EscImagesLoaded ? true : false;
+    console.log('  Cover shouldUpdate: ', this.cfg.friendlyName(), doUpdate);
+    return doUpdate;
   }
   connectedCallback() {
     //console_log('Shutter connectedCallback');
@@ -1691,6 +1768,7 @@ class EnhancedShutter extends LitElement
 
   render()
   {
+    console.log('  COVER RENDER start: ',this.cfg.friendlyName());
     let entityId = this.cfg.entityId();
     let positionText;
     if (this.action=='user-drag'){
@@ -1808,71 +1886,9 @@ class EnhancedShutter extends LitElement
       this.tiltSlider.value = this.react_TiltPosition; // !!!!! Special ..Bug ??...
     }
     this.action='cover-update';
-    // TODO: better testing and employing _resolveEntities(), basicly it works ...
-    //this.TEST_resolveEntities(this.hass);
 
   }
 
-  async TEST_resolveEntities(hass) {
-
-    const ENTITY_REGISTRY_LIST = "config/entity_registry/list";
-    if (!this._registryCache) {
-      try {
-        this._registryCache = await hass.callWS({ type: ENTITY_REGISTRY_LIST });
-      } catch (e) {
-        console.warn("device-group-card: entity registry lookup failed", e);
-        return;
-      }
-    }
-
-    const newMap = {};
-    let entityIds= [this.cfg.entityId()];
-
-
-    //for (const item of this.config.entities) {
-    for (const item of entityIds) {
-      const entityId = item; //.entity;
-
-      // Full manual override — skip discovery entirely
-      if (item.battery_entity && item.signal_entity) {
-        newMap[entityId] = {
-          battery_entity: item.battery_entity,
-          signal_entity:  item.signal_entity,
-        };
-        continue;
-      }
-
-      const primary = this._registryCache.find(e => e.entity_id === entityId);
-      if (!primary?.device_id) {
-        newMap[entityId] = { battery_entity: null, signal_entity: null };
-        continue;
-      }
-
-      const siblings = this._registryCache.filter(
-        e => e.device_id === primary.device_id && e.entity_id !== entityId
-      );
-      const currentHass = hass;
-      // Helper: check registry entry AND live state attributes
-      const hasDeviceClass = (entry, targetClass) => {
-        const stateObj = currentHass.states[entry.entity_id];
-        return stateObj?.attributes?.device_class === targetClass;
-      };
-
-      const batteryEntry = siblings.find(e => hasDeviceClass(e, "battery"));
-      const signalEntry  = siblings.find(e => hasDeviceClass(e, "signal_strength"));
-
-      // Manual override wins per-field; discovery fills the rest
-      newMap[entityId] = {
-        battery_entity: item.battery_entity ?? batteryEntry?.entity_id ?? null,
-        signal_entity:  item.signal_entity  ?? signalEntry?.entity_id  ?? null,
-      };
-    }
-
-    // Assigning a new object triggers LitElement's reactive update.
-    // This is why we build 'newMap' separately rather than mutating this._entityMap in place —
-    // mutating the same object reference would NOT trigger a re-render.
-    this._entityMap = newMap;
-  }
 
 /**
  * TRANSFORM FUNCTIONS
@@ -2460,9 +2476,8 @@ class shutterCfg {
 
   #cfg={};
   #coverEntity=null;
-  #batteryEntity=null;
-  #signalEntity=null;
   #localize={};
+  subEntity={};
 
   constructor(hass,escConfig)
   {
@@ -2471,11 +2486,13 @@ class shutterCfg {
     this.#setLocalize(hass.localize);
     this.setCoverEntity(hass,entityId);
 
-    this.setBatteryEntity(hass,escConfig[CONFIG_BATTERY_ENTITY_ID]);
-    this.setSignalEntity(hass,escConfig[CONFIG_SIGNAL_ENTITY_ID]);
 
     this.batteryEntityId(escConfig[CONFIG_BATTERY_ENTITY_ID]);
     this.signalEntityId(escConfig[CONFIG_SIGNAL_ENTITY_ID]);
+
+    this.subEntity[DEVICE_CLASS_BATTERY] = new haSubEntity(hass,DEVICE_CLASS_BATTERY,this.batteryEntityId());
+    this.subEntity[DEVICE_CLASS_SIGNAL]  = new haSubEntity(hass,DEVICE_CLASS_SIGNAL,this.signalEntityId());
+
 
     this.debug(!!escConfig[CONFIG_DEBUG]);
 
@@ -2580,43 +2597,33 @@ class shutterCfg {
      const state = NOT_KNOWN.includes(haEntity?.getState()) ? UNAVAILABLE : haEntity.getState();
      return state;
   }
-  setBatteryEntity(hass,entityId){
-    this.#batteryEntity = entityId ? new haEntity(hass,entityId) : null;
-  }
-  updateBatteryEntity(haEntity){
-    this.#batteryEntity = haEntity;
-  }
   getBatteryEntity(){
-    return this.#batteryEntity;
-  }
-  setSignalEntity(hass,entityId){
-    this.#signalEntity = entityId ? new haEntity(hass,entityId) : null;
-  }
-  updateSignalEntity(haEntity){
-    this.#signalEntity = haEntity;
+    const entity = this.subEntity[DEVICE_CLASS_BATTERY].entity;
+    return entity;
   }
   // Get SignalInfo
   getSignalEntity(){
-    return this.#signalEntity;
+    const entity = this.subEntity[DEVICE_CLASS_SIGNAL].entity;
+    return entity;
   }
   getIconsActive(){
     return (this.getBatteryEntity() || this.getSignalEntity()) ? true : false;
   }
 
   batteryLevel(){
-    let state = this.#batteryEntity?.getState()?? UNAVAILABLE;
+    let state = this.subEntity[DEVICE_CLASS_BATTERY].entity?.getState() ?? UNAVAILABLE;
     return NOT_KNOWN.includes (state) ? '?' : state ;
   }
   signalLevel(){
-    let state = this.#signalEntity?.getState()?? UNAVAILABLE;
+    let state = this.subEntity[DEVICE_CLASS_SIGNAL].entity?.getState() ?? UNAVAILABLE;
     return  NOT_KNOWN.includes (state) ? '?' : state ;
   }
   batteryUnit(){
-    let unit = this.#batteryEntity?.getUnitOfMeasurement() ?? UNAVAILABLE;
+    let unit = this.subEntity[DEVICE_CLASS_BATTERY].entity?.getUnitOfMeasurement() ?? UNAVAILABLE;
     return NOT_KNOWN.includes (unit) ? '?' : unit ;
   }
   signalUnit(){
-    let unit = this.#signalEntity?.getUnitOfMeasurement() ?? UNAVAILABLE;
+    let unit = this.subEntity[DEVICE_CLASS_SIGNAL].entity?.getUnitOfMeasurement() ?? UNAVAILABLE;
     return NOT_KNOWN.includes (unit) ? '?' : unit ;
   }
 
@@ -2757,7 +2764,7 @@ class shutterCfg {
     }
     return this.#getCfg(CONFIG_OPENING_DISABLED,value);
   }
-passiveMode(value = null){
+  passiveMode(value = null){
     let mode = this.#getCfg(CONFIG_PASSIVE_MODE,value)
     if (value!== null && mode) console.warn('Passive mode, no action');
     return mode;
@@ -4206,6 +4213,28 @@ class EscImages {
 
         await Promise.all(promises);
     }
+}
+class haSubEntity{
+
+  constructor(hass,type,entityId=false){
+    this.hass= hass;
+    this.type=type;
+    this.entityId = entityId;
+    //this.entity = this.set(entityId);
+    this.set(entityId);
+  }
+  set(entityId){
+    if (entityId && entityId !==AUTO){
+      this.entity = new haEntity(this.hass,entityId);
+      this.entityId=entityId;
+    }
+  }
+  get(){
+    return this.entity
+  }
+  update(haEntity){
+    this.entity=haEntity;
+  }
 }
 /**
  * global functions
