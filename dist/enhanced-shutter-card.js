@@ -1003,8 +1003,8 @@ class EnhancedShutterCardNew extends LitElement{
 */
   shouldUpdate(changedProperties) {
     let doUpdate =false;
+    console.log('Card shouldUpdate Start:', this.config.title);
     if (this.isShutterConfigLoaded){
-      console.log('Card shouldUpdate Start:', this.config.title);
       changedProperties.forEach((oldValue, propName) => {
         console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
         switch (propName){
@@ -1032,16 +1032,20 @@ class EnhancedShutterCardNew extends LitElement{
                   if (currentEntity) {
                     const liveEntity = new haEntity(this.hass,entityId);
                     if (liveEntity && liveEntity.getState() !== currentEntity?.getState() ){
-                      console.log(`    Cover state change detected for ${coverEntityId},${type}; ${entityId}`);
+                      console.log(`    ${type}: Cover state change detected for ${coverEntityId}; ${entityId}`);
                       doUpdate =true;
                       subEntity.update(liveEntity);
+                    }else{
+                      console.log(`    ${type}: NO Cover state change detected for ${coverEntityId}; ${entityId}`);
                     }
+                  }else{
+                      console.log(`    ${type} No entity found :${currentEntity}`);
                   }
                 }
               }
             });
 
-            break
+            break;
           case ("isShutterConfigLoaded"):
           case ("escImagesLoaded"):
           case ("isSubEntitiesChecked"):
@@ -1058,6 +1062,8 @@ class EnhancedShutterCardNew extends LitElement{
             doUpdate =true;
         }
       });
+    }else{
+      console.log('Card shouldUpdate: shutter config not loaded yet, skipping update');
     }
     console.log('Card shouldUpdate: ',this.config.title, doUpdate);
     return doUpdate;
