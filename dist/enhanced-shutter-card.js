@@ -892,7 +892,7 @@ class EnhancedShutterCardNew extends LitElement{
     // local reactive variables
     isSubEntitiesChecked: {type: Boolean, state: true},
     isShutterConfigLoaded: {type: Boolean, state: true},
-    shutterCfgs: {type: Object, state: true},
+    shutterCfgs: {type: Array, state: true},
     screenOrientation: {type: Object, state: true},
     escImagesLoaded: {type: Boolean, state: true},
     gridPixelWidth: {type: Number, state: true},
@@ -903,7 +903,7 @@ class EnhancedShutterCardNew extends LitElement{
     console.log('Card constructor');
 
     this.isShutterConfigLoaded = false;
-    this.shutterCfgs = {};
+    this.shutterCfgs = [];
     this.screenOrientation= LANDSCAPE;
     this.escImagesLoaded = false;
     this.gridPixelWidth = HA_GRID_PX_WIDTH;
@@ -924,7 +924,13 @@ class EnhancedShutterCardNew extends LitElement{
     this.cardCfg = new cardCfg(cardConfig);
     this.config.entities.map((subConfig) => {
       let shutterConfig = this.#buildConfig(cardConfig,subConfig);
-      this.shutterCfgs[shutterConfig.entity] = new shutterCfg(this.hass,shutterConfig);
+/**
+ * check here whether the entity of the subConfig is a group ...
+ * Then when needed split it up in seperate covers.
+ */
+
+      this.shutterCfgs.push(new shutterCfg(this.hass,shutterConfig));
+
     });
     this.isShutterConfigLoaded = true;
   }
@@ -994,7 +1000,7 @@ class EnhancedShutterCardNew extends LitElement{
     return this.cardCfg.stacked() == VERTICAL ? 'column' : 'row';
   }
   getCoverEntities(){
-    let keys = Object.keys(this.shutterCfgs);
+    let keys = this.shutterCfgs.map(cfg=>cfg.entityId());
     return keys;
   }
 
@@ -1011,7 +1017,8 @@ class EnhancedShutterCardNew extends LitElement{
           case 'hass':
           /* On hass update, check if there is a cover change */
             //console.log('Card shouldUpdate on hass change, check if cover state change');
-            Object.entries(this.shutterCfgs).forEach(([coverEntityId, cfg]) => {
+            this.shutterCfgs.forEach(cfg =>{
+              const coverEntityId = cfg.entityId();
               const currentShutterEntity =cfg.getCoverEntity();
               if (currentShutterEntity) {
                 const liveCoverEntity = new haEntity(this.hass,coverEntityId);
@@ -1095,7 +1102,7 @@ class EnhancedShutterCardNew extends LitElement{
         const entityId = currEntity.entity || currEntity;
         return entityId;
       });
-*/
+      */
     let htmlout = html`
         ${showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
         ${showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
@@ -1104,8 +1111,8 @@ class EnhancedShutterCardNew extends LitElement{
             class="${ESC_CLASS_SHUTTERS}"
             style = "${htmlParts.defStyleVarsCard()}"
           >
-            ${Object.keys(this.shutterCfgs).map(entityId =>{
-                const cfg = this.shutterCfgs[entityId];
+            ${this.shutterCfgs.map(cfg => {
+                const entityId = cfg.entityId();
                 // update the live states and attributes
                 return html`
                   <div class="${ESC_CLASS_SHUTTER_FLEX}">
@@ -1328,11 +1335,12 @@ class EnhancedShutterCardNew extends LitElement{
     const hasDeviceClass = (entry, targetClass) =>
       this.hass.states[entry.entity_id]?.attributes?.device_class === targetClass;
 
-    for (const entityId of entityIds) {
-      const cfg = this.shutterCfgs[entityId];
-      let siblings =null;
+    for (const cfg of this.shutterCfgs) {
+       const entityId = cfg.entityId();
 
-      for (let type of DEVICES_CLASSES_SUB_ENTITIES) {
+        let siblings =null;
+
+      for (const type of DEVICES_CLASSES_SUB_ENTITIES) {
         const subEntity = cfg.subEntity[type];
 
         if (subEntity.entityId === AUTO){
@@ -1353,7 +1361,7 @@ class EnhancedShutterCardNew extends LitElement{
         }
      }
    }
-    return true;
+   return true;
   }
 /*
 * OVERRIDE FUNCTIONS HA CARD
@@ -1405,9 +1413,8 @@ class EnhancedShutterCardNew extends LitElement{
       let totalShuttersSize = {localWidthPx: 0,localHeightPx: 0};
       let seperate=0;
 
-      Object.keys(this.shutterCfgs).forEach(key =>
-      {
-        let cfg = this.shutterCfgs[key];
+      this.shutterCfgs.forEach(cfg =>{
+
         if (!tempCardName) tempCardName= cfg.friendlyName();
         let shutterSize = this.gridSizeCardTop(cfg);
 
