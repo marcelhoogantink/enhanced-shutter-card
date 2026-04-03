@@ -2362,7 +2362,7 @@ class EnhancedShutter extends LitElement
       // send position to shutter
       this.sendShutterTiltPosition(this.cfg.entityId(),tiltPosition);
     }else{
-      // no ESC_FEATURE_SET_POSITION, so send open- or close-action
+      // no ESC_FEATURE_SET_TILT_POSITION, so send open- or close-action
       const actionToSend = (tiltPosition > 50) ? ACTION_SHUTTER_OPEN_TILT : ACTION_SHUTTER_CLOSE_TILT;
       this.callHassCoverService(this.cfg.entityId(),actionToSend);
       // possinlity that position is not changed => request Update

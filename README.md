@@ -31,52 +31,43 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.5.2:
+### New in this beta-version v1.6.0b0:
 
-Improved Tilt (3d-tilt) and tilt slat visible at 90 degrees.
+
+
+- #### New `auto`-option for finding sub-entities
+  For the `battery_entity` and `signal_entity` settings, a new added option `auto` is available. When this is set to `auto`, the Card tries to find a battery or signal entity in the device of the cover-entity and displays its icon and status.
+
+  Examples:
+        `battery_entity: auto`
+    `signal_entity: auto`
+
+  Of course, you can still enter the name of these sub-entities.
+
+- #### Horizontal stacked card.
+  With the new setting `stacked` (default `vertical`), you can create a horizontal stacked Card by setting `stacked: horizontal`.
+
+- #### Group-member display.
+  When displaying a cover-group, it is now possible to display the group-members in stead of the group-cover itself.
+  Use the new `show_group_members` setting and set it `true` like `show_group_members: true`.
+  When you also use the `auto` setting for the sub-entitties (see above), the Card wil search for these entities for each group-member seperately
 
 - #### Solved issues:
 
-    [#151](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/151) Does not work anymore without internet access
+  [#51](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/51) How to do a Horizonal Stack?
+  [#132](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/132) Multiple Shade Row Card
+  [#156](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/156) (bug) Curtain buttons do not show left and right, but up and down
+  [#157](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/157) (bug) unreachable code after return statement
+
+
+- #### to be done:
+
+  [#153](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/153) (bug) Tilt options!
+  [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) Configuration variable to hide the central graphical window (Minimalist UI)
+
 
 ---
-### New in version v1.5.1:
-
-Version `v1.5.1` is the Tilt-version !!!
-Now, fully tilt capacities are included:
-
-  ![FullTiltOptions](FullTiltOptions.gif) ![FullTiltOptions](FullTiltOptions2.gif)
-
-Also a new preset setting-option is added: `shutter_preset: blind`. This one is used in the example above.
-
-- #### New tilt-setting options are added:
-
-- ##### New option [invert_percentage_tilt_ui]
-  (boolean) Invert/alter the setting for tilt-percentage on user-interface level. (default `false`)
-- ##### New option [invert_percentage_tilt_cover]
-  (boolean) Invert/alter the setting for tilt-percentage on device level. (default `false`)
-- ##### New option [tilt_slider_only]
-  (boolean) Display only the tilt-silder, not the buttons and visualisation (default `false`)
-  Only active when the cover has a tilt option and `show_tilt` equals `true`
-- ##### New option [tilt_angle_min]
-  (int) Set the maximum tilt-level (in degrees)
-  values between [0] and [180] and less then `tilt_angle_max` (default 0)
-  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
-- ##### New option [tilt_angle_max]
-  (int) Set the minimum tilt-level (in degrees)
-  values between [0] and [180] and greater then `tilt_angle_min` (default 180)
-  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
-
-- #### Solved issues:
-
-  - [#100](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/100) Roller Shades with Tilt
-  - [#45](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/45) [Feature Request] Add tilt positional options and icons to the Card
-  - [#145](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/145) Extra options for new tilt function
-
-
 ### For previous release-changes go to [Previous-release changes](#previous-release-changes)
-
-
 ---
 
 ## All functions of the Card
@@ -318,8 +309,49 @@ entities:
 ```
 
 ---
-## Previous release-changes
+## Previous release-changes:
 ---
+### New in version v1.5.2:
+
+Improved Tilt (3d-tilt) and tilt slat visible at 90 degrees.
+
+- #### Solved issues:
+
+    [#151](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/151) Does not work anymore without internet access
+
+---
+### New in version v1.5.1:
+
+#### Version `v1.5.1` is the Tilt-version !!!
+Now, fully tilt capacities are included:
+
+  ![FullTiltOptions](FullTiltOptions.gif) ![FullTiltOptions](FullTiltOptions2.gif)
+
+Also a new preset setting-option is added: `shutter_preset: blind`. This one is used in the example above.
+
+- #### New tilt-setting options are added:
+
+- ##### New option [invert_percentage_tilt_ui]
+  (boolean) Invert/alter the setting for tilt-percentage on user-interface level. (default `false`)
+- ##### New option [invert_percentage_tilt_cover]
+  (boolean) Invert/alter the setting for tilt-percentage on device level. (default `false`)
+- ##### New option [tilt_slider_only]
+  (boolean) Display only the tilt-silder, not the buttons and visualisation (default `false`)
+  Only active when the cover has a tilt option and `show_tilt` equals `true`
+- ##### New option [tilt_angle_min]
+  (int) Set the maximum tilt-level (in degrees)
+  values between [0] and [180] and less then `tilt_angle_max` (default 0)
+  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
+- ##### New option [tilt_angle_max]
+  (int) Set the minimum tilt-level (in degrees)
+  values between [0] and [180] and greater then `tilt_angle_min` (default 180)
+  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
+
+- #### Solved issues:
+
+  - [#100](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/100) Roller Shades with Tilt
+  - [#45](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/45) [Feature Request] Add tilt positional options and icons to the Card
+  - [#145](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/145) Extra options for new tilt function
 ### New in version v1.4.3:
 
 This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
