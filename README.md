@@ -127,7 +127,11 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 | ---------------------------- | ------------- | -------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | type                         | string        | Yes      | -                                             | Must be "custom:enhanced-shutter-card"
 | title                        | string        | no       | -                                             | Title of the card
+| stacked                      | string        | no       | `vertical`                                    | Set the stacked direction when using multiple covers in one Card.
 | shutter_preset               | string        | no       | `roller-shutter`                              | Several preset-shutters-setting-groups, which creates a good start-setting for a specific type of cover. See the table below for possible definitions and the settings of them
+| battery_entity               | string        | No       | `null`                                        | For general setting just use `auto` for automatic search
+| signal_entity                | string        | No       | `null`                                        | For general setting just use `auto` for automatic search
+| show_group_members           | boolean       | No       | flase                                         | Whwn using a grouped-cover in the Card, set to 'true'to display the member covers in stead of the group-cover.
 | passive_mode                 | boolean       | no       | false                                         | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.
 | image_map                    | string        | No       | /local/community/enhanced-shutter-card/images | map of the images.
 | window_image                 | string        | No       | esc-window.png                                | image of the window shutter.
@@ -174,12 +178,13 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 
 ### Entities
 
-| Name                         | Type        | Required | Default                                  | Description                                                                                 | remarks                                      |
-| ---------------------------- | ----------- | -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| entity                       | string      | Yes      | -                                        | The shutter entity ID                                                                       |
-| name                         | string      | No       | _Friendly name of the entity_            | Name to display for the shutter                                                             |
-| battery_entity               | string      | No       | `null`                                   | EntityId of the sensor represenating the battery-level of the shutter (as a number)         |
-| signal_entity                | string      | No       | `null`                                   | EntityId of the sensor represenating the Wireless signal-level of the shutter (as a number) |
+| Name                         | Type        | Required | Default                                  | Description                                                                                                               | remarks                                      |
+| ---------------------------- | ----------- | -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| entity                       | string      | Yes      | -                                        | The shutter entity ID                                                                                                     |
+| name                         | string      | No       | _Friendly name of the entity_            | Name to display for the shutter                                                                                           |
+| battery_entity               | string      | No       | global item setting, see under _General_ | EntityId of the sensor represenating the battery-level of the shutter (as a number) or `auto` for automatic search        |
+| signal_entity                | string      | No       | global item setting, see under _General_ | EntityId of the sensor represenating the Wireless signal-level of the shutter (as a number) or `auto` for automatic search|
+| show_group_members           | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | shutter_preset               | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | passive_mode                 | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
 | image_map                    | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
