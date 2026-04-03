@@ -1,5 +1,14 @@
+/**
+ * Enhanced Shutter Card for Home Assistant
+ *
+ *
+ * HA-dev-page for cover:
+ * https://developers.home-assistant.io/docs/core/entity/cover
+ */
 
-const VERSION = 'v1.5.3b0';
+
+
+const VERSION = 'v1.6.0b0';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
@@ -72,8 +81,10 @@ const DEVICES_CLASSES_SUB_ENTITIES =[DEVICE_CLASS_BATTERY, DEVICE_CLASS_SIGNAL];
 const PORTRAIT ="P";
 const LANDSCAPE ="L";
 
-// derived from: https://github.com/home-assistant/core/blob/dev/homeassistant/components/cover/__init__.py
-//               lines 101-108
+// derived from:
+// https://github.com/home-assistant/core/blob/dev/homeassistant/components/cover/const.py
+//               lines 20-27 (class CoverEntityFeatures(enum.IntFlag)):
+
 
 const ESC_FEATURE_OPEN              = 0b00000001; // 1
 const ESC_FEATURE_CLOSE             = 0b00000010; // 2
@@ -175,6 +186,8 @@ const CONFIG_STACKED = "stacked";
 const CONFIG_SHUTTER_PRESET = 'shutter_preset';
 const CONFIG_TITLE = "title";
 const CONFIG_ENTITIES = 'entities';
+const CONFIG_ID = "id";
+const CONFIG_GROUP = "group";
 
 const HA_ALERT_SUCCESS = 'success';
 const HA_ALERT_WARNING = 'warning';
@@ -189,6 +202,8 @@ const CONFIG_WIDTH_PX = 'width_px';
 const CONFIG_SUPPORTED_FEATURES = 'supported_features';
 const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
 const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
+
+const CONFIG_SHOW_GROUP_MEMBERS = 'show_group_members';
 
 const CONFIG_NAME = 'name';
 const CONFIG_PASSIVE_MODE = 'passive_mode';
@@ -278,6 +293,8 @@ const ESC_ENTITY_ID = null;
 
 const ESC_BATTERY_ENTITY_ID = null;
 const ESC_SIGNAL_ENTITY_ID = null;
+
+const ESC_SHOW_GROUP_MEMBERS = false;
 
 const ESC_SUPPORTED_FEATURES = ESC_FEATURE_ALL;
 
@@ -372,6 +389,8 @@ const CONFIG_DEFAULT ={
   [CONFIG_SUPPORTED_FEATURES]: ESC_SUPPORTED_FEATURES,
   [CONFIG_TYPE]: "",
   [CONFIG_TITLE]: "",
+  [CONFIG_ID]:"",
+  [CONFIG_GROUP]: "",
   [CONFIG_ENTITIES]: "",
 
   [CONFIG_DEBUG]: ESC_DEBUG,
@@ -379,6 +398,7 @@ const CONFIG_DEFAULT ={
 
   [CONFIG_SHUTTER_PRESET]: ESC_SHUTTER_PRESET,
   [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
+  [CONFIG_SHOW_GROUP_MEMBERS]: ESC_SHOW_GROUP_MEMBERS,
 
   [CONFIG_BATTERY_ENTITY_ID]: ESC_BATTERY_ENTITY_ID,
   [CONFIG_SIGNAL_ENTITY_ID]: ESC_SIGNAL_ENTITY_ID,
@@ -782,8 +802,9 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_HA_ICON} {
         padding-bottom: 10px;
+      }
+      ha-icon-button {
         transform: var(--esc-button-rotate);
-
       }
       .${ESC_CLASS_HA_ICON_TILT} {
         padding-bottom: 10px;
@@ -817,25 +838,17 @@ const SHUTTER_CSS =`
         line-height: var(--esc-top-icon-text-line-height);
         font-size: var(--esc-top-icon-text-font-size);
       }
-`+
-      // TILT test CSS
-`
-    .tilt-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
 
     .${ESC_CLASS_TILT_SLIDER_WRAP} {
       display: flex;
       align-items: center;
       justify-content: center;
       writing-mode: var(--esc-tilt-slider-writing-mode);
-      direction: rtl;
+      direction: var(--esc-tilt-slider-direction);
     }
 
-    .${ESC_CLASS_TILT_SLIDER} {
-      transform: scale(var(--esc-button-scale));
+    .${ESC_CLASS_TILT_SLIDER_CLASS} {
+      zoom: var(--esc-button-scale);
     }
 
     .${ESC_CLASS_TILT_CONTAINER} {
@@ -885,27 +898,13 @@ const SHUTTER_CSS =`
 
 class EnhancedShutterCardNew extends LitElement{
   //reactive properties
-  static properties = {
-    // reactive variables from Home Assistant Card
-    hass: {type: Object},
-    config: {type: Object},
-    // local reactive variables
-    isSubEntitiesChecked: {type: Boolean, state: true},
-    isShutterConfigLoaded: {type: Boolean, state: true},
-    shutterCfgs: {type: Array, state: true},
-    screenOrientation: {type: Object, state: true},
-    escImagesLoaded: {type: Boolean, state: true},
-    gridPixelWidth: {type: Number, state: true},
-  };
-
   constructor() {
     super(); //  mandetory by Lit-element
-    console.log('Card constructor');
 
     this.isShutterConfigLoaded = false;
     this.shutterCfgs = [];
     this.screenOrientation= LANDSCAPE;
-    this.escImagesLoaded = false;
+    //this.escImagesLoaded = false;
     this.gridPixelWidth = HA_GRID_PX_WIDTH;
 
     this.gridPixelHeight = HA_GRID_PX_HEIGHT;
@@ -913,31 +912,88 @@ class EnhancedShutterCardNew extends LitElement{
     this.gridContainer = null;
     this.isResizeInProgress = false;
     this.isSubEntitiesChecked = false;
-
+    this.initializeReady = false;
+    this.initializeStarted = false;
     this.messageManager= new MessageManager();
+  }
+  static properties = {
+    // reactive variables from Home Assistant Card
+    hass: {type: Object},
+    config: {type: Object},
+    // local reactive variables
 
-    console_log('Card constructor ready');
+    initializeReady: {type: Boolean, state: true},
+    shutterCfgs: {type: Array, state: true},
+    screenOrientation: {type: Object, state: true},
+    gridPixelWidth: {type: Number, state: true},
+  };
+
+  set hass(hass) {
+
+    const oldHass = this._hass;
+    this._hass = hass;
+    if (!this.initializeStarted) {
+      this.initializeStarted = true;
+      this.cardInitialize(); // run once
+    }
+    this.requestUpdate('hass', oldHass);
+  }
+  get hass() {
+    return this._hass;
+  }
+  async cardInitialize() {
+    // ✅ Safe to use hass here, runs exactly once
+    try {
+      this.isShutterConfigLoaded = this.#defAllShutterConfig();
+      this.escImages = new EscImages(this.shutterCfgs);
+
+      await this.resolveSubEntities();
+      await this.escImages.processImages();
+    } catch (err) {
+      console.warn('Error during initialization:', err);
+    } finally {
+      this.initializeReady = true;
+
+      this.requestUpdate();
+      if (this.isConnected) {
+        // HA will re-call these methods on your card in response of this event:
+        // getGridOptions()   ← recalculates layout
+        // getCardSize()      ← recalculates legacy size (if defined)
+        this.dispatchEvent(new CustomEvent('card-updated', { bubbles: true }));
+      }
+    }
   }
   #defAllShutterConfig()
   {
     const cardConfig = this.#buildConfig(CONFIG_DEFAULT,this.config);
     this.cardCfg = new cardCfg(cardConfig);
+    let id =0;
     this.config.entities.map((subConfig) => {
-      let shutterConfig = this.#buildConfig(cardConfig,subConfig);
-/**
- * check here whether the entity of the subConfig is a group ...
- * Then when needed split it up in seperate covers.
- */
 
-      this.shutterCfgs.push(new shutterCfg(this.hass,shutterConfig));
+      let baseEntity = subConfig.entity ? new haEntity(this.hass,subConfig.entity) : null;
+      let newSubConfig = {...subConfig,  id: id++};
+      let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+      let cfg = new shutterCfg(this.hass,shutterConfig)
 
+      if (cfg.showGroupMembers() && baseEntity && baseEntity.isGroup()){
+        const groupEntities = baseEntity.getAttributes().entity_id || [];
+        const entitiesInGroup = groupEntities.filter(entityId => this.hass.states[entityId]);
+        entitiesInGroup.forEach(entityId => {
+          let newSubConfig = {...subConfig, entity: entityId, group: subConfig.entity, id: id++};
+          let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+          this.shutterCfgs.push(new shutterCfg(this.hass,shutterConfig));
+        });
+      }else{
+        this.shutterCfgs.push(cfg);
+      }
     });
-    this.isShutterConfigLoaded = true;
+    return true;
   }
 
   #buildConfig(configBase,configSub)
   {
-    const entityId = configSub.entity || 'General';
+    const id = configSub.id === undefined ? 'General' : configSub.id;
+
     if (typeof configSub !== 'object' || configSub === null){
       configSub={[CONFIG_ENTITY_ID]: configSub};
     }
@@ -946,7 +1002,11 @@ class EnhancedShutterCardNew extends LitElement{
     if (uniqueKeys.length > 0){
       uniqueKeys.forEach((key) =>
       {
-        this.messageManager.addMessage(`Unknown keyword: [${key}], check your input!`,HA_ALERT_WARNING,entityId);
+        this.messageManager.addMessage(
+          `Unknown keyword: [${key}], check your input!`,
+          HA_ALERT_WARNING,
+          id
+        );
       });
     };
     // handle PRESET TYPE
@@ -962,7 +1022,7 @@ class EnhancedShutterCardNew extends LitElement{
         this.messageManager.addMessage(
           `Deprecated: [${key}], use '${DEPRECATED[key].new}'!`,
           HA_ALERT_WARNING,
-          entityId
+          id
         );
         newConfigSub[DEPRECATED[key].new] = newConfigSub[key];
         delete newConfigSub[key];
@@ -974,7 +1034,7 @@ class EnhancedShutterCardNew extends LitElement{
         this.messageManager.addMessage(
           `Removed: [${key}], use '${REMOVED[key].new}'!`,
           HA_ALERT_ERROR,
-          entityId
+          id
         );
         newConfigSub[REMOVED[key].new] = newConfigSub[key];
         delete newConfigSub[key];
@@ -1009,90 +1069,66 @@ class EnhancedShutterCardNew extends LitElement{
 */
   shouldUpdate(changedProperties) {
     let doUpdate =false;
-    console.log('Card shouldUpdate Start:', this.config.title);
-    if (this.isShutterConfigLoaded){
-      changedProperties.forEach((oldValue, propName) => {
-        console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
-        switch (propName){
-          case 'hass':
-          /* On hass update, check if there is a cover change */
-            //console.log('Card shouldUpdate on hass change, check if cover state change');
-            this.shutterCfgs.forEach(cfg =>{
-              const coverEntityId = cfg.entityId();
-              const currentShutterEntity =cfg.getCoverEntity();
-              if (currentShutterEntity) {
-                const liveCoverEntity = new haEntity(this.hass,coverEntityId);
-                let shutterStateOld= cfg.getCoverState();
-                let shutterStateNew= cfg.getCoverState(liveCoverEntity);
 
-                if (shutterStateNew != shutterStateOld){
-                  console.log(`  A Cover in this Card changed: ${coverEntityId}, old: ${shutterStateOld}, new: ${shutterStateNew}`);
-                  doUpdate =true;
-                  cfg.updateCoverEntity(liveCoverEntity);
-                }
+    changedProperties.forEach((oldValue, propName) => {
+      // console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
+      switch (propName){
+        case ("initializeReady"):
+          if (this.initializeReady){
+            doUpdate =true;
+          }
+          break;
+        case 'hass':
+        /* On hass update, check if there is a cover change */
+          this.shutterCfgs.forEach(cfg =>{
+            const coverEntityId = cfg.entityId();
+            const currentShutterEntity =cfg.getCoverEntity();
+            if (currentShutterEntity) {
+              const liveCoverEntity = new haEntity(this.hass,coverEntityId);
+              let shutterStateOld= cfg.getCoverState();
+              let shutterStateNew= cfg.getCoverState(liveCoverEntity);
 
-                for (let type of DEVICES_CLASSES_SUB_ENTITIES) {
-                  const subEntity = cfg.subEntity[type];
-                  const test= null;
-                  const currentEntity = subEntity?.entity;
+              if (shutterStateNew != shutterStateOld){
+                doUpdate =true;
+                cfg.updateCoverEntity(liveCoverEntity);
+              }
+
+              for (let type of DEVICES_CLASSES_SUB_ENTITIES) {
+                const subEntity = cfg.subEntity[type];
+                const currentEntity = subEntity?.entity;
+                if (currentEntity) {
                   const entityId = subEntity?.entityId;
-                  if (currentEntity) {
-                    const liveEntity = new haEntity(this.hass,entityId);
-                    if (liveEntity && liveEntity.getState() !== currentEntity?.getState() ){
-                      console.log(`    ${type}: Cover state change detected for ${coverEntityId}; ${entityId}`);
-                      doUpdate =true;
-                      subEntity.update(liveEntity);
-                    }else{
-                      console.log(`    ${type}: NO Cover state change detected for ${coverEntityId}; ${entityId}`);
-                    }
-                  }else{
-                      console.log(`    ${type} No entity found :${currentEntity}`);
+                  const liveEntity = new haEntity(this.hass,entityId);
+                  if (liveEntity && liveEntity.getState() !== currentEntity.getState() ){
+                    doUpdate =true;
+                    subEntity.update(liveEntity);
                   }
                 }
               }
-            });
-
-            break;
-          case ("isShutterConfigLoaded"):
-          case ("escImagesLoaded"):
-          case ("isSubEntitiesChecked"):
-            if (
-              this.isShutterConfigLoaded &&
-              this.escImagesLoaded &&
-              this.isSubEntitiesChecked){
-              doUpdate =true;
             }
-            break;
-          default:
+          });
+
+          break;
+        default:
           /* On any other property change, do the update */
-            console.log(`propName: ${propName}`)
-            doUpdate =true;
-        }
-      });
-    }else{
-      console.log('Card shouldUpdate: shutter config not loaded yet, skipping update');
-    }
-    console.log('Card shouldUpdate: ',this.config.title, doUpdate);
+          if (oldValue !== undefined) doUpdate = true;
+      }
+    });
     return doUpdate;
   }
   willUpdate(changedProperties){
     super.willUpdate(changedProperties);
   }
   update(changedProperties){
-    console_log('Card Update');
     super.update(changedProperties);
     changedProperties.forEach((oldValue, propName) => {
-      console_log(`Card Update, Property ${propName} changed. oldValue: ${oldValue}; new: ${this[propName]}`);
-
+      //console_log(`Card Update, Property ${propName} changed. oldValue: ${oldValue}; new: ${this[propName]}`);
     });
-    console_log('Card Update ready');
   }
   render()
   {
-    console.log('CARD RENDER start: ',this.config.title);
-    if (!this.config || !this.hass || !this.isShutterConfigLoaded) {
-      console.warn('ShutterCard  .. no content ..');
-      return html`Waiting ...`;
+    if (!this.config || !this.hass || !this.initializeReady){
+      return html`Waiting for Card to initialize...`;
     }
     let showMessages = this.messageManager.countMessages() && this.closestElement('.element-preview',this) !== null;
     let htmlParts = new htmlCard(this);
@@ -1112,7 +1148,6 @@ class EnhancedShutterCardNew extends LitElement{
             style = "${htmlParts.defStyleVarsCard()}"
           >
             ${this.shutterCfgs.map(cfg => {
-                const entityId = cfg.entityId();
                 // update the live states and attributes
                 return html`
                   <div class="${ESC_CLASS_SHUTTER_FLEX}">
@@ -1121,14 +1156,14 @@ class EnhancedShutterCardNew extends LitElement{
                       .react_BatteryState=${cfg.getState(cfg.getBatteryEntity())}
                       .react_SignalState=${cfg.getState(cfg.getSignalEntity())}
                       .react_ScreenOrientation=${this.screenOrientation}
-                      .react_EscImagesLoaded=${this.escImagesLoaded}
+                      .react_InitializeReady=${this.initializeReady}
 
                       .hass=${this.hass}
                       .cfg=${cfg}
                       .escImages=${this.escImages}
                     >
                     </enhanced-shutter>
-                    ${showMessages ? html`${this.messageManager.displayGroupMessages(entityId)} ` : ''}
+                    ${showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
                   </div>
                   <div class="${ESC_CLASS_SHUTTER_SEPARATE}-${this.cardCfg.stacked()}"></div>
                 `;
@@ -1137,35 +1172,25 @@ class EnhancedShutterCardNew extends LitElement{
           </div>
         </ha-card>
       `;
-    //console.log('### grid-width=',this.gridPixelWidth);
-
-    //console.log('Card Render ready');
     return htmlout;
   }
   firstUpdated() {
-    console_log('Card firstUpdated Start');
-    console_log('Card firstUpdated End');
   }
   updated(changedProperties) {
-    console_log('Card updated Start');
     super.updated(changedProperties);
-    console_log('Card updated End');
   }
   getGrid(){
     if (!this.gridContainer){
       this.defGridContainer();
     }
-    if (this.gridContainer) {
-      //console.log('GridContainer');
+    if (this.gridContainer){
       const style = getComputedStyle(this.gridContainer);
       const previousGridWidth = this.gridPixelWidth;
       const columns = style.getPropertyValue('grid-template-columns');
       this.gridPixelWidth = (parseFloat(columns.split(/\s+/)[0]));
 
       if (previousGridWidth !== this.gridPixelWidth) {
-        //console.log(`#@#@ Card getGrid: changed from ${previousGridWidth} to ${this.gridPixelWidth} `);
         this.getGridOptions('from getGrid()');
-
       }
     } else {
       console.warn('Could not find grid container');
@@ -1191,35 +1216,20 @@ class EnhancedShutterCardNew extends LitElement{
   }
   connectedCallback() {
     super.connectedCallback();
-    console_log('Card connectedCallback Start');
-
-
-    //const parent = this.parentElement;
 
     const gridContainer = this.defGridContainer();
     if (!gridContainer) {
-      if (!this.isShutterConfigLoaded) {
-        this.#defAllShutterConfig();
-      }
       this.getGridOptionsInternal();
     }
-    let lastCols = '';
-    //console.log('Card connectedCallback: observing parent:',gridContainer);
-    // Check grid layout changes
-
-
     /* get element of hui-view to detect resizing */
     Globals.huiView = findElementInBody(HA_HUI_VIEW);
 
     this.messageManager.addMessage(`GridSize: rows: ${this.nbRows}, columns: ${this.nbCols}`,HA_ALERT_SUCCESS,'GridSize');
     this.startResizeObserver();
-    //console_log('Card connectedCallback End');
   }
   startResizeObserver() {
-
     const onResize = (entries) => {
-      /* Things todo when risize is detected */
-      //console.log('#@ Card Resize detected by onResize',Globals.huiView?.getBoundingClientRect());
+      /* Things todo when resize is detected */
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
@@ -1232,7 +1242,6 @@ class EnhancedShutterCardNew extends LitElement{
   }
   // Check the orientation based on the window and div visibility
   disconnectedCallback() {
-    //console.log('Card disconnectedCallback Start');
     super.disconnectedCallback();
     this.resizeObserver?.disconnect();
   }
@@ -1255,7 +1264,6 @@ class EnhancedShutterCardNew extends LitElement{
     // Determine the orientation based on visible area and window size
     Globals.screenOrientation = {value: visibleWidth*1.4 > visibleHeight ? LANDSCAPE : PORTRAIT};
     this.screenOrientation = Globals.screenOrientation.value;
-    console_log('Card Resize checkOrientation: screenOrientation:',this.screenOrientation);
 
     // After orientation check is done, reset the flag
     this.isResizeInProgress = false;
@@ -1336,9 +1344,9 @@ class EnhancedShutterCardNew extends LitElement{
       this.hass.states[entry.entity_id]?.attributes?.device_class === targetClass;
 
     for (const cfg of this.shutterCfgs) {
-       const entityId = cfg.entityId();
+      const entityId = cfg.entityId();
 
-        let siblings =null;
+      let siblings =null;
 
       for (const type of DEVICES_CLASSES_SUB_ENTITIES) {
         const subEntity = cfg.subEntity[type];
@@ -1366,37 +1374,29 @@ class EnhancedShutterCardNew extends LitElement{
 /*
 * OVERRIDE FUNCTIONS HA CARD
 */
-  async setConfig(config)
+  setConfig(config)
   {
-    //throw new Warn('Test warning');
-    console_log('setconfig Start');
-
     if (!config.entities) {
       throw new Error('You need to define entities');
     }
     this.config = config;
-    this.escImages = new EscImages(this.config);
-    this.escImagesLoaded = await this.escImages.processImages();
-
-    this.isSubEntitiesChecked = await this.resolveSubEntities();
-    console_log('setconfig End');
   }
   getCardSize() {
-    console_log('Card getCardSize');
     return this.config.entities.length + 1;
   }
 
   //Section layout : we compute the size of the card. (experimental)
-  getGridOptions(text="from External"){
-    /**
-     * load config is needed.
-     */
-    //console.log(`getGridOptions ${text}`);
-    if (!this.isShutterConfigLoaded)
-      this.#defAllShutterConfig();
 
+
+  getGridOptions(text="from External"){
+    /*
+      This is called **early and synchronously** by HA — before `setConfig()` and definitely before `hass`:
+
+      getGridOptions()   ← HA calls this first, no hass, no config
+      setConfig(config)  ← config arrives
+      set hass(hass)     ← hass arrives
+    */
     let options = this.getGridOptionsInternal();
-    //console.log('getGridOptions results: ',options);
     return options;
   }
 
@@ -1408,7 +1408,7 @@ class EnhancedShutterCardNew extends LitElement{
     let totalCardSize= this.gridSizeCardTitle();
 
 
-    if (this.config && this.config.entities && this.isShutterConfigLoaded)
+    if (this.config && this.config.entities && (this.isShutterConfigLoaded || this.initializeReady))
     {
       let totalShuttersSize = {localWidthPx: 0,localHeightPx: 0};
       let seperate=0;
@@ -1419,7 +1419,6 @@ class EnhancedShutterCardNew extends LitElement{
         let shutterSize = this.gridSizeCardTop(cfg);
 
         let sizeCardMiddle = this.gridSizeCardMiddle(cfg);
-        //console.log(`getGridOptionsInternal: sizeCardMiddle: `,sizeCardMiddle);
         shutterSize = this.gridAddVertical(shutterSize,sizeCardMiddle);
 
         let sizeCardBottom = this.gridSizeCardBottom(cfg);
@@ -1439,16 +1438,14 @@ class EnhancedShutterCardNew extends LitElement{
       // add padding
       totalCardSize = this.gridAddBoth(totalCardSize,{localWidthPx: 32,localHeightPx: 32});
     }else{
-      console.warn('ShutterCard  .. no content ??..');
+      console.warn('ShutterCard  .. no content yet ??..');
     }
     /*
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
-    //console.log(`getGridOptionsInternal: cardSize: `,totalCardSize);
     this.nbRows= Math.ceil((totalCardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
     this.nbCols= Math.ceil((totalCardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
-    //console.log(totalCardSize.localWidthPx, this.gridPixelWidth, this.gridPixelGap, `=> nbCols: ${this.nbCols}`);
 
     const divCard= this.closest('div.card');
     /* Set CSS variables for number of rows and columns */
@@ -1460,7 +1457,6 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
       console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
     }
-    //console.log(`getGridOptionsInternal: calculated nbRows: ${this.nbRows}, nbCols: ${this.nbCols} for card '${tempCardName}'`);
     return {
       rows: this.nbRows,
       columns: this.nbCols,
@@ -1538,14 +1534,10 @@ class EnhancedShutterCardNew extends LitElement{
     * size image
     */
     let sizeStandardButtons = this.gridSizeStandardButtons(cfg);
-    //console.log('gridSizeStandardButtons: ',sizeStandardButtons);
     let sizeWindowImage = this.gridSizeWindowImage(cfg);
-    //console.log('gridSizeWindowImage: ',sizeWindowImage);
 
     let sizePartialOpenButtons = this.gridSizePartialOpenButtons(cfg);
-    //console.log('gridSizePartialOpenButtons: ',sizePartialOpenButtons);
     let sizeTiltSection = this.gridSizeTiltSection(cfg);
-    //console.log('gridSizeTiltSection: ',sizeTiltSection);
 
     let cardSize;
     if (cfg.buttonsInRow()){
@@ -1565,7 +1557,6 @@ class EnhancedShutterCardNew extends LitElement{
         cardSize = this.gridAddVertical(cardSize,{localWidthPx: 0,localHeightPx: 36});
       }
     }
-    //console.log('gridSizeCardMiddle: ',cardSize);
     return cardSize;
   }
   gridSizeCardBottom(cfg){
@@ -1598,7 +1589,6 @@ class EnhancedShutterCardNew extends LitElement{
         localWidthPx = haButtonSize*3;
       }
     }
-    //console.log('gridSizeStandardButtons: ',{localWidthPx,localHeightPx});
     return {localWidthPx,localHeightPx};
   };
   gridSizeWindowImage(cfg){
@@ -1701,7 +1691,6 @@ class EnhancedShutter extends LitElement
   // - react_BatteryState
   // - react_SignalState
   // - react_ScreenOrientation
-  // - react_EscImagesLoaded
 
   // - hass
   // - cfg
@@ -1714,7 +1703,7 @@ class EnhancedShutter extends LitElement
     react_BatteryState: {type: String},        // for detecting battery state change
     react_SignalState: {type: String},         // for detecting signal state change
     react_ScreenOrientation: {type: Object},   // for change in screen orientation  by resize window or rotate device
-    react_EscImagesLoaded: {type: Boolean},
+    react_InitializeReady: {type: Boolean},
 
     // local reactive variables
     react_ShutterPosition: {state: true},      // for dragging shutter onscreen
@@ -1722,7 +1711,6 @@ class EnhancedShutter extends LitElement
     react_ResizeDivShutterSelector: {state: true,type: Boolean}, // for detecting resize of shutter div by responsive design
   };
   constructor(){
-    console.log('Shutter constructor');
     super(); //  mandetory by Lit-element
 
     this.screenPosition=-1;
@@ -1732,32 +1720,22 @@ class EnhancedShutter extends LitElement
     this.action = '#';
 
     this[ESC_CLASS_SELECTOR]=null;
-
-    console_log('Version:',VERSION);
-
-    //console_log('Shutter constructor ready');
   }
   shouldUpdate(changedProperties)
   {
-    console.log('  Cover shouldUpdate Start: ',this.cfg.friendlyName());
+    // console.log('  Cover shouldUpdate Start: ',this.cfg.friendlyName());
     changedProperties.forEach((oldValue, propName) => {
-        console.log(`  Cover shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
+        // console.log(`  Cover shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
     });
-    let doUpdate =this.react_EscImagesLoaded ? true : false;
-    console.log('  Cover shouldUpdate: ', this.cfg.friendlyName(), doUpdate);
+    let doUpdate =(this.react_InitializeReady) ? true : false;
     return doUpdate;
   }
   connectedCallback() {
-    //console_log('Shutter connectedCallback');
     super.connectedCallback();
-
-    //console_log('Shutter connectedCallback ready');
   }
   disconnectedCallback() {
-    //console_log('Shutter disconnectedCallback');
     super.disconnectedCallback();
     if (this.resizeObserver) this.resizeObserver.disconnect();
-    //console_log('Shutter disconnectedCallback ready');
   }
 
   startResizeObserver() {
@@ -1781,7 +1759,6 @@ class EnhancedShutter extends LitElement
 
   render()
   {
-    console.log('  COVER RENDER start: ',this.cfg.friendlyName());
     let entityId = this.cfg.entityId();
     let positionText;
     if (this.action=='user-drag'){
@@ -1805,7 +1782,6 @@ class EnhancedShutter extends LitElement
 
     let htmlParts = new htmlShutter(this);
 
-    //console_log('Shutter Render ready');
     return html`
       <div
         class=${ESC_CLASS_SHUTTER}
@@ -1889,17 +1865,11 @@ class EnhancedShutter extends LitElement
 
   updated(changedProperties) {
     // after update and render
-
-
-    // Log the properties that were updated
-    //console_log('Shutter Updated');
     super.updated(changedProperties);
-
     if (this.cfg.showTilt()){
-      this.tiltSlider.value = this.react_TiltPosition; // !!!!! Special ..Bug ??...
+      this.tiltSlider.value = this.react_TiltPosition; // TODO !!!!! Special ..Bug ??...
     }
     this.action='cover-update';
-
   }
 
 
@@ -1984,6 +1954,10 @@ class EnhancedShutter extends LitElement
     const mode= this.cfg.buttonsInRow() ? 'vertical-rl' : 'horizontal';
     return mode;
   }
+  tiltSliderDirection(){
+    const direction= this.cfg.buttonsInRow() ? 'rtl' : 'ltr';
+    return direction;
+  }
   tiltIconRotate2(){
     let rotate= this.cfg.buttonsInRow() ? 0 : -90;
     return rotate;
@@ -2059,7 +2033,7 @@ class EnhancedShutter extends LitElement
     return this.actualGlobalWidthPx()-this.offsetClosedPx() - this.offsetOpenedPx();
   }
   shutterBottomSize(){
-    const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.entityId());
+    const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.id());
     return imageSize;
   };
 
@@ -2115,7 +2089,7 @@ class EnhancedShutter extends LitElement
     return size;
   }
   shutterSlatSize(){
-    let imageSize = this.escImages.getShutterSlatImageSize(this.cfg.entityId())
+    let imageSize = this.escImages.getShutterSlatImageSize(this.cfg.id())
     return imageSize;
   }
   canShowTilt(){
@@ -2125,7 +2099,7 @@ class EnhancedShutter extends LitElement
 
 
   shutterBottomSizePercentage(){
-    const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.entityId())
+    const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.id())
     let size;
     if (this.cfg.stretchEdgeImage()){
       size= `100% ${imageSize.y}px`;
@@ -2294,7 +2268,6 @@ class EnhancedShutter extends LitElement
     /* get current shutter position on screen */
     this.basePickPoint.shutterScreenPos = this.defScreenPositionFromCurrentPosition();
 
-    console_log('screenPos: basePickPoint:',this.basePickPoint);
   }
 
   getShutterOnScreenPosition(event){
@@ -2339,7 +2312,6 @@ class EnhancedShutter extends LitElement
   }
   mouseDown = (event) =>
   {
-    console_log('mouseDown:',event.type,event);
     if (event.pageY === undefined || this.cfg.passiveMode()) return;
 
     if (event.cancelable) {
@@ -2373,7 +2345,6 @@ class EnhancedShutter extends LitElement
     this.positionText = this.cfg.computePositionText(this.react_ShutterPosition,tiltPosition);
   };
   mouseMoveTilt = (event) => { // mouseMoveTilt
-    //console.log('event',event.pageY);
     this.action='user-drag-tilt';
     this.react_TiltPosition = this.getTiltOnScreenPosition(event);
 
@@ -2386,7 +2357,6 @@ class EnhancedShutter extends LitElement
     this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveTilt);
 
     const tiltPosition = this.getTiltOnScreenPosition(event);
-    console.log('mouseUpTilt: tiltPosition:',tiltPosition);
 
     if (this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)){
       // send position to shutter
@@ -2403,7 +2373,6 @@ class EnhancedShutter extends LitElement
 
   mouseUp = (event) =>
   {
-    console_log('mouseUp:',event.type,event);
     if (event.pageY === undefined) return;
 
     this.action='user-pick';
@@ -2431,21 +2400,17 @@ class EnhancedShutter extends LitElement
   }
   sendShutterTiltPosition( entityId, position)
   {
-    console.log('sendShutterTiltPosition: position:',position,'entityId:',entityId);
     this.callHassCoverService(entityId,ACTION_SHUTTER_SET_POS_TILT, { tilt_position: this.cfg.applyInvertToTiltPosition(position) });
   }
   callHassCoverService(entityId,command,args='')
   {
-    //console.log(`callHassCoverService: command: ${command}, position: ${args.position ?? args.tilt_position}, entityId: ${entityId}`);
     if (!this.cfg.passiveMode()){
-      console.log(`callHassCoverService: command: ${command}, args:`, args, `entityId: ${entityId}`);
       const domain= 'cover';
       if (this.checkServiceAvailability(domain, command)) {
         this.hass.callService(domain, command, {
           entity_id: entityId,
           ...args
         });
-        //console.log(`Service call: '${domain}'-'${command}' for entity '${entityId}' with args:`,args);
       } else {
         console.warn(`Service '${domain}'-'${command}' not available`);
       }
@@ -2491,22 +2456,33 @@ class shutterCfg {
   #coverEntity=null;
   #localize={};
   subEntity={};
+  #group=null;
+  #id=null;
 
   constructor(hass,escConfig)
   {
     let entityId = this.entityId(escConfig[CONFIG_ENTITY_ID] ? escConfig[CONFIG_ENTITY_ID] : escConfig);
 
+    this.#group=escConfig[CONFIG_GROUP];
+    this.#id=escConfig[CONFIG_ID];
+
     this.#setLocalize(hass.localize);
     this.setCoverEntity(hass,entityId);
 
+    this.showGroupMembers(escConfig[CONFIG_SHOW_GROUP_MEMBERS]);
+
+    this.imageMap(escConfig[CONFIG_IMAGE_MAP]);
+
+    this.windowImage(escConfig[CONFIG_WINDOW_IMAGE]);
+    this.viewImage(escConfig[CONFIG_VIEW_IMAGE]);
+    this.shutterSlatImage(escConfig[CONFIG_SHUTTER_SLAT_IMAGE]);
+    this.shutterBottomImage(escConfig[CONFIG_SHUTTER_BOTTOM_IMAGE]);
 
     this.batteryEntityId(escConfig[CONFIG_BATTERY_ENTITY_ID]);
     this.signalEntityId(escConfig[CONFIG_SIGNAL_ENTITY_ID]);
 
     this.subEntity[DEVICE_CLASS_BATTERY] = new haSubEntity(hass,DEVICE_CLASS_BATTERY,this.batteryEntityId());
     this.subEntity[DEVICE_CLASS_SIGNAL]  = new haSubEntity(hass,DEVICE_CLASS_SIGNAL,this.signalEntityId());
-
-
     this.debug(!!escConfig[CONFIG_DEBUG]);
 
     this.friendlyName(escConfig[CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || UNKNOWN);
@@ -2740,6 +2716,52 @@ class shutterCfg {
     return this.#getCfg(CONFIG_SIGNAL_ENTITY_ID,value);
   }
 
+  getImage(imageType){
+    let image;
+    switch (imageType){
+      case CONFIG_WINDOW_IMAGE:
+        image = this.windowImage();
+        break;
+      case CONFIG_VIEW_IMAGE:
+        image = this.viewImage();
+        break;
+      case CONFIG_SHUTTER_SLAT_IMAGE:
+        image = this.shutterSlatImage();
+        break;
+      case CONFIG_SHUTTER_BOTTOM_IMAGE:
+        image = this.shutterBottomImage();
+        break;
+      default:
+        throw new Error(`Unknown imageType: ${imageType}`);
+    }
+    return image;
+  }
+  group(){
+    return this.#group
+
+  }
+  id(){
+    return this.#id;
+  }
+  showGroupMembers(value = null){
+    return this.#getCfg(CONFIG_SHOW_GROUP_MEMBERS,value);
+  }
+  imageMap(value = null){
+    return this.#getCfg(CONFIG_IMAGE_MAP,value);
+  }
+  windowImage(value = null){
+    return this.#getCfg(CONFIG_WINDOW_IMAGE,value);
+  }
+  viewImage(value = null){
+    return this.#getCfg(CONFIG_VIEW_IMAGE,value);
+  }
+  shutterSlatImage(value = null){
+    return this.#getCfg(CONFIG_SHUTTER_SLAT_IMAGE,value);
+  }
+  shutterBottomImage(value = null){
+    return this.#getCfg(CONFIG_SHUTTER_BOTTOM_IMAGE,value);
+  }
+
   friendlyName(value = null){
     return this.#getCfg(CONFIG_NAME,value);
   }
@@ -2968,62 +2990,34 @@ class shutterCfg {
   }
 
   applyInvertForPositionToText(setting,debug=false){
-    if (debug){
-      console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
-      console.log('applyInvertForPositionToText start:',setting);
-    }
     setting = this.applyInvertOpenClose(setting,debug);
     return setting;
   }
   applyInvertForOverlayDisplay(setting,debug=false){
-    if (debug){
-      console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
-      console.log('applyInvertForOverlayDisplay start:',setting);
-    }
     setting = this.applyInvertOpenClose(setting,debug);
-    //setting = this.applyInvertUiPercentage(setting, );
-    //setting = this.applyInvertDirection(setting,debug);
     return setting;
   }
   applyInvertForShowButtonUpDownLabel(setting,debug=false){
-    if (debug){
-      console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
-      console.log('applyInvertForShowButtonUpDownLabel start:',setting);
-    }
     setting = this.applyInvertOpenClose(setting,debug);
-    //setting = this.applyInvertUiPercentage(setting, debug);
     setting = this.applyInvertDirection(setting,debug);
     return setting;
   }
   applyInvertForShowButtonUpDownClick(setting,debug){
-    if (debug){
-      console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
-      console.log('applyInvertForShowButtonUpDownClick start:',setting);
-    }
-    //setting = this.applyInvertOpenClose(setting,debug);
-    //setting = this.applyInvertPercentage(setting, debug);
-    //setting = this.applyInvertUiPercentage(setting, debug);
     setting = this.applyInvertDirection(setting,debug);
     setting = this.applyInvertCommands(setting,debug);
     return setting;
   }
   applyInvertForButtonOpenCloseHideStates(setting,debug=false){
-    if (debug){
-      console.log('SHUTTER: ',this.#getCfg(CONFIG_NAME));
-      console.log('applyInvertForButtonOpenCloseHideStates start:',setting);
-    }
     setting = this.applyInvertOpenClose(setting,debug);
     setting = this.applyInvertDirection(setting,debug);
     return setting;
   }
-
   applyInvertNone(setting){
     return setting;
   }
   applyInvertOpenCloseAndPercentage(setting,debug=false){
     setting = this.applyInvertOpenClose(setting,debug);
     setting = this.applyInvertPercentage(setting,debug);
-
     return setting;
   }
   applyInvertAll(setting,debug=false){
@@ -3031,39 +3025,28 @@ class shutterCfg {
     setting = this.applyInvertPercentage(setting,debug);
     setting = this.applyInvertDirection(setting,debug);
     setting = this.applyInvertCommands(setting,debug);
-
     return setting;
   }
 
   applyInvertDirection(setting,debug=false){
-    //return setting;
     if (this.#invertDirection()) setting = Object.keys(INVERT_OPEN_CLOSE_SETTING).includes(setting) ? INVERT_OPEN_CLOSE_SETTING[setting] : setting;
-    if (debug) console.log('applyInvertDirection: ',setting);
     return setting;
   }
 
   applyInvertOpenClose(setting,debug=false){
-    //return setting;
     if (this.invertOpenCloseUi()) setting = Object.keys(INVERT_OPEN_CLOSE_SETTING).includes(setting) ? INVERT_OPEN_CLOSE_SETTING[setting] : setting;
-    if (debug) console.log('applyInvertOpenClose: ',setting);
     return setting;
   }
   applyInvertCommands(setting,debug=false){
-    //return setting;
     if (this.invertOpenCloseCover()) setting = Object.keys(INVERT_OPEN_CLOSE_SETTING).includes(setting) ? INVERT_OPEN_CLOSE_SETTING[setting] : setting;
-    if (debug) console.log('applyInvertCommands: ',setting);
     return setting;
   }
   applyInvertPercentage(setting,debug=false){
-    //return setting;
     if (this.invertPercentageCover()) setting = Object.keys(INVERT_OPEN_CLOSE_SETTING).includes(setting) ? INVERT_OPEN_CLOSE_SETTING[setting] : setting;
-    if (debug) console.log('applyInvertPercentage: ',setting);
     return setting;
   }
   applyInvertUiPercentage(setting,debug=false){
-    //return setting;
     if (this.invertPercentageUi()) setting = Object.keys(INVERT_OPEN_CLOSE_SETTING).includes(setting) ? INVERT_OPEN_CLOSE_SETTING[setting] : setting;
-    if (debug) console.log('applyInvertUiPercentage: ',setting);
     return setting;
   }
 
@@ -3113,7 +3096,6 @@ class shutterCfg {
     }else if (position == this.applyInvertToPosition(SHUTTER_CLOSED_PCT) && escState== (this.applyInvertOpenCloseAndPercentage(SHUTTER_STATE_CLOSING))) {
       escState = this.applyInvertOpenCloseAndPercentage(SHUTTER_STATE_CLOSED);
     }
-    //console.log(`positionToState: Cover=${this.getCoverEntity()?.getFriendlyName()}  state=${state} position=${position} => escSstate=${escState}`);
     return escState;
   }
 
@@ -3235,7 +3217,6 @@ class shutterCfg {
     return text;
   }
   computePositionText(position,tiltPosition){
-    //console.log(`computePositionText: position=${position}, tiltPosition=${tiltPosition}`);
     let positionText;
     if (NOT_KNOWN.includes(this.getCoverEntity().getState())){
       positionText = this.getLocalize(LOCALIZE_TEXT[UNAVAILABLE]);
@@ -3502,14 +3483,15 @@ class htmlShutter{
 
   defStyleVarsShutter(){
     let escState=this.cfg.positionToState();
-    const viewImage=this.escImages.getViewImageSrc(this.cfg.entityId());
+    const viewImage=this.escImages.getViewImageSrc(this.cfg.id());
 
     // solves #103 see other lines with shutterSlatImage
-    const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.entityId());
-    const shutterBottomImage=this.escImages.getShutterBottomImageSrc(this.cfg.entityId());
+    const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.id());
+    const shutterBottomImage=this.escImages.getShutterBottomImageSrc(this.cfg.id());
 
     return `
       --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
+      --ha-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
       --mdc-icon-size: ${this.cfg.iconSize()}${UNITY};
       --esc-icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${UNITY};
       --esc-icon-div-size: ${ICON_DIV_SIZE/ICON_SIZE*this.cfg.iconSizeWifiBattery()}${UNITY};
@@ -3549,6 +3531,7 @@ class htmlShutter{
       --esc-tilt-slat-origin: ${this.enhancedShutter.tiltSlatOrigin()};
       --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};
       --esc-tilt-slider-writing-mode: ${this.enhancedShutter.tiltSliderWritingMode()};
+      --esc-tilt-slider-direction: ${this.enhancedShutter.tiltSliderDirection()};
       --esc-tilt-icon-rotate: ${(this.enhancedShutter.tiltIconRotate3())};
 
       --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+UNITY};
@@ -3556,7 +3539,7 @@ class htmlShutter{
 
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
 
-      --esc-buttons-flex-flow: ${!this.cfg.buttonsInRow() ? 'row' : 'column'} nowrap;
+      --esc-buttons-flex-flow:      ${!this.cfg.buttonsInRow() ? 'row-reverse' : 'column'} nowrap;
       --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonsInRow() ? 'row-reverse' : 'column'} nowrap;
 
       --esc-movement-overlay-display: ${(escState == SHUTTER_STATE_OPENING || escState == SHUTTER_STATE_CLOSING) ? 'block' : NONE};
@@ -3682,11 +3665,6 @@ class htmlShutter{
   }
   showButtonUpDown(feature,action,upDown,icon){
 
-    //console.log('==>>',this.cfg.friendlyName(), 'feature:',feature,', action:',action,', upDown:',upDown);
-    //console.log('HideStates:', this.cfg.buttonOpenCloseHideStates(upDown));
-    //console.log('positionToState:', this.cfg.positionToState());
-    //console.log('Hide:',(this.cfg.buttonOpenCloseHideStates(upDown).includes(this.cfg.positionToState())))
-
     return html`
       ${!this.cfg.disableStandardButtons() &&
         !this.cfg.buttonOpenCloseHideStates(upDown).includes(this.cfg.positionToState()) &&
@@ -3763,7 +3741,7 @@ class htmlShutter{
         <div class="${ESC_CLASS_SELECTOR_PICTURE}">
 
 
-        ${this.escImages.getWindowImageSrc(this.cfg.entityId()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.entityId())}">` : ''}
+        ${this.escImages.getWindowImageSrc(this.cfg.id()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">` : ''}
 
           ${this.showSlide()}
           ${this.cfg.partialActive()  //  show partial only if no offset is defined
@@ -4014,6 +3992,9 @@ class haEntity{
   getUnitOfMeasurement(){
     return this.getAttributes()?.unit_of_measurement ?? UNAVAILABLE;
   }
+  isGroup(){
+    return this.getAttributes()?.entity_id !== undefined;
+  }
 }
 class MessageManager {
   constructor() {
@@ -4077,41 +4058,22 @@ class Message {
   }
 }
 class EscImages {
-    #escImagesLoaded = false;
     #escImageInfo = {};
     #uniqueImages = new Set();   // unique srcs to load — Set handles deduplication automatically
     #dimensions = new Map();     // src → xyPair(width, height)
     #srcImageType = new Map();   // src → image_type, needed for fallback lookup on load error
 
-    constructor(config) {
-        let baseImageMap = config[CONFIG_IMAGE_MAP] || ESC_IMAGE_MAP;
-        let shutterPreset = config[CONFIG_SHUTTER_PRESET];
+    constructor(shutterCfgs) {
 
         for (const imageType of IMAGE_TYPES) {
             let imageRefs = {};
 
-            let initImage = CONFIG_DEFAULT[imageType];
+            for (const shutterCfg of shutterCfgs) {
 
-            let presetImage = (shutterPreset && ESC_PRESET[shutterPreset] && ESC_PRESET[shutterPreset][imageType] !== undefined)
-                ? ESC_PRESET[shutterPreset][imageType]
-                : initImage;
+                let map = shutterCfg.imageMap();
+                let image = shutterCfg.getImage(imageType);
+                image = defImagePathOrColor(map, image, imageType);
 
-            let configImage = config[imageType] ? config[imageType] : presetImage;
-            let baseImage = defImagePathOrColor(baseImageMap, configImage, imageType);
-
-            for (const entityConfig of config.entities) {
-                let entityShutterPreset = entityConfig[CONFIG_SHUTTER_PRESET];
-
-                let entityPresetImage = (entityConfig[imageType] || ESC_PRESET[entityShutterPreset] == undefined)
-                    ? entityConfig[imageType]
-                    : ESC_PRESET[entityShutterPreset][imageType];
-
-                let imageMap = entityConfig[CONFIG_IMAGE_MAP] || baseImageMap;
-                const entityId = entityConfig[CONFIG_ENTITY_ID] || entityConfig;
-
-                let image = NOT_KNOWN.includes(entityPresetImage)
-                    ? baseImage
-                    : defImagePathOrColor(imageMap, entityPresetImage, imageType);
 
                 if (image) {
                     let src = image.replace(/([^:]\/)\/+/g, "/").trim();
@@ -4121,9 +4083,9 @@ class EscImages {
                     if (!this.#srcImageType.has(src)) {
                         this.#srcImageType.set(src, imageType);
                     }
-                    imageRefs[entityId] = { entityId, src };
+                    imageRefs[shutterCfg.id()] = { src };
                 } else {
-                    imageRefs[entityId] = { entityId, src: '' };
+                    imageRefs[shutterCfg.id()] = { src: '' };
                 }
             }
 
@@ -4133,17 +4095,17 @@ class EscImages {
 
     // --- src getters ---
 
-    getWindowImageSrc(entityId) {
-        return this.getImageSrc(CONFIG_WINDOW_IMAGE, entityId);
+    getWindowImageSrc(id) {
+        return this.#getImageSrc(CONFIG_WINDOW_IMAGE, id);
     }
-    getViewImageSrc(entityId) {
-        return this.getImageSrc(CONFIG_VIEW_IMAGE, entityId);
+    getViewImageSrc(id) {
+        return this.#getImageSrc(CONFIG_VIEW_IMAGE, id);
     }
-    getShutterSlatImageSrc(entityId) {
-        return this.getImageSrc(CONFIG_SHUTTER_SLAT_IMAGE, entityId);
+    getShutterSlatImageSrc(id) {
+        return this.#getImageSrc(CONFIG_SHUTTER_SLAT_IMAGE, id);
     }
-    getShutterBottomImageSrc(entityId) {
-        return this.getImageSrc(CONFIG_SHUTTER_BOTTOM_IMAGE, entityId);
+    getShutterBottomImageSrc(id) {
+        return this.#getImageSrc(CONFIG_SHUTTER_BOTTOM_IMAGE, id);
     }
     #getImageSrc(image_type, id) {
         return this.#escImageInfo[image_type][id]?.src ?? '';
@@ -4151,20 +4113,20 @@ class EscImages {
 
     // --- size getters ---
 
-    getWindowImageSize(entityId) {
-        return this.getImageSize(CONFIG_WINDOW_IMAGE, entityId);
+    getWindowImageSize(id) {
+        return this.#getImageSize(CONFIG_WINDOW_IMAGE, id);
     }
-    getViewImageSize(entityId) {
-        return this.getImageSize(CONFIG_VIEW_IMAGE, entityId);
+    getViewImageSize(id) {
+        return this.#getImageSize(CONFIG_VIEW_IMAGE, id);
     }
-    getShutterSlatImageSize(entityId) {
-        return this.getImageSize(CONFIG_SHUTTER_SLAT_IMAGE, entityId);
+    getShutterSlatImageSize(id) {
+        return this.#getImageSize(CONFIG_SHUTTER_SLAT_IMAGE, id);
     }
-    getShutterBottomImageSize(entityId) {
-        return this.getImageSize(CONFIG_SHUTTER_BOTTOM_IMAGE, entityId);
+    getShutterBottomImageSize(id) {
+        return this.#getImageSize(CONFIG_SHUTTER_BOTTOM_IMAGE, id);
     }
-    getImageSize(image_type, entityId) {
-        const src = this.#escImageInfo[image_type][entityId]?.src;
+    #getImageSize(image_type, id) {
+        const src = this.#escImageInfo[image_type][id]?.src;
         if (!src) return new xyPair(0, 0);
         return this.#dimensions.get(src) ?? new xyPair(0, 0);
     }
@@ -4174,11 +4136,9 @@ class EscImages {
     async processImages() {
         try {
             await this.#readImageDimensions();
-            this.#escImagesLoaded = true;
         } catch (error) {
             console.error('Failed to load image dimensions:', error);
         }
-        return this.#escImagesLoaded;
     }
 
     async #readImageDimensions() {
@@ -4347,7 +4307,6 @@ function findElement(base,selector) {
 
   // If not found directly, search the element
   if (!foundInDom) foundInDom= recursiveSearch(base);
-  //console_log('Found in recursiveSearch:',foundInDom.nodeName,foundInDom.className);
   return foundInDom;
 
   // Function to recursively search in shadow roots
@@ -4511,7 +4470,7 @@ function findParentNode(node, selector) {
 
 }
 function console_log(...args){
-  if (VERSION.indexOf('b') > 0 && DEBUG){
+  if (VERSION.indexOf('b') > 0 || DEBUG){
     console.log(formatDate("HH:mm:ss.SSS"),...args);
   }
 }
