@@ -4145,8 +4145,8 @@ class EscImages {
     getShutterBottomImageSrc(entityId) {
         return this.getImageSrc(CONFIG_SHUTTER_BOTTOM_IMAGE, entityId);
     }
-    getImageSrc(image_type, entityId) {
-        return this.#escImageInfo[image_type][entityId]?.src ?? '';
+    #getImageSrc(image_type, id) {
+        return this.#escImageInfo[image_type][id]?.src ?? '';
     }
 
     // --- size getters ---
