@@ -4065,7 +4065,7 @@ class EscImages {
     #uniqueImages = new Set();   // unique srcs to load — Set handles deduplication automatically
     #dimensions = new Map();     // src → xyPair(width, height)
     #srcImageType = new Map();   // src → image_type, needed for fallback lookup on load error
-
+    #resolvedSrc = new Map();    // original src → actual src to use
     constructor(shutterCfgs) {
 
         for (const imageType of IMAGE_TYPES) {
@@ -4111,7 +4111,9 @@ class EscImages {
         return this.#getImageSrc(CONFIG_SHUTTER_BOTTOM_IMAGE, id);
     }
     #getImageSrc(image_type, id) {
-        return this.#escImageInfo[image_type][id]?.src ?? '';
+        let src = this.#escImageInfo[image_type][id]?.src ?? '';
+        src = this.#resolvedSrc.get(src) ?? src;
+        return src;
     }
 
     // --- size getters ---
@@ -4155,6 +4157,7 @@ class EscImages {
 
                 img.onload = () => {
                     this.#dimensions.set(src, new xyPair(img.width, img.height));
+                    this.#resolvedSrc.set(src, src); // original src is fine
                     resolve();
                 };
 
@@ -4170,13 +4173,14 @@ class EscImages {
                         // Store fallback dimensions under the original src key
                         // so all existing references in #escImageInfo remain valid
                         this.#dimensions.set(src, new xyPair(fallbackImg.width, fallbackImg.height));
+                        this.#resolvedSrc.set(src, fallbackSrc); // ← remap src
                         resolve();
                     };
                     fallbackImg.onerror = () => {
                         // Fallback also failed — store zero size and move on
                         // Never reject: we want Promise.all to load as much as possible
                         this.#dimensions.set(src, new xyPair(0, 0));
-                        resolve();
+                        this.#resolvedSrc.set(src, fallbackSrc); // ← remap src
                     };
                     fallbackImg.src = fallbackSrc;
                 };
