@@ -54,16 +54,16 @@ Thank you !
 
 - #### Solved issues:
 
-  [#51](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/51) How to do a Horizonal Stack?
-  [#132](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/132) Multiple Shade Row Card
-  [#156](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/156) (bug) Curtain buttons do not show left and right, but up and down
-  [#157](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/157) (bug) unreachable code after return statement
+  - [#51](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/51) How to do a Horizonal Stack?
+  - [#132](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/132) Multiple Shade Row Card
+  - [#156](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/156) (bug) Curtain buttons do not show left and right, but up and down
+  - [#157](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/157) (bug) unreachable code after return statement
 
 
 - #### to be done:
 
-  [#153](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/153) (bug) Tilt options!
-  [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) Configuration variable to hide the central graphical window (Minimalist UI)
+  - [#153](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/153) (bug) Tilt options!
+  - [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) Configuration variable to hide the central graphical window (Minimalist UI)
 
 
 ---

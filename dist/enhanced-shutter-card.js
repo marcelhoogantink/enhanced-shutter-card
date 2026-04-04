@@ -8,7 +8,7 @@
 
 
 
-const VERSION = 'v1.6.0b0';
+const VERSION = 'v1.6.0b1';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
@@ -1285,11 +1285,14 @@ class EnhancedShutterCardNew extends LitElement{
         padding: ${16}px;
         display: flex;
         align-items: center;
-        justify-content: center;
         flex-direction: var(--esc-card-flex-direction);
+        overflow-x: auto;
+        padding-left: 1px;
+        padding-right: 1px;
+
       }
       .${ESC_CLASS_SHUTTER_FLEX} {
-        justify-content: center;
+        margin: 0 auto;
       }
       .${ESC_CLASS_SHUTTER_SEPARATE}-${VERTICAL}:not(:last-child) {
         box-sizing: border-box;
