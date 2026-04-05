@@ -593,9 +593,7 @@ const SHUTTER_CSS =`
         background-image: var(--esc-window-background-image);
         background-size: cover;
         background-position: center;
-        flex-grow: 0;
-        flex-shrink: 0;
-        flex-basis: var(--esc-selector-flex-basis);
+        flex: none;
       }
       .${ESC_CLASS_SELECTOR_PICTURE} {
         width: var(--esc-window-width);
@@ -3506,8 +3504,8 @@ class htmlShutter{
       --esc-display-position-bottom: ${this.cfg.displayOpening(BOTTOM)};
       --esc-flex-flow-middle: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
       --esc-window-height: ${this.cfg.windowHeightPx()+UNITY};
-      --esc-window-width: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
-      --esc-window-width2: ${this.cfg.windowWidthPx()+UNITY};
+      --esc-window-width1: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
+      --esc-window-width: ${this.cfg.windowWidthPx()+UNITY};
       --esc-window-background-image: ${viewImage.includes('.') ?  `url(${viewImage})` : ''};
       --esc-window-background-color: ${viewImage.includes('.') ? '' : `${viewImage}`};
       --esc-window-rotate: ${this.cfg.viewImageRotate()};
@@ -3568,7 +3566,6 @@ class htmlShutter{
       --esc-text-scale: ${this.cfg.textScaleFactor()};
       --esc-button-scale: ${this.cfg.buttonScaleFactor()};
 
-      --esc-selector-flex-basis: ${this.cfg.buttonsInRow() ? this.enhancedShutter.actualGlobalWidthPx():this.enhancedShutter.actualGlobalHeightPx()}${UNITY};
     `;
   }
 
