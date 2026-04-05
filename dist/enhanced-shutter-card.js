@@ -1282,14 +1282,12 @@ class EnhancedShutterCardNew extends LitElement{
   static get styles() {
     const CSS = `
       .${ESC_CLASS_SHUTTERS} {
-        padding: ${16}px;
         display: flex;
-        align-items: center;
         flex-direction: var(--esc-card-flex-direction);
         overflow-x: auto;
         padding-left: 1px;
         padding-right: 1px;
-
+        padding-bottom: 6px;
       }
       .${ESC_CLASS_SHUTTER_FLEX} {
         margin: 0 auto;
