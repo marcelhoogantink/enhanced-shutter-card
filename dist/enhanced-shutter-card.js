@@ -1780,6 +1780,12 @@ class EnhancedShutter extends LitElement
     }
 
     let htmlParts = new htmlShutter(this);
+    const topDivBlock = new htmlBlockTopDiv(this);
+    const bottomDivBlock = new htmlBlockBottomDiv(this);
+    const leftButtonsBlock = new htmlBlockLeftButtons(this);
+    const tiltSectionBlock = new htmlBlockTiltSection(this);
+    const centralWindowBlock = new htmlBlockCentralWindow(this);
+    const rightButtonsBlock = new htmlBlockRightButtons(this);
 
     return html`
       <div
@@ -1787,20 +1793,20 @@ class EnhancedShutter extends LitElement
         data-shutter="${entityId}"
         style = "${htmlParts.defStyleVarsShutter()}"
       >
-        ${htmlParts.showTopDiv()}
+        ${topDivBlock.show()}
 
         <div class="${ESC_CLASS_MIDDLE}">
-          ${htmlParts.showLeftButtons()}
-          ${htmlParts.showCentralWindow()}
+          ${leftButtonsBlock.show()}
+          ${centralWindowBlock.show()}
           ${!this.cfg.disablePartialOpenButtons() || this.cfg.showTilt()
             ? html`
-              ${!this.cfg.disablePartialOpenButtons() ? htmlParts.showRightButtons():''}
-              ${(this.cfg.showTilt()) ? htmlParts.showTiltSection():''}
+              ${!this.cfg.disablePartialOpenButtons() ? rightButtonsBlock.show():''}
+              ${(this.cfg.showTilt()) ? tiltSectionBlock.show():''}
             `
             : html`<div class='blankDiv'></div>`
           }
         </div>
-        ${htmlParts.showBottomDiv()}
+        ${bottomDivBlock.show()}
       </div>
     `;
   }
@@ -3568,9 +3574,84 @@ class htmlShutter{
 
     `;
   }
+}
+
+class htmlBlock{
+
+  constructor(enhancedShutter){
+    this.enhancedShutter=enhancedShutter;
+    this.cfg=enhancedShutter.cfg;
+    this.escImages= enhancedShutter.escImages;
+  }
+  show(){
+    return '';
+  }
+  size(){
+    return new xyPair(0,0);
+  }
+  showTopBottomDiv(position){
+    const escClassName = position == TOP ? ESC_CLASS_TOP : ESC_CLASS_BOTTOM;
+    const actualTiltPosition = this.enhancedShutter.actualTiltPosition;
+    const positionText =this.cfg.computePositionText(this.enhancedShutter.actualShutterPosition,actualTiltPosition);
 
 
-  showBatteryIcon(){
+    return html`
+        <div class="${ESC_CLASS_TOP_BOTTOM}">
+          ${position == this.cfg.iconsPosition() ? this.batteryIconBlock.show() : ''}
+          <div class = "${escClassName}">
+            <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
+              @click="${() => this.enhancedShutter.doHassMoreInfoOpen(this.cfg.entityId())}"
+            >
+              ${this.cfg.friendlyName()}
+              ${this.cfg.passiveMode() ? html`
+                <span class="${ESC_CLASS_HA_ICON_LOCK}">
+                  <ha-icon icon="mdi:lock"></ha-icon>
+                </span>
+              `:''}
+            </div>
+            <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
+              <span style="white-space: pre-line;">${positionText}</span>
+            </div>
+          </div>
+          ${position == this.cfg.iconsPosition() ? this.signalIconBlock.show() : ''}
+        </div>
+    `;
+  }
+  showButtonUpDown(feature,action,upDown,icon){
+
+    return html`
+      ${!this.cfg.disableStandardButtons() &&
+        !this.cfg.buttonOpenCloseHideStates(upDown).includes(this.cfg.positionToState()) &&
+         this.cfg.isCoverFeatureActive(feature)
+      ? html`
+        <ha-icon-button
+          label="${this.cfg.getLocalize(LOCALIZE_TEXT[this.cfg.applyInvertForShowButtonUpDownLabel(action)])}"
+          .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonDisabled(upDown)}
+          @click=${()=> this.enhancedShutter.doOnclick(`${this.cfg.applyInvertForShowButtonUpDownClick(action,true)}`)} >
+          <ha-icon
+            class="${ESC_CLASS_HA_ICON}"
+            icon="${icon}">
+          </ha-icon>
+        </ha-icon-button>
+      `
+      : ''}
+    `;
+  }
+  showButtonTilt(action,icon){
+    return html`
+          <ha-icon-button
+            label="${this.cfg.getLocalize(LOCALIZE_TEXT[action])}"
+            .disabled=${this.cfg.disabledGlobaly()}
+            @click="${()=> this.enhancedShutter.doOnclick(`${action}`)}">
+            <ha-icon class="${ESC_CLASS_HA_ICON_TILT}" icon="${icon}"></ha-icon>
+          </ha-icon-button>
+    `;
+  }
+
+}
+class htmlBlockBatteryIcon extends htmlBlock{
+
+  show(){
     return html`
         ${this.cfg.getIconsActive() ? html`
           ${this.cfg.getBatteryEntity() ? html`
@@ -3596,93 +3677,64 @@ class htmlShutter{
           ` : ''
         }
     `;
+
   }
-  showSignalIcon(){
+}
+class htmlBlockSignalIcon extends htmlBlock{
+
+  show(){
     return html`
-        ${this.cfg.getIconsActive() ? html`
-          ${this.cfg.getSignalEntity() ? html`
-            <div class="${ESC_CLASS_ICON_RIGHT}">
-              <ha-icon
-                class="${ESC_CLASS_HA_ICON}"
-                icon=${this.cfg.signalLevelIcon()}
-              >
-              </ha-icon>
-              <div class="${ESC_CLASS_TOP_ICON_TEXT}">
-                ${this.cfg.signalLevelText()}
-              </div>
-            </div>
-            ` : html`
-            <div class="${ESC_CLASS_ICON_RIGHT}">
-              <ha-icon
-                icon="mdi:blank"
-                class="${ESC_CLASS_HA_ICON}"
-              >
-              </ha-icon>
-            </div>`
-          }
-          ` : ''
-        }
-    `;
-  }
-  showTopDiv(){
-    return this.showTopBottomDiv(TOP);
-  }
-  showBottomDiv(){
-    return this.showTopBottomDiv(BOTTOM);
-  }
-  showTopBottomDiv(position){
-    const escClassName = position == TOP ? ESC_CLASS_TOP : ESC_CLASS_BOTTOM;
-    return html`
-        <div class="${ESC_CLASS_TOP_BOTTOM}">
-          ${position == this.cfg.iconsPosition() ? this.showBatteryIcon() : ''}
-          <div class = "${escClassName}">
-            <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
-              @click="${() => this.enhancedShutter.doHassMoreInfoOpen(this.cfg.entityId())}"
+      ${this.cfg.getIconsActive() ? html`
+        ${this.cfg.getSignalEntity() ? html`
+          <div class="${ESC_CLASS_ICON_RIGHT}">
+            <ha-icon
+              class="${ESC_CLASS_HA_ICON}"
+              icon=${this.cfg.signalLevelIcon()}
             >
-              ${this.cfg.friendlyName()}
-              ${this.cfg.passiveMode() ? html`
-                <span class="${ESC_CLASS_HA_ICON_LOCK}">
-                  <ha-icon icon="mdi:lock"></ha-icon>
-                </span>
-              `:''}
-            </div>
-            <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
-              <span style="white-space: pre-line;">${this.positionText}</span>
+            </ha-icon>
+            <div class="${ESC_CLASS_TOP_ICON_TEXT}">
+              ${this.cfg.signalLevelText()}
             </div>
           </div>
-          ${position == this.cfg.iconsPosition() ? this.showSignalIcon() : ''}
-        </div>
+          ` : html`
+          <div class="${ESC_CLASS_ICON_RIGHT}">
+            <ha-icon
+              icon="mdi:blank"
+              class="${ESC_CLASS_HA_ICON}"
+            >
+            </ha-icon>
+          </div>`
+        }
+        ` : ''
+      }
     `;
-  }
 
-  showButtonUp(){
-    return this.showButtonUpDown(ESC_FEATURE_OPEN,ACTION_SHUTTER_OPEN,UP,'mdi:arrow-up');
+  }
+}
+class htmlBlockTopDiv extends htmlBlock{
+  batteryIconBlock = new htmlBlockBatteryIcon(this.enhancedShutter);
+  signalIconBlock = new htmlBlockSignalIcon(this.enhancedShutter);
+  position= TOP;
+  show(){
+    return this.showTopBottomDiv(TOP);
+  }
+}
+class htmlBlockBottomDiv extends htmlBlock{
+  batteryIconBlock = new htmlBlockBatteryIcon(this.enhancedShutter);
+  signalIconBlock = new htmlBlockSignalIcon(this.enhancedShutter);
+  position= BOTTOM;
+  show(){
+    return this.showTopBottomDiv(BOTTOM);
+  }
+}
+class htmlBlockButtonUp extends htmlBlock{
+
+  show(){
+        return this.showButtonUpDown(ESC_FEATURE_OPEN,ACTION_SHUTTER_OPEN,UP,'mdi:arrow-up');
    }
-  showButtonDown(){
-    return this.showButtonUpDown(ESC_FEATURE_CLOSE,ACTION_SHUTTER_CLOSE,DOWN,'mdi:arrow-down');
-  }
-  showButtonUpDown(feature,action,upDown,icon){
-
-    return html`
-      ${!this.cfg.disableStandardButtons() &&
-        !this.cfg.buttonOpenCloseHideStates(upDown).includes(this.cfg.positionToState()) &&
-         this.cfg.isCoverFeatureActive(feature)
-      ? html`
-        <ha-icon-button
-          label="${this.cfg.getLocalize(LOCALIZE_TEXT[this.cfg.applyInvertForShowButtonUpDownLabel(action)])}"
-          .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonDisabled(upDown)}
-          @click=${()=> this.enhancedShutter.doOnclick(`${this.cfg.applyInvertForShowButtonUpDownClick(action,true)}`)} >
-          <ha-icon
-            class="${ESC_CLASS_HA_ICON}"
-            icon="${icon}">
-          </ha-icon>
-        </ha-icon-button>
-      `
-      : ''}
-    `;
-  }
-  showButtonStop(){
-
+}
+class htmlBlockButtonStop extends htmlBlock{
+  show(){
     const action = ACTION_SHUTTER_STOP;
     const feature = ESC_FEATURE_STOP;
     const icon = "mdi:stop"
@@ -3705,7 +3757,14 @@ class htmlShutter{
       : ''
     }`;
   }
-  showButtonPartial(){
+}
+class htmlBlockButtonDown extends htmlBlock{
+  show(){
+    return this.showButtonUpDown(ESC_FEATURE_CLOSE,ACTION_SHUTTER_CLOSE,DOWN,'mdi:arrow-down');
+  }
+}
+class htmlBlockButtonPartial extends htmlBlock{
+  show(){
     return html`
       ${this.cfg.partialActive()  /* TODO localize texts */
         ? html`
@@ -3718,31 +3777,104 @@ class htmlShutter{
         ` : ''}
     `;
   }
-  showLeftButtons(){
+}
+class htmlBlockLeftButtons extends htmlBlock{
+  show(){
+    const buttonUpBlock = new htmlBlockButtonUp(this.enhancedShutter);
+    const buttonDownBlock = new htmlBlockButtonDown(this.enhancedShutter);
+    const buttonStopBlock = new htmlBlockButtonStop(this.enhancedShutter);
+    const buttonPartialBlock = new htmlBlockButtonPartial(this.enhancedShutter);
     return html`
       ${this.cfg.buttonsLeftActive()
       ? html`
         <div class="${ESC_CLASS_BUTTONS}">
-          ${this.showButtonUp()}
-          ${this.showButtonStop()}
-          ${this.showButtonDown()}
-          ${this.showButtonPartial()}
+          ${buttonUpBlock.show()}
+          ${buttonStopBlock.show()}
+          ${buttonDownBlock.show()}
+          ${buttonPartialBlock.show()}
         </div>
         ` : html`
         <div class='blankDiv'></div>
       `}
     `;
+
   }
-  showCentralWindow(){
+}
+class htmlBlockButtonTiltDown extends htmlBlock{
+  show(){
+    const icon = this.cfg.buttonsInRow() ? "mdi:arrow-bottom-right":"mdi:arrow-bottom-left" ;
+    return this.showButtonTilt(ACTION_SHUTTER_CLOSE_TILT,icon);
+
+  }
+}
+class htmlBlockButtonTiltUp extends htmlBlock{
+  show(){
+    const icon = this.cfg.buttonsInRow() ? "mdi:arrow-top-right":"mdi:arrow-bottom-right" ;
+    return this.showButtonTilt(ACTION_SHUTTER_OPEN_TILT,icon);
+  }
+}
+class htmlBlockTiltPosition extends htmlBlock{
+  show(){
+    return html`
+      <div class="${ESC_CLASS_TILT_CONTAINER}">
+        <div class="${ESC_CLASS_TILT_CLASS}">
+          <div class="${ESC_CLASS_TILT_LINE}"></div>
+        </div>
+        <div class="${ESC_CLASS_TILT_CLASS}">
+          <div class="${ESC_CLASS_TILT_LINE}"></div>
+        </div>
+        <div class="${ESC_CLASS_TILT_CLASS}">
+          <div class="${ESC_CLASS_TILT_LINE}"></div>
+        </div>
+      </div>
+    `;
+
+  }
+}
+class htmlBlockTiltSlider extends htmlBlock{
+  show(){
+    return html`
+      <div class="${ESC_CLASS_TILT_SLIDER_WRAP}">
+        <input type="range" class ="${ESC_CLASS_TILT_SLIDER_CLASS}" min="0" max="100" value="${this.actualTiltPosition}">
+      </div>
+    `;
+
+  }
+}
+class htmlBlockTiltButtons extends htmlBlock{
+  show(){
+    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.enhancedShutter);
+    const tiltPositionBlock = new htmlBlockTiltPosition(this.enhancedShutter);
+    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.enhancedShutter);
+    return html`
+      <div class="${ESC_CLASS_TILT_BUTTONS}">
+        ${buttonTiltUpBlock.show()}
+        ${tiltPositionBlock.show()}
+        ${buttonTiltDownBlock.show()}
+      </div>
+    `;
+
+  }
+}
+class htmlBlockTiltSection extends htmlBlock{
+  show(){
+    const tiltSliderBlock= new htmlBlockTiltSlider(this.enhancedShutter);
+    const tiltButtonsBlock = new htmlBlockTiltButtons(this.enhancedShutter);
+    return html`
+        ${this.cfg.tiltSliderOnly() ? html`` : tiltButtonsBlock.show()}
+        ${tiltSliderBlock.show()}
+    `;
+  }
+}
+class htmlBlockCentralWindow extends htmlBlock{
+  show(){
     return html`
       <div class="${ESC_CLASS_SELECTOR}">
         <div class="${ESC_CLASS_SELECTOR_PICTURE}">
-
-
-        ${this.escImages.getWindowImageSrc(this.cfg.id()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">` : ''}
+          ${this.escImages.getWindowImageSrc(this.cfg.id()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">` : ''}
 
           ${this.showSlide()}
-          ${this.cfg.partialActive()  //  show partial only if no offset is defined
+          ${this.cfg.partialActive()
             ? html`<div class="${ESC_CLASS_SELECTOR_PARTIAL}"></div>`
             : ''}
           <div class="${ESC_CLASS_MOVEMENT_OVERLAY}">
@@ -3758,7 +3890,6 @@ class htmlShutter{
       </div>
     `;
   }
-
   showSlide(){
      return html`
         <div class="${ESC_CLASS_SELECTOR_SLIDE}">
@@ -3807,8 +3938,9 @@ class htmlShutter{
         </div>
       `;
   }
-  showRightButtons(){
-
+}
+class htmlBlockRightButtons extends htmlBlock{
+  show(){
     const icons= {
       0: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z",
       1: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z",
@@ -3869,66 +4001,8 @@ class htmlShutter{
         `)}
     `;
   }
-
-  // TILT test HTML
-  showTiltSection(){
-    return html`
-        ${this.cfg.tiltSliderOnly() ? html`` : this.showTiltButtonColumn() }
-        ${this.showTiltSliderColumn()}
-    `;
-  }
-  showTiltButtonColumn(){
-    return html`
-      <div class="${ESC_CLASS_TILT_BUTTONS}">
-        ${this.showButtonTiltUp()}
-        ${this.showTiltPosition()}
-        ${this.showButtonTiltDown()}
-      </div>
-    `;
-  }
-  showTiltSliderColumn(){
-    return html`
-      <div class="${ESC_CLASS_TILT_SLIDER_WRAP}">
-        <input type="range" id="tilt-slider" class ="${ESC_CLASS_TILT_SLIDER_CLASS}" min="0" max="100" value="${this.actualTiltPosition}">
-      </div>
-    `;
-  }
-  showButtonTiltUp(){
-    const icon = this.cfg.buttonsInRow() ? "mdi:arrow-top-right":"mdi:arrow-bottom-right" ;
-    return this.showButtonTilt(ACTION_SHUTTER_OPEN_TILT,icon);
-  }
-  showTiltPosition(){
-    return html`
-      <div class="${ESC_CLASS_TILT_CONTAINER}">
-        <div class="${ESC_CLASS_TILT_CLASS}">
-          <div class="${ESC_CLASS_TILT_LINE}"></div>
-        </div>
-        <div class="${ESC_CLASS_TILT_CLASS}">
-          <div class="${ESC_CLASS_TILT_LINE}"></div>
-        </div>
-        <div class="${ESC_CLASS_TILT_CLASS}">
-          <div class="${ESC_CLASS_TILT_LINE}"></div>
-        </div>
-      </div>
-    `;
-  }
-  showButtonTiltDown(){
-
-    const icon = this.cfg.buttonsInRow() ? "mdi:arrow-bottom-right":"mdi:arrow-bottom-left" ;
-    return this.showButtonTilt(ACTION_SHUTTER_CLOSE_TILT,icon);
-  }
-  showButtonTilt(action,icon){
-    return html`
-          <ha-icon-button
-            label="${this.cfg.getLocalize(LOCALIZE_TEXT[action])}"
-            .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> this.enhancedShutter.doOnclick(`${action}`)}">
-            <ha-icon class="${ESC_CLASS_HA_ICON_TILT}" icon="${icon}"></ha-icon>
-          </ha-icon-button>
-    `;
-  }
-
 }
+
 
 class xyPair{
 
