@@ -1126,17 +1126,15 @@ class EnhancedShutterCardNew extends LitElement{
   render()
   {
     if (!this.config || !this.hass || !this.initializeReady){
-      return html`Waiting for Card to initialize...`;
+      return html`
+       <ha-card>
+          Waiting for Card to initialize...
+       </ha-card>
+      `;
     }
     let showMessages = this.messageManager.countMessages() && this.closestElement('.element-preview',this) !== null;
     let htmlParts = new htmlCard(this);
-/*
-    const coverGroupTest = this.config.entities.map(
-      (currEntity) => {
-        const entityId = currEntity.entity || currEntity;
-        return entityId;
-      });
-      */
+
     let htmlout = html`
         ${showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
         ${showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
