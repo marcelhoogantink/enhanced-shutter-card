@@ -1619,6 +1619,7 @@ class EnhancedShutterCardNew extends LitElement{
   };
   gridSizePartialOpenButtons(cfg){
     // HA basic sizes for calculations:
+    // htmlBlockRightButtons.size();
 
     let localHeightPx=0;
     let localWidthPx =0;
@@ -1782,10 +1783,7 @@ class EnhancedShutter extends LitElement
     let htmlParts = new htmlShutter(this);
     const topDivBlock = new htmlBlockTopDiv(this);
     const bottomDivBlock = new htmlBlockBottomDiv(this);
-    const leftButtonsBlock = new htmlBlockLeftButtons(this);
-    const tiltSectionBlock = new htmlBlockTiltSection(this);
-    const centralWindowBlock = new htmlBlockCentralWindow(this);
-    const rightButtonsBlock = new htmlBlockRightButtons(this);
+    const middleDivBlock = new htmlBlockMiddleDiv(this);
 
     return html`
       <div
@@ -1794,18 +1792,7 @@ class EnhancedShutter extends LitElement
         style = "${htmlParts.defStyleVarsShutter()}"
       >
         ${topDivBlock.show()}
-
-        <div class="${ESC_CLASS_MIDDLE}">
-          ${leftButtonsBlock.show()}
-          ${centralWindowBlock.show()}
-          ${!this.cfg.disablePartialOpenButtons() || this.cfg.showTilt()
-            ? html`
-              ${!this.cfg.disablePartialOpenButtons() ? rightButtonsBlock.show():''}
-              ${(this.cfg.showTilt()) ? tiltSectionBlock.show():''}
-            `
-            : html`<div class='blankDiv'></div>`
-          }
-        </div>
+        ${middleDivBlock.show()}
         ${bottomDivBlock.show()}
       </div>
     `;
@@ -3689,6 +3676,29 @@ class htmlBlockTopDiv extends htmlBlock{
     return this.showTopBottomDiv(TOP);
   }
 }
+class htmlBlockMiddleDiv extends htmlBlock{
+  show(){
+
+    const tiltSectionBlock = new htmlBlockTiltSection(this.enhancedShutter);
+    const rightButtonsBlock = new htmlBlockRightButtons(this.enhancedShutter);
+    const leftButtonsBlock = new htmlBlockLeftButtons(this.enhancedShutter);
+    const centralWindowBlock = new htmlBlockCentralWindow(this.enhancedShutter);
+
+    return html`
+      <div class="${ESC_CLASS_MIDDLE}">
+        ${leftButtonsBlock.show()}
+        ${centralWindowBlock.show()}
+        ${!this.cfg.disablePartialOpenButtons() || this.cfg.showTilt()
+          ? html`
+            ${!this.cfg.disablePartialOpenButtons() ? rightButtonsBlock.show():''}
+            ${(this.cfg.showTilt()) ? tiltSectionBlock.show():''}
+          `
+          : html`<div class='blankDiv'></div>`
+        }
+      </div>
+    `;
+  }
+}
 class htmlBlockBottomDiv extends htmlBlock{
   batteryIconBlock = new htmlBlockBatteryIcon(this.enhancedShutter);
   signalIconBlock = new htmlBlockSignalIcon(this.enhancedShutter);
@@ -3998,6 +4008,24 @@ class htmlBlockRightButtons extends htmlBlock{
           </div>
         `)}
     `;
+  }
+  size(){
+
+    let localHeightPx=0;
+    let localWidthPx =0;
+
+    const haButtonSize = cfg.iconButtonSize();
+
+    if (!this.cfg.disablePartialOpenButtons()) {
+      if (this.cfg.buttonsInRow()){
+        localHeightPx += haButtonSize*3;
+        localWidthPx += haButtonSize*2;
+      }else{
+        localHeightPx += haButtonSize*2;
+        localWidthPx += haButtonSize*3;
+      }
+    }
+    return new xyPair(localWidthPx,localHeightPx);
   }
 }
 
