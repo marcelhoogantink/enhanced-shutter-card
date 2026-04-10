@@ -178,6 +178,7 @@ const FONT_SIZE_POSITION = 14;
 const LINE_HEIGHT_LABEL = 30;
 const LINE_HEIGHT_POSITION = 20;
 const MARGIN_POSITION = 5;
+const SELECTOR_MARGIN = 2;
 
 const UNITY= 'px';
 
@@ -585,7 +586,7 @@ const SHUTTER_CSS =`
       }
       .${ESC_CLASS_SELECTOR} {
         max-width: 100%;
-        margin: 2px;
+        margin: ${SELECTOR_MARGIN}px;
         justify-content: center;
         position: relative;
         align-items: center;
@@ -841,11 +842,11 @@ const SHUTTER_CSS =`
       display: flex;
       align-items: center;
       justify-content: center;
-      writing-mode: var(--esc-tilt-slider-writing-mode);
-      direction: var(--esc-tilt-slider-direction);
     }
 
     .${ESC_CLASS_TILT_SLIDER_CLASS} {
+      writing-mode: var(--esc-tilt-slider-writing-mode);
+      direction: var(--esc-tilt-slider-direction);
       zoom: var(--esc-button-scale);
     }
 
@@ -1134,6 +1135,7 @@ class EnhancedShutterCardNew extends LitElement{
     }
     let showMessages = this.messageManager.countMessages() && this.closestElement('.element-preview',this) !== null;
     let htmlParts = new htmlCard(this);
+    let shutterSeperateBlock= new htmlBlockShutterSeperate(this.cardCfg);
 
     let htmlout = html`
         ${showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
@@ -1161,7 +1163,7 @@ class EnhancedShutterCardNew extends LitElement{
                     </enhanced-shutter>
                     ${showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
                   </div>
-                  <div class="${ESC_CLASS_SHUTTER_SEPARATE}-${this.cardCfg.stacked()}"></div>
+                  ${shutterSeperateBlock.show()}
                 `;
               }
             )}
@@ -1402,38 +1404,36 @@ class EnhancedShutterCardNew extends LitElement{
     const debug=0;
     let tempCardName="";
 
-    let totalCardSize= this.gridSizeCardTitle();
+    let sizeCard = new xyPair();
 
+    let shutterSeperateBlock= new htmlBlockShutterSeperate(this.cardCfg);
+    let sizeSeperate = shutterSeperateBlock.size();
 
     if (this.config && this.config.entities && (this.isShutterConfigLoaded || this.initializeReady))
     {
-      let totalShuttersSize = {localWidthPx: 0,localHeightPx: 0};
-      let seperate=0;
+      let seperate=false;
 
       this.shutterCfgs.forEach(cfg =>{
 
-        if (!tempCardName) tempCardName= cfg.friendlyName();
-        let shutterSize = this.gridSizeCardTop(cfg);
+        let block = {cfg: cfg,escImages: this.escImages};
+        let shutterBlock = new htmlBlockShutter(block);
 
-        let sizeCardMiddle = this.gridSizeCardMiddle(cfg);
-        shutterSize = this.gridAddVertical(shutterSize,sizeCardMiddle);
-
-        let sizeCardBottom = this.gridSizeCardBottom(cfg);
-        shutterSize = this.gridAddVertical(shutterSize,sizeCardBottom);
-
-        if (this.cardCfg.stacked() == VERTICAL){
-          totalShuttersSize = this.gridAddVertical(totalShuttersSize,shutterSize);
-          totalShuttersSize = this.gridAddVertical(totalShuttersSize,{localWidthPx: 0,localHeightPx: seperate});
-        }else{
-          totalShuttersSize = this.gridAddHorizontal(totalShuttersSize,shutterSize);
-          totalShuttersSize = this.gridAddHorizontal(totalShuttersSize,{localWidthPx: seperate,localHeightPx: 0});
+        if (seperate){
+          if (this.cardCfg.stacked() == VERTICAL){
+            sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeperate);
+          }else{
+            sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeperate);
+          }
         }
-        seperate=10;  // size of seperation bar (7 margin + 3 border)
+        if (this.cardCfg.stacked() == VERTICAL){
+          sizeCard = shutterBlock.gridAddVertical(sizeCard,shutterBlock.size());
+        }else{
+          sizeCard = shutterBlock.gridAddHorizontal(sizeCard,shutterBlock.size());
+        }
+       seperate=true;  // size of seperation bar (7 margin + 3 border)
 
       });
-      totalCardSize = this.gridAddVertical(totalCardSize,totalShuttersSize);
       // add padding
-      totalCardSize = this.gridAddBoth(totalCardSize,{localWidthPx: 32,localHeightPx: 32});
     }else{
       console.warn('ShutterCard  .. no content yet ??..');
     }
@@ -1441,8 +1441,8 @@ class EnhancedShutterCardNew extends LitElement{
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
-    this.nbRows= Math.ceil((totalCardSize.localHeightPx+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
-    this.nbCols= Math.ceil((totalCardSize.localWidthPx+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
+    this.nbRows= Math.ceil((sizeCard.y()+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
+    this.nbCols= Math.ceil((sizeCard.x()+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
 
     const divCard= this.closest('div.card');
     /* Set CSS variables for number of rows and columns */
@@ -1463,190 +1463,6 @@ class EnhancedShutterCardNew extends LitElement{
 //      max_columns: this.nbCols+1,
     };
  }
-  gridSizeCardTitle(){
-
-    // HA basic sizes for calculations:
-
-    const haCardTitleFontHeight= 24;
-    const haTitleHeightPx = 76;
-    const haTitleFont = 'Roboto, Noto, sans-serif';
-
-    let localHeightPx=0;
-    let localWidthPx=0;
-
-    let titleSize;
-    if (this.config.title){
-      // TODO: Add Card title to cardConfig
-      titleSize= getTextSize(this.config.title,haTitleFont,haCardTitleFontHeight);
-      localHeightPx = haTitleHeightPx;
-      localWidthPx  = titleSize.width;
-    }
-    return {localWidthPx,localHeightPx};
-  }
-
-  gridSizeCardTop(cfg){
-
-    // HA basic sizes for calculations:
-
-    const haTitleFont = 'Roboto, Noto, sans-serif';
-    const shutterTitleHeight = FONT_SIZE_LABEL * cfg.textScaleFactor();
-
-    let localHeightPx=0;
-    let localWidthPx =0;
-
-    if (cfg.getIconsActive()){
-      localWidthPx += ICON_DIV_SIZE*2; // estimated width of icons including text
-    }
-
-    /*
-    * Size shutter title row
-    */
-    if (!cfg.nameDisabled()){
-      let titleSize = getTextSize(cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
-
-      let partHeightPx = LINE_HEIGHT_LABEL * cfg.textScaleFactor();
-      let partWidthPx = titleSize.width;
-
-      localHeightPx += partHeightPx;
-      localWidthPx  += partWidthPx;
-    }
-    /*
-    * Size shutter-opening row
-    */
-    if (!cfg.openingDisabled() && !cfg.inlineHeader()){
-      let position =cfg.currentDevicePosition();
-      let tiltPosition = cfg.currentDeviceTiltPosition();
-      let pctSize = getTextSize(cfg.computePositionText(position,tiltPosition),haTitleFont,FONT_SIZE_POSITION * cfg.textScaleFactor());
-      let partHeightPx = LINE_HEIGHT_POSITION * cfg.textScaleFactor() + 2*MARGIN_POSITION;  // including margin
-      let partWidthPx = pctSize.width;
-      localHeightPx += partHeightPx;
-      localWidthPx = Math.max(localWidthPx,partWidthPx);
-    }
-    localHeightPx += 16; // padding
-
-    return {localWidthPx,localHeightPx};
-  }
-  gridSizeCardMiddle(cfg){
-    /*
-    * size image
-    */
-    let sizeStandardButtons = this.gridSizeStandardButtons(cfg);
-    let sizeWindowImage = this.gridSizeWindowImage(cfg);
-
-    let sizePartialOpenButtons = this.gridSizePartialOpenButtons(cfg);
-    let sizeTiltSection = this.gridSizeTiltSection(cfg);
-
-    let cardSize;
-    if (cfg.buttonsInRow()){
-      cardSize = this.gridAddHorizontal(sizeStandardButtons,sizeWindowImage);
-      cardSize = this.gridAddHorizontal(cardSize,sizePartialOpenButtons);
-      cardSize = this.gridAddHorizontal(cardSize,sizeTiltSection);
-      // TODO: improve
-      if (cfg.disablePartialOpenButtons() && !cfg.showTilt()) {
-        cardSize = this.gridAddHorizontal(cardSize,{localWidthPx: 36,localHeightPx: 0});
-      }
-    }else{
-      cardSize = this.gridAddVertical(sizeStandardButtons,sizeWindowImage);
-      cardSize = this.gridAddVertical(cardSize,sizePartialOpenButtons);
-      cardSize = this.gridAddVertical(cardSize,sizeTiltSection);
-      // TODO: improve
-      if (cfg.disablePartialOpenButtons() && !cfg.showTilt()) {
-        cardSize = this.gridAddVertical(cardSize,{localWidthPx: 0,localHeightPx: 36});
-      }
-    }
-    return cardSize;
-  }
-  gridSizeCardBottom(cfg){
-
-    // HA basic sizes for calculations:
-
-    let localHeightPx=0;
-    let localWidthPx =0;
-    // TODO: Add definition
-    localHeightPx += 16; // padding
-
-    return {localWidthPx,localHeightPx};
-  }
-  gridSizeStandardButtons(cfg){
-    // HA basic sizes for calculations:
-
-    let localHeightPx=0;
-    let localWidthPx =0;
-
-    const haButtonSize = cfg.iconButtonSize();
-    /*
-    * size standard-buttons
-    */
-    if (!cfg.disableStandardButtons()) {
-      if (cfg.buttonsInRow()){
-        localHeightPx = haButtonSize*3;
-        localWidthPx = haButtonSize;
-      }else{
-        localHeightPx = haButtonSize;
-        localWidthPx = haButtonSize*3;
-      }
-    }
-    return {localWidthPx,localHeightPx};
-  };
-  gridSizeWindowImage(cfg){
-    /*
-    * size image
-    */
-    let localHeightPx = cfg.windowHeightPx()+4;  // margin is 2
-    let localWidthPx = cfg.windowWidthPx()+4;
-
-    return {localWidthPx,localHeightPx};
-  };
-  gridSizeTiltSection(cfg){
-    /*
-    * size of tilt options
-    */
-    let localHeightPx=0;
-    let localWidthPx =0;
-
-    if (cfg.showTilt()) {
-      if (cfg.buttonsInRow()){
-        localHeightPx += cfg.windowHeightPx();
-        localWidthPx += cfg.tiltSliderOnly() ? 20 : 56;  // TODO: to be improved
-      }else{
-        localHeightPx += cfg.tiltSliderOnly() ? 20 : 56;  // TODO: to be improved
-        localWidthPx += cfg.windowWidthPx();
-      }
-    }
-    return {localWidthPx,localHeightPx};
-  };
-  gridSizePartialOpenButtons(cfg){
-    // HA basic sizes for calculations:
-    // htmlBlockRightButtons.size();
-
-    let localHeightPx=0;
-    let localWidthPx =0;
-
-    const haButtonSize = cfg.iconButtonSize();
-
-    /*
-    * size partial-open-buttons
-    */
-    if (!cfg.disablePartialOpenButtons()) {
-      if (cfg.buttonsInRow()){
-        localHeightPx += haButtonSize*3;
-        localWidthPx += haButtonSize*2;
-      }else{
-        localHeightPx += haButtonSize*2;
-        localWidthPx += haButtonSize*3;
-      }
-    }
-    return {localWidthPx,localHeightPx};
-  };
-  gridAddVertical(size1,size2){
-    return {localWidthPx: Math.max(size1.localWidthPx,size2.localWidthPx),localHeightPx: size1.localHeightPx+size2.localHeightPx};
-  }
-  gridAddHorizontal(size1,size2){
-    return {localWidthPx: size1.localWidthPx+size2.localWidthPx,localHeightPx: Math.max(size1.localHeightPx,size2.localHeightPx)};
-  }
-  gridAddBoth(size1,size2){
-    return {localWidthPx: size1.localWidthPx+size2.localWidthPx,localHeightPx: size1.localHeightPx+size2.localHeightPx};
-  }
 
   // ############################################################################################################
   static getStubConfig(hass, unusedEntities, allEntities) {
@@ -1778,22 +1594,10 @@ class EnhancedShutter extends LitElement
       this.react_TiltPosition = this.actualTiltPosition; // TODO: logical not needed, but actual it does: check
     }
 
-    let htmlParts = new htmlShutter(this);
-    const topDivBlock = new htmlBlockTopDiv(this);
-    const bottomDivBlock = new htmlBlockBottomDiv(this);
-    const middleDivBlock = new htmlBlockMiddleDiv(this);
+    const shutterBlock = new htmlBlockShutter(this);
 
-    return html`
-      <div
-        class=${ESC_CLASS_SHUTTER}
-        data-shutter="${entityId}"
-        style = "${htmlParts.defStyleVarsShutter()}"
-      >
-        ${topDivBlock.show()}
-        ${middleDivBlock.show()}
-        ${bottomDivBlock.show()}
-      </div>
-    `;
+    return shutterBlock.show(this);
+
   }
   firstUpdated(changedProperties) {
     this[ESC_CLASS_SELECTOR] = findElement(this, `.${ESC_CLASS_SELECTOR}`);
@@ -1874,7 +1678,7 @@ class EnhancedShutter extends LitElement
     const size_global = new xyPair(size_x,size_y);
     const size_local=this.cfg.switchAxis(size_global);
     return [
-      this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
+      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
       this.cfg.transformScale(size_global.x,size_global.y), // correct local sizes
       this.cfg.transformTranslate(0,-size_local.y/2 + screenPosition),  // Move to correct position
@@ -1887,9 +1691,9 @@ class EnhancedShutter extends LitElement
     const size_global = new xyPair(size_x,size_y);
     const size_local=this.cfg.switchAxis(size_global);
     return [
-      this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
+      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
-      this.cfg.transformScalePicker(size_global.x,size_global.y), // correct local width of the Picker
+      this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
       this.cfg.transformTranslate(0,-size_local.y/2 + screenPosition),  // Move to correct position
 
     ].join(SPACE);
@@ -1901,11 +1705,11 @@ class EnhancedShutter extends LitElement
     const size_global = new xyPair(size_x,size_y);
     const size_local=this.cfg.switchAxis(size_global);
     return [
-      this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
+      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
-      //this.cfg.transformScale(size_global.x,size_global.y), // correct local width of the Picker
-      this.cfg.transformScalePicker(size_global.x,size_global.y), // correct local width of the Picker
-      this.cfg.transformTranslate(0,-size_local.y/2 + screenPosition),  // Move to correct position
+      //this.cfg.transformScale(size_global.x(),size_global.y()), // correct local width of the Picker
+      this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
+      this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
 
     ].join(SPACE);
   }
@@ -1941,15 +1745,15 @@ class EnhancedShutter extends LitElement
     ].join(SPACE);
   }
   tiltSliderWritingMode(){
-    const mode= this.cfg.buttonsInRow() ? 'vertical-rl' : 'horizontal';
+    const mode= this.cfg.buttonGroupInRow() ? 'vertical-rl' : 'horizontal';
     return mode;
   }
   tiltSliderDirection(){
-    const direction= this.cfg.buttonsInRow() ? 'rtl' : 'ltr';
+    const direction= this.cfg.buttonGroupInRow() ? 'rtl' : 'ltr';
     return direction;
   }
   tiltIconRotate2(){
-    let rotate= this.cfg.buttonsInRow() ? 0 : -90;
+    let rotate= this.cfg.buttonGroupInRow() ? 0 : -90;
     return rotate;
   }
   tiltIconRotate3(){
@@ -1962,7 +1766,7 @@ class EnhancedShutter extends LitElement
     if (this.cfg.rotateSlatsImage()) {
       origin = '50% 50%';
     }else{
-      const width = ((this.shutterSlatSize().x)/2)+UNITY;
+      const width = ((this.shutterSlatSize().x())/2)+UNITY;
       origin = `${width} ${width}`;
     }
     return origin;
@@ -1974,10 +1778,10 @@ class EnhancedShutter extends LitElement
     const size_local=this.cfg.switchAxis(size_global);
     const position = this.defScreenPositionFromCurrentPosition(this.cfg.calcOffset(this.cfg.partial()));
     return [
-      this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
+      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
-      this.cfg.transformScale(size_global.x,size_global.y), // correct local sizes
-      this.cfg.transformTranslate(0,-size_local.y/2+position),  // Move to correct position
+      this.cfg.transformScale(size_global.x(),size_global.y()), // correct local sizes
+      this.cfg.transformTranslate(0,-size_local.y()/2+position),  // Move to correct position
     ].join(SPACE);
   }
   transformMovement(){
@@ -1988,9 +1792,9 @@ class EnhancedShutter extends LitElement
     const position = this.offsetOpenedPx()+this.coverSizeMovingDirectionPx()/2.0;
     return [
       'translate(-50%, -50%)',
-      this.cfg.transformTranslate(size_global.x/2,size_global.y/2), // to mid-point
+      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
-      this.cfg.transformTranslate(0,-size_local.y/2+position),  // Move to correct position
+      this.cfg.transformTranslate(0,-size_local.y()/2+position),  // Move to correct position
     ].join(SPACE);
   }
 
@@ -2005,8 +1809,8 @@ class EnhancedShutter extends LitElement
   slatSizeMovingDirectionPx(){
     //const value = this.cfg.verticalMovement() || this.cfg.rotateSlatsImage()
     const value = this.cfg.rotateSlatsImage()
-      ? this.shutterSlatSize().y
-      : this.shutterSlatSize().x;
+      ? this.shutterSlatSize().y()
+      : this.shutterSlatSize().x();
     return value;
   }
   slatsSizeMovingDirectionPx(){
@@ -2092,9 +1896,9 @@ class EnhancedShutter extends LitElement
     const imageSize = this.escImages.getShutterBottomImageSize(this.cfg.id())
     let size;
     if (this.cfg.stretchEdgeImage()){
-      size= `100% ${imageSize.y}px`;
+      size= `100% ${imageSize.y()}px`;
     }else{
-      size= `${imageSize.x}px ${imageSize.y}px`;
+      size= `${imageSize.x()}px ${imageSize.y()}px`;
     }
     return size;
   }
@@ -2107,15 +1911,15 @@ class EnhancedShutter extends LitElement
     }else{
       width = this.cfg.windowHeightPx();
     }
-    let x = 100/(width/imageSize.x)+ "%"; // TODO stretch_bottom_image
-    let y = 100/(height/imageSize.y)+ "%"; // TODO stretch_bottom_image
+    let x = 100/(width/imageSize.x())+ "%"; // TODO stretch_bottom_image
+    let y = 100/(height/imageSize.y())+ "%"; // TODO stretch_bottom_image
     let size = new xyPair(x,y);
     return size;
 
   }
   sizePercentageSlat(imageSize){
     let width;
-    let height = this.shutterSlatSize().y;
+    let height = this.shutterSlatSize().y();
     if (this.cfg.verticalMovement()) {
       width = this.cfg.windowWidthPx();
     }else{
@@ -2123,8 +1927,8 @@ class EnhancedShutter extends LitElement
     }
 
     // let factor = width / imageSize.x;
-    let x = `calc(100% / (${width}/${imageSize.x}))`; // TODO stretch_bottom_image
-    let y = `calc(100% / (${height}/${imageSize.y}))`; // TODO stretch_bottom_image
+    let x = `calc(100% / (${width}/${imageSize.x()}))`; // TODO stretch_bottom_image
+    let y = `calc(100% / (${height}/${imageSize.y()}))`; // TODO stretch_bottom_image
     let size = new xyPair(x,y);
     return size;
 
@@ -2169,7 +1973,7 @@ class EnhancedShutter extends LitElement
   tiltSlatHeightPx(){
     let value;
     if (this.cfg.rotateSlatsImage()){
-      value = this.shutterSlatSize().y;
+      value = this.shutterSlatSize().y();
     }else{
       value =this.slatHeightPx1();
     }
@@ -2181,7 +1985,7 @@ class EnhancedShutter extends LitElement
     if (this.cfg.rotateSlatsImage()){
       value = '100%';
     }else{
-      value = (this.shutterSlatSize().x/this.cfg.windowWidthPx()*100)+'%';
+      value = (this.shutterSlatSize().x()/this.cfg.windowWidthPx()*100)+'%';
     }
     return value;
   }
@@ -2278,8 +2082,8 @@ class EnhancedShutter extends LitElement
 
   getScreenPosFromPickPoint(event){
     const pickPoint = this.getPoint(event);
-    let delta = {x: pickPoint.x - this.basePickPoint.x ,
-                 y: pickPoint.y - this.basePickPoint.y};
+    let delta = {x: pickPoint.x() - this.basePickPoint.x() ,
+                 y: pickPoint.y() - this.basePickPoint.y()};
     let delta_local = this.cfg.rotateBackOrtho(delta);
 
     let newScreenPosition =
@@ -2609,14 +2413,14 @@ class shutterCfg {
   rotateOrtho(coord,angle=this.getCloseAngle()){
     switch (angle){
       case (90):
-        return { x: -coord.y, y:  coord.x };
+        return new xyPair(-coord.y(),coord.x() );
       case (180):
-        return { x: -coord.x, y: -coord.y };
+        return new xyPair(-coord.x(),-coord.y());
       case (270):
-        return { x:  coord.y, y: -coord.x };
+        return new xyPair(coord.y(),-coord.x());
       case (360):
       case (0):
-        return { x:  coord.x, y:  coord.y };
+        return new xyPair(coord.x(),coord.y());
       default:
         throw new Error(`Angle must be a multiple of 90 degrees. (angle= ${angle})`);
     }
@@ -2624,14 +2428,14 @@ class shutterCfg {
   rotateBackOrtho(coord,angle=this.getCloseAngle()){
     switch (angle){
       case (90):
-        return { x:  coord.y, y: -coord.x };
+        return new xyPair(coord.y(),-coord.x());
       case (180):
-        return { x: -coord.x, y: -coord.y };
+        return new xyPair(-coord.x(),-coord.y());
       case (270):
-        return { x: -coord.y, y:  coord.x };
+        return new xyPair(-coord.y(),coord.x());
       case (360):
       case (0):
-        return { x:  coord.x, y:  coord.y };
+        return new xyPair(coord.x(),coord.y());
       default:
         throw new Error(`Angle must be a multiple of 90 degrees. (angle= ${angle})`);
     }
@@ -2640,11 +2444,11 @@ class shutterCfg {
     switch (angle){
       case (90):
       case (270):
-        return { x: coord.y, y: coord.x };
+        return new xyPair(coord.y(),coord.x() );
       case (360):
       case (180):
       case (0):
-        return { x: coord.x, y: coord.y };
+        return new xyPair(coord.x(),coord.y() );
       default:
        throw new Error(`Angle must be a multiple of 90 degrees. (angle= ${angle})`);
     }
@@ -3096,7 +2900,7 @@ class shutterCfg {
       return true;
   }
 
-  buttonsInRow(){
+  buttonGroupInRow(){
     return this.getButtonsPosition() == LEFT || this.getButtonsPosition() == RIGHT;
   }
   buttonsContainerReversed(){
@@ -3294,7 +3098,7 @@ class shutterCfg {
       case 'boolean':
         if (scale_setting){
           let px;
-          if (this.buttonsInRow()){
+          if (this.buttonGroupInRow()){
             px = this.windowHeightPx();
           }else{
             px = this.windowWidthPx();
@@ -3315,7 +3119,7 @@ class shutterCfg {
       case 'boolean':
         if (scale_setting){
           let px;
-          if (this.buttonsInRow()){
+          if (this.buttonGroupInRow()){
             px = this.windowHeightPx();
           }else{
             px = this.windowWidthPx();
@@ -3337,7 +3141,7 @@ class shutterCfg {
       case 'boolean':
         if (scale_setting){
           let px;
-          if (this.buttonsInRow()){
+          if (this.buttonGroupInRow()){
             px = this.windowHeightPx();
           }else{
             px = this.windowWidthPx();
@@ -3493,9 +3297,9 @@ class htmlShutter{
       --esc-display-name-bottom: ${this.cfg.displayName(BOTTOM)};
       --esc-display-position-top: ${this.cfg.displayOpening(TOP)};
       --esc-display-position-bottom: ${this.cfg.displayOpening(BOTTOM)};
-      --esc-flex-flow-middle: ${!this.cfg.buttonsInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
+      --esc-flex-flow-middle: ${!this.cfg.buttonGroupInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
       --esc-window-height: ${this.cfg.windowHeightPx()+UNITY};
-      --esc-window-width1: ${this.cfg.buttonsInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
+      --esc-window-width1: ${this.cfg.buttonGroupInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
       --esc-window-width: ${this.cfg.windowWidthPx()+UNITY};
       --esc-window-background-image: ${viewImage.includes('.') ?  `url(${viewImage})` : ''};
       --esc-window-background-color: ${viewImage.includes('.') ? '' : `${viewImage}`};
@@ -3529,8 +3333,8 @@ class htmlShutter{
 
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
 
-      --esc-buttons-flex-flow:      ${!this.cfg.buttonsInRow() ? 'row-reverse' : 'column'} nowrap;
-      --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonsInRow() ? 'row-reverse' : 'column'} nowrap;
+      --esc-buttons-flex-flow:      ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
+      --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
 
       --esc-movement-overlay-display: ${(escState == SHUTTER_STATE_OPENING || escState == SHUTTER_STATE_CLOSING) ? 'block' : NONE};
       --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertForOverlayDisplay(SHUTTER_STATE_OPENING) ? 'block' : NONE};
@@ -3563,50 +3367,138 @@ class htmlShutter{
 
 class htmlBlock{
 
-  constructor(enhancedShutter){
-    this.enhancedShutter=enhancedShutter;
-    this.cfg=enhancedShutter.cfg;
-    this.escImages= enhancedShutter.escImages;
+  constructor(shutter){
+    //this.enhancedShutter=enhancedShutter;
+    this.cfg=shutter.cfg;
+    this.escImages= shutter.escImages ?? {};
+    this.block = {cfg: this.cfg,escImages: this.escImages};
+
   }
-  show(){
+  show(shutter){
     return '';
   }
   size(){
-    return new xyPair(0,0);
+    return new xyPair(-1,-1);
   }
-  showTopBottomDiv(position){
-    const escClassName = position == TOP ? ESC_CLASS_TOP : ESC_CLASS_BOTTOM;
-    const actualTiltPosition = this.enhancedShutter.actualTiltPosition;
-    const positionText =this.cfg.computePositionText(this.enhancedShutter.actualShutterPosition,actualTiltPosition);
-
+  showTopBottomDiv(shutter,position){
+    const batteryIconBlock = new htmlBlockBatteryIcon(shutter);
+    const signalIconBlock = new htmlBlockSignalIcon(shutter);
+    const nameAndStateBlock = new htmlBlockNameAndState(shutter);
 
     return html`
         <div class="${ESC_CLASS_TOP_BOTTOM}">
-          ${position == this.cfg.iconsPosition() ? this.batteryIconBlock.show() : ''}
-          <div class = "${escClassName}">
-            <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
-              @click="${() => this.enhancedShutter.doHassMoreInfoOpen(this.cfg.entityId())}"
-            >
-              ${this.cfg.friendlyName()}
-              ${this.cfg.passiveMode() ? html`
-                <span class="${ESC_CLASS_HA_ICON_LOCK}">
-                  <ha-icon icon="mdi:lock"></ha-icon>
-                </span>
-              `:''}
-            </div>
-            <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
-              <span style="white-space: pre-line;">${positionText}</span>
-            </div>
-          </div>
-          ${position == this.cfg.iconsPosition() ? this.signalIconBlock.show() : ''}
+          ${position == this.cfg.iconsPosition() ? batteryIconBlock.show(shutter) : ''}
+          ${nameAndStateBlock.show(shutter,position)}
+          ${position == this.cfg.iconsPosition() ? signalIconBlock.show(shutter) : ''}
         </div>
     `;
   }
+  sizeTopBottomDiv(position){
+    const batteryIconBlock = new htmlBlockBatteryIcon(this.block);
+    const signalIconBlock = new htmlBlockSignalIcon(this.block);
+    const nameAndStateBlock = new htmlBlockNameAndState(this.block);
 
+    let xyBattery = this.cfg.iconsPosition() === position ? batteryIconBlock.size() : new xyPair();
+    let xySignal = this.cfg.iconsPosition() === position ? signalIconBlock.size() : new xyPair();
+    let xyNameAndState = nameAndStateBlock.size(position);
+
+    let xy = this.gridAddHorizontal(xyBattery,xyNameAndState);
+    xy = this.gridAddHorizontal(xy,xySignal);
+    //xy = this.gridAddVertical(xy,new xyPair(0,16)); // padding
+    return xy;
+  }
+
+
+  gridAddVertical(size1,size2){ //  xyPair's
+    return new xyPair (Math.max(size1.x(),size2.x()),size1.y()+size2.y())
+  };
+  gridAddHorizontal(size1,size2){ //  xyPair's
+    return new xyPair(size1.x()+size2.x(),Math.max(size1.y(),size2.y()));
+  }
+  gridAddBoth(size1,size2){ //  xyPair's
+    return new xyPair(size1.x()+size2.x(),size1.y()+size2.y());
+  }
+  sizeButton(){
+    /*
+    * size standard-buttons
+    */
+   let xy;
+    if (!this.cfg.disableStandardButtons()) {
+      const haButtonSize = this.cfg.iconButtonSize();
+      xy = new xyPair(haButtonSize,haButtonSize);
+    }else{
+      xy = new xyPair();
+    }
+    return xy;
+  }
+
+}
+class htmlBlockShutter extends htmlBlock{
+
+
+  show(shutter){
+    const entityId = this.cfg.entityId();
+    const htmlParts = new htmlShutter(shutter);
+
+    const topDivBlock = new htmlBlockTopDiv(shutter);
+    const middleDivBlock = new htmlBlockMiddleDiv(shutter);
+    const bottomDivBlock = new htmlBlockBottomDiv(shutter);
+
+    return html`
+      <div
+        class=${ESC_CLASS_SHUTTER}
+        data-shutter="${entityId}"
+        style = "${htmlParts.defStyleVarsShutter()}"
+      >
+        ${topDivBlock.show(shutter)}
+        ${middleDivBlock.show(shutter)}
+        ${bottomDivBlock.show(shutter)}
+      </div>
+    `;
+
+  }
+  size(){
+    const topDivBlock = new htmlBlockTopDiv(this.block);
+    const middleDivBlock = new htmlBlockMiddleDiv(this.block);
+    const bottomDivBlock = new htmlBlockBottomDiv(this.block);
+
+    let xyTopDiv = topDivBlock.size();
+    let xyMiddleDiv = middleDivBlock.size();
+    let xyBottomDiv =bottomDivBlock.size();
+
+    let xy = this.gridAddVertical(xyTopDiv,xyMiddleDiv);
+    xy = this.gridAddVertical(xy,xyBottomDiv)
+
+    return xy;
+  }
+}
+class htmlBlockShutterSeperate extends htmlBlock{
+  constructor(cfg){
+    //this.enhancedShutter=enhancedShutter;
+    let block = {cfg: cfg};
+    super(block);
+  }
+  show(){
+    return html`
+      <div class="${ESC_CLASS_SHUTTER_SEPARATE}-${this.cfg.stacked()}"></div>
+    `;
+  }
+  size(){
+    let x,y;
+
+    if (this.cfg.stacked()===VERTICAL){
+      x = 100;
+      y = 4;
+    }else{
+      x = 20;
+      y = 100;
+    }
+    return new xyPair(x,y);
+  }
 }
 class htmlBlockBatteryIcon extends htmlBlock{
 
-  show(){
+  show(shutter){
     return html`
         ${this.cfg.getIconsActive() ? html`
           ${this.cfg.getBatteryEntity() ? html`
@@ -3634,17 +3526,21 @@ class htmlBlockBatteryIcon extends htmlBlock{
     `;
 
   }
+  size(){
+    if (this.cfg.getIconsActive()) return new xyPair(ICON_DIV_SIZE,ICON_DIV_SIZE);
+    return new xyPair();
+  }
 }
 class htmlBlockSignalIcon extends htmlBlock{
 
-  show(){
+  show(shutter){
     return html`
       ${this.cfg.getIconsActive() ? html`
         ${this.cfg.getSignalEntity() ? html`
           <div class="${ESC_CLASS_ICON_RIGHT}">
             <ha-icon
-              class="${ESC_CLASS_HA_ICON}"
               icon=${this.cfg.signalLevelIcon()}
+              class="${ESC_CLASS_HA_ICON}"
             >
             </ha-icon>
             <div class="${ESC_CLASS_TOP_ICON_TEXT}">
@@ -3663,69 +3559,212 @@ class htmlBlockSignalIcon extends htmlBlock{
         ` : ''
       }
     `;
-
+  }
+  size(){
+    if (this.cfg.getIconsActive()) return new xyPair(ICON_DIV_SIZE,ICON_DIV_SIZE);
+    return new xyPair();
   }
 }
+class htmlBlockNameAndState extends htmlBlock{
+
+  show(shutter,position=TOP){
+    const escClassName = position == TOP ? ESC_CLASS_TOP : ESC_CLASS_BOTTOM;
+    const stateBlock= new htmlBlockState(shutter);
+    const nameBlock = new htmlBlockName(shutter);
+    return html`
+      <div class = "${escClassName}">
+        ${this.cfg.namePosition() === position ? nameBlock.show(shutter) : ''}
+        ${this.cfg.openingPosition() === position ? stateBlock.show(shutter) : ''}
+      </div>
+    `;
+  }
+  size(position=TOP){
+    const stateBlock= new htmlBlockState(this.block);
+    const nameBlock = new htmlBlockName(this.block);
+
+    let xyName = this.cfg.openingPosition() === position ? nameBlock.size() : new xyPair();
+    let xyState = this.cfg.namePosition() === position ? stateBlock.size() : new xyPair();
+    let xy = this.cfg.inlineHeader()
+      ? this.gridAddHorizontal(xyName,xyState)
+      : this.gridAddVertical(xyName,xyState);
+
+    xy = this.gridAddVertical(xy,new xyPair(0,16)); // padding = 16
+    return xy;
+  }
+}
+class htmlBlockName extends htmlBlock{
+  show(shutter){
+    return html`
+      ${this.cfg.nameDisabled()
+        ? ''
+        :  html`
+          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
+            @click="${() => shutter.doHassMoreInfoOpen(this.cfg.entityId())}"
+          >
+            ${this.cfg.friendlyName()}
+            ${this.cfg.passiveMode() ? html`
+              <span class="${ESC_CLASS_HA_ICON_LOCK}">
+                <ha-icon icon="mdi:lock"></ha-icon>
+              </span>
+            `:''}
+          </div>
+      `}
+    `;
+  }
+  size(){
+    let x=0;
+    let y=0;
+    const haTitleFont = 'Roboto, Noto, sans-serif';
+    const shutterTitleHeight = FONT_SIZE_LABEL * this.cfg.textScaleFactor();
+
+    if (!this.cfg.nameDisabled()){
+      let titleSize = getTextSize(this.cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
+      let x1 = titleSize.width;
+      let y1 = LINE_HEIGHT_LABEL * this.cfg.textScaleFactor();
+      x += x1;
+      y += y1;
+    }
+    return new xyPair(x,y);
+  }
+}
+class htmlBlockState extends htmlBlock{
+  show(shutter){
+    const actualTiltPosition = shutter.actualTiltPosition;
+    const positionText =this.cfg.computePositionText(shutter.actualShutterPosition,actualTiltPosition);
+
+    return html`
+      ${this.cfg.openingDisabled()
+        ? ''
+        :  html`
+          <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
+            <span style="white-space: pre-line;">${positionText}</span>
+          </div>
+      `}
+    `;
+  }
+  size(){
+    let x=0;
+    let y=0;
+    let xy;
+    const haTitleFont = 'Roboto, Noto, sans-serif';
+    /*
+    * Size shutter-opening row
+    */
+    if (!this.cfg.openingDisabled()) {
+      let devPosition =this.cfg.currentDevicePosition();
+      let tiltPosition = this.cfg.currentDeviceTiltPosition();
+      let pctSize = getTextSize(this.cfg.computePositionText(devPosition,tiltPosition),haTitleFont,FONT_SIZE_POSITION * this.cfg.textScaleFactor());
+      let x1 = pctSize.width;
+      let y1 = LINE_HEIGHT_POSITION * this.cfg.textScaleFactor() + 2*MARGIN_POSITION;  // including margin
+      x += x1 + 5 * 2; // hor. padding
+      y += y1; // vert. padding already with margin ??
+      xy = new xyPair(x,y);
+    }
+    return xy;
+  }
+
+}
 class htmlBlockTopDiv extends htmlBlock{
-  batteryIconBlock = new htmlBlockBatteryIcon(this.enhancedShutter);
-  signalIconBlock = new htmlBlockSignalIcon(this.enhancedShutter);
-  position= TOP;
-  show(){
-    return this.showTopBottomDiv(TOP);
+  show(shutter){
+    return this.showTopBottomDiv(shutter,TOP);
+  }
+  size(){
+    return this.sizeTopBottomDiv(TOP);
   }
 }
 class htmlBlockMiddleDiv extends htmlBlock{
-  show(){
+  show(shutter){
 
-    const tiltSectionBlock = new htmlBlockTiltSection(this.enhancedShutter);
-    const rightButtonsBlock = new htmlBlockRightButtons(this.enhancedShutter);
-    const leftButtonsBlock = new htmlBlockLeftButtons(this.enhancedShutter);
-    const centralWindowBlock = new htmlBlockCentralWindow(this.enhancedShutter);
+    const leftButtonsBlock = new htmlBlockLeftButtons(shutter);
+    const centralWindowBlock = new htmlBlockCentralWindow(shutter);
+    const tiltSectionBlock = new htmlBlockTiltSection(shutter);
+    const rightButtonsBlock = new htmlBlockRightButtons(shutter);
 
     return html`
       <div class="${ESC_CLASS_MIDDLE}">
-        ${leftButtonsBlock.show()}
-        ${centralWindowBlock.show()}
+        ${leftButtonsBlock.show(shutter)}
+        ${centralWindowBlock.show(shutter)}
         ${!this.cfg.disablePartialOpenButtons() || this.cfg.showTilt()
           ? html`
-            ${!this.cfg.disablePartialOpenButtons() ? rightButtonsBlock.show():''}
-            ${(this.cfg.showTilt()) ? tiltSectionBlock.show():''}
+            ${(this.cfg.showTilt()) ? tiltSectionBlock.show(shutter):''}
+            ${!this.cfg.disablePartialOpenButtons() ? rightButtonsBlock.show(shutter):''}
           `
           : html`<div class='blankDiv'></div>`
         }
       </div>
     `;
   }
-}
-class htmlBlockBottomDiv extends htmlBlock{
-  batteryIconBlock = new htmlBlockBatteryIcon(this.enhancedShutter);
-  signalIconBlock = new htmlBlockSignalIcon(this.enhancedShutter);
-  position= BOTTOM;
-  show(){
-    return this.showTopBottomDiv(BOTTOM);
+  size(){
+    const leftButtonsBlock = new htmlBlockLeftButtons(this.block);
+    const centralWindowBlock = new htmlBlockCentralWindow(this.block);
+    const tiltSectionBlock = new htmlBlockTiltSection(this.block);
+    const rightButtonsBlock = new htmlBlockRightButtons(this.block);
+
+    let xyLeftButtons = leftButtonsBlock.size();
+    let xyCentralWindow = centralWindowBlock.size();
+    let xyTiltSection = tiltSectionBlock.size();
+    let xyRightButtons = rightButtonsBlock.size();
+
+    let xy = this.gridAddHorizontal(xyLeftButtons,xyCentralWindow);
+    xy = this.gridAddHorizontal(xy,xyTiltSection);
+    xy = this.gridAddHorizontal(xy,xyRightButtons);
+
+    if (!this.cfg.buttonGroupInRow()) xy.switch();
+
+    return xy;
+
+
   }
 }
+class htmlBlockBottomDiv extends htmlBlock{
+  show(shutter){
+    return this.showTopBottomDiv(shutter,BOTTOM);
+  }
+  size(){
+    return this.sizeTopBottomDiv(BOTTOM);
+  }
+}
+
 class htmlBlockLeftButtons extends htmlBlock{
-  show(){
-    const buttonUpBlock = new htmlBlockButtonUp(this.enhancedShutter);
-    const buttonDownBlock = new htmlBlockButtonDown(this.enhancedShutter);
-    const buttonStopBlock = new htmlBlockButtonStop(this.enhancedShutter);
-    const buttonPartialBlock = new htmlBlockButtonPartial(this.enhancedShutter);
+  show(shutter){
+    const buttonUpBlock = new htmlBlockButtonUp(shutter);
+    const buttonDownBlock = new htmlBlockButtonDown(shutter);
+    const buttonStopBlock = new htmlBlockButtonStop(shutter);
+    const buttonPartialBlock = new htmlBlockButtonPartial(shutter);
     return html`
       ${this.cfg.buttonsLeftActive()
       ? html`
         <div class="${ESC_CLASS_BUTTONS}">
-          ${buttonUpBlock.show()}
-          ${buttonStopBlock.show()}
-          ${buttonDownBlock.show()}
-          ${buttonPartialBlock.show()}
+          ${buttonUpBlock.show(shutter)}
+          ${buttonStopBlock.show(shutter)}
+          ${buttonDownBlock.show(shutter)}
+          ${buttonPartialBlock.show(shutter)}
         </div>
         ` : html`
         <div class='blankDiv'></div>
       `}
     `;
   }
-  showButtonUpDown(feature,action,upDown,icon){
+  size(){
+    const buttonUpBlock = new htmlBlockButtonUp(this.block);
+    const buttonDownBlock = new htmlBlockButtonDown(this.block);
+    const buttonStopBlock = new htmlBlockButtonStop(this.block);
+    const buttonPartialBlock = new htmlBlockButtonPartial(this.block);
+
+    let xyButtonUpBlock = buttonUpBlock.size();
+    let xyButtonDownBlock = buttonDownBlock.size();
+    let xyButtonStopBlock = buttonStopBlock.size();
+    let xyButtonPartialBlock = buttonPartialBlock.size();
+
+    let xy = this.gridAddVertical(xyButtonUpBlock,xyButtonDownBlock);
+    xy = this.gridAddVertical(xy,xyButtonStopBlock);
+    xy = this.gridAddVertical(xy,xyButtonPartialBlock);
+
+    if (!this.cfg.buttonGroupInRow()) xy.switch();
+
+    return xy;
+  }
+  showButtonUpDown(shutter,feature,action,upDown,icon){
 
     return html`
       ${!this.cfg.disableStandardButtons() &&
@@ -3735,7 +3774,7 @@ class htmlBlockLeftButtons extends htmlBlock{
         <ha-icon-button
           label="${this.cfg.getLocalize(LOCALIZE_TEXT[this.cfg.applyInvertForShowButtonUpDownLabel(action)])}"
           .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonDisabled(upDown)}
-          @click=${()=> this.enhancedShutter.doOnclick(`${this.cfg.applyInvertForShowButtonUpDownClick(action,true)}`)} >
+          @click=${()=> shutter.doOnclick(`${this.cfg.applyInvertForShowButtonUpDownClick(action,true)}`)} >
           <ha-icon
             class="${ESC_CLASS_HA_ICON}"
             icon="${icon}">
@@ -3748,12 +3787,15 @@ class htmlBlockLeftButtons extends htmlBlock{
 }
 class htmlBlockButtonUp extends htmlBlockLeftButtons{
 
-  show(){
-        return this.showButtonUpDown(ESC_FEATURE_OPEN,ACTION_SHUTTER_OPEN,UP,'mdi:arrow-up');
-   }
+  show(shutter){
+        return this.showButtonUpDown(shutter,ESC_FEATURE_OPEN,ACTION_SHUTTER_OPEN,UP,'mdi:arrow-up');
+  }
+  size(){
+    return this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+  }
 }
 class htmlBlockButtonStop extends htmlBlockLeftButtons{
-  show(){
+  show(shutter){
     const action = ACTION_SHUTTER_STOP;
     const feature = ESC_FEATURE_STOP;
     const icon = "mdi:stop"
@@ -3766,7 +3808,7 @@ class htmlBlockButtonStop extends htmlBlockLeftButtons{
         <ha-icon-button
           label="${this.cfg.getLocalize(LOCALIZE_TEXT[action])}"
           .disabled=${this.cfg.disabledGlobaly()}
-          @click=${()=> this.enhancedShutter.doOnclick(`${action}`)} >
+          @click=${()=> shutter.doOnclick(`${action}`)} >
           <ha-icon
             class="${ESC_CLASS_HA_ICON}"
             icon="${icon}">
@@ -3776,66 +3818,98 @@ class htmlBlockButtonStop extends htmlBlockLeftButtons{
       : ''
     }`;
   }
+  size(){
+    return this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+  }
+
 }
 class htmlBlockButtonDown extends htmlBlockLeftButtons{
-  show(){
-    return this.showButtonUpDown(ESC_FEATURE_CLOSE,ACTION_SHUTTER_CLOSE,DOWN,'mdi:arrow-down');
+  show(shutter){
+    return this.showButtonUpDown(shutter,ESC_FEATURE_CLOSE,ACTION_SHUTTER_CLOSE,DOWN,'mdi:arrow-down');
+  }
+  size(){
+    return this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
   }
 }
 class htmlBlockButtonPartial extends htmlBlockLeftButtons{
-  show(){
+  show(shutter){
     return html`
       ${this.cfg.partialActive()  /* TODO localize texts */
         ? html`
           <ha-icon-button
             label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
             .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(this.cfg.partial()))}" >
+            @click="${()=> shutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(this.cfg.partial()))}" >
             <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
           </ha-icon-button>
         ` : ''}
     `;
   }
+  size(){
+    return this.cfg.partialActive() ?  this.sizeButton() : new xyPair(0,0) ;
+  }
 }
 class htmlBlockTiltButtons extends htmlBlock{
-  show(){
-    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.enhancedShutter);
-    const tiltPositionBlock = new htmlBlockTiltPosition(this.enhancedShutter);
-    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.enhancedShutter);
+  show(shutter){
+    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(shutter);
+    const tiltPositionBlock = new htmlBlockTiltPosition(shutter);
+    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(shutter);
     return html`
       <div class="${ESC_CLASS_TILT_BUTTONS}">
-        ${buttonTiltUpBlock.show()}
-        ${tiltPositionBlock.show()}
-        ${buttonTiltDownBlock.show()}
+        ${buttonTiltUpBlock.show(shutter)}
+        ${tiltPositionBlock.show(shutter)}
+        ${buttonTiltDownBlock.show(shutter)}
       </div>
     `;
   }
-  showButtonTilt(action,icon){
+  showButtonTilt(shutter,action,icon){
     return html`
           <ha-icon-button
             label="${this.cfg.getLocalize(LOCALIZE_TEXT[action])}"
             .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> this.enhancedShutter.doOnclick(`${action}`)}">
+            @click="${()=> shutter.doOnclick(`${action}`)}">
             <ha-icon class="${ESC_CLASS_HA_ICON_TILT}" icon="${icon}"></ha-icon>
           </ha-icon-button>
     `;
   }
+  size(){
+    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.block);
+    const tiltPositionBlock = new htmlBlockTiltPosition(this.block);
+    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.block);
+
+    let xyButtonTiltUp = buttonTiltUpBlock.size();
+    let xyTiltPosition = tiltPositionBlock.size();
+    let xyButtonTiltDown = buttonTiltDownBlock.size();
+
+    let xy = this.gridAddVertical(xyButtonTiltUp,xyTiltPosition);
+    xy = this.gridAddVertical(xy,xyButtonTiltDown);
+
+    if (!this.cfg.buttonGroupInRow()) xy.switch();
+    return xy;
+  }
+
 }
 class htmlBlockButtonTiltDown extends htmlBlockTiltButtons{
-  show(){
-    const icon = this.cfg.buttonsInRow() ? "mdi:arrow-bottom-right":"mdi:arrow-bottom-left" ;
-    return this.showButtonTilt(ACTION_SHUTTER_CLOSE_TILT,icon);
+  show(shutter){
+    const icon = this.cfg.buttonGroupInRow() ? "mdi:arrow-bottom-right":"mdi:arrow-bottom-left" ;
+    return this.showButtonTilt(shutter,ACTION_SHUTTER_CLOSE_TILT,icon);
 
+  }
+  size(){
+    return this.sizeButton();
   }
 }
 class htmlBlockButtonTiltUp extends htmlBlockTiltButtons{
-  show(){
-    const icon = this.cfg.buttonsInRow() ? "mdi:arrow-top-right":"mdi:arrow-bottom-right" ;
-    return this.showButtonTilt(ACTION_SHUTTER_OPEN_TILT,icon);
+  show(shutter){
+    const icon = this.cfg.buttonGroupInRow() ? "mdi:arrow-top-right":"mdi:arrow-bottom-right" ;
+    return this.showButtonTilt(shutter,ACTION_SHUTTER_OPEN_TILT,icon);
+  }
+  size(){
+    return this.sizeButton();
   }
 }
 class htmlBlockTiltPosition extends htmlBlockTiltButtons{
-  show(){
+  show(shutter){
     return html`
       <div class="${ESC_CLASS_TILT_CONTAINER}">
         <div class="${ESC_CLASS_TILT_CLASS}">
@@ -3849,37 +3923,66 @@ class htmlBlockTiltPosition extends htmlBlockTiltButtons{
         </div>
       </div>
     `;
+  }
+  size(){
+    // question on box-sizing: border-box: can't see difference ..??
+    let size = ICON_SIZE* this.cfg.buttonScaleFactor();
+    let xy = new xyPair(size,3*size);
+    if (!this.cfg.buttonGroupInRow()) xy.switch();
 
+    return xy;
   }
 }
 class htmlBlockTiltSlider extends htmlBlock{
-  show(){
+  show(shutter){
     return html`
       <div class="${ESC_CLASS_TILT_SLIDER_WRAP}">
         <input type="range" class ="${ESC_CLASS_TILT_SLIDER_CLASS}" min="0" max="100" value="${this.actualTiltPosition}">
       </div>
     `;
+  }
+  size(){
+    /**
+     * questions about size due to browswer definitions of <input> html
+     */
+    let width= 20; //default of chrome WATCH OUT POSSIBLE WRONG FOR ROTATING
+    let height = 129; // default
+    let zoom = this.cfg.buttonScaleFactor();
 
+    let xy = new xyPair(zoom*width,zoom*height);
+    if (!this.cfg.buttonGroupInRow()) xy.switch();
+    return xy;
   }
 }
 class htmlBlockTiltSection extends htmlBlock{
-  show(){
-    const tiltSliderBlock= new htmlBlockTiltSlider(this.enhancedShutter);
-    const tiltButtonsBlock = new htmlBlockTiltButtons(this.enhancedShutter);
+  show(shutter){
+    const tiltSliderBlock= new htmlBlockTiltSlider(shutter);
+    const tiltButtonsBlock = new htmlBlockTiltButtons(shutter);
     return html`
-        ${this.cfg.tiltSliderOnly() ? html`` : tiltButtonsBlock.show()}
-        ${tiltSliderBlock.show()}
+        ${this.cfg.tiltSliderOnly() ? html`` : tiltButtonsBlock.show(shutter)}
+        ${tiltSliderBlock.show(shutter)}
     `;
+  }
+  size(){
+    const tiltSliderBlock= new htmlBlockTiltSlider(this.block);
+    const tiltButtonsBlock = new htmlBlockTiltButtons(this.block);
+    let xyTiltSlider = tiltSliderBlock.size();
+    let xyTiltButtons = tiltButtonsBlock.size();
+
+    let xy = this.cfg.tiltSliderOnly() ? xyTiltSlider : this.gridAddHorizontal(xyTiltSlider,xyTiltButtons);
+    if (!this.cfg.buttonGroupInRow()) xy.switch();
+
+    return xy;
   }
 }
 class htmlBlockCentralWindow extends htmlBlock{
-  show(){
+  show(shutter){
     return html`
       <div class="${ESC_CLASS_SELECTOR}">
         <div class="${ESC_CLASS_SELECTOR_PICTURE}">
           ${this.escImages.getWindowImageSrc(this.cfg.id()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">` : ''}
 
-          ${this.showSlide()}
+          ${this.showSlide(shutter)}
           ${this.cfg.partialActive()
             ? html`<div class="${ESC_CLASS_SELECTOR_PARTIAL}"></div>`
             : ''}
@@ -3896,29 +3999,34 @@ class htmlBlockCentralWindow extends htmlBlock{
       </div>
     `;
   }
-  showSlide(){
+  size(){
+    let x = this.cfg.windowWidthPx() + 2 * SELECTOR_MARGIN;
+    let y = this.cfg.windowHeightPx() + 2 * SELECTOR_MARGIN;
+    return new xyPair(x,y);
+  }
+  showSlide(shutter){
      return html`
         <div class="${ESC_CLASS_SELECTOR_SLIDE}">
-          ${this.showSlideSlats()}
+          ${this.showSlideSlats(shutter)}
           <div class="${ESC_CLASS_SELECTOR_SLIDE_EDGE}"></div>
         </div>
       `;
   }
-  showSlideSlats(){
+  showSlideSlats(shutter){
     // Only Tilt when SHowTilt and there is a size
-    const output = this.cfg.showTilt() && this.enhancedShutter.canShowTilt()
+    const output = this.cfg.showTilt() && shutter.canShowTilt()
      ? html`
-        ${this.showSlatsTilt()}
+        ${this.showSlatsTilt(shutter)}
       `
      : html`
-        ${this.showSlats()}
+        ${this.showSlats(shutter)}
       `;
     return output;
   }
-  showSlatsTilt(){
+  showSlatsTilt(shutter){
 
-    const sizeSlide = this.enhancedShutter.windowSizeMovingDirectionPx();
-    const sizeSlat = this.enhancedShutter.slatSizeMovingDirectionPx() ;
+    const sizeSlide = shutter.windowSizeMovingDirectionPx();
+    const sizeSlat = shutter.slatSizeMovingDirectionPx() ;
 
     //const sizeSlat = new xyPair(100,51);
     const number = sizeSlat ? Math.ceil(sizeSlide / sizeSlat): 1;
@@ -3937,7 +4045,7 @@ class htmlBlockCentralWindow extends htmlBlock{
       </div>
     `;
   }
-  showSlats(){
+  showSlats(shutter){
 
     return html`
         <div class="${ESC_CLASS_SELECTOR_SLIDE_SLATS}">
@@ -3946,7 +4054,7 @@ class htmlBlockCentralWindow extends htmlBlock{
   }
 }
 class htmlBlockRightButtons extends htmlBlock{
-  show(){
+  show(shutter){
     const icons= {
       0: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z",
       1: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z",
@@ -4009,30 +4117,42 @@ class htmlBlockRightButtons extends htmlBlock{
   }
   size(){
 
-    let localHeightPx=0;
-    let localWidthPx =0;
+    let x=0;
+    let y=0;
 
-    const haButtonSize = cfg.iconButtonSize();
+    const haButtonSize = this.cfg.iconButtonSize();
 
     if (!this.cfg.disablePartialOpenButtons()) {
-      if (this.cfg.buttonsInRow()){
-        localHeightPx += haButtonSize*3;
-        localWidthPx += haButtonSize*2;
+      if (!this.cfg.buttonGroupInRow()){
+        x += haButtonSize*3;
+        y += haButtonSize*2;
       }else{
-        localHeightPx += haButtonSize*2;
-        localWidthPx += haButtonSize*3;
+        x += haButtonSize*2;
+        y += haButtonSize*3;
       }
     }
-    return new xyPair(localWidthPx,localHeightPx);
+    return new xyPair(x,y);
   }
 }
 
 
 class xyPair{
-
-  constructor(x,y){
-    this.x=x;
-    this.y=y;
+  #coordX;
+  #coordY;
+  constructor(x=0,y=0){
+    this.#coordX = x;
+    this.#coordY = y;
+  }
+  x(){
+    return this.#coordX;
+  }
+  y(){
+    return this.#coordY;
+  }
+  switch(){
+    let tmp= this.#coordX;
+    this.#coordX = this.#coordY;
+    this.#coordY = tmp;
   }
 }
 
