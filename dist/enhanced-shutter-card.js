@@ -1968,7 +1968,7 @@ class EnhancedShutter extends LitElement
     const size_global = new xyPair(this.actualGlobalWidthPx(),this.actualGlobalHeightPx());
     const size_local=this.cfg.switchAxis(size_global);
 
-    return size_local.y-this.offsetClosedPx();
+    return size_local.y()-this.offsetClosedPx();
   }
   tiltSlatHeightPx(){
     let value;
@@ -2082,13 +2082,13 @@ class EnhancedShutter extends LitElement
 
   getScreenPosFromPickPoint(event){
     const pickPoint = this.getPoint(event);
-    let delta = {x: pickPoint.x() - this.basePickPoint.x() ,
-                 y: pickPoint.y() - this.basePickPoint.y()};
+    let delta = new xyPair(pickPoint.coord.x() - this.basePickPoint.coord.x() ,
+                           pickPoint.coord.y() - this.basePickPoint.coord.y());
     let delta_local = this.cfg.rotateBackOrtho(delta);
 
     let newScreenPosition =
       Math.round(boundary(
-        this.basePickPoint.shutterScreenPos+delta_local.y,
+        this.basePickPoint.shutterScreenPos+delta_local.y(),
         this.coverOpenedPx(),
         this.coverClosedPx()
       ));
@@ -3393,6 +3393,9 @@ class htmlBlock{
         </div>
     `;
   }
+  displaySize(xy){
+    console.log (this.constructor.name,xy.x(),xy.y());
+  }
   sizeTopBottomDiv(position){
     const batteryIconBlock = new htmlBlockBatteryIcon(this.block);
     const signalIconBlock = new htmlBlockSignalIcon(this.block);
@@ -3468,7 +3471,7 @@ class htmlBlockShutter extends htmlBlock{
 
     let xy = this.gridAddVertical(xyTopDiv,xyMiddleDiv);
     xy = this.gridAddVertical(xy,xyBottomDiv)
-
+    this.displaySize(xy);
     return xy;
   }
 }
@@ -3484,16 +3487,15 @@ class htmlBlockShutterSeperate extends htmlBlock{
     `;
   }
   size(){
-    let x,y;
+    let xy;
 
     if (this.cfg.stacked()===VERTICAL){
-      x = 100;
-      y = 4;
+      xy = new xyPair(100,4);
     }else{
-      x = 20;
-      y = 100;
+      xy = new xyPair(20,100);
     }
-    return new xyPair(x,y);
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockBatteryIcon extends htmlBlock{
@@ -3527,8 +3529,10 @@ class htmlBlockBatteryIcon extends htmlBlock{
 
   }
   size(){
-    if (this.cfg.getIconsActive()) return new xyPair(ICON_DIV_SIZE,ICON_DIV_SIZE);
-    return new xyPair();
+      let xy = new xyPair();
+      if (this.cfg.getIconsActive()) xy= new xyPair(ICON_DIV_SIZE,ICON_DIV_SIZE);
+      this.displaySize(xy);
+      return xy;
   }
 }
 class htmlBlockSignalIcon extends htmlBlock{
@@ -3561,8 +3565,10 @@ class htmlBlockSignalIcon extends htmlBlock{
     `;
   }
   size(){
-    if (this.cfg.getIconsActive()) return new xyPair(ICON_DIV_SIZE,ICON_DIV_SIZE);
-    return new xyPair();
+    let xy = new xyPair();
+    if (this.cfg.getIconsActive()) xy= new xyPair(ICON_DIV_SIZE,ICON_DIV_SIZE);
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockNameAndState extends htmlBlock{
@@ -3589,6 +3595,7 @@ class htmlBlockNameAndState extends htmlBlock{
       : this.gridAddVertical(xyName,xyState);
 
     xy = this.gridAddVertical(xy,new xyPair(0,16)); // padding = 16
+    this.displaySize(xy);
     return xy;
   }
 }
@@ -3612,8 +3619,7 @@ class htmlBlockName extends htmlBlock{
     `;
   }
   size(){
-    let x=0;
-    let y=0;
+    let xy= new xyPair();
     const haTitleFont = 'Roboto, Noto, sans-serif';
     const shutterTitleHeight = FONT_SIZE_LABEL * this.cfg.textScaleFactor();
 
@@ -3621,10 +3627,10 @@ class htmlBlockName extends htmlBlock{
       let titleSize = getTextSize(this.cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
       let x1 = titleSize.width;
       let y1 = LINE_HEIGHT_LABEL * this.cfg.textScaleFactor();
-      x += x1;
-      y += y1;
+      xy = new xyPair(x1,y1);
     }
-    return new xyPair(x,y);
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockState extends htmlBlock{
@@ -3660,6 +3666,7 @@ class htmlBlockState extends htmlBlock{
       y += y1; // vert. padding already with margin ??
       xy = new xyPair(x,y);
     }
+    this.displaySize(xy);
     return xy;
   }
 
@@ -3669,7 +3676,9 @@ class htmlBlockTopDiv extends htmlBlock{
     return this.showTopBottomDiv(shutter,TOP);
   }
   size(){
-    return this.sizeTopBottomDiv(TOP);
+    let xy = this.sizeTopBottomDiv(TOP);
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockMiddleDiv extends htmlBlock{
@@ -3710,6 +3719,7 @@ class htmlBlockMiddleDiv extends htmlBlock{
     xy = this.gridAddHorizontal(xy,xyRightButtons);
 
     if (!this.cfg.buttonGroupInRow()) xy.switch();
+    this.displaySize(xy);
 
     return xy;
 
@@ -3721,7 +3731,9 @@ class htmlBlockBottomDiv extends htmlBlock{
     return this.showTopBottomDiv(shutter,BOTTOM);
   }
   size(){
-    return this.sizeTopBottomDiv(BOTTOM);
+    let xy = this.sizeTopBottomDiv(BOTTOM);
+    this.displaySize(xy);
+    return xy;
   }
 }
 
@@ -3762,6 +3774,7 @@ class htmlBlockLeftButtons extends htmlBlock{
 
     if (!this.cfg.buttonGroupInRow()) xy.switch();
 
+    this.displaySize(xy);
     return xy;
   }
   showButtonUpDown(shutter,feature,action,upDown,icon){
@@ -3791,7 +3804,9 @@ class htmlBlockButtonUp extends htmlBlockLeftButtons{
         return this.showButtonUpDown(shutter,ESC_FEATURE_OPEN,ACTION_SHUTTER_OPEN,UP,'mdi:arrow-up');
   }
   size(){
-    return this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    let xy = this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockButtonStop extends htmlBlockLeftButtons{
@@ -3819,7 +3834,9 @@ class htmlBlockButtonStop extends htmlBlockLeftButtons{
     }`;
   }
   size(){
-    return this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    let xy =this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    this.displaySize(xy);
+    return xy;
   }
 
 }
@@ -3828,7 +3845,9 @@ class htmlBlockButtonDown extends htmlBlockLeftButtons{
     return this.showButtonUpDown(shutter,ESC_FEATURE_CLOSE,ACTION_SHUTTER_CLOSE,DOWN,'mdi:arrow-down');
   }
   size(){
-    return this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    let xy = this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockButtonPartial extends htmlBlockLeftButtons{
@@ -3846,7 +3865,9 @@ class htmlBlockButtonPartial extends htmlBlockLeftButtons{
     `;
   }
   size(){
-    return this.cfg.partialActive() ?  this.sizeButton() : new xyPair(0,0) ;
+    let xy = this.cfg.partialActive() ?  this.sizeButton() : new xyPair(0,0) ;
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockTiltButtons extends htmlBlock{
@@ -3885,6 +3906,7 @@ class htmlBlockTiltButtons extends htmlBlock{
     xy = this.gridAddVertical(xy,xyButtonTiltDown);
 
     if (!this.cfg.buttonGroupInRow()) xy.switch();
+    this.displaySize(xy);
     return xy;
   }
 
@@ -3896,7 +3918,9 @@ class htmlBlockButtonTiltDown extends htmlBlockTiltButtons{
 
   }
   size(){
-    return this.sizeButton();
+    let xy = this.sizeButton();
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockButtonTiltUp extends htmlBlockTiltButtons{
@@ -3905,7 +3929,9 @@ class htmlBlockButtonTiltUp extends htmlBlockTiltButtons{
     return this.showButtonTilt(shutter,ACTION_SHUTTER_OPEN_TILT,icon);
   }
   size(){
-    return this.sizeButton();
+    let xy = this.sizeButton();
+    this.displaySize(xy);
+    return xy;
   }
 }
 class htmlBlockTiltPosition extends htmlBlockTiltButtons{
@@ -3929,7 +3955,7 @@ class htmlBlockTiltPosition extends htmlBlockTiltButtons{
     let size = ICON_SIZE* this.cfg.buttonScaleFactor();
     let xy = new xyPair(size,3*size);
     if (!this.cfg.buttonGroupInRow()) xy.switch();
-
+    this.displaySize(xy);
     return xy;
   }
 }
@@ -3951,6 +3977,7 @@ class htmlBlockTiltSlider extends htmlBlock{
 
     let xy = new xyPair(zoom*width,zoom*height);
     if (!this.cfg.buttonGroupInRow()) xy.switch();
+    this.displaySize(xy);
     return xy;
   }
 }
@@ -3971,7 +3998,7 @@ class htmlBlockTiltSection extends htmlBlock{
 
     let xy = this.cfg.tiltSliderOnly() ? xyTiltSlider : this.gridAddHorizontal(xyTiltSlider,xyTiltButtons);
     if (!this.cfg.buttonGroupInRow()) xy.switch();
-
+    this.displaySize(xy);
     return xy;
   }
 }
@@ -4002,7 +4029,9 @@ class htmlBlockCentralWindow extends htmlBlock{
   size(){
     let x = this.cfg.windowWidthPx() + 2 * SELECTOR_MARGIN;
     let y = this.cfg.windowHeightPx() + 2 * SELECTOR_MARGIN;
-    return new xyPair(x,y);
+    let xy = new xyPair(x,y);
+    this.displaySize(xy);
+    return xy;
   }
   showSlide(shutter){
      return html`
@@ -4117,21 +4146,18 @@ class htmlBlockRightButtons extends htmlBlock{
   }
   size(){
 
-    let x=0;
-    let y=0;
+    let xy = new xyPair();
 
     const haButtonSize = this.cfg.iconButtonSize();
 
     if (!this.cfg.disablePartialOpenButtons()) {
+      xy = new xyPair(haButtonSize*2,haButtonSize*3);
       if (!this.cfg.buttonGroupInRow()){
-        x += haButtonSize*3;
-        y += haButtonSize*2;
-      }else{
-        x += haButtonSize*2;
-        y += haButtonSize*3;
+        xy.switch();
       }
     }
-    return new xyPair(x,y);
+    this.displaySize(xy);
+    return xy;
   }
 }
 
