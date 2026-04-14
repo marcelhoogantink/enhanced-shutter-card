@@ -33,6 +33,24 @@ Thank you !
 ---
 ### New in this beta-version v1.6.0b1:
 
+deprecated
+const CONFIG_NAME_DISABLED = 'name_disabled'; //depr SHOW 1
+  const CONFIG_SHOW_NAME = 'show_name'; // new    SHOW 1
+const CONFIG_OPENING_DISABLED = 'opening_disabled';  // depr SHOW 2
+  const CONFIG_SHOW_OPENING = "show_opening"; //new SHOW 2
+const CONFIG_TILT_SLIDER_ONLY = 'tilt_slider_only';  // deprecated SHOW 4
+  const CONFIG_SHOW_TILT_BUTTON_BLOCK = 'show_tilt_button_block'; // SHOW 4
+const CONFIG_DISABLE_STANDARD_BUTTONS = 'disable_standard_buttons'; // SHOW 5
+  const CONFIG_SHOW_STANDARD_BUTTONS = 'show_standard_buttons'; //SHOW 5
+const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons'; // SHOW 6
+  const CONFIG_SHOW_PARTIAL_OPEN_BUTTONS = 'show_partial_open_buttons';//SHOW 6
+
+/ new
+const CONFIG_SHOW_WINDOW = 'show_window'; // SHOW 7 new
+const CONFIG_SHOW_TILT_SLIDER_BLOCK = 'show_tilt_slider_block'; // new SHOW 3 new
+
+
+### New in this beta-version v1.6.0b0:
 
 
 - #### New `auto`-option for finding sub-entities

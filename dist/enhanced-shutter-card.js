@@ -178,7 +178,7 @@ const FONT_SIZE_POSITION = 14;
 const LINE_HEIGHT_LABEL = 30;
 const LINE_HEIGHT_POSITION = 20;
 const MARGIN_POSITION = 5;
-const SELECTOR_MARGIN = 2;
+const SELECTOR_MARGIN = 4;
 
 const UNITY= 'px';
 
@@ -226,22 +226,19 @@ const CONFIG_SCALE_BUTTONS = 'scale_buttons';
 const CONFIG_OFFSET_OPENED_PCT = 'top_offset_pct'; // TODO  rename: top->opened
 const CONFIG_OFFSET_CLOSED_PCT = 'bottom_offset_pct'; // TODO rename bottom->closed
 const CONFIG_BUTTONS_POSITION = 'buttons_position';
-const CONFIG_TITLE_POSITION = 'title_position';  // removed
 const CONFIG_NAME_POSITION = 'name_position';
-const CONFIG_NAME_DISABLED = 'name_disabled';
 const CONFIG_OPENING_POSITION = 'opening_position';
 const CONFIG_ICONS_POSITION = 'icons_position';
-const CONFIG_OPENING_DISABLED = 'opening_disabled';
+
 const CONFIG_INLINE_HEADER = 'inline_header';
 
 const CONFIG_INVERT_PCT       = 'invert_percentage'; // deprecated
-const CONFIG_INVERT_PCT_UI    = 'invert_percentage_ui'; //
 const CONFIG_INVERT_PCT_COVER = 'invert_percentage_cover'; // new
+const CONFIG_INVERT_PCT_UI    = 'invert_percentage_ui'; //
 
 const CONFIG_INVERT_PCT_TILT_UI    = 'invert_percentage_tilt_ui'; //
 const CONFIG_INVERT_PCT_TILT_COVER = 'invert_percentage_tilt_cover'; // new
 
-const CONFIG_TILT_SLIDER_ONLY = 'tilt_slider_only';
 
 const CONFIG_INVERT_OPEN_CLOSE       = 'invert_open_close'; // deprecated
 const CONFIG_INVERT_OPEN_CLOSE_UI    = 'invert_open_close_ui'; // new
@@ -255,9 +252,24 @@ const CONFIG_CLOSING_DIRECTION = 'closing_direction'
 const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
 const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
 const CONFIG_ALWAYS_PCT = 'always_percentage';
-const CONFIG_DISABLE_END_BUTTONS = 'disable_end_buttons';
-const CONFIG_DISABLE_STANDARD_BUTTONS = 'disable_standard_buttons';
-const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons';
+//======
+const CONFIG_NAME_DISABLED = 'name_disabled'; //depr SHOW 1
+const CONFIG_OPENING_DISABLED = 'opening_disabled';  // depr SHOW 2
+const CONFIG_TILT_SLIDER_ONLY = 'tilt_slider_only';  // deprecated SHOW 4
+const CONFIG_DISABLE_STANDARD_BUTTONS = 'disable_standard_buttons'; // deprecated SHOW 5
+const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons'; // deprecated SHOW 6
+
+const CONFIG_SHOW_NAME = 'show_name'; // new    SHOW 1
+const CONFIG_SHOW_OPENING = "show_opening"; //new SHOW 2
+const CONFIG_SHOW_TILT_BUTTON_BLOCK = 'show_tilt_button_block'; // SHOW 4
+const CONFIG_SHOW_STANDARD_BUTTONS = 'show_standard_buttons'; //SHOW 5
+const CONFIG_SHOW_PARTIAL_OPEN_BUTTONS = 'show_partial_open_buttons';//SHOW 6
+
+const CONFIG_SHOW_TILT_SLIDER_BLOCK = 'show_tilt_slider_block'; // new SHOW 3 new
+const CONFIG_SHOW_WINDOW = 'show_window'; // SHOW 7 new
+//======
+const CONFIG_DISABLE_END_BUTTONS = 'disable_end_buttons'; // grey out the endbuttons when not functional
+
 const CONFIG_PICKER_OVERLAP_PX = 'picker_overlap_px';
 const CONFIG_CURRENT_POSITION = 'current_position';
 
@@ -265,12 +277,17 @@ const CONFIG_BUTTON_STOP_HIDE_STATES = 'button_stop_hide_states';
 const CONFIG_BUTTON_OPENED_HIDE_STATES = 'button_up_hide_states';  // TODO rename up->opened
 const CONFIG_BUTTON_CLOSED_HIDE_STATES = 'button_down_hide_states'; // TODO rename down->closed
 
+const invertBoolean = (value) => !value;
 const DEPRECATED={
-  [CONFIG_INVERT_PCT]: {new: CONFIG_INVERT_PCT_COVER}, // jan 2026 1.4.0-alpha
-  [CONFIG_INVERT_OPEN_CLOSE]: {new: CONFIG_INVERT_OPEN_CLOSE_UI}, // jan 2026 1.4.0-alpha
+  [CONFIG_NAME_DISABLED]: {new: CONFIG_SHOW_NAME, value: invertBoolean},
+  [CONFIG_OPENING_DISABLED]: {new: CONFIG_SHOW_OPENING, value: invertBoolean},
+  [CONFIG_TILT_SLIDER_ONLY]: {new: CONFIG_SHOW_TILT_SLIDER_BLOCK, value: invertBoolean},
+  [CONFIG_DISABLE_STANDARD_BUTTONS]: {new: CONFIG_SHOW_STANDARD_BUTTONS, value: invertBoolean},
+  [CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: {new: CONFIG_SHOW_PARTIAL_OPEN_BUTTONS, value: invertBoolean},
 };
 const REMOVED={
-  [CONFIG_TITLE_POSITION]: {new: CONFIG_NAME_POSITION},
+  [CONFIG_INVERT_PCT]: {new: CONFIG_INVERT_PCT_COVER}, // april 2026 v1.6.0 // jan 2026 1.4.0-alpha
+  [CONFIG_INVERT_OPEN_CLOSE]: {new: CONFIG_INVERT_OPEN_CLOSE_UI}, // april 2026 v1.6.0 // jan 2026 1.4.0-alpha
 };
     const ICONCOLORS = {
       '-1': "grey",
@@ -331,12 +348,13 @@ const ESC_SCALE_BUTTONS = false;
 const ESC_OPENED_OFFSET_PCT = 13;
 const ESC_CLOSED_OFFSET_PCT = 0;
 const ESC_BUTTONS_POSITION = LEFT;
-const ESC_TITLE_POSITION = null;  // deprecated
 const ESC_NAME_POSITION =TOP;
 const ESC_NAME_DISABLED = false;
+const ESC_SHOW_NAME = true;
 const ESC_OPENING_POSITION = TOP;
 const ESC_ICONS_POSITION = TOP;
 const ESC_OPENING_DISABLED = false;
+const ESC_SHOW_OPENING = true;
 const ESC_INLINE_HEADER = false;
 const ESC_INVERT_PCT_COVER = false;
 const ESC_INVERT_PCT_UI = false;
@@ -347,6 +365,8 @@ const ESC_INVERT_PCT_TILT_UI    = false;
 const ESC_INVERT_PCT_TILT_COVER = false;
 
 const ESC_TILT_SLIDER_ONLY = false;
+const ESC_SHOW_TILT_SLIDER_BLOCK = true;
+const ESC_SHOW_TILT_BUTTON_BLOCK = true;
 
 const ESC_SHOW_TILT = true;
 const ESC_TILT_ANGLE_MIN = 0;
@@ -358,7 +378,10 @@ const ESC_OFFSET_CLOSED_PCT = 0;
 const ESC_ALWAYS_PCT = false;
 const ESC_DISABLE_END_BUTTONS = false;
 const ESC_DISABLE_STANDARD_BUTTONS = false;
+const ESC_SHOW_STANDARD_BUTTONS = true;
 const ESC_DISABLE_PARTIAL_OPEN_BUTTONS = true;
+const ESC_SHOW_PARTIAL_OPEN_BUTTONS = false;
+const ESC_SHOW_WINDOW = true;
 const ESC_PICKER_OVERLAP_PX = 20;
 const ESC_CURRENT_POSITION = 0;
 
@@ -424,12 +447,9 @@ const CONFIG_DEFAULT ={
   [CONFIG_OFFSET_OPENED_PCT]: ESC_OPENED_OFFSET_PCT,
   [CONFIG_OFFSET_CLOSED_PCT]: ESC_CLOSED_OFFSET_PCT,
   [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
-  [CONFIG_TITLE_POSITION]: ESC_TITLE_POSITION,  // deprecated
-  [CONFIG_NAME_POSITION]: ESC_NAME_POSITION, // new
-  [CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,
+  [CONFIG_NAME_POSITION]: ESC_NAME_POSITION,
   [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION,
   [CONFIG_ICONS_POSITION]: ESC_ICONS_POSITION,
-  [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,
   [CONFIG_INLINE_HEADER]: ESC_INLINE_HEADER,
 
   [CONFIG_INVERT_PCT]   : ESC_INVERT_PCT_UI,
@@ -441,7 +461,6 @@ const CONFIG_DEFAULT ={
 
   [CONFIG_INVERT_PCT_TILT_UI]: ESC_INVERT_PCT_TILT_UI,
   [CONFIG_INVERT_PCT_TILT_COVER]: ESC_INVERT_PCT_TILT_COVER,
-  [CONFIG_TILT_SLIDER_ONLY]: ESC_TILT_SLIDER_ONLY,
 
   [CONFIG_SHOW_TILT]: ESC_SHOW_TILT,
   [CONFIG_TILT_ANGLE_MIN]: ESC_TILT_ANGLE_MIN,
@@ -452,9 +471,22 @@ const CONFIG_DEFAULT ={
   [CONFIG_OFFSET_IS_CLOSED_PCT]: ESC_OFFSET_CLOSED_PCT,
   [CONFIG_ALWAYS_PCT]: ESC_ALWAYS_PCT,
   [CONFIG_DISABLE_END_BUTTONS]: ESC_DISABLE_END_BUTTONS,
-  [CONFIG_DISABLE_STANDARD_BUTTONS]: ESC_DISABLE_STANDARD_BUTTONS,
-  [CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: ESC_DISABLE_PARTIAL_OPEN_BUTTONS,
+// ===================
+  [CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,   // deprecated
+  [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,  // deprecated
+  [CONFIG_TILT_SLIDER_ONLY]: ESC_TILT_SLIDER_ONLY, // deprecated
+  [CONFIG_DISABLE_STANDARD_BUTTONS]: ESC_DISABLE_STANDARD_BUTTONS, // deprecated
+  [CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: ESC_DISABLE_PARTIAL_OPEN_BUTTONS, // deprecated
 
+  [CONFIG_SHOW_NAME]: ESC_SHOW_NAME, // replace
+  [CONFIG_SHOW_OPENING]: ESC_SHOW_OPENING, // replace
+  [CONFIG_SHOW_TILT_BUTTON_BLOCK]: ESC_SHOW_TILT_BUTTON_BLOCK, // replace
+  [CONFIG_SHOW_STANDARD_BUTTONS]: ESC_SHOW_STANDARD_BUTTONS, // replace
+  [CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]: ESC_SHOW_PARTIAL_OPEN_BUTTONS, // replace
+
+  [CONFIG_SHOW_WINDOW]: ESC_SHOW_WINDOW, // new
+  [CONFIG_SHOW_TILT_SLIDER_BLOCK]: ESC_SHOW_TILT_SLIDER_BLOCK, // new
+//==========================
   [CONFIG_PICKER_OVERLAP_PX]: ESC_PICKER_OVERLAP_PX,
   [CONFIG_CURRENT_POSITION]: ESC_CURRENT_POSITION,
 
@@ -1018,25 +1050,25 @@ class EnhancedShutterCardNew extends LitElement{
     // TODO: combine:
     Object.keys(DEPRECATED).forEach(key => {
       if (newConfigSub[key] != null) {
+        let oldKey = DEPRECATED[key];
         this.messageManager.addMessage(
-          `Deprecated: [${key}], use '${DEPRECATED[key].new}'!`,
+          `Deprecated: [${key}], use '${oldKey.new}'!`,
           HA_ALERT_WARNING,
           id
         );
-        newConfigSub[DEPRECATED[key].new] = newConfigSub[key];
-        delete newConfigSub[key];
+        this.replaceKey(newConfigSub, key,oldKey);
       }
     });
 
     Object.keys(REMOVED).forEach(key => {
       if (newConfigSub[key] != null) {
+        let oldKey = REMOVED[key];
         this.messageManager.addMessage(
-          `Removed: [${key}], use '${REMOVED[key].new}'!`,
+          `Removed: [${key}], use '${oldKey.new}'!`,
           HA_ALERT_ERROR,
           id
         );
-        newConfigSub[REMOVED[key].new] = newConfigSub[key];
-        delete newConfigSub[key];
+        this.replaceKey(newConfigSub, key,oldKey);
       }
     });
 
@@ -1044,7 +1076,16 @@ class EnhancedShutterCardNew extends LitElement{
 
     return config;
   }
-
+  replaceKey(newConfigSub, key,oldKey){
+        if (oldKey.value){
+          // correct value with function
+          newConfigSub[oldKey.new] = oldKey.value(newConfigSub[key]);
+        }else{
+          // take same value
+          newConfigSub[oldKey.new] = newConfigSub[key];
+        }
+        delete newConfigSub[key];
+  }
   getUniqueKeysFromObjects(obj1, obj2) {
     // Get all keys from both objects
     const keysObj1 = Object.keys(obj1);
@@ -1283,8 +1324,9 @@ class EnhancedShutterCardNew extends LitElement{
         display: flex;
         flex-direction: var(--esc-card-flex-direction);
         overflow-x: auto;
-        padding-left: 1px;
-        padding-right: 1px;
+        overflow-y: hidden;
+        padding-left: 0px;
+        padding-right: 0px;
         padding-bottom: 6px;
       }
       .${ESC_CLASS_SHUTTER_FLEX} {
@@ -1408,6 +1450,8 @@ class EnhancedShutterCardNew extends LitElement{
 
     let shutterSeperateBlock= new htmlBlockShutterSeperate(this.cardCfg);
     let sizeSeperate = shutterSeperateBlock.size();
+    let cardTilteSize = new htmlBlockCardTitle(this.cardCfg);
+    let sizeTitle = cardTilteSize.size();
 
     if (this.config && this.config.entities && (this.isShutterConfigLoaded || this.initializeReady))
     {
@@ -1424,7 +1468,10 @@ class EnhancedShutterCardNew extends LitElement{
           }else{
             sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeperate);
           }
+        }else{
+          sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
         }
+
         if (this.cardCfg.stacked() == VERTICAL){
           sizeCard = shutterBlock.gridAddVertical(sizeCard,shutterBlock.size());
         }else{
@@ -1441,6 +1488,7 @@ class EnhancedShutterCardNew extends LitElement{
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
+    console.log('=====>Size Card: ', sizeCard);
     this.nbRows= Math.ceil((sizeCard.y()+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
     this.nbCols= Math.ceil((sizeCard.x()+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
 
@@ -1610,9 +1658,7 @@ class EnhancedShutter extends LitElement
     // tilt .....
     if (this.cfg.showTilt()){
       this.tiltSlider = findElement(this,`.${ESC_CLASS_TILT_SLIDER_CLASS}`);
-
       this.manageEvents(ADD_EVENT, MOUSEDOWN, this.tiltSlider, this.mouseDownTilt);
-
     }
     this.startResizeObserver();
   }
@@ -1681,7 +1727,7 @@ class EnhancedShutter extends LitElement
       this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
       this.cfg.transformScale(size_global.x,size_global.y), // correct local sizes
-      this.cfg.transformTranslate(0,-size_local.y/2 + screenPosition),  // Move to correct position
+      this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
     ].join(SPACE);
   }
   transformPicker(screenPosition){
@@ -1694,7 +1740,7 @@ class EnhancedShutter extends LitElement
       this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
       this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
-      this.cfg.transformTranslate(0,-size_local.y/2 + screenPosition),  // Move to correct position
+      this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
 
     ].join(SPACE);
   }
@@ -1815,7 +1861,7 @@ class EnhancedShutter extends LitElement
   }
   slatsSizeMovingDirectionPx(){
     const value = this.cfg.rotateSlatsImage()
-      ? this.slideHeightPx()-this.shutterBottomSize().y
+      ? this.slideHeightPx()-this.shutterBottomSize().y()
       : this.slideHeightPx();
     return value;
   }
@@ -1847,40 +1893,38 @@ class EnhancedShutter extends LitElement
     const position = BOTTOM
     return position;
   }
-/*
-      const y_size_bottom= this.escImages.getShutterBottomImageSize(this.cfg.entityId()).y+'px';
-      [DOWN]:'center bottom '+y_size_bottom,
-      [UP]:'center top '+y_size_bottom,
-      [LEFT]:'left '+y_size_bottom+' center',
-      [RIGHT]:'right '+y_size_bottom+' center',
-*/
-
   shutterSlatSizePercentage(){
-    let imageSize = this.shutterSlatSize();
-    let imagePercentage;
+    let imageSize = new xyPair();
+    let imagePercentage = new xyPair();
+    imageSize.fill2(this.shutterSlatSize());
     if (this.cfg.rotateSlatsImage()) {
-      imagePercentage = this.sizePercentageSlat(imageSize);
+      imagePercentage.fill2(this.sizePercentageSlat(imageSize));
     }else{
-      if (!this.cfg.verticalMovement()) imageSize =  new xyPair(imageSize.y, imageSize.x);
-      imagePercentage = this.sizePercentageSlat(imageSize);
-      if (!this.cfg.verticalMovement()) imagePercentage = new xyPair(imagePercentage.y, imagePercentage.x);
-      imagePercentage = new xyPair("50%","50%");
+      //if (!this.cfg.verticalMovement()) imageSize =  new xyPair(imageSize.y(), imageSize.x());
+      if (!this.cfg.verticalMovement()) imageSize.switch();
+      imagePercentage.fill2(this.sizePercentageSlat(imageSize));
+      //if (!this.cfg.verticalMovement()) imagePercentage = new xyPair(imagePercentage.y(), imagePercentage.x());
+      if (!this.cfg.verticalMovement()) imagePercentage.switch();
+      imagePercentage.fill("50%","50%");
     }
-    let size = `${imagePercentage.x} ${imagePercentage.y}`;
-    return size;
+    let sizeText = `${imagePercentage.x()} ${imagePercentage.y()}`;
+    return sizeText;
   }
   shutterSlatsSizePercentage(){
-    let imageSize = this.shutterSlatSize();
-    let imagePercentage;
+    let imageSize = new xyPair();
+    let imagePercentage = new xyPair();
+    imageSize.fill2(this.shutterSlatSize());
     if (this.cfg.rotateSlatsImage()) {
-      imagePercentage = this.sizePercentage(imageSize);
+      imagePercentage.fill2(this.sizePercentage(imageSize));
     }else{
-      if (!this.cfg.verticalMovement()) imageSize =  new xyPair(imageSize.y, imageSize.x);
-      imagePercentage = this.sizePercentage(imageSize);
-      if (!this.cfg.verticalMovement()) imagePercentage = new xyPair(imagePercentage.y, imagePercentage.x);
+      //if (!this.cfg.verticalMovement()) imageSize =  new xyPair(imageSize.y(), imageSize.x());
+      if (!this.cfg.verticalMovement()) imageSize.switch();
+      imagePercentage.fill2(this.sizePercentage(imageSize));
+      //if (!this.cfg.verticalMovement()) imagePercentage = new xyPair(imagePercentage.y(), imagePercentage.x());
+      if (!this.cfg.verticalMovement()) imagePercentage.switch();
     }
-    let size = `${imagePercentage.x} ${imagePercentage.y}`;
-    return size;
+    let sizeText = `${imagePercentage.x()} ${imagePercentage.y()}`;
+    return sizeText;
   }
   shutterSlatSize(){
     let imageSize = this.escImages.getShutterSlatImageSize(this.cfg.id())
@@ -1903,7 +1947,6 @@ class EnhancedShutter extends LitElement
     return size;
   }
   sizePercentage(imageSize){
-    let debugName = this.cfg.friendlyName();
     let width;
     let height = this.slatsSlideHeightPx();
     if (this.cfg.verticalMovement()) {
@@ -1946,7 +1989,7 @@ class EnhancedShutter extends LitElement
    * @returns Netto local height of the slats-part (= total - edge)
    */
   slatsSlideHeightPx(){
-    return this.slideHeightPx()-this.shutterBottomSize().y;
+    return this.slideHeightPx()-this.shutterBottomSize().y();
   }
   /**
    * @return Local height of the slide-part
@@ -1992,9 +2035,9 @@ class EnhancedShutter extends LitElement
   tiltSlatBackgroundSize(){
     let value;
     if (this.cfg.rotateSlatsImage()){
-      value = this.shutterSlatSizePercentage();
+      let value = this.shutterSlatSizePercentage();
     }else{
-      value = '100% '+(this.shutterSlatSize().y/this.cfg.windowHeightPx()*100)+'%';
+      value = '100% '+(this.shutterSlatSize().y()/this.cfg.windowHeightPx()*100)+'%';
     }
     return value;
   }
@@ -2228,6 +2271,8 @@ class cardCfg {
   constructor(cfg)
   {
     this.stacked(cfg[CONFIG_STACKED]);
+    this.title(cfg[CONFIG_TITLE]);
+
     Object.preventExtensions(this);
   }
 
@@ -2242,6 +2287,9 @@ class cardCfg {
   }
   stacked(value = null){
     return this.#getCfg(CONFIG_STACKED,value);
+  }
+  title(value = null){
+    return this.#getCfg(CONFIG_TITLE,value);
   }
 }
 class shutterCfg {
@@ -2288,7 +2336,6 @@ class shutterCfg {
     this.invertPercentageTiltUi(escConfig[CONFIG_INVERT_PCT_TILT_UI]);
     this.invertOpenCloseUi(escConfig[CONFIG_INVERT_OPEN_CLOSE_UI]);
     this.invertOpenCloseCover(escConfig[CONFIG_INVERT_OPEN_CLOSE_COVER]);
-    this.tiltSliderOnly(escConfig[CONFIG_TILT_SLIDER_ONLY]);
     this.passiveMode(escConfig[CONFIG_PASSIVE_MODE]);
 
     this.unrollUnfoldDirection(escConfig[CONFIG_CLOSING_DIRECTION]);
@@ -2321,21 +2368,26 @@ class shutterCfg {
 
     this.defButtonPosition(escConfig);
 
-    this.titlePosition(escConfig[CONFIG_TITLE_POSITION]);  //deprecated
     this.namePosition(escConfig[CONFIG_NAME_POSITION]);
-    this.nameDisabled(escConfig[CONFIG_NAME_DISABLED]);
 
     this.iconsPosition(escConfig[CONFIG_ICONS_POSITION]);
 
     this.openingPosition(escConfig[CONFIG_OPENING_POSITION]);
-    this.openingDisabled(escConfig[CONFIG_OPENING_DISABLED]);
+
     this.inlineHeader(escConfig[CONFIG_INLINE_HEADER]);
 
     this.alwaysPercentage(!!escConfig[CONFIG_ALWAYS_PCT]);
     this.disableEndButtons(!!escConfig[CONFIG_DISABLE_END_BUTTONS]);
     this.pickerOverlapPx(ESC_PICKER_OVERLAP_PX);
-    this.disableStandardButtons(escConfig[CONFIG_DISABLE_STANDARD_BUTTONS]);
-    this.disablePartialOpenButtons(escConfig[CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]);
+
+    this.showName(escConfig[CONFIG_SHOW_NAME]);
+    this.showOpening(escConfig[CONFIG_SHOW_OPENING]);
+    this.showTiltButtonBlock(escConfig[CONFIG_SHOW_TILT_BUTTON_BLOCK]);
+    this.showStandardButtons(escConfig[CONFIG_SHOW_STANDARD_BUTTONS]);
+    this.showPartialOpenButtons(escConfig[CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]);
+
+    this.showTiltSliderBlock(escConfig[CONFIG_SHOW_TILT_SLIDER_BLOCK]);
+    this.showWindow(escConfig[CONFIG_SHOW_WINDOW]);
 
     this.buttonStopHideStates(escConfig[CONFIG_BUTTON_STOP_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_STOP_HIDE_STATES] : ESC_BUTTON_STOP_HIDE_STATES);
     this.buttonOpenHideStates(escConfig[CONFIG_BUTTON_OPENED_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_OPENED_HIDE_STATES] : ESC_BUTTON_OPENED_HIDE_STATES);
@@ -2481,18 +2533,34 @@ class shutterCfg {
     let transform =`rotate(${r}deg)`;
     return transform;
   }
+  
+  showName(value = null){
+    return this.#getCfg(CONFIG_SHOW_NAME,value);
+  }
+  showOpening(value = null){
+    return this.#getCfg(CONFIG_SHOW_OPENING,value);
+   }
+  showTiltButtonBlock(value = null){
+    return this.#getCfg(CONFIG_SHOW_TILT_BUTTON_BLOCK,value);
+  }
+  showStandardButtons(value = null){
+    return this.#getCfg(CONFIG_SHOW_STANDARD_BUTTONS,value);
+  }
+  showPartialOpenButtons(value = null){
+    const show = this.#getCfg(CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,value);
+    return show && this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION);
+  }
 
+  showTiltSliderBlock(value = null){
+    return this.#getCfg(CONFIG_SHOW_TILT_SLIDER_BLOCK,value);
+  }
+  showWindow(value = null){
+    return this.#getCfg(CONFIG_SHOW_WINDOW,value);
+  }
 
 
   buttonsPosition(value = null){
     return this.#getCfg(CONFIG_BUTTONS_POSITION,value);
-  }
-  disableStandardButtons(value = null){
-    return this.#getCfg(CONFIG_DISABLE_STANDARD_BUTTONS,value);
-  }
-  disablePartialOpenButtons(value = null){
-    const disable = this.#getCfg(CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS,value);
-    return disable || !this.isCoverFeatureActive(ESC_FEATURE_SET_POSITION);
   }
   supportedFeatures(value = null){
     return this.#getCfg(CONFIG_SUPPORTED_FEATURES,value);
@@ -2580,19 +2648,7 @@ class shutterCfg {
   invertOpenCloseCover(value = null){
     return this.#getCfg(CONFIG_INVERT_OPEN_CLOSE_COVER,value);
   }
-  tiltSliderOnly(value = null){
-    return this.#getCfg(CONFIG_TILT_SLIDER_ONLY,value);
-  }
-  //openingDisabled(value = null){
-  //  return this.#getCfg(CONFIG_OPENING_DISABLED,value);
-  // }
-  openingDisabled(value = null){
-    if (value !== null  && this.#getCfg(CONFIG_OPENING_DISABLED,value) === null)
-    {
-      value = this.#getCfg(CONFIG_NAME_DISABLED);
-    }
-    return this.#getCfg(CONFIG_OPENING_DISABLED,value);
-  }
+
   passiveMode(value = null){
     let mode = this.#getCfg(CONFIG_PASSIVE_MODE,value)
     if (value!== null && mode) console.warn('Passive mode, no action');
@@ -2664,9 +2720,6 @@ class shutterCfg {
   unrollUnfoldDirection(value = null){
     return this.#getCfg(CONFIG_CLOSING_DIRECTION,value);
   }
-  nameDisabled(value = null){
-    return this.#getCfg(CONFIG_NAME_DISABLED,value);
-  }
   buttonStopHideStates(value = null){
     return this.#getCfg(CONFIG_BUTTON_STOP_HIDE_STATES,value);
   }
@@ -2684,11 +2737,6 @@ class shutterCfg {
 
   buttonCloseHideStates(value = null){
     return this.#getCfg(CONFIG_BUTTON_CLOSED_HIDE_STATES,value);
-  }
-
-  // deprecated
-  titlePosition(value = null){
-    return this.#getCfg(CONFIG_NAME_POSITION,value);
   }
 
   namePosition(value = null){
@@ -2894,10 +2942,10 @@ class shutterCfg {
   }
 
   buttonsLeftActive(){
-    if (this.disableStandardButtons() && !this.showTilt() && !this.partialActive())
-      return false;
-    else
+    if (this.showStandardButtons() || this.partialActive())
       return true;
+    else
+      return false;
   }
 
   buttonGroupInRow(){
@@ -2948,16 +2996,16 @@ class shutterCfg {
 
   displayName(position){
       let displayType= this.inlineHeader() ? 'inline-block' : 'block';
-      let display =(this.namePosition() != position || this.nameDisabled()) ? NONE : displayType;
+      let display =(this.namePosition() != position || this.showName()) ? displayType : NONE;
       return display;
     }
   displayOpening(position){
     let displayType= this.inlineHeader() ? 'inline-block' : 'block';
     let display;
     if (this.inlineHeader()){
-      display =(this.namePosition() != position || this.openingDisabled()) ? NONE : displayType;
+      display =(this.namePosition() != position || this.showOpening()) ? displayType : NONE;
     }else{
-      display =(this.openingPosition() != position || this.openingDisabled()) ? NONE : displayType;
+      display =(this.openingPosition() != position || this.showOpening()) ? displayType : NONE;
     }
     return display;
   }
@@ -3329,7 +3377,7 @@ class htmlShutter{
       --esc-tilt-icon-rotate: ${(this.enhancedShutter.tiltIconRotate3())};
 
       --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+UNITY};
-      --esc-slide-edge-height: ${this.enhancedShutter.shutterBottomSize().y+UNITY};
+      --esc-slide-edge-height: ${this.enhancedShutter.shutterBottomSize().y()+UNITY};
 
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
 
@@ -3426,7 +3474,7 @@ class htmlBlock{
     * size standard-buttons
     */
    let xy;
-    if (!this.cfg.disableStandardButtons()) {
+    if (this.cfg.showStandardButtons()) {
       const haButtonSize = this.cfg.iconButtonSize();
       xy = new xyPair(haButtonSize,haButtonSize);
     }else{
@@ -3480,6 +3528,38 @@ class htmlBlockShutter extends htmlBlock{
     return xy;
   }
 }
+class htmlBlockCardTitle extends htmlBlock{
+  constructor(cfg){
+    //this.enhancedShutter=enhancedShutter;
+    let block = {cfg: cfg};
+    super(block);
+  }
+  show(){
+    // dummy code, done by HA
+    return html``;
+  }
+  size(){
+
+    let xy;
+    //let title2 = "TestTitle";
+    let title = this.cfg.title();
+    if (title){
+      const haCardTitleFontHeight= 24;
+      const haTitleHeightPx = 76;
+      const haTitleFont = 'Roboto, Noto, sans-serif';
+      const titleSize= getTextSize(title,haTitleFont,haCardTitleFontHeight);
+      xy = new xyPair(titleSize.width,haTitleHeightPx);
+    }
+    else{
+      xy = new xyPair();
+    }
+    this.displaySize(xy);
+    return xy;
+  }
+
+}
+
+
 class htmlBlockShutterSeperate extends htmlBlock{
   constructor(cfg){
     //this.enhancedShutter=enhancedShutter;
@@ -3588,15 +3668,23 @@ class htmlBlockNameAndState extends htmlBlock{
     `;
   }
   size(position=TOP){
+    const haTitleFont = 'Roboto, Noto, sans-serif';
+    const shutterTitleHeight = FONT_SIZE_LABEL * this.cfg.textScaleFactor();
     const stateBlock= new htmlBlockState(this.block);
     const nameBlock = new htmlBlockName(this.block);
 
+    let spaceSize = getTextSize('\u00A0', haTitleFont, shutterTitleHeight, '400');
+    let xySpace =new xyPair(spaceSize.width,spaceSize.height);
+
     let xyName = this.cfg.openingPosition() === position ? nameBlock.size() : new xyPair();
     let xyState = this.cfg.namePosition() === position ? stateBlock.size() : new xyPair();
-    let xy = this.cfg.inlineHeader()
-      ? this.gridAddHorizontal(xyName,xyState)
-      : this.gridAddVertical(xyName,xyState);
-
+    let xy;
+    if (this.cfg.inlineHeader()){
+       xy = this.gridAddHorizontal(xyName,xyState);
+       xy = xy.size() ? this.gridAddHorizontal(xy,xySpace) : xy;  // add space if name or state is present)
+    }else{
+       xy = this.gridAddVertical(xyName,xyState);
+    }
     xy = this.gridAddVertical(xy,new xyPair(0,16)); // padding = 16
     this.displaySize(xy);
     return xy;
@@ -3605,9 +3693,8 @@ class htmlBlockNameAndState extends htmlBlock{
 class htmlBlockName extends htmlBlock{
   show(shutter){
     return html`
-      ${this.cfg.nameDisabled()
-        ? ''
-        :  html`
+      ${this.cfg.showName()
+        ? html`
           <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
             @click="${() => shutter.doHassMoreInfoOpen(this.cfg.entityId())}"
           >
@@ -3618,7 +3705,11 @@ class htmlBlockName extends htmlBlock{
               </span>
             `:''}
           </div>
-      `}
+          `
+        :
+          ''
+      }
+
     `;
   }
   size(){
@@ -3626,7 +3717,7 @@ class htmlBlockName extends htmlBlock{
     const haTitleFont = 'Roboto, Noto, sans-serif';
     const shutterTitleHeight = FONT_SIZE_LABEL * this.cfg.textScaleFactor();
 
-    if (!this.cfg.nameDisabled()){
+    if (this.cfg.showName()){
       let titleSize = getTextSize(this.cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
       let x1 = titleSize.width;
       let y1 = LINE_HEIGHT_LABEL * this.cfg.textScaleFactor();
@@ -3642,28 +3733,29 @@ class htmlBlockState extends htmlBlock{
     const positionText =this.cfg.computePositionText(shutter.actualShutterPosition,actualTiltPosition);
 
     return html`
-      ${this.cfg.openingDisabled()
-        ? ''
-        :  html`
+      ${this.cfg.showOpening()
+        ?  html`
           <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
             <span style="white-space: pre-line;">${positionText}</span>
           </div>
-      `}
+      `:
+        ''
+     }
     `;
   }
   size(){
     let x=0;
     let y=0;
-    let xy;
+    let xy= new xyPair();
     const haTitleFont = 'Roboto, Noto, sans-serif';
     /*
     * Size shutter-opening row
     */
-    if (!this.cfg.openingDisabled()) {
+    if (this.cfg.showOpening()) {
       let devPosition =this.cfg.currentDevicePosition();
       let tiltPosition = this.cfg.currentDeviceTiltPosition();
       let pctSize = getTextSize(this.cfg.computePositionText(devPosition,tiltPosition),haTitleFont,FONT_SIZE_POSITION * this.cfg.textScaleFactor());
-      let x1 = pctSize.width;
+      let x1 = pctSize.width + 2*MARGIN_POSITION;  // including margin;
       let y1 = LINE_HEIGHT_POSITION * this.cfg.textScaleFactor() + 2*MARGIN_POSITION;  // including margin
       x += x1 + 5 * 2; // hor. padding
       y += y1; // vert. padding already with margin ??
@@ -3696,10 +3788,10 @@ class htmlBlockMiddleDiv extends htmlBlock{
       <div class="${ESC_CLASS_MIDDLE}">
         ${leftButtonsBlock.show(shutter)}
         ${centralWindowBlock.show(shutter)}
-        ${!this.cfg.disablePartialOpenButtons() || this.cfg.showTilt()
+        ${this.cfg.showPartialOpenButtons() || this.cfg.showTilt()
           ? html`
             ${(this.cfg.showTilt()) ? tiltSectionBlock.show(shutter):''}
-            ${!this.cfg.disablePartialOpenButtons() ? rightButtonsBlock.show(shutter):''}
+            ${this.cfg.showPartialOpenButtons() ? rightButtonsBlock.show(shutter):''}
           `
           : html`<div class='blankDiv'></div>`
         }
@@ -3714,18 +3806,24 @@ class htmlBlockMiddleDiv extends htmlBlock{
 
     let xyLeftButtons = leftButtonsBlock.size();
     let xyCentralWindow = centralWindowBlock.size();
-    let xyTiltSection = tiltSectionBlock.size();
-    let xyRightButtons = rightButtonsBlock.size();
+    let xyTiltSection = this.cfg.showTilt() ? tiltSectionBlock.size(): new xyPair();
+    let xyRightButtons = this.cfg.showPartialOpenButtons() ? rightButtonsBlock.size() : new xyPair();
+
+    let xyRight = this.gridAddBoth(xyTiltSection,xyRightButtons);
+
+    if (!xyRight.size()) {
+      let xySize = this.cfg.iconSize()*1.5;
+      xyRight = new xyPair(xySize,xySize);
+    }
+
 
     let xy;
     if (this.cfg.buttonGroupInRow()){
       xy = this.gridAddHorizontal(xyLeftButtons,xyCentralWindow);
-      xy = this.gridAddHorizontal(xy,xyTiltSection);
-      xy = this.gridAddHorizontal(xy,xyRightButtons);
+      xy = this.gridAddHorizontal(xy,xyRight);
     }else{
       xy = this.gridAddVertical(xyLeftButtons,xyCentralWindow);
-      xy = this.gridAddVertical(xy,xyTiltSection);
-      xy = this.gridAddVertical(xy,xyRightButtons);
+      xy = this.gridAddVertical(xy,xyRight);
 
     }
     this.displaySize(xy);
@@ -3789,7 +3887,7 @@ class htmlBlockLeftButtons extends htmlBlock{
   showButtonUpDown(shutter,feature,action,upDown,icon){
 
     return html`
-      ${!this.cfg.disableStandardButtons() &&
+      ${this.cfg.showStandardButtons() &&
         !this.cfg.buttonOpenCloseHideStates(upDown).includes(this.cfg.positionToState()) &&
          this.cfg.isCoverFeatureActive(feature)
       ? html`
@@ -3813,7 +3911,7 @@ class htmlBlockButtonUp extends htmlBlockLeftButtons{
         return this.showButtonUpDown(shutter,ESC_FEATURE_OPEN,ACTION_SHUTTER_OPEN,UP,'mdi:arrow-up');
   }
   size(){
-    let xy = this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    let xy = this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
     this.displaySize(xy);
     return xy;
   }
@@ -3825,7 +3923,7 @@ class htmlBlockButtonStop extends htmlBlockLeftButtons{
     const icon = "mdi:stop"
 
     return html`
-      ${!this.cfg.disableStandardButtons() &&
+      ${this.cfg.showStandardButtons() &&
         !this.cfg.buttonStopHideStates().includes(this.cfg.positionToState()) &&
          this.cfg.isCoverFeatureActive(feature)
       ? html`
@@ -3843,7 +3941,7 @@ class htmlBlockButtonStop extends htmlBlockLeftButtons{
     }`;
   }
   size(){
-    let xy =this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    let xy =this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
     this.displaySize(xy);
     return xy;
   }
@@ -3854,7 +3952,7 @@ class htmlBlockButtonDown extends htmlBlockLeftButtons{
     return this.showButtonUpDown(shutter,ESC_FEATURE_CLOSE,ACTION_SHUTTER_CLOSE,DOWN,'mdi:arrow-down');
   }
   size(){
-    let xy = this.cfg.disableStandardButtons() ?  new xyPair() : this.sizeButton();
+    let xy =this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
     this.displaySize(xy);
     return xy;
   }
@@ -3862,7 +3960,7 @@ class htmlBlockButtonDown extends htmlBlockLeftButtons{
 class htmlBlockButtonPartial extends htmlBlockLeftButtons{
   show(shutter){
     return html`
-      ${this.cfg.partialActive()  /* TODO localize texts */
+      ${this.cfg.partialActive() && this.cfg.showStandardButtons() /* TODO localize texts */
         ? html`
           <ha-icon-button
             label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
@@ -3874,7 +3972,7 @@ class htmlBlockButtonPartial extends htmlBlockLeftButtons{
     `;
   }
   size(){
-    let xy = this.cfg.partialActive() ?  this.sizeButton() : new xyPair(0,0) ;
+    let xy = this.cfg.partialActive() && this.cfg.showStandardButtons()?  this.sizeButton() : new xyPair(0,0) ;
     this.displaySize(xy);
     return xy;
   }
@@ -3999,21 +4097,23 @@ class htmlBlockTiltSection extends htmlBlock{
     const tiltSliderBlock= new htmlBlockTiltSlider(shutter);
     const tiltButtonsBlock = new htmlBlockTiltButtons(shutter);
     return html`
-        ${this.cfg.tiltSliderOnly() ? html`` : tiltButtonsBlock.show(shutter)}
-        ${tiltSliderBlock.show(shutter)}
+        ${this.cfg.showTiltButtonBlock() ? tiltButtonsBlock.show(shutter) : html``}
+        ${this.cfg.showTiltSliderBlock() ? tiltSliderBlock.show(shutter) :html``}
     `;
   }
   size(){
+    let xy = new xyPair();
     const tiltSliderBlock= new htmlBlockTiltSlider(this.block);
     const tiltButtonsBlock = new htmlBlockTiltButtons(this.block);
     let xyTiltSlider = tiltSliderBlock.size();
     let xyTiltButtons = tiltButtonsBlock.size();
 
-    let xy;
     if (this.cfg.buttonGroupInRow()){
-      xy = this.cfg.tiltSliderOnly() ? xyTiltSlider : this.gridAddHorizontal(xyTiltSlider,xyTiltButtons);
+      xy = this.cfg.showTiltButtonBlock() ? this.gridAddHorizontal(xy,xyTiltButtons) : xy;
+      xy = this.cfg.showTiltSliderBlock() ? this.gridAddHorizontal(xy,xyTiltSlider) :xy;
     }else{
-      xy = this.cfg.tiltSliderOnly() ? xyTiltSlider : this.gridAddVertical(xyTiltSlider,xyTiltButtons);
+      xy = this.cfg.showTiltButtonBlock() ? this.gridAddVertical(xy,xyTiltButtons) : xy;
+      xy = this.cfg.showTiltSliderBlock() ? this.gridAddVertical(xy,xyTiltSlider) : xy;
 
     }
     this.displaySize(xy);
@@ -4164,15 +4264,11 @@ class htmlBlockRightButtons extends htmlBlock{
   }
   size(){
 
-    let xy = new xyPair();
-
     const haButtonSize = this.cfg.iconButtonSize();
 
-    if (!this.cfg.disablePartialOpenButtons()) {
-      xy = new xyPair(haButtonSize*2,haButtonSize*3);
-      if (!this.cfg.buttonGroupInRow()){
-        xy.switch();
-      }
+    let xy = new xyPair(haButtonSize*2,haButtonSize*3);
+    if (!this.cfg.buttonGroupInRow()){
+      xy.switch();
     }
     this.displaySize(xy);
     return xy;
@@ -4194,11 +4290,39 @@ class xyPair{
     return this.#coordY;
   }
   switch(){
-    let tmp= this.#coordX;
+    const tmp= this.#coordX;
     this.#coordX = this.#coordY;
     this.#coordY = tmp;
   }
+  size(){
+    return this.x()*this.y();
+  }
+  rotate90(){
+    const tmp= this.#coordX;
+    this.#coordX = -this.#coordY;
+    this.#coordY = tmp;
+  }
+  rotate180(){
+    this.#coordX = -this.#coordX;
+    this.#coordY = -this.#coordY;
+  }
+  rotate270(){
+    const tmp= this.#coordX;
+    this.#coordX = this.#coordY;
+    this.#coordY = -tmp;
+  }
+  rotate360(){
+  }
+  fill(x,y){
+    this.#coordX = x;
+    this.#coordY = y;
+  }
+  fill2(xy){
+    this.#coordX = xy.x();
+    this.#coordY = xy.y();
+  }
 }
+
 
 class haEntity{
   #state;
