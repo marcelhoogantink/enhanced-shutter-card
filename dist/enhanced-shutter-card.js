@@ -244,7 +244,7 @@ const CONFIG_INVERT_OPEN_CLOSE       = 'invert_open_close'; // deprecated
 const CONFIG_INVERT_OPEN_CLOSE_UI    = 'invert_open_close_ui'; // new
 const CONFIG_INVERT_OPEN_CLOSE_COVER = 'invert_open_close_cover';
 
-const CONFIG_SHOW_TILT = 'show_tilt';
+const CONFIG_SHOW_TILT = 'show_tilt'; // deprecated
 const CONFIG_TILT_ANGLE_MIN = 'tilt_angle_min';
 const CONFIG_TILT_ANGLE_MAX = 'tilt_angle_max';
 
@@ -253,8 +253,8 @@ const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
 const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
 const CONFIG_ALWAYS_PCT = 'always_percentage';
 //======
-const CONFIG_NAME_DISABLED = 'name_disabled'; //depr SHOW 1
-const CONFIG_OPENING_DISABLED = 'opening_disabled';  // depr SHOW 2
+const CONFIG_NAME_DISABLED = 'name_disabled'; //deprecated SHOW 1
+const CONFIG_OPENING_DISABLED = 'opening_disabled';  // deprecated SHOW 2
 const CONFIG_TILT_SLIDER_ONLY = 'tilt_slider_only';  // deprecated SHOW 4
 const CONFIG_DISABLE_STANDARD_BUTTONS = 'disable_standard_buttons'; // deprecated SHOW 5
 const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons'; // deprecated SHOW 6
@@ -284,6 +284,7 @@ const DEPRECATED={
   [CONFIG_TILT_SLIDER_ONLY]: {new: CONFIG_SHOW_TILT_SLIDER_BLOCK, value: invertBoolean},
   [CONFIG_DISABLE_STANDARD_BUTTONS]: {new: CONFIG_SHOW_STANDARD_BUTTONS, value: invertBoolean},
   [CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: {new: CONFIG_SHOW_PARTIAL_OPEN_BUTTONS, value: invertBoolean},
+  [CONFIG_SHOW_TILT]: {new: CONFIG_SHOW_TILT_BUTTON_BLOCK}, // only name change, value remains the same
 };
 const REMOVED={
   [CONFIG_INVERT_PCT]: {new: CONFIG_INVERT_PCT_COVER}, // april 2026 v1.6.0 // jan 2026 1.4.0-alpha
@@ -462,7 +463,7 @@ const CONFIG_DEFAULT ={
   [CONFIG_INVERT_PCT_TILT_UI]: ESC_INVERT_PCT_TILT_UI,
   [CONFIG_INVERT_PCT_TILT_COVER]: ESC_INVERT_PCT_TILT_COVER,
 
-  [CONFIG_SHOW_TILT]: ESC_SHOW_TILT,
+  [CONFIG_SHOW_TILT]: ESC_SHOW_TILT,  // deprecated
   [CONFIG_TILT_ANGLE_MIN]: ESC_TILT_ANGLE_MIN,
   [CONFIG_TILT_ANGLE_MAX]: ESC_TILT_ANGLE_MAX,
 
@@ -512,7 +513,6 @@ const ESC_PRESET = {
     [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: false,
     [CONFIG_OFFSET_CLOSED_PCT]: 50,
     [CONFIG_CLOSING_DIRECTION]: DOWN,
-    [CONFIG_SHOW_TILT]: false,
     [CONFIG_NAME]: 'Awning',
   },
   [ESC_CURTAIN]: {
@@ -520,7 +520,6 @@ const ESC_PRESET = {
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-curtain.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
-    [CONFIG_SHOW_TILT]: false,
     [CONFIG_NAME]: 'Curtain',
   },
   [ESC_SHADE]: {
@@ -535,7 +534,6 @@ const ESC_PRESET = {
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
     [CONFIG_WINDOW_IMAGE]: 'esc-window2.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
-    [CONFIG_SHOW_TILT]: true,
     [CONFIG_NAME]: 'Blind',
   },
   [ESC_TEST]: {
@@ -1174,7 +1172,7 @@ class EnhancedShutterCardNew extends LitElement{
        </ha-card>
       `;
     }
-    let showMessages = this.messageManager.countMessages() && this.closestElement('.element-preview',this) !== null;
+    let showMessages = this.messageManager.countMessages() && this.inEditor();
     let htmlParts = new htmlCard(this);
     let shutterSeperateBlock= new htmlBlockShutterSeperate(this.cardCfg);
 
@@ -1502,16 +1500,26 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
       console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
     }
+    let min_rows= this.nbROws;
+    let min_cols = this.nbCols;
+
+    if (this.inEditor()) {
+       min_rows = 4;
+       min_cols = 4;
+    }
+
     return {
       rows: this.nbRows,
       columns: this.nbCols,
-//      min_rows: this.nbRows-1,
-//      max_rows: this.nbRows+1,
-//      min_columns: this.nbCols-1,
-//      max_columns: this.nbCols+1,
+      min_rows: min_rows,
+      min_columns: min_cols,
+      // max_rows: 6,
+      // max_columns: 28,
     };
- }
-
+  }
+  inEditor(){
+    return this.closestElement('hui-dialog-edit-card') !== null;
+  }
   // ############################################################################################################
   static getStubConfig(hass, unusedEntities, allEntities) {
     //Search for a cover entity unused first then in all entities.
@@ -1656,14 +1664,14 @@ class EnhancedShutter extends LitElement
     }
 
     // tilt .....
-    if (this.cfg.showTilt()){
+    if (this.cfg.canTilt()&& this.cfg.showTiltSliderBlock()){
       this.tiltSlider = findElement(this,`.${ESC_CLASS_TILT_SLIDER_CLASS}`);
       this.manageEvents(ADD_EVENT, MOUSEDOWN, this.tiltSlider, this.mouseDownTilt);
     }
     this.startResizeObserver();
   }
 
-  manageEvents(action, phase, target, handler) {
+  manageEvents(action, mouseState, target, handler) {
     const EVENTS = {
       [MOUSEDOWN]: ['touchstart', 'mousedown', 'pointerdown'],
       [MOUSEMOVE]: ['touchmove', 'mousemove', 'pointermove'],
@@ -1673,10 +1681,8 @@ class EnhancedShutter extends LitElement
        [ADD_EVENT]:    target.addEventListener.bind(target),
        [REMOVE_EVENT]: target.removeEventListener.bind(target)
     }
-
-
-    for (const type of EVENTS[phase]) {
-      if (phase === MOUSEDOWN && type === 'touchstart' && action === ADD_EVENT) {
+    for (const type of EVENTS[mouseState]) {
+      if (mouseState === MOUSEDOWN && type === 'touchstart' && action === ADD_EVENT) {
         // Workaround: reattach touchstart as non-passive
         target.removeEventListener(type, handler);
         eventMethod[action](type, handler, { passive: false });
@@ -1706,7 +1712,7 @@ class EnhancedShutter extends LitElement
   updated(changedProperties) {
     // after update and render
     super.updated(changedProperties);
-    if (this.cfg.showTilt()){
+    if (this.cfg.canTilt()){
       this.tiltSlider.value = this.react_TiltPosition; // TODO !!!!! Special ..Bug ??...
     }
     this.action='cover-update';
@@ -2361,7 +2367,7 @@ class shutterCfg {
     this.offsetOpenedPct(boundary(escConfig[CONFIG_OFFSET_OPENED_PCT]));
     this.offsetClosedPct(boundary(escConfig[CONFIG_OFFSET_CLOSED_PCT]));
 
-    this.showTilt(!!escConfig[CONFIG_SHOW_TILT]);
+    //this.showTilt(!!escConfig[CONFIG_SHOW_TILT]);
 
     this.tiltAngleMin(escConfig[CONFIG_TILT_ANGLE_MIN]);
     this.tiltAngleMax(escConfig[CONFIG_TILT_ANGLE_MAX]);
@@ -2533,7 +2539,7 @@ class shutterCfg {
     let transform =`rotate(${r}deg)`;
     return transform;
   }
-  
+
   showName(value = null){
     return this.#getCfg(CONFIG_SHOW_NAME,value);
   }
@@ -2702,9 +2708,9 @@ class shutterCfg {
   offsetClosedPct(value = null){
     return this.#getCfg(CONFIG_OFFSET_CLOSED_PCT,value);
   }
-  showTilt(value=null){
-    return (this.#getCfg(CONFIG_SHOW_TILT,value)) && this.canTilt()
-  }
+  //showTilt(value=null){
+  //  return (this.#getCfg(CONFIG_SHOW_TILT,value)) && this.canTilt()
+ // }
   canTilt(){
     return this.isCoverFeatureActive(ESC_FEATURE_OPEN_TILT | ESC_FEATURE_CLOSE_TILT | ESC_FEATURE_SET_TILT_POSITION ) ;
 
@@ -3069,7 +3075,7 @@ class shutterCfg {
       if (this.offsetActive()) {
         positionText += ` (${this.currentUiPosition(position)}%)`;
       }
-      if (this.showTilt()) {
+      if (this.canTilt()) {
         tiltPosition = this.currentUiTiltPosition(tiltPosition);
         positionText += ` / Tilt: ${tiltPosition}%`;
       }
@@ -3788,12 +3794,12 @@ class htmlBlockMiddleDiv extends htmlBlock{
       <div class="${ESC_CLASS_MIDDLE}">
         ${leftButtonsBlock.show(shutter)}
         ${centralWindowBlock.show(shutter)}
-        ${this.cfg.showPartialOpenButtons() || this.cfg.showTilt()
+        ${this.cfg.showPartialOpenButtons() || this.cfg.canTilt()
           ? html`
-            ${(this.cfg.showTilt()) ? tiltSectionBlock.show(shutter):''}
+            ${(this.cfg.canTilt()) ? tiltSectionBlock.show(shutter):''}
             ${this.cfg.showPartialOpenButtons() ? rightButtonsBlock.show(shutter):''}
           `
-          : html`<div class='blankDiv'></div>`
+          : html`` //`<div class='blankDiv'></div>`
         }
       </div>
     `;
@@ -3806,17 +3812,15 @@ class htmlBlockMiddleDiv extends htmlBlock{
 
     let xyLeftButtons = leftButtonsBlock.size();
     let xyCentralWindow = centralWindowBlock.size();
-    let xyTiltSection = this.cfg.showTilt() ? tiltSectionBlock.size(): new xyPair();
+    let xyTiltSection = this.cfg.canTilt() ? tiltSectionBlock.size(): new xyPair();
     let xyRightButtons = this.cfg.showPartialOpenButtons() ? rightButtonsBlock.size() : new xyPair();
 
     let xyRight = this.gridAddBoth(xyTiltSection,xyRightButtons);
 
-    if (!xyRight.size()) {
-      let xySize = this.cfg.iconSize()*1.5;
-      xyRight = new xyPair(xySize,xySize);
-    }
-
-
+    //if (!xyRight.size()) { // class blankDiv
+    //  let xySize = this.cfg.iconSize()*1.5;
+    //  xyRight = new xyPair(xySize,xySize);
+    //}
     let xy;
     if (this.cfg.buttonGroupInRow()){
       xy = this.gridAddHorizontal(xyLeftButtons,xyCentralWindow);
@@ -3829,8 +3833,6 @@ class htmlBlockMiddleDiv extends htmlBlock{
     this.displaySize(xy);
 
     return xy;
-
-
   }
 }
 class htmlBlockBottomDiv extends htmlBlock{
@@ -4103,18 +4105,20 @@ class htmlBlockTiltSection extends htmlBlock{
   }
   size(){
     let xy = new xyPair();
-    const tiltSliderBlock= new htmlBlockTiltSlider(this.block);
-    const tiltButtonsBlock = new htmlBlockTiltButtons(this.block);
-    let xyTiltSlider = tiltSliderBlock.size();
-    let xyTiltButtons = tiltButtonsBlock.size();
+    if (this.cfg.canTilt()){
+      const tiltSliderBlock= new htmlBlockTiltSlider(this.block);
+      const tiltButtonsBlock = new htmlBlockTiltButtons(this.block);
+      let xyTiltSlider = tiltSliderBlock.size();
+      let xyTiltButtons = tiltButtonsBlock.size();
 
-    if (this.cfg.buttonGroupInRow()){
-      xy = this.cfg.showTiltButtonBlock() ? this.gridAddHorizontal(xy,xyTiltButtons) : xy;
-      xy = this.cfg.showTiltSliderBlock() ? this.gridAddHorizontal(xy,xyTiltSlider) :xy;
-    }else{
-      xy = this.cfg.showTiltButtonBlock() ? this.gridAddVertical(xy,xyTiltButtons) : xy;
-      xy = this.cfg.showTiltSliderBlock() ? this.gridAddVertical(xy,xyTiltSlider) : xy;
+      if (this.cfg.buttonGroupInRow()){
+        xy = this.cfg.showTiltButtonBlock() ? this.gridAddHorizontal(xy,xyTiltButtons) : xy;
+        xy = this.cfg.showTiltSliderBlock() ? this.gridAddHorizontal(xy,xyTiltSlider) :xy;
+      }else{
+        xy = this.cfg.showTiltButtonBlock() ? this.gridAddVertical(xy,xyTiltButtons) : xy;
+        xy = this.cfg.showTiltSliderBlock() ? this.gridAddVertical(xy,xyTiltSlider) : xy;
 
+      }
     }
     this.displaySize(xy);
     return xy;
@@ -4123,31 +4127,37 @@ class htmlBlockTiltSection extends htmlBlock{
 class htmlBlockCentralWindow extends htmlBlock{
   show(shutter){
     return html`
-      <div class="${ESC_CLASS_SELECTOR}">
-        <div class="${ESC_CLASS_SELECTOR_PICTURE}">
-          ${this.escImages.getWindowImageSrc(this.cfg.id()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">` : ''}
+      ${this.cfg.showWindow()
+      ? html`
+        <div class="${ESC_CLASS_SELECTOR}">
+          <div class="${ESC_CLASS_SELECTOR_PICTURE}">
+            ${this.escImages.getWindowImageSrc(this.cfg.id()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">` : ''}
 
-          ${this.showSlide(shutter)}
-          ${this.cfg.partialActive()
-            ? html`<div class="${ESC_CLASS_SELECTOR_PARTIAL}"></div>`
-            : ''}
-          <div class="${ESC_CLASS_MOVEMENT_OVERLAY}">
-            <ha-icon class="${ESC_CLASS_MOVEMENT_UP}" icon="mdi:arrow-up">
-            </ha-icon>
-            <ha-icon class="${ESC_CLASS_MOVEMENT_DOWN}" icon="mdi:arrow-down">
-            </ha-icon>
+            ${this.showSlide(shutter)}
+            ${this.cfg.partialActive()
+              ? html`<div class="${ESC_CLASS_SELECTOR_PARTIAL}"></div>`
+              : ''}
+            <div class="${ESC_CLASS_MOVEMENT_OVERLAY}">
+              <ha-icon class="${ESC_CLASS_MOVEMENT_UP}" icon="mdi:arrow-up">
+              </ha-icon>
+              <ha-icon class="${ESC_CLASS_MOVEMENT_DOWN}" icon="mdi:arrow-down">
+              </ha-icon>
+            </div>
           </div>
+          ${this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)
+            ? html`<div class="${ESC_CLASS_SELECTOR_PICKER}"></div>`
+            : ''}
         </div>
-        ${this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)
-          ? html`<div class="${ESC_CLASS_SELECTOR_PICKER}"></div>`
-          : ''}
-      </div>
+      `: html``}
     `;
   }
   size(){
-    let x = this.cfg.windowWidthPx() + 2 * SELECTOR_MARGIN;
-    let y = this.cfg.windowHeightPx() + 2 * SELECTOR_MARGIN;
-    let xy = new xyPair(x,y);
+    let xy = new xyPair();
+    if (this.cfg.showWindow()){
+      let x = this.cfg.windowWidthPx() + 2 * SELECTOR_MARGIN;
+      let y = this.cfg.windowHeightPx() + 2 * SELECTOR_MARGIN;
+      xy.fill(x,y);
+    }
     this.displaySize(xy);
     return xy;
   }
@@ -4161,7 +4171,7 @@ class htmlBlockCentralWindow extends htmlBlock{
   }
   showSlideSlats(shutter){
     // Only Tilt when SHowTilt and there is a size
-    const output = this.cfg.showTilt() && shutter.canShowTilt()
+    const output = this.cfg.canTilt() && shutter.canShowTilt()
      ? html`
         ${this.showSlatsTilt(shutter)}
       `
