@@ -6,14 +6,15 @@
  * https://developers.home-assistant.io/docs/core/entity/cover
  */
 
-
-
 const VERSION = 'v1.6.0b1';
 const DEBUG = false;
 // // local copy of RELEASE 3.0.1 of
 // https://www.jsdelivr.com/package/gh/lit/dist
 
 import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
+import * as C from './src/constants.js';
+import {xyPair,htmlShutter} from './src/classes.js';
+import * as HtmlBlocks from './src/htmlBlocks.js';
 
 // import {html, css, unsafeCSS } from './lit/lit-core.min.js';
 // import {LitElement} from './lit/lit-debug.js'; // <-- dit is nu de debug versie
@@ -47,12 +48,14 @@ const REMOVE_EVENT = 'remove';
 const IS_HORIZONTAL = [LEFT,RIGHT];
 const IS_VERTICAL = [UP,DOWN];
 const HORIZONTAL = 'horizontal';
-const VERTICAL = 'vertical';
+// const VERTICAL = 'vertical';
 const NONE = 'none';
 const AUTO_TL = `${AUTO}-${TOP}-${LEFT}`;
 const AUTO_TR = `${AUTO}-${TOP}-${RIGHT}`;
 const AUTO_BL = `${AUTO}-${BOTTOM}-${LEFT}`;
 const AUTO_BR = `${AUTO}-${BOTTOM}-${RIGHT}`;
+
+
 /*
     from https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view
     for getLayoutOptions() {
@@ -144,19 +147,18 @@ const ESC_CLASS_HA_ICON_TILT = `${ESC_CLASS_HA_ICON}-tilt`;
 const ESC_CLASS_ICON_LEFT = `${ESC_CLASS_BASE_NAME}-icon-${LEFT}`;
 const ESC_CLASS_ICON_RIGHT = `${ESC_CLASS_BASE_NAME}-icon-${RIGHT}`;
 const ESC_CLASS_TOP_ICON_TEXT = `${ESC_CLASS_BASE_NAME}-icon-text`;
+
 const ESC_CLASS_TILT = `${ESC_CLASS_BASE_NAME}-tilt`;
 const ESC_CLASS_TILT_CONTAINER = `${ESC_CLASS_TILT}-container`;
 const ESC_CLASS_TILT_CLASS = `${ESC_CLASS_TILT}-class`;
 const ESC_CLASS_TILT_LINE = `${ESC_CLASS_TILT}-line`;
-const ESC_CLASS_TILT_SLIDER = `${ESC_CLASS_TILT}-slider`;
-const ESC_CLASS_TILT_SLIDER_WRAP = `${ESC_CLASS_TILT_SLIDER}-wrap`;
-const ESC_CLASS_TILT_SLIDER_CLASS = `${ESC_CLASS_TILT_SLIDER}-class`;
+const ESC_CLASS_SLIDER = `${ESC_CLASS_TILT}-slider`;
+const ESC_CLASS_SLIDER_WRAP = `${ESC_CLASS_SLIDER}-wrap`;
+const ESC_CLASS_SLIDER_CLASS = `${ESC_CLASS_SLIDER}-class`;
 const ESC_CLASS_TILT_SLAT1 = `${ESC_CLASS_TILT}-slat1`;
 const ESC_CLASS_TILT_SLAT2 = `${ESC_CLASS_TILT}-slat2`;
 const ESC_CLASS_TILT_SLAT3 = `${ESC_CLASS_TILT}-slat3`;
 const ESC_CLASS_TILT_EDGE = `${ESC_CLASS_TILT}-slat-edge`;
-
-
 
 const POSITIONS =[AUTO,AUTO_BL,AUTO_BR,AUTO_TL,AUTO_TR,LEFT,RIGHT,TOP,BOTTOM,NONE];
 
@@ -266,6 +268,7 @@ const CONFIG_SHOW_STANDARD_BUTTONS = 'show_standard_buttons'; //SHOW 5
 const CONFIG_SHOW_PARTIAL_OPEN_BUTTONS = 'show_partial_open_buttons';//SHOW 6
 
 const CONFIG_SHOW_TILT_SLIDER_BLOCK = 'show_tilt_slider_block'; // new SHOW 3 new
+const CONFIG_SHOW_OPEN_CLOSE_SLIDER_BLOCK = 'show_open_close_slider_block'; // new SHOW 3 new
 const CONFIG_SHOW_WINDOW = 'show_window'; // SHOW 7 new
 //======
 const CONFIG_DISABLE_END_BUTTONS = 'disable_end_buttons'; // grey out the endbuttons when not functional
@@ -319,7 +322,8 @@ const ESC_SUPPORTED_FEATURES = ESC_FEATURE_ALL;
 
 const ESC_AWNING = 'awning';
 const ESC_CURTAIN = 'curtain';
-const ESC_TEST = 'test'; // used for testing purposes
+const ESC_TEST = 'test';
+const ESC_COMPACT = 'compact';
 const ESC_SHADE = 'shade';
 const ESC_BLIND = 'blind';
 const ESC_ROLLER_SHUTTER = 'roller-shutter';
@@ -327,7 +331,7 @@ const ESC_TYPES =
   [ESC_AWNING, ESC_CURTAIN, ESC_ROLLER_SHUTTER,ESC_SHADE,ESC_BLIND];
 
 const ESC_SHUTTER_PRESET = ESC_ROLLER_SHUTTER;
-const ESC_STACKED = VERTICAL;
+const ESC_STACKED = C.VERTICAL;
 const ESC_NAME = null;
 const ESC_PASSIVE_MODE = false;
 const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}/images`;
@@ -366,6 +370,7 @@ const ESC_INVERT_PCT_TILT_UI    = false;
 const ESC_INVERT_PCT_TILT_COVER = false;
 
 const ESC_TILT_SLIDER_ONLY = false;
+const ESC_SHOW_OPEN_CLOSE_SLIDER_BLOCK = true;
 const ESC_SHOW_TILT_SLIDER_BLOCK = true;
 const ESC_SHOW_TILT_BUTTON_BLOCK = true;
 
@@ -487,6 +492,7 @@ const CONFIG_DEFAULT ={
 
   [CONFIG_SHOW_WINDOW]: ESC_SHOW_WINDOW, // new
   [CONFIG_SHOW_TILT_SLIDER_BLOCK]: ESC_SHOW_TILT_SLIDER_BLOCK, // new
+  [CONFIG_SHOW_OPEN_CLOSE_SLIDER_BLOCK]: ESC_SHOW_OPEN_CLOSE_SLIDER_BLOCK, // new
 //==========================
   [CONFIG_PICKER_OVERLAP_PX]: ESC_PICKER_OVERLAP_PX,
   [CONFIG_CURRENT_POSITION]: ESC_CURRENT_POSITION,
@@ -542,6 +548,17 @@ const ESC_PRESET = {
     [CONFIG_SHUTTER_SLAT_IMAGE]: 'rode_rechthoek.png',
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: 'gele_rechthoek.png',
     [CONFIG_NAME]: 'Test',
+  },
+  [ESC_COMPACT]: {
+    [CONFIG_WINDOW_IMAGE]: '',
+    [CONFIG_SHOW_NAME]: false,
+    [CONFIG_SHOW_OPENING]: false,
+    [CONFIG_SHOW_STANDARD_BUTTONS]: false,
+    [CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]: false,
+    [CONFIG_SHOW_TILT_BUTTON_BLOCK]: false,
+    [CONFIG_SHOW_TILT_SLIDER_BLOCK]: false,
+    [CONFIG_SHOW_WINDOW]: false,
+    [CONFIG_NAME]: 'Minimal',
   }
 }
 
@@ -868,15 +885,15 @@ const SHUTTER_CSS =`
         font-size: var(--esc-top-icon-text-font-size);
       }
 
-    .${ESC_CLASS_TILT_SLIDER_WRAP} {
+    .${ESC_CLASS_SLIDER_WRAP} {
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .${ESC_CLASS_TILT_SLIDER_CLASS} {
-      writing-mode: var(--esc-tilt-slider-writing-mode);
-      direction: var(--esc-tilt-slider-direction);
+    .${ESC_CLASS_SLIDER_CLASS} {
+      writing-mode: var(--esc-slider-writing-mode);
+      direction: var(--esc-slider-direction);
       zoom: var(--esc-button-scale);
     }
 
@@ -1095,7 +1112,7 @@ class EnhancedShutterCardNew extends LitElement{
     return uniqueKeysInObj1;
   }
   getCardFlexDirection(){
-    return this.cardCfg.stacked() == VERTICAL ? 'column' : 'row';
+    return this.cardCfg.stacked() == C.VERTICAL ? 'column' : 'row';
   }
   getCoverEntities(){
     let keys = this.shutterCfgs.map(cfg=>cfg.entityId());
@@ -1174,7 +1191,7 @@ class EnhancedShutterCardNew extends LitElement{
     }
     let showMessages = this.messageManager.countMessages() && this.inEditor();
     let htmlParts = new htmlCard(this);
-    let shutterSeperateBlock= new htmlBlockShutterSeperate(this.cardCfg);
+    let shutterSeperateBlock= new HtmlBlocks.htmlBlockShutterSeperate(this.cardCfg);
 
     let htmlout = html`
         ${showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
@@ -1330,7 +1347,7 @@ class EnhancedShutterCardNew extends LitElement{
       .${ESC_CLASS_SHUTTER_FLEX} {
         margin: 0 auto;
       }
-      .${ESC_CLASS_SHUTTER_SEPARATE}-${VERTICAL}:not(:last-child) {
+      .${ESC_CLASS_SHUTTER_SEPARATE}-${C.VERTICAL}:not(:last-child) {
         box-sizing: border-box;
         border: 2px solid var(--divider-color);
 
@@ -1446,9 +1463,9 @@ class EnhancedShutterCardNew extends LitElement{
 
     let sizeCard = new xyPair();
 
-    let shutterSeperateBlock= new htmlBlockShutterSeperate(this.cardCfg);
+    let shutterSeperateBlock= new HtmlBlocks.htmlBlockShutterSeperate(this.cardCfg);
     let sizeSeperate = shutterSeperateBlock.size();
-    let cardTilteSize = new htmlBlockCardTitle(this.cardCfg);
+    let cardTilteSize = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
     let sizeTitle = cardTilteSize.size();
 
     if (this.config && this.config.entities && (this.isShutterConfigLoaded || this.initializeReady))
@@ -1458,10 +1475,10 @@ class EnhancedShutterCardNew extends LitElement{
       this.shutterCfgs.forEach(cfg =>{
 
         let block = {cfg: cfg,escImages: this.escImages};
-        let shutterBlock = new htmlBlockShutter(block);
+        let shutterBlock = new HtmlBlocks.htmlBlockShutter(block);
 
         if (seperate){
-          if (this.cardCfg.stacked() == VERTICAL){
+          if (this.cardCfg.stacked() == C.VERTICAL){
             sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeperate);
           }else{
             sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeperate);
@@ -1470,7 +1487,7 @@ class EnhancedShutterCardNew extends LitElement{
           sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
         }
 
-        if (this.cardCfg.stacked() == VERTICAL){
+        if (this.cardCfg.stacked() == C.VERTICAL){
           sizeCard = shutterBlock.gridAddVertical(sizeCard,shutterBlock.size());
         }else{
           sizeCard = shutterBlock.gridAddHorizontal(sizeCard,shutterBlock.size());
@@ -1486,11 +1503,12 @@ class EnhancedShutterCardNew extends LitElement{
     * Calculate the number of rows and columns
     * Use sizes from calculated cardSize and HA grid sizes
     */
-    console.log('=====>Size Card: ', sizeCard);
+    //console.log('=====>Size Card: ', sizeCard);
     this.nbRows= Math.ceil((sizeCard.y()+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
     this.nbCols= Math.ceil((sizeCard.x()+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
 
-    const divCard= this.closest('div.card');
+    //const divCard= this.closest('div.card');
+    const divCard= this.closestElement('div.card');
     /* Set CSS variables for number of rows and columns */
     /* Used in CSS to set sizes */
 
@@ -1500,7 +1518,7 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
       console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
     }
-    let min_rows= this.nbROws;
+    let min_rows= this.nbRows;
     let min_cols = this.nbCols;
 
     if (this.inEditor()) {
@@ -1631,9 +1649,15 @@ class EnhancedShutter extends LitElement
   {
     let entityId = this.cfg.entityId();
     let positionText;
-    if (this.action=='user-drag'){
+    //console.log('action: ',this.action);
+    if (this.action=='user-drag-picker'){
       // position from screen-dragging shown
       this.actualScreenPosition = this.screenPosition;  // old
+      this.actualShutterPosition = this.react_ShutterPosition;
+      this.actualTiltPosition = this.cfg.currentBaseTiltPosition();
+    }else if (this.action=='user-drag-slider'){
+      // position from screen-dragging shown
+      this.actualScreenPosition =  this.defScreenPositionFromCurrentPosition(this.react_ShutterPosition);
       this.actualShutterPosition = this.react_ShutterPosition;
       this.actualTiltPosition = this.cfg.currentBaseTiltPosition();
     }else if (this.action=='user-drag-tilt'){
@@ -1645,33 +1669,45 @@ class EnhancedShutter extends LitElement
       // physical position cover shown.
       this.actualScreenPosition =  this.defScreenPositionFromCurrentPosition();
       this.actualShutterPosition = this.cfg.currentDevicePosition()?? 0;
-
       this.actualTiltPosition = this.cfg.currentDeviceTiltPosition() ?? 0;
-      this.react_TiltPosition = this.actualTiltPosition; // TODO: logical not needed, but actual it does: check
     }
-
-    const shutterBlock = new htmlBlockShutter(this);
+    this.react_TiltPosition = this.actualTiltPosition; // TODO: logical not needed, but actual it does: check
+    this.react_ShutterPosition = this.actualShutterPosition;
+    console.log(`Render Cover ${entityId}, action: ${this.action}, actualScreenPosition: ${this.actualScreenPosition}, actualShutterPosition: ${this.actualShutterPosition}, actualTiltPosition: ${this.actualTiltPosition}`);
+    const shutterBlock = new HtmlBlocks.htmlBlockShutter(this);
 
     return shutterBlock.show(this);
 
   }
   firstUpdated(changedProperties) {
     this[ESC_CLASS_SELECTOR] = findElement(this, `.${ESC_CLASS_SELECTOR}`);
-    const picker = findElement(this, `.${ESC_CLASS_SELECTOR_PICKER}`);
-    if (picker) {
-      this.manageEvents(ADD_EVENT, MOUSEDOWN, picker, this.mouseDown);
+
+    // openClosePicker
+    const openClosePicker = findElement(this, `.${ESC_CLASS_SELECTOR_PICKER}`);
+    if (openClosePicker) {
+      this.manageEvents(ADD_EVENT, MOUSEDOWN, openClosePicker, this.mouseDownOpenClosePicker);
 
     }
+    // openCloseSlider
+    if (this.cfg.showOpenCloseSliderBlock() && this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)){
+      this.openCloseSlider = findElement(this,`.${ESC_CLASS_SLIDER_CLASS}.openclose`);
+      if (this.openCloseSlider) {
+        this.manageEvents(ADD_EVENT, MOUSEDOWN, this.openCloseSlider, this.mouseDownOpenCloseSlider);
+      }
+    }
 
-    // tilt .....
+    // tiltSlider
     if (this.cfg.canTilt()&& this.cfg.showTiltSliderBlock()){
-      this.tiltSlider = findElement(this,`.${ESC_CLASS_TILT_SLIDER_CLASS}`);
-      this.manageEvents(ADD_EVENT, MOUSEDOWN, this.tiltSlider, this.mouseDownTilt);
+      this.tiltSlider = findElement(this,`.${ESC_CLASS_SLIDER_CLASS}.tilt`);
+      if (this.tiltSlider) {
+        this.manageEvents(ADD_EVENT, MOUSEDOWN, this.tiltSlider, this.mouseDownTiltSlider);
+      }
     }
     this.startResizeObserver();
   }
 
   manageEvents(action, mouseState, target, handler) {
+
     const EVENTS = {
       [MOUSEDOWN]: ['touchstart', 'mousedown', 'pointerdown'],
       [MOUSEMOVE]: ['touchmove', 'mousemove', 'pointermove'],
@@ -1713,9 +1749,12 @@ class EnhancedShutter extends LitElement
     // after update and render
     super.updated(changedProperties);
     if (this.cfg.canTilt()){
-      this.tiltSlider.value = this.react_TiltPosition; // TODO !!!!! Special ..Bug ??...
+      if (this.$tiltSlider) this.tiltSlider.value = this.react_TiltPosition  ; // TODO !!!!! Special ..Bug ??...
     }
-    this.action='cover-update';
+    if (this.cfg.showOpenCloseSliderBlock()){
+      if (this.$openCloseSlider) this.openCloseSlider.value = this.react_ShutterPosition; // TODO !!!!! Special ..Bug ??...
+    }
+    this.action='cover-updated';
   }
 
 
@@ -1796,11 +1835,11 @@ class EnhancedShutter extends LitElement
       this.cfg.transformRotate(rotate), // rotate around div transform-origin
     ].join(SPACE);
   }
-  tiltSliderWritingMode(){
+  sliderWritingMode(){
     const mode= this.cfg.buttonGroupInRow() ? 'vertical-rl' : 'horizontal';
     return mode;
   }
-  tiltSliderDirection(){
+  sliderDirection(){
     const direction= this.cfg.buttonGroupInRow() ? 'rtl' : 'ltr';
     return direction;
   }
@@ -2088,7 +2127,7 @@ class EnhancedShutter extends LitElement
   }
   doOnclick(command, position=null) {
 
-    this.action='user-pick';
+    this.action='user-pick-on-click';
     let entityId= this.cfg.entityId();
 
     if (position !==null) position = this.cfg.applyInvertToPosition(position);
@@ -2116,12 +2155,17 @@ class EnhancedShutter extends LitElement
   getShutterOnScreenPosition(event){
     const screenPosition = this.getScreenPosFromPickPoint(event);
     const shutterPosition = this.getShutterPosFromScreenPos(screenPosition);
-    return shutterPosition;
+    return shutterPosition; // between 0-100
   }
   getTiltOnScreenPosition(event){
     // since Tilt uses Slider, event is not needed
     const  tiltPosition = this.tiltSlider.value ?? 0;
-    return tiltPosition;
+    return tiltPosition; // between 0-100
+  }
+  getOpenCloseOnScreenPosition(event){
+    // since Tilt uses Slider, event is not needed
+    const  shutterPosition =  parseInt(this.openCloseSlider.value, 10) ?? 0;
+    return shutterPosition; // between 0-100
   }
 
   getShutterPosFromScreenPos(screenPosition){
@@ -2153,77 +2197,85 @@ class EnhancedShutter extends LitElement
     };
     return point;
   }
-  mouseDown = (event) =>
+/**
+ * MOUSE DOWN
+ */
+  mouseDownOpenClosePicker = (event) =>
   {
     if (event.pageY === undefined || this.cfg.passiveMode()) return;
-
     if (event.cancelable) {
       //Disable default drag event
       event.preventDefault();
     }
-    this.action='user-drag';
-
+    this.action='user-drag-picker';
     this.getBasePickPoint(event);
-
-    this.manageEvents(ADD_EVENT, MOUSEMOVE, this, this.mouseMove);
-    this.manageEvents(ADD_EVENT, MOUSEUP, window, this.mouseUp);
+    this.manageEvents(ADD_EVENT, MOUSEMOVE, this, this.mouseMoveOpenClosePicker);
+    this.manageEvents(ADD_EVENT, MOUSEUP, window, this.mouseUpOpenClosePicker);
   };
-  mouseDownTilt = () => {
+  mouseDownTiltSlider = () => {
     this.action='user-drag-tilt';
-    this.manageEvents(ADD_EVENT, MOUSEMOVE, this, this.mouseMoveTilt);
-    this.manageEvents(ADD_EVENT, MOUSEUP, window, this.mouseUpTilt);
+    this.manageEvents(ADD_EVENT, MOUSEMOVE, this, this.mouseMoveTiltSlider);
+    this.manageEvents(ADD_EVENT, MOUSEUP, window, this.mouseUpTiltSlider);
   }
-
-
-  mouseMove = (event) =>
+  mouseDownOpenCloseSlider = () => {
+    this.action='user-drag-slider';
+    this.manageEvents(ADD_EVENT, MOUSEMOVE, this, this.mouseMoveOpenCloseSlider);
+    this.manageEvents(ADD_EVENT, MOUSEUP, window, this.mouseUpOpenCloseSlider);
+  }
+/**
+ * MOUSE MOVE
+ */
+  mouseMoveOpenClosePicker = (event) =>
   {
     if (event.pageY === undefined) return;
-
-
-    this.action='user-drag';
+    this.action='user-drag-picker';
     this.screenPosition = this.getScreenPosFromPickPoint(event); //old
     this.react_ShutterPosition = this.getShutterOnScreenPosition(event);
-
     const tiltPosition = this.cfg.currentDeviceTiltPosition();
     this.positionText = this.cfg.computePositionText(this.react_ShutterPosition,tiltPosition);
+    console.log('mouseMoveOpenClosePicker:',this.react_ShutterPosition,tiltPosition,this.positionText);
   };
-  mouseMoveTilt = (event) => { // mouseMoveTilt
+  mouseMoveTiltSlider = (event) => { // mouseMoveTilt
     this.action='user-drag-tilt';
     this.react_TiltPosition = this.getTiltOnScreenPosition(event);
-
     const shutterPosition = this.cfg.currentDevicePosition();
     this.positionText = this.cfg.computePositionText(shutterPosition,this.react_TiltPosition);
+    console.log('mouseMoveTiltSlider:',shutterPosition,this.react_TiltPosition,this.positionText);
   }
-  mouseUpTilt = (event) => {
-    this.action='user-pick';
-    this.manageEvents(REMOVE_EVENT, MOUSEUP, window, this.mouseUpTilt);
-    this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveTilt);
-
-    const tiltPosition = this.getTiltOnScreenPosition(event);
-
-    if (this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)){
-      // send position to shutter
-      this.sendShutterTiltPosition(this.cfg.entityId(),tiltPosition);
-    }else{
-      // no ESC_FEATURE_SET_TILT_POSITION, so send open- or close-action
-      const actionToSend = (tiltPosition > 50) ? ACTION_SHUTTER_OPEN_TILT : ACTION_SHUTTER_CLOSE_TILT;
-      this.callHassCoverService(this.cfg.entityId(),actionToSend);
-      // possinlity that position is not changed => request Update
-      this.requestUpdate();
-    }
-
+  mouseMoveOpenCloseSlider = (event) => { // mouseMoveTilt
+    this.action='user-drag-slider';
+    this.react_ShutterPosition = this.getOpenCloseOnScreenPosition(event); // TODO
+    const tiltPosition = this.cfg.currentDeviceTiltPosition();
+    this.positionText = this.cfg.computePositionText(this.react_ShutterPosition,tiltPosition);
+    console.log('mouseMoveOpenCloseSlider:',this.react_ShutterPosition,tiltPosition,this.positionText);
   }
+/**
+ * MOUSE UP
+ */
 
-  mouseUp = (event) =>
-  {
+  mouseUpTiltSlider = (event) => {
+    this.action='user-drag-tilt';
+    this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveTiltSlider);
+    this.manageEvents(REMOVE_EVENT, MOUSEUP, window, this.mouseUpTiltSlider);
+    this.react_TiltPosition = this.getTiltOnScreenPosition(event)
+    this.sendTilt(this.react_TiltPosition);
+  }
+  mouseUpOpenCloseSlider = (event) => {
+    this.action='user-drag-slider';
+    this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveOpenCloseSlider);
+    this.manageEvents(REMOVE_EVENT, MOUSEUP, window, this.mouseUpOpenCloseSlider);
+    this.react_ShutterPosition =  this.getOpenCloseOnScreenPosition(event);
+    this.sendOpenClose(this.react_ShutterPosition);
+  }
+  mouseUpOpenClosePicker = (event) => {
     if (event.pageY === undefined) return;
-
-    this.action='user-pick';
-    this.manageEvents(REMOVE_EVENT, MOUSEUP, window, this.mouseUp);
-    this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMove);
-
-    const shutterPosition = this.getShutterOnScreenPosition(event);
-
+    this.action='user-drag-picker';
+    this.manageEvents(REMOVE_EVENT, MOUSEMOVE, this, this.mouseMoveOpenClosePicker);
+    this.manageEvents(REMOVE_EVENT, MOUSEUP, window, this.mouseUpOpenClosePicker);
+    this.react_ShutterPosition = this.getShutterOnScreenPosition(event);
+    this.sendOpenClose(this.react_ShutterPosition);
+  };
+  sendOpenClose(shutterPosition){
     if (this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)){
       // send position to shutter
       this.sendShutterPosition(this.cfg.entityId(), shutterPosition);
@@ -2231,11 +2283,20 @@ class EnhancedShutter extends LitElement
       // no ESC_FEATURE_SET_POSITION, so send open- or close-action
       const actionToSend = (shutterPosition > 50) ? ACTION_SHUTTER_OPEN : ACTION_SHUTTER_CLOSE;
       this.callHassCoverService(this.cfg.entityId(),actionToSend);
-      // possinlity that position is not changed => request Update
-      this.requestUpdate();
-
+      //this.requestUpdate();
     }
-  };
+  }
+  sendTilt(tiltPosition){
+    if (this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_TILT_POSITION)){
+      // send tilt position to shutter
+      this.sendShutterTiltPosition(this.cfg.entityId(), tiltPosition);
+    }else{
+      // no ESC_FEATURE_SET_TILT_POSITION, so send open- or close-action
+      const actionToSend = (tiltPosition > 50) ? ACTION_SHUTTER_OPEN_TILT : ACTION_SHUTTER_CLOSE_TILT;
+      this.callHassCoverService(this.cfg.entityId(),actionToSend);
+      //this.requestUpdate();
+    }
+  }
 
   sendShutterPosition( entityId, position)
   {
@@ -2393,6 +2454,7 @@ class shutterCfg {
     this.showPartialOpenButtons(escConfig[CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]);
 
     this.showTiltSliderBlock(escConfig[CONFIG_SHOW_TILT_SLIDER_BLOCK]);
+    this.showOpenCloseSliderBlock(escConfig[CONFIG_SHOW_OPEN_CLOSE_SLIDER_BLOCK]);
     this.showWindow(escConfig[CONFIG_SHOW_WINDOW]);
 
     this.buttonStopHideStates(escConfig[CONFIG_BUTTON_STOP_HIDE_STATES]  ? escConfig[CONFIG_BUTTON_STOP_HIDE_STATES] : ESC_BUTTON_STOP_HIDE_STATES);
@@ -2559,6 +2621,10 @@ class shutterCfg {
 
   showTiltSliderBlock(value = null){
     return this.#getCfg(CONFIG_SHOW_TILT_SLIDER_BLOCK,value);
+  }
+  showOpenCloseSliderBlock(value = null){
+    return true; // TODO: remove
+    return this.#getCfg(CONFIG_SHOW_OPEN_CLOSE_SLIDER_BLOCK,value);
   }
   showWindow(value = null){
     return this.#getCfg(CONFIG_SHOW_WINDOW,value);
@@ -3318,1022 +3384,6 @@ class htmlCard{
   }
 }
 
-class htmlShutter{
-
-  constructor(enhancedShutter){
-    this.enhancedShutter=enhancedShutter;
-    this.cfg =enhancedShutter.cfg;
-    this.actualScreenPosition = enhancedShutter.actualScreenPosition;
-    this.actualTiltPosition = enhancedShutter.actualTiltPosition;
-    this.positionText =this.cfg.computePositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
-    this.escImages= enhancedShutter.escImages;
-  }
-
-  defStyleVarsShutter(){
-    let escState=this.cfg.positionToState();
-    const viewImage=this.escImages.getViewImageSrc(this.cfg.id());
-
-    // solves #103 see other lines with shutterSlatImage
-    const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.id());
-    const shutterBottomImage=this.escImages.getShutterBottomImageSrc(this.cfg.id());
-
-    return `
-      --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
-      --ha-icon-button-size: ${this.cfg.iconButtonSize()}${UNITY};
-      --mdc-icon-size: ${this.cfg.iconSize()}${UNITY};
-      --esc-icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${UNITY};
-      --esc-icon-div-size: ${ICON_DIV_SIZE/ICON_SIZE*this.cfg.iconSizeWifiBattery()}${UNITY};
-      --esc-icons-margins: ${this.cfg.iconsPosition()==TOP?'0 0 auto 0':'auto 0 0 0'};
-
-      --esc-overflow: ${this.enhancedShutter.getOverflow()};
-
-      --esc-display-name-top: ${this.cfg.displayName(TOP)};
-      --esc-display-name-bottom: ${this.cfg.displayName(BOTTOM)};
-      --esc-display-position-top: ${this.cfg.displayOpening(TOP)};
-      --esc-display-position-bottom: ${this.cfg.displayOpening(BOTTOM)};
-      --esc-flex-flow-middle: ${!this.cfg.buttonGroupInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
-      --esc-window-height: ${this.cfg.windowHeightPx()+UNITY};
-      --esc-window-width1: ${this.cfg.buttonGroupInRow() ? '100%': this.cfg.windowWidthPx()+UNITY};
-      --esc-window-width: ${this.cfg.windowWidthPx()+UNITY};
-      --esc-window-background-image: ${viewImage.includes('.') ?  `url(${viewImage})` : ''};
-      --esc-window-background-color: ${viewImage.includes('.') ? '' : `${viewImage}`};
-      --esc-window-rotate: ${this.cfg.viewImageRotate()};
-      --esc-button-rotate: ${this.cfg.buttonRotate()};
-
-      --esc-transform-slide:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};
-      --esc-transform-picker: ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
-      --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngleDeg(this.enhancedShutter.react_TiltPosition)};
-      --esc-tilt-angle-deg-graph: ${this.enhancedShutter.getTiltAngleDegGraph(this.enhancedShutter.react_TiltPosition)};
-
-      --esc-transform-undo-slats-rotate:  ${this.enhancedShutter.transformUndoSlatsRotate()};
-      --esc-transform-tilt-slat-rotate:  ${this.enhancedShutter.transformTiltSlatRotate()};
-      --esc-transform-movement: ${this.enhancedShutter.transformMovement()};
-
-      --esc-picker-top: -${this.cfg.pickerOverlapPx()+UNITY};
-      --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+UNITY};
-
-      --esc-slat-height: ${this.enhancedShutter.slatHeightPx()+UNITY};
-
-      --esc-tilt-slat-height: ${this.enhancedShutter.tiltSlatHeightPx()+UNITY};
-      --esc-tilt-slat-width: ${this.enhancedShutter.tiltSlatWidthPx()};
-      --esc-tilt-slat-origin: ${this.enhancedShutter.tiltSlatOrigin()};
-      --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};
-      --esc-tilt-slider-writing-mode: ${this.enhancedShutter.tiltSliderWritingMode()};
-      --esc-tilt-slider-direction: ${this.enhancedShutter.tiltSliderDirection()};
-      --esc-tilt-icon-rotate: ${(this.enhancedShutter.tiltIconRotate3())};
-
-      --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+UNITY};
-      --esc-slide-edge-height: ${this.enhancedShutter.shutterBottomSize().y()+UNITY};
-
-      --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
-
-      --esc-buttons-flex-flow:      ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
-      --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
-
-      --esc-movement-overlay-display: ${(escState == SHUTTER_STATE_OPENING || escState == SHUTTER_STATE_CLOSING) ? 'block' : NONE};
-      --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertForOverlayDisplay(SHUTTER_STATE_OPENING) ? 'block' : NONE};
-      --esc-movement-overlay-down-display: ${escState == this.cfg.applyInvertForOverlayDisplay(SHUTTER_STATE_CLOSING) ? 'block' : NONE};
-
-      --esc-slide-background-main-image: ${shutterSlatImage.includes('.') ?  `url(${shutterSlatImage})` : ''};
-      --esc-slide-background-edge-image: ${shutterBottomImage.includes('.') ?  `url(${shutterBottomImage})` : ''};
-
-      --esc-slide-background-main-color: ${shutterSlatImage.includes('.') ? '' : `${shutterSlatImage}`};
-      --esc-slide-background-edge-color: ${shutterBottomImage.includes('.') ? '' : `${shutterBottomImage}`};
-
-      --esc-slide-background-slat-size: ${this.enhancedShutter.shutterSlatSizePercentage()};
-      --esc-slide-background-slats-size: ${this.enhancedShutter.shutterSlatsSizePercentage()};
-      --esc-slide-background-edge-size: ${this.enhancedShutter.shutterBottomSizePercentage()};
-
-      --esc-slide-background-main-position: ${this.enhancedShutter.shutterMainBackgroundPosition()};
-      --esc-slide-background-edge-position: ${this.enhancedShutter.shutterEdgeBackgroundPosition()};
-
-      --esc-top-right-color: ${this.cfg.signalIconColor()};
-      --esc-top-left-color: ${this.cfg.batteryIconColor()};
-
-      --esc-top-icon-text-line-height: ${this.cfg.iconScalePercent()};
-      --esc-top-icon-text-font-size: ${this.cfg.iconScalePercent()};
-      --esc-text-scale: ${this.cfg.textScaleFactor()};
-      --esc-button-scale: ${this.cfg.buttonScaleFactor()};
-
-    `;
-  }
-}
-
-class htmlBlock{
-
-  constructor(shutter){
-    //this.enhancedShutter=enhancedShutter;
-    this.cfg=shutter.cfg;
-    this.escImages= shutter.escImages ?? {};
-    this.block = {cfg: this.cfg,escImages: this.escImages};
-
-  }
-  show(shutter){
-    return '';
-  }
-  size(){
-    return new xyPair(-1,-1);
-  }
-  showTopBottomDiv(shutter,position){
-    const batteryIconBlock = new htmlBlockBatteryIcon(shutter);
-    const signalIconBlock = new htmlBlockSignalIcon(shutter);
-    const nameAndStateBlock = new htmlBlockNameAndState(shutter);
-
-    return html`
-        <div class="${ESC_CLASS_TOP_BOTTOM}">
-          ${position == this.cfg.iconsPosition() ? batteryIconBlock.show(shutter) : ''}
-          ${nameAndStateBlock.show(shutter,position)}
-          ${position == this.cfg.iconsPosition() ? signalIconBlock.show(shutter) : ''}
-        </div>
-    `;
-  }
-  displaySize(xy){
-    console.log (this.constructor.name,xy.x(),xy.y());
-  }
-  sizeTopBottomDiv(position){
-    const batteryIconBlock = new htmlBlockBatteryIcon(this.block);
-    const signalIconBlock = new htmlBlockSignalIcon(this.block);
-    const nameAndStateBlock = new htmlBlockNameAndState(this.block);
-
-    let xyBattery = this.cfg.iconsPosition() === position ? batteryIconBlock.size() : new xyPair();
-    let xySignal = this.cfg.iconsPosition() === position ? signalIconBlock.size() : new xyPair();
-    let xyNameAndState = nameAndStateBlock.size(position);
-
-    let xy = this.gridAddHorizontal(xyBattery,xyNameAndState);
-    xy = this.gridAddHorizontal(xy,xySignal);
-    //xy = this.gridAddVertical(xy,new xyPair(0,16)); // padding
-    return xy;
-  }
-
-
-  gridAddVertical(size1,size2){ //  xyPair's
-    return new xyPair (Math.max(size1.x(),size2.x()),size1.y()+size2.y())
-  };
-  gridAddHorizontal(size1,size2){ //  xyPair's
-    return new xyPair(size1.x()+size2.x(),Math.max(size1.y(),size2.y()));
-  }
-  gridAddBoth(size1,size2){ //  xyPair's
-    return new xyPair(size1.x()+size2.x(),size1.y()+size2.y());
-  }
-  sizeButton(){
-    /*
-    * size standard-buttons
-    */
-   let xy;
-    if (this.cfg.showStandardButtons()) {
-      const haButtonSize = this.cfg.iconButtonSize();
-      xy = new xyPair(haButtonSize,haButtonSize);
-    }else{
-      xy = new xyPair();
-    }
-    return xy;
-  }
-  sizeIcon(){
-    let xy = new xyPair();
-    if (this.cfg.getIconsActive()) xy= new xyPair(ICON_DIV_SIZE,ICON_DIV_SIZE+4); // +4 from browser info (to be improved)
-    return xy;
-  }
-
-}
-class htmlBlockShutter extends htmlBlock{
-
-
-  show(shutter){
-    const entityId = this.cfg.entityId();
-    const htmlParts = new htmlShutter(shutter);
-
-    const topDivBlock = new htmlBlockTopDiv(shutter);
-    const middleDivBlock = new htmlBlockMiddleDiv(shutter);
-    const bottomDivBlock = new htmlBlockBottomDiv(shutter);
-
-    return html`
-      <div
-        class=${ESC_CLASS_SHUTTER}
-        data-shutter="${entityId}"
-        style = "${htmlParts.defStyleVarsShutter()}"
-      >
-        ${topDivBlock.show(shutter)}
-        ${middleDivBlock.show(shutter)}
-        ${bottomDivBlock.show(shutter)}
-      </div>
-    `;
-
-  }
-  size(){
-    const topDivBlock = new htmlBlockTopDiv(this.block);
-    const middleDivBlock = new htmlBlockMiddleDiv(this.block);
-    const bottomDivBlock = new htmlBlockBottomDiv(this.block);
-
-    let xyTopDiv = topDivBlock.size();
-    let xyMiddleDiv = middleDivBlock.size();
-    let xyBottomDiv =bottomDivBlock.size();
-
-    let xy = this.gridAddVertical(xyTopDiv,xyMiddleDiv);
-    xy = this.gridAddVertical(xy,xyBottomDiv)
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockCardTitle extends htmlBlock{
-  constructor(cfg){
-    //this.enhancedShutter=enhancedShutter;
-    let block = {cfg: cfg};
-    super(block);
-  }
-  show(){
-    // dummy code, done by HA
-    return html``;
-  }
-  size(){
-
-    let xy;
-    //let title2 = "TestTitle";
-    let title = this.cfg.title();
-    if (title){
-      const haCardTitleFontHeight= 24;
-      const haTitleHeightPx = 76;
-      const haTitleFont = 'Roboto, Noto, sans-serif';
-      const titleSize= getTextSize(title,haTitleFont,haCardTitleFontHeight);
-      xy = new xyPair(titleSize.width,haTitleHeightPx);
-    }
-    else{
-      xy = new xyPair();
-    }
-    this.displaySize(xy);
-    return xy;
-  }
-
-}
-
-
-class htmlBlockShutterSeperate extends htmlBlock{
-  constructor(cfg){
-    //this.enhancedShutter=enhancedShutter;
-    let block = {cfg: cfg};
-    super(block);
-  }
-  show(){
-    return html`
-      <div class="${ESC_CLASS_SHUTTER_SEPARATE}-${this.cfg.stacked()}"></div>
-    `;
-  }
-  size(){
-    let xy;
-
-    if (this.cfg.stacked()===VERTICAL){
-      xy = new xyPair(100,4);
-    }else{
-      xy = new xyPair(20,100);
-    }
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockBatteryIcon extends htmlBlock{
-
-  show(shutter){
-    return html`
-        ${this.cfg.getIconsActive() ? html`
-          ${this.cfg.getBatteryEntity() ? html`
-            <div class="${ESC_CLASS_ICON_LEFT}">
-              <ha-icon
-                icon=${this.cfg.batteryLevelIcon()}
-                class="${ESC_CLASS_HA_ICON}"
-              >
-              </ha-icon>
-              <div class="${ESC_CLASS_TOP_ICON_TEXT}">
-                ${this.cfg.batteryLevelText()}
-              </div>
-            </div>
-            ` : html`
-            <div class="${ESC_CLASS_ICON_LEFT}">
-              <ha-icon
-                icon="mdi:blank"
-                class="${ESC_CLASS_HA_ICON}"
-              >
-              </ha-icon>
-            </div>`
-          }
-          ` : ''
-        }
-    `;
-
-  }
-  size(){
-    let xy= this.sizeIcon();
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockSignalIcon extends htmlBlock{
-
-  show(shutter){
-    return html`
-      ${this.cfg.getIconsActive() ? html`
-        ${this.cfg.getSignalEntity() ? html`
-          <div class="${ESC_CLASS_ICON_RIGHT}">
-            <ha-icon
-              icon=${this.cfg.signalLevelIcon()}
-              class="${ESC_CLASS_HA_ICON}"
-            >
-            </ha-icon>
-            <div class="${ESC_CLASS_TOP_ICON_TEXT}">
-              ${this.cfg.signalLevelText()}
-            </div>
-          </div>
-          ` : html`
-          <div class="${ESC_CLASS_ICON_RIGHT}">
-            <ha-icon
-              icon="mdi:blank"
-              class="${ESC_CLASS_HA_ICON}"
-            >
-            </ha-icon>
-          </div>`
-        }
-        ` : ''
-      }
-    `;
-  }
-  size(){
-    let xy = this.sizeIcon();
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockNameAndState extends htmlBlock{
-
-  show(shutter,position=TOP){
-    const escClassName = position == TOP ? ESC_CLASS_TOP : ESC_CLASS_BOTTOM;
-    const stateBlock= new htmlBlockState(shutter);
-    const nameBlock = new htmlBlockName(shutter);
-    return html`
-      <div class = "${escClassName}">
-        ${this.cfg.namePosition() === position ? nameBlock.show(shutter) : ''}
-        ${this.cfg.openingPosition() === position ? stateBlock.show(shutter) : ''}
-      </div>
-    `;
-  }
-  size(position=TOP){
-    const haTitleFont = 'Roboto, Noto, sans-serif';
-    const shutterTitleHeight = FONT_SIZE_LABEL * this.cfg.textScaleFactor();
-    const stateBlock= new htmlBlockState(this.block);
-    const nameBlock = new htmlBlockName(this.block);
-
-    let spaceSize = getTextSize('\u00A0', haTitleFont, shutterTitleHeight, '400');
-    let xySpace =new xyPair(spaceSize.width,spaceSize.height);
-
-    let xyName = this.cfg.openingPosition() === position ? nameBlock.size() : new xyPair();
-    let xyState = this.cfg.namePosition() === position ? stateBlock.size() : new xyPair();
-    let xy;
-    if (this.cfg.inlineHeader()){
-       xy = this.gridAddHorizontal(xyName,xyState);
-       xy = xy.size() ? this.gridAddHorizontal(xy,xySpace) : xy;  // add space if name or state is present)
-    }else{
-       xy = this.gridAddVertical(xyName,xyState);
-    }
-    xy = this.gridAddVertical(xy,new xyPair(0,16)); // padding = 16
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockName extends htmlBlock{
-  show(shutter){
-    return html`
-      ${this.cfg.showName()
-        ? html`
-          <div class="${ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}"
-            @click="${() => shutter.doHassMoreInfoOpen(this.cfg.entityId())}"
-          >
-            ${this.cfg.friendlyName()}
-            ${this.cfg.passiveMode() ? html`
-              <span class="${ESC_CLASS_HA_ICON_LOCK}">
-                <ha-icon icon="mdi:lock"></ha-icon>
-              </span>
-            `:''}
-          </div>
-          `
-        :
-          ''
-      }
-
-    `;
-  }
-  size(){
-    let xy= new xyPair();
-    const haTitleFont = 'Roboto, Noto, sans-serif';
-    const shutterTitleHeight = FONT_SIZE_LABEL * this.cfg.textScaleFactor();
-
-    if (this.cfg.showName()){
-      let titleSize = getTextSize(this.cfg.friendlyName(),haTitleFont,shutterTitleHeight,'400');
-      let x1 = titleSize.width;
-      let y1 = LINE_HEIGHT_LABEL * this.cfg.textScaleFactor();
-      xy = new xyPair(x1,y1);
-    }
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockState extends htmlBlock{
-  show(shutter){
-    const actualTiltPosition = shutter.actualTiltPosition;
-    const positionText =this.cfg.computePositionText(shutter.actualShutterPosition,actualTiltPosition);
-
-    return html`
-      ${this.cfg.showOpening()
-        ?  html`
-          <div class="${ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${ESC_CLASS_LABEL_DISABLED}` : ''}">
-            <span style="white-space: pre-line;">${positionText}</span>
-          </div>
-      `:
-        ''
-     }
-    `;
-  }
-  size(){
-    let x=0;
-    let y=0;
-    let xy= new xyPair();
-    const haTitleFont = 'Roboto, Noto, sans-serif';
-    /*
-    * Size shutter-opening row
-    */
-    if (this.cfg.showOpening()) {
-      let devPosition =this.cfg.currentDevicePosition();
-      let tiltPosition = this.cfg.currentDeviceTiltPosition();
-      let pctSize = getTextSize(this.cfg.computePositionText(devPosition,tiltPosition),haTitleFont,FONT_SIZE_POSITION * this.cfg.textScaleFactor());
-      let x1 = pctSize.width + 2*MARGIN_POSITION;  // including margin;
-      let y1 = LINE_HEIGHT_POSITION * this.cfg.textScaleFactor() + 2*MARGIN_POSITION;  // including margin
-      x += x1 + 5 * 2; // hor. padding
-      y += y1; // vert. padding already with margin ??
-      xy = new xyPair(x,y);
-    }
-    this.displaySize(xy);
-    return xy;
-  }
-
-}
-class htmlBlockTopDiv extends htmlBlock{
-  show(shutter){
-    return this.showTopBottomDiv(shutter,TOP);
-  }
-  size(){
-    let xy = this.sizeTopBottomDiv(TOP);
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockMiddleDiv extends htmlBlock{
-  show(shutter){
-
-    const leftButtonsBlock = new htmlBlockLeftButtons(shutter);
-    const centralWindowBlock = new htmlBlockCentralWindow(shutter);
-    const tiltSectionBlock = new htmlBlockTiltSection(shutter);
-    const rightButtonsBlock = new htmlBlockRightButtons(shutter);
-
-    return html`
-      <div class="${ESC_CLASS_MIDDLE}">
-        ${leftButtonsBlock.show(shutter)}
-        ${centralWindowBlock.show(shutter)}
-        ${this.cfg.showPartialOpenButtons() || this.cfg.canTilt()
-          ? html`
-            ${(this.cfg.canTilt()) ? tiltSectionBlock.show(shutter):''}
-            ${this.cfg.showPartialOpenButtons() ? rightButtonsBlock.show(shutter):''}
-          `
-          : html`` //`<div class='blankDiv'></div>`
-        }
-      </div>
-    `;
-  }
-  size(){
-    const leftButtonsBlock = new htmlBlockLeftButtons(this.block);
-    const centralWindowBlock = new htmlBlockCentralWindow(this.block);
-    const tiltSectionBlock = new htmlBlockTiltSection(this.block);
-    const rightButtonsBlock = new htmlBlockRightButtons(this.block);
-
-    let xyLeftButtons = leftButtonsBlock.size();
-    let xyCentralWindow = centralWindowBlock.size();
-    let xyTiltSection = this.cfg.canTilt() ? tiltSectionBlock.size(): new xyPair();
-    let xyRightButtons = this.cfg.showPartialOpenButtons() ? rightButtonsBlock.size() : new xyPair();
-
-    let xyRight = this.gridAddBoth(xyTiltSection,xyRightButtons);
-
-    //if (!xyRight.size()) { // class blankDiv
-    //  let xySize = this.cfg.iconSize()*1.5;
-    //  xyRight = new xyPair(xySize,xySize);
-    //}
-    let xy;
-    if (this.cfg.buttonGroupInRow()){
-      xy = this.gridAddHorizontal(xyLeftButtons,xyCentralWindow);
-      xy = this.gridAddHorizontal(xy,xyRight);
-    }else{
-      xy = this.gridAddVertical(xyLeftButtons,xyCentralWindow);
-      xy = this.gridAddVertical(xy,xyRight);
-
-    }
-    this.displaySize(xy);
-
-    return xy;
-  }
-}
-class htmlBlockBottomDiv extends htmlBlock{
-  show(shutter){
-    return this.showTopBottomDiv(shutter,BOTTOM);
-  }
-  size(){
-    let xy = this.sizeTopBottomDiv(BOTTOM);
-    this.displaySize(xy);
-    return xy;
-  }
-}
-
-class htmlBlockLeftButtons extends htmlBlock{
-  show(shutter){
-    const buttonUpBlock = new htmlBlockButtonUp(shutter);
-    const buttonDownBlock = new htmlBlockButtonDown(shutter);
-    const buttonStopBlock = new htmlBlockButtonStop(shutter);
-    const buttonPartialBlock = new htmlBlockButtonPartial(shutter);
-    return html`
-      ${this.cfg.buttonsLeftActive()
-      ? html`
-        <div class="${ESC_CLASS_BUTTONS}">
-          ${buttonUpBlock.show(shutter)}
-          ${buttonStopBlock.show(shutter)}
-          ${buttonDownBlock.show(shutter)}
-          ${buttonPartialBlock.show(shutter)}
-        </div>
-        ` : html`
-        <div class='blankDiv'></div>
-      `}
-    `;
-  }
-  size(){
-    const buttonUpBlock = new htmlBlockButtonUp(this.block);
-    const buttonDownBlock = new htmlBlockButtonDown(this.block);
-    const buttonStopBlock = new htmlBlockButtonStop(this.block);
-    const buttonPartialBlock = new htmlBlockButtonPartial(this.block);
-
-    let xyButtonUpBlock = buttonUpBlock.size();
-    let xyButtonDownBlock = buttonDownBlock.size();
-    let xyButtonStopBlock = buttonStopBlock.size();
-    let xyButtonPartialBlock = buttonPartialBlock.size();
-
-    let xy = this.gridAddVertical(xyButtonUpBlock,xyButtonDownBlock);
-    xy = this.gridAddVertical(xy,xyButtonStopBlock);
-    xy = this.gridAddVertical(xy,xyButtonPartialBlock);
-
-    if (!this.cfg.buttonGroupInRow()) xy.switch();
-
-    this.displaySize(xy);
-    return xy;
-  }
-  showButtonUpDown(shutter,feature,action,upDown,icon){
-
-    return html`
-      ${this.cfg.showStandardButtons() &&
-        !this.cfg.buttonOpenCloseHideStates(upDown).includes(this.cfg.positionToState()) &&
-         this.cfg.isCoverFeatureActive(feature)
-      ? html`
-        <ha-icon-button
-          label="${this.cfg.getLocalize(LOCALIZE_TEXT[this.cfg.applyInvertForShowButtonUpDownLabel(action)])}"
-          .disabled=${this.cfg.disabledGlobaly() || this.cfg.coverButtonDisabled(upDown)}
-          @click=${()=> shutter.doOnclick(`${this.cfg.applyInvertForShowButtonUpDownClick(action,true)}`)} >
-          <ha-icon
-            class="${ESC_CLASS_HA_ICON}"
-            icon="${icon}">
-          </ha-icon>
-        </ha-icon-button>
-      `
-      : ''}
-    `;
-  }
-}
-class htmlBlockButtonUp extends htmlBlockLeftButtons{
-
-  show(shutter){
-        return this.showButtonUpDown(shutter,ESC_FEATURE_OPEN,ACTION_SHUTTER_OPEN,UP,'mdi:arrow-up');
-  }
-  size(){
-    let xy = this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockButtonStop extends htmlBlockLeftButtons{
-  show(shutter){
-    const action = ACTION_SHUTTER_STOP;
-    const feature = ESC_FEATURE_STOP;
-    const icon = "mdi:stop"
-
-    return html`
-      ${this.cfg.showStandardButtons() &&
-        !this.cfg.buttonStopHideStates().includes(this.cfg.positionToState()) &&
-         this.cfg.isCoverFeatureActive(feature)
-      ? html`
-        <ha-icon-button
-          label="${this.cfg.getLocalize(LOCALIZE_TEXT[action])}"
-          .disabled=${this.cfg.disabledGlobaly()}
-          @click=${()=> shutter.doOnclick(`${action}`)} >
-          <ha-icon
-            class="${ESC_CLASS_HA_ICON}"
-            icon="${icon}">
-          </ha-icon>
-        </ha-icon-button>
-      `
-      : ''
-    }`;
-  }
-  size(){
-    let xy =this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
-    this.displaySize(xy);
-    return xy;
-  }
-
-}
-class htmlBlockButtonDown extends htmlBlockLeftButtons{
-  show(shutter){
-    return this.showButtonUpDown(shutter,ESC_FEATURE_CLOSE,ACTION_SHUTTER_CLOSE,DOWN,'mdi:arrow-down');
-  }
-  size(){
-    let xy =this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockButtonPartial extends htmlBlockLeftButtons{
-  show(shutter){
-    return html`
-      ${this.cfg.partialActive() && this.cfg.showStandardButtons() /* TODO localize texts */
-        ? html`
-          <ha-icon-button
-            label="Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} (${SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
-            .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> shutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(this.cfg.partial()))}" >
-            <ha-icon class="${ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
-          </ha-icon-button>
-        ` : ''}
-    `;
-  }
-  size(){
-    let xy = this.cfg.partialActive() && this.cfg.showStandardButtons()?  this.sizeButton() : new xyPair(0,0) ;
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockTiltButtons extends htmlBlock{
-  show(shutter){
-    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(shutter);
-    const tiltPositionBlock = new htmlBlockTiltPosition(shutter);
-    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(shutter);
-    return html`
-      <div class="${ESC_CLASS_TILT_BUTTONS}">
-        ${buttonTiltUpBlock.show(shutter)}
-        ${tiltPositionBlock.show(shutter)}
-        ${buttonTiltDownBlock.show(shutter)}
-      </div>
-    `;
-  }
-  showButtonTilt(shutter,action,icon){
-    return html`
-          <ha-icon-button
-            label="${this.cfg.getLocalize(LOCALIZE_TEXT[action])}"
-            .disabled=${this.cfg.disabledGlobaly()}
-            @click="${()=> shutter.doOnclick(`${action}`)}">
-            <ha-icon class="${ESC_CLASS_HA_ICON_TILT}" icon="${icon}"></ha-icon>
-          </ha-icon-button>
-    `;
-  }
-  size(){
-    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.block);
-    const tiltPositionBlock = new htmlBlockTiltPosition(this.block);
-    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.block);
-
-    let xyButtonTiltUp = buttonTiltUpBlock.size();
-    let xyTiltPosition = tiltPositionBlock.size();
-    let xyButtonTiltDown = buttonTiltDownBlock.size();
-    let xy;
-
-    if (!this.cfg.buttonGroupInRow()) {
-       xy = this.gridAddHorizontal(xyButtonTiltUp,xyTiltPosition);
-       xy = this.gridAddHorizontal(xy,xyButtonTiltDown);
-    }else{
-       xy = this.gridAddVertical(xyButtonTiltUp,xyTiltPosition);
-       xy = this.gridAddVertical(xy,xyButtonTiltDown);
-    }
-    this.displaySize(xy);
-    return xy;
-  }
-
-}
-class htmlBlockButtonTiltDown extends htmlBlockTiltButtons{
-  show(shutter){
-    const icon = this.cfg.buttonGroupInRow() ? "mdi:arrow-bottom-right":"mdi:arrow-bottom-left" ;
-    return this.showButtonTilt(shutter,ACTION_SHUTTER_CLOSE_TILT,icon);
-
-  }
-  size(){
-    let xy = this.sizeButton();
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockButtonTiltUp extends htmlBlockTiltButtons{
-  show(shutter){
-    const icon = this.cfg.buttonGroupInRow() ? "mdi:arrow-top-right":"mdi:arrow-bottom-right" ;
-    return this.showButtonTilt(shutter,ACTION_SHUTTER_OPEN_TILT,icon);
-  }
-  size(){
-    let xy = this.sizeButton();
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockTiltPosition extends htmlBlockTiltButtons{
-  show(shutter){
-    return html`
-      <div class="${ESC_CLASS_TILT_CONTAINER}">
-        <div class="${ESC_CLASS_TILT_CLASS}">
-          <div class="${ESC_CLASS_TILT_LINE}"></div>
-        </div>
-        <div class="${ESC_CLASS_TILT_CLASS}">
-          <div class="${ESC_CLASS_TILT_LINE}"></div>
-        </div>
-        <div class="${ESC_CLASS_TILT_CLASS}">
-          <div class="${ESC_CLASS_TILT_LINE}"></div>
-        </div>
-      </div>
-    `;
-  }
-  size(){
-    // question on box-sizing: border-box: can't see difference ..??
-    let size = ICON_SIZE* this.cfg.buttonScaleFactor();
-    let xy = new xyPair(size,3*size);
-    if (!this.cfg.buttonGroupInRow()) xy.switch();
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockTiltSlider extends htmlBlock{
-  show(shutter){
-    return html`
-      <div class="${ESC_CLASS_TILT_SLIDER_WRAP}">
-        <input type="range" class ="${ESC_CLASS_TILT_SLIDER_CLASS}" min="0" max="100" value="${this.actualTiltPosition}">
-      </div>
-    `;
-  }
-  size(){
-    /**
-     * questions about size due to browswer definitions of <input> html
-     */
-    let width= 20; //default of chrome WATCH OUT POSSIBLE WRONG FOR ROTATING
-    let height = 129; // default
-    let zoom = this.cfg.buttonScaleFactor();
-
-    let xy = new xyPair(zoom*width,zoom*height);
-    if (!this.cfg.buttonGroupInRow()) xy.switch();
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockTiltSection extends htmlBlock{
-  show(shutter){
-    const tiltSliderBlock= new htmlBlockTiltSlider(shutter);
-    const tiltButtonsBlock = new htmlBlockTiltButtons(shutter);
-    return html`
-        ${this.cfg.showTiltButtonBlock() ? tiltButtonsBlock.show(shutter) : html``}
-        ${this.cfg.showTiltSliderBlock() ? tiltSliderBlock.show(shutter) :html``}
-    `;
-  }
-  size(){
-    let xy = new xyPair();
-    if (this.cfg.canTilt()){
-      const tiltSliderBlock= new htmlBlockTiltSlider(this.block);
-      const tiltButtonsBlock = new htmlBlockTiltButtons(this.block);
-      let xyTiltSlider = tiltSliderBlock.size();
-      let xyTiltButtons = tiltButtonsBlock.size();
-
-      if (this.cfg.buttonGroupInRow()){
-        xy = this.cfg.showTiltButtonBlock() ? this.gridAddHorizontal(xy,xyTiltButtons) : xy;
-        xy = this.cfg.showTiltSliderBlock() ? this.gridAddHorizontal(xy,xyTiltSlider) :xy;
-      }else{
-        xy = this.cfg.showTiltButtonBlock() ? this.gridAddVertical(xy,xyTiltButtons) : xy;
-        xy = this.cfg.showTiltSliderBlock() ? this.gridAddVertical(xy,xyTiltSlider) : xy;
-
-      }
-    }
-    this.displaySize(xy);
-    return xy;
-  }
-}
-class htmlBlockCentralWindow extends htmlBlock{
-  show(shutter){
-    return html`
-      ${this.cfg.showWindow()
-      ? html`
-        <div class="${ESC_CLASS_SELECTOR}">
-          <div class="${ESC_CLASS_SELECTOR_PICTURE}">
-            ${this.escImages.getWindowImageSrc(this.cfg.id()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">` : ''}
-
-            ${this.showSlide(shutter)}
-            ${this.cfg.partialActive()
-              ? html`<div class="${ESC_CLASS_SELECTOR_PARTIAL}"></div>`
-              : ''}
-            <div class="${ESC_CLASS_MOVEMENT_OVERLAY}">
-              <ha-icon class="${ESC_CLASS_MOVEMENT_UP}" icon="mdi:arrow-up">
-              </ha-icon>
-              <ha-icon class="${ESC_CLASS_MOVEMENT_DOWN}" icon="mdi:arrow-down">
-              </ha-icon>
-            </div>
-          </div>
-          ${this.cfg.isCoverFeatureActive(ESC_FEATURE_SET_POSITION)
-            ? html`<div class="${ESC_CLASS_SELECTOR_PICKER}"></div>`
-            : ''}
-        </div>
-      `: html``}
-    `;
-  }
-  size(){
-    let xy = new xyPair();
-    if (this.cfg.showWindow()){
-      let x = this.cfg.windowWidthPx() + 2 * SELECTOR_MARGIN;
-      let y = this.cfg.windowHeightPx() + 2 * SELECTOR_MARGIN;
-      xy.fill(x,y);
-    }
-    this.displaySize(xy);
-    return xy;
-  }
-  showSlide(shutter){
-     return html`
-        <div class="${ESC_CLASS_SELECTOR_SLIDE}">
-          ${this.showSlideSlats(shutter)}
-          <div class="${ESC_CLASS_SELECTOR_SLIDE_EDGE}"></div>
-        </div>
-      `;
-  }
-  showSlideSlats(shutter){
-    // Only Tilt when SHowTilt and there is a size
-    const output = this.cfg.canTilt() && shutter.canShowTilt()
-     ? html`
-        ${this.showSlatsTilt(shutter)}
-      `
-     : html`
-        ${this.showSlats(shutter)}
-      `;
-    return output;
-  }
-  showSlatsTilt(shutter){
-
-    const sizeSlide = shutter.windowSizeMovingDirectionPx();
-    const sizeSlat = shutter.slatSizeMovingDirectionPx() ;
-
-    //const sizeSlat = new xyPair(100,51);
-    const number = sizeSlat ? Math.ceil(sizeSlide / sizeSlat): 1;
-
-    return html`
-      <div class="${ESC_CLASS_TILT_SLAT1}">
-      ${Array.from({ length: number }, () =>
-        html`
-          <div class="${ESC_CLASS_TILT_SLAT2}">
-            <div class="${ESC_CLASS_TILT_EDGE}"></div>
-            <div class="${ESC_CLASS_TILT_SLAT3}">
-            </div>
-          </div>
-          `
-      )}
-      </div>
-    `;
-  }
-  showSlats(shutter){
-
-    return html`
-        <div class="${ESC_CLASS_SELECTOR_SLIDE_SLATS}">
-        </div>
-      `;
-  }
-}
-class htmlBlockRightButtons extends htmlBlock{
-  show(shutter){
-    const icons= {
-      0: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z",
-      1: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z",
-      2: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12Z",
-      3: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15Z",
-      4: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z",
-      5: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V20H8V18Z",
-
-    }
-    const pct= {
-      0: SHUTTER_OPEN_PCT,
-      1: 75,
-      2: 50,
-      3: 25,
-      4: 10,
-      5: SHUTTER_CLOSED_PCT,
-    }
-
-    const pointer={
-      0: 0,  // up
-      1: 1,  // middle
-      2: 1,  // middle
-      3: 1,  // middle
-      4: 1,  // middle
-      5: 2,  // down
-    };
-
-    const labels={
-      0: `Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_OPEN)}`,
-      1: `Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[1])}% )`,
-      2: `Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[2])}% )`,
-      3: `Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[3])}% )`,
-      4: `Partially ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[4])}% )`,
-      5: `Fully ${this.cfg.applyInvertOpenClose(SHUTTER_STATE_CLOSED)}`,
-    };
-
-    const disabled = {
-      0: this.cfg.disabledGlobaly() || this.cfg.coverButtonUpDisabled(), // up
-      1: this.cfg.disabledGlobaly(), // middle
-      2: this.cfg.disabledGlobaly() || this.cfg.coverButtonDownDisabled(), // down
-    };
-    const click = Object.fromEntries(
-      [0, 1, 2, 3, 4, 5].map(j => [j, () => this.enhancedShutter.doOnclick(`${ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(pct[j]))])
-    );
-
-    return html`
-        ${[0, 1].map(i => html`
-          <div class="${ESC_CLASS_BUTTONS}">
-            ${[i * 3, i * 3 + 1, i * 3 + 2].map(j => html`
-              <ha-icon-button
-                label=${labels[j]}
-                .disabled=${disabled[pointer[j]]}
-                @click=${click[j]}
-                path=${icons[j]}>
-              </ha-icon-button>
-            `)}
-          </div>
-        `)}
-    `;
-  }
-  size(){
-
-    const haButtonSize = this.cfg.iconButtonSize();
-
-    let xy = new xyPair(haButtonSize*2,haButtonSize*3);
-    if (!this.cfg.buttonGroupInRow()){
-      xy.switch();
-    }
-    this.displaySize(xy);
-    return xy;
-  }
-}
-
-
-class xyPair{
-  #coordX;
-  #coordY;
-  constructor(x=0,y=0){
-    this.#coordX = x;
-    this.#coordY = y;
-  }
-  x(){
-    return this.#coordX;
-  }
-  y(){
-    return this.#coordY;
-  }
-  switch(){
-    const tmp= this.#coordX;
-    this.#coordX = this.#coordY;
-    this.#coordY = tmp;
-  }
-  size(){
-    return this.x()*this.y();
-  }
-  rotate90(){
-    const tmp= this.#coordX;
-    this.#coordX = -this.#coordY;
-    this.#coordY = tmp;
-  }
-  rotate180(){
-    this.#coordX = -this.#coordX;
-    this.#coordY = -this.#coordY;
-  }
-  rotate270(){
-    const tmp= this.#coordX;
-    this.#coordX = this.#coordY;
-    this.#coordY = -tmp;
-  }
-  rotate360(){
-  }
-  fill(x,y){
-    this.#coordX = x;
-    this.#coordY = y;
-  }
-  fill2(xy){
-    this.#coordX = xy.x();
-    this.#coordY = xy.y();
-  }
-}
-
-
 class haEntity{
   #state;
   #attributes;
@@ -4631,21 +3681,6 @@ function defImagePathOrColor(image_map,image,image_type)
   return result;
 }
 
-function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
-  // Create a temporary canvas element
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-
-  // Set the fontstyle
-  context.font = `${fontWeight} ${fontHeight}px ${font}`;
-
-  // Measure and return the width of the text
-  let data = context.measureText(text);
-  let width = Math.ceil(data.width);
-  let height =  Math.ceil(data.fontBoundingBoxAscent + data.fontBoundingBoxDescent);
-  return {width,height,text,data};
-
-}
 
 /**
  * Main code
@@ -4878,7 +3913,6 @@ function isUrl(fileName){
   // Check if the file is a URL (starts with http:// or https://)
   return fileName.includes('.');
 }
-
 
 
 
