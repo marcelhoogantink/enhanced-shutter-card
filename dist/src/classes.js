@@ -1,4 +1,6 @@
 import * as C from './constants.js';
+//import {EscImages} from './escImages.js';
+
 
 export class xyPair{
   #coordX;
@@ -53,6 +55,7 @@ export class htmlShutter{
     this.cfg =enhancedShutter.cfg;
     this.actualScreenPosition = enhancedShutter.actualScreenPosition;
     this.actualTiltPosition = enhancedShutter.actualTiltPosition;
+    this.actualShutterPosition = enhancedShutter.actualShutterPosition;
     this.positionText =this.cfg.computePositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
     this.escImages= enhancedShutter.escImages;
   }
@@ -75,10 +78,7 @@ export class htmlShutter{
 
       --esc-overflow: ${this.enhancedShutter.getOverflow()};
 
-      --esc-display-name-top: ${this.cfg.displayName(C.TOP)};
-      --esc-display-name-bottom: ${this.cfg.displayName(C.BOTTOM)};
-      --esc-display-position-top: ${this.cfg.displayOpening(C.TOP)};
-      --esc-display-position-bottom: ${this.cfg.displayOpening(C.BOTTOM)};
+      --esc-flex-name_opening-flow: ${this.cfg.inlineHeader() ? 'row' : 'column'} nowrap;
       --esc-flex-flow-middle: ${!this.cfg.buttonGroupInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
       --esc-window-height: ${this.cfg.windowHeightPx()+C.UNITY};
       --esc-window-width1: ${this.cfg.buttonGroupInRow() ? '100%': this.cfg.windowWidthPx()+C.UNITY};
@@ -145,19 +145,4 @@ export class htmlShutter{
 
     `;
   }
-}
-export function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
-  // Create a temporary canvas element
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-
-  // Set the fontstyle
-  context.font = `${fontWeight} ${fontHeight}px ${font}`;
-
-  // Measure and return the width of the text
-  let data = context.measureText(text);
-  let width = Math.ceil(data.width);
-  let height =  Math.ceil(data.fontBoundingBoxAscent + data.fontBoundingBoxDescent);
-  return {width,height,text,data};
-
 }

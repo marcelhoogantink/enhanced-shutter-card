@@ -39,7 +39,7 @@ const CONFIG_NAME_DISABLED = 'name_disabled'; //depr SHOW 1
 const CONFIG_OPENING_DISABLED = 'opening_disabled';  // depr SHOW 2
   const CONFIG_SHOW_OPENING = "show_opening"; //new SHOW 2
 const CONFIG_TILT_SLIDER_ONLY = 'tilt_slider_only';  // deprecated SHOW 4
-  const CONFIG_SHOW_TILT_BUTTON_BLOCK = 'show_tilt_button_block'; // SHOW 4
+  const CONFIG_SHOW_TILT_BUTTON = 'show_tilt_button'; // SHOW 4
 const CONFIG_DISABLE_STANDARD_BUTTONS = 'disable_standard_buttons'; // SHOW 5
   const CONFIG_SHOW_STANDARD_BUTTONS = 'show_standard_buttons'; //SHOW 5
 const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons'; // SHOW 6
@@ -47,9 +47,17 @@ const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons'; // S
 
 / new
 const CONFIG_SHOW_WINDOW = 'show_window'; // SHOW 7 new
-const CONFIG_SHOW_TILT_SLIDER_BLOCK = 'show_tilt_slider_block'; // new SHOW 3 new
+const CONFIG_SHOW_TILT_SLIDER = 'show_tilt_slider'; // new SHOW 3 new
 
-
+    show_name: true
+    show_opening: true
+    show_standard_buttons: true
+    show_partial_open_buttons: true
+    show_tilt_button: true
+    show_tilt_slider: true
+    show_open_close_slider: true
+    show_window: true
+    partial_close_percentage: 50
 ### New in this beta-version v1.6.0b0:
 
 
@@ -153,7 +161,7 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 | shutter_preset               | string        | no       | `roller-shutter`                              | Several preset-shutters-setting-groups, which creates a good start-setting for a specific type of cover. See the table below for possible definitions and the settings of them
 | battery_entity               | string        | No       | `null`                                        | For general setting just use `auto` for automatic search
 | signal_entity                | string        | No       | `null`                                        | For general setting just use `auto` for automatic search
-| show_group_members           | boolean       | No       | flase                                         | Whwn using a grouped-cover in the Card, set to 'true'to display the member covers in stead of the group-cover.
+| show_group_members           | boolean       | No       | flase                                         | When using a grouped-cover in the Card, set to 'true'to display the member covers in stead of the group-cover.
 | passive_mode                 | boolean       | no       | false                                         | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.
 | image_map                    | string        | No       | /local/community/enhanced-shutter-card/images | map of the images.
 | window_image                 | string        | No       | esc-window.png                                | image of the window shutter.
