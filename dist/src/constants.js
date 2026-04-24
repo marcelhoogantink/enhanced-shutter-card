@@ -1,6 +1,11 @@
+import {
+  isRunningLocally,
+} from './functions.js';
+
+
 export const VERSION = 'v1.6.0b1';
-export const DEBUG = VERSION.includes('b');
-//export const DEBUG = false;
+export const IS_LOCAL = isRunningLocally();
+export const DEBUG = VERSION.includes('b') && IS_LOCAL;
 export const NONE = 'none';
 
 export const HORIZONTAL = 'horizontal';

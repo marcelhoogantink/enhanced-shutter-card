@@ -1,6 +1,6 @@
 //import * as C from './constants.js';
 //import {EscImages} from './escImages.js';
-
+import {DEBUG} from './constants.js';
 
 export function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
   // Create a temporary canvas element
@@ -18,6 +18,9 @@ export function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') 
 
 }
 export function console_log(...args){
+
+  if (!DEBUG) return;
+
   const stackLine = new Error().stack.split('\n')[2].trim();
 
   let caller = '?', line = '?';
@@ -34,7 +37,6 @@ export function console_log(...args){
     caller = '<anonymous>';
     line = anonMatch[1];
   }
-
   console.log(formatDate("HH:mm:ss.SSS"),`[${caller}:${line}]`,...args);
 }
 function formatDate(format) {
@@ -167,4 +169,53 @@ export function findParentNode(node, selector) {
   return currentNode;
 
 }
+export function isRunningLocally() {
+  const hostname = window.location.hostname;
+  const localPatterns = [
+    /^localhost$/,
+    /^127\.0\.0\.1$/,
+    /^homeassistant\.local$/,
+    /\.local$/,
+    /^10\./,
+    /^192\.168\./,
+    /^172\.(1[6-9]|2\d|3[01])\./,
+  ];
+  return localPatterns.some(pattern => pattern.test(hostname));
+}
+export function resizeDebugger(entries) {
+    entries.forEach((entry, i) => {
+      const reasons = [];
 
+      const { width, height } = entry.contentRect;
+      const target = entry.target;
+      // Check if target dimensions actually changed vs last observation
+      const prevSize = target._prevResizeSize;
+
+      if (!prevSize) {
+        reasons.push('🆕 first observation — no previous size to compare');
+      } else if (prevSize.width === width && prevSize.height === height) {
+        reasons.push('⚠️ fired but NO SIZE CHANGE — possibly reflow/style recalc triggered this');
+      } else {
+        if (prevSize.width !== width)  reasons.push(`↔️ width changed: ${prevSize.width}px → ${width}px`);
+        if (prevSize.height !== height) reasons.push(`↕️ height changed: ${prevSize.height}px → ${height}px`);
+      }
+
+      // Check borderBoxSize if available
+      if (entry.borderBoxSize?.length) {
+        reasons.push(`📦 borderBox: ${entry.borderBoxSize[0].inlineSize} × ${entry.borderBoxSize[0].blockSize}`);
+      }
+
+      // Check contentRect change
+      reasons.push(`📐 contentRect: ${width} × ${height}`);
+
+
+      console.group(`🔁 ResizeObserver fired — entry ${i}`);
+      console.log('target:', target);
+      console.log('reasons:', reasons);
+      console.log('target_prev:', target._prevResizeSize);
+      console.trace();
+      console.groupEnd();
+
+      target._prevResizeSize = { width, height };
+    });
+  }

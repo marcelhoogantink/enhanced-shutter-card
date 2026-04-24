@@ -14,7 +14,7 @@ import {
   //htmlShutter,
 } from './src/classes.js';
 import {
-  //defImagePathOrColor,
+  resizeDebugger,
   console_log,
 } from'./src/functions.js';
 
@@ -370,7 +370,7 @@ class EnhancedShutterCardNew extends LitElement{
   startResizeObserver() {
     const onResize = (entries) => {
       /* Things todo when resize is detected */
-      if (C.DEBUG) this.resizeDebugger(entries);
+      if (C.DEBUG) resizeDebugger(entries);
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
@@ -385,43 +385,6 @@ class EnhancedShutterCardNew extends LitElement{
     this.resizeObserver.observe(Globals.huiView);
   }
 
-  resizeDebugger(entries) {
-  entries.forEach((entry, i) => {
-    const reasons = [];
-
-    const { width, height } = entry.contentRect;
-    const target = entry.target;
-    // Check if target dimensions actually changed vs last observation
-    const prevSize = target._prevResizeSize;
-
-    if (!prevSize) {
-      reasons.push('🆕 first observation — no previous size to compare');
-    } else if (prevSize.width === width && prevSize.height === height) {
-      reasons.push('⚠️ fired but NO SIZE CHANGE — possibly reflow/style recalc triggered this');
-    } else {
-      if (prevSize.width !== width)  reasons.push(`↔️ width changed: ${prevSize.width}px → ${width}px`);
-      if (prevSize.height !== height) reasons.push(`↕️ height changed: ${prevSize.height}px → ${height}px`);
-    }
-
-    // Check borderBoxSize if available
-    if (entry.borderBoxSize?.length) {
-      reasons.push(`📦 borderBox: ${entry.borderBoxSize[0].inlineSize} × ${entry.borderBoxSize[0].blockSize}`);
-    }
-
-    // Check contentRect change
-    reasons.push(`📐 contentRect: ${width} × ${height}`);
-
-
-    console.group(`🔁 ResizeObserver fired — entry ${i}`);
-    console.log('target:', target);
-    console.log('reasons:', reasons);
-    console.log('target_prev:', target._prevResizeSize);
-    console.trace();
-    console.groupEnd();
-
-    target._prevResizeSize = { width, height };
-  });
-}
 
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -781,6 +744,8 @@ class EnhancedShutter extends LitElement
 
   startResizeObserver() {
     const onResize = (entries) => {
+      if (C.DEBUG) resizeDebugger(entries);
+
       /* Things todo when resize is detected */
       entries.forEach(entry =>{
         // keep size due to start-up sizing problem in card-editor.
