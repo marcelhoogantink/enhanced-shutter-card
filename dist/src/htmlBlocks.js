@@ -175,7 +175,7 @@ export class htmlBlockShutterSeperate extends htmlBlock{
     let block = {cfg: cfg};
     super(block);
   }
-  defineHtmlshow(){
+  defineHtml(){
     this.setHtmlString (html`
       <div class="${C.ESC_CLASS_SHUTTER_SEPARATE}-${this.cfg.stacked()}"></div>
     `);
