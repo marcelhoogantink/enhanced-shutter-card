@@ -175,27 +175,20 @@ export class htmlBlockShutterSeperate extends htmlBlock{
     let block = {cfg: cfg};
     super(block);
   }
-  show(){
-    return html`
+  defineHtmlshow(){
+    this.setHtmlString (html`
       <div class="${C.ESC_CLASS_SHUTTER_SEPARATE}-${this.cfg.stacked()}"></div>
-    `;
+    `);
   }
-  size(){
-    let xy;
-
-    if (this.cfg.stacked()===C.VERTICAL){
-      xy = new xyPair(100,4);
-    }else{
-      xy = new xyPair(20,100);
-    }
-    this.displaySize(xy);
-    return xy;
+  defineSize(){
+    let xy = this.cfg.stacked()===C.VERTICAL ? new xyPair(100,4) : new xyPair(20,100);
+    this.setXySize(xy);
   }
 }
 export class htmlBlockBatteryIcon extends htmlBlock{
 
-  show(){
-    return html`
+  defineHtml(){
+    this.setHtmlString(html`
         ${this.cfg.getIconsActive() ? html`
           ${this.cfg.getBatteryEntity() ? html`
             <div class="${C.ESC_CLASS_ICON_LEFT}">
@@ -217,21 +210,21 @@ export class htmlBlockBatteryIcon extends htmlBlock{
               </ha-icon>
             </div>`
           }
-          ` : ''
+          ` : html``
         }
-    `;
+    `);
 
   }
-  size(){
+  defineSize(){
     let xy= this.sizeIcon();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockSignalIcon extends htmlBlock{
 
-  show(){
-    return html`
+  defineHtml(){
+    // dummy code, done by HA
+    this.setHtmlString(html`
       ${this.cfg.getIconsActive() ? html`
         ${this.cfg.getSignalEntity() ? html`
           <div class="${C.ESC_CLASS_ICON_RIGHT}">
@@ -255,31 +248,28 @@ export class htmlBlockSignalIcon extends htmlBlock{
         }
         ` : ''
       }
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     let xy = this.sizeIcon();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockNameAndState extends htmlBlock{
 
   show(position=C.TOP){
-    console_log('to htmlBlockState-show');
     const escClassName = position === C.TOP ? C.ESC_CLASS_TOP : C.ESC_CLASS_BOTTOM;
-    //const stateBlock= new htmlBlockState(shutter);
+    const stateBlock= new htmlBlockState(this.shutter);
     const nameBlock = new htmlBlockName(this.shutter);
     return html`
       <div class = "${escClassName}">
         ${this.cfg.namePosition() === position ? nameBlock.show() : html``}
-        ${this.cfg.openingPosition() === position ? new htmlBlockState(this.shutter).show() : html``}
+        ${this.cfg.openingPosition() === position ? stateBlock.show() : html``}
       </div>
     `;
   }
   size(position=C.TOP){
-    console_log('to htmlBlockState-size');
-    //const shutterTitleHeight = C.FONT_SIZE_LABEL * this.cfg.textScaleFactor();
+
     const stateBlock= new htmlBlockState(this.shutter);
     const nameBlock = new htmlBlockName(this.shutter);
 
@@ -299,8 +289,9 @@ export class htmlBlockNameAndState extends htmlBlock{
   }
 }
 export class htmlBlockName extends htmlBlock{
-  show(){
-    return html`
+  defineHtml(){
+    // dummy code, done by HA
+    this.setHtmlString(html`
       ${this.cfg.showName()
         ? html`
           <div class="${C.ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${C.ESC_CLASS_LABEL_DISABLED}` : ''}"
@@ -316,9 +307,9 @@ export class htmlBlockName extends htmlBlock{
           `
         : html``
       }
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     let xy= new xyPair();
     const shutterTitleHeight = C.FONT_SIZE_LABEL * this.cfg.textScaleFactor();
 
@@ -328,15 +319,14 @@ export class htmlBlockName extends htmlBlock{
       let y1 = C.LINE_HEIGHT_LABEL * this.cfg.textScaleFactor();
       xy = new xyPair(x1,y1);
     }
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockState extends htmlBlock{
   defineHtml(){
     const positionText =this.cfg.computePositionText(this.actualShutterPosition,this.actualTiltPosition);
-    //console_log('TO htmlBlockState-show',this.actualShutterPosition,this.actualTiltPosition,positionText);
-    this.htmlString = html`
+
+    this.setHtmlString(html`
       ${this.cfg.showOpening()
         ? html`
           <div class="${C.ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${C.ESC_CLASS_LABEL_DISABLED}` : ''}">
@@ -344,7 +334,7 @@ export class htmlBlockState extends htmlBlock{
           </div>`
         : html``
      }
-    `;
+    `);
   }
   defineSize(){
       let text="";
@@ -378,20 +368,21 @@ export class htmlBlockState extends htmlBlock{
   }
 }
 export class htmlBlockTop extends htmlBlock{
-  show(){
-    return this.showTopBottomDiv(C.TOP);
+  defineHtml(){
+    // dummy code, done by HA
+    this.setHtmlString(this.showTopBottomDiv(C.TOP));
   }
-  size(){
+  defineSize(){
     let xy = this.sizeTopBottomDiv(C.TOP);
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockMiddle extends htmlBlock{
 
   featurePosition = this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION);
 
-  show(){
+  defineHtml(){
+    // dummy code, done by HA
 
     const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter);
     const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter);
@@ -399,7 +390,7 @@ export class htmlBlockMiddle extends htmlBlock{
     const tiltSectionBlock = new htmlBlockTiltSection(this.shutter);
     const rightButtonsBlock = new htmlBlockRightButtons(this.shutter);
 
-    return html`
+    this.setHtmlString(html`
       <div class="${C.ESC_CLASS_MIDDLE}">
         ${this.cfg.buttonsLeftActive() ? leftButtonsBlock.show() : html``}
         ${this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.show() : html``}
@@ -412,9 +403,9 @@ export class htmlBlockMiddle extends htmlBlock{
           : html`` //`<div class='blankDiv'></div>`
         }
       </div>
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter);
     const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter);
     const centralWindowBlock = new htmlBlockCentralWindow(this.shutter);
@@ -428,10 +419,6 @@ export class htmlBlockMiddle extends htmlBlock{
     let xyRightButtons = this.cfg.showPartialOpenButtons() ? rightButtonsBlock.size() : new xyPair();
 
     let xyRight = this.gridAddBoth(xyTiltSection,xyRightButtons);
-    //if (!xyRight.size()) { // class blankDiv
-    //  let xySize = this.cfg.iconSize()*1.5;
-    //  xyRight = new xyPair(xySize,xySize);
-    //}
     let xy;
     if (this.cfg.buttonGroupInRow()){
       xy = this.gridAddHorizontal(xyLeftButtons,xyOpenCloseSlider);
@@ -443,29 +430,29 @@ export class htmlBlockMiddle extends htmlBlock{
       xy = this.gridAddVertical(xy,xyRight);
 
     }
-    this.displaySize(xy);
+    this.setXySize(xy);
 
-    return xy;
   }
 }
 export class htmlBlockBottom extends htmlBlock{
-  show(){
-    return this.showTopBottomDiv(C.BOTTOM);
+  defineHtml(){
+    // dummy code, done by HA
+    this.setHtmlString(this.showTopBottomDiv(C.BOTTOM));
   }
-  size(){
+  defineSize(){
     let xy = this.sizeTopBottomDiv(C.BOTTOM);
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
-
 export class htmlBlockLeftButtons extends htmlBlock{
-  show(){
+  defineHtml(){
+    // dummy code, done by HA
+
     const buttonUpBlock = new htmlBlockButtonUp(this.shutter);
     const buttonDownBlock = new htmlBlockButtonDown(this.shutter);
     const buttonStopBlock = new htmlBlockButtonStop(this.shutter);
     const buttonPartialBlock = new htmlBlockButtonPartial(this.shutter);
-    return html`
+    this.setHtmlString(html`
       ${this.cfg.buttonsLeftActive()
       ? html`
         <div class="${C.ESC_CLASS_BUTTONS}">
@@ -477,9 +464,9 @@ export class htmlBlockLeftButtons extends htmlBlock{
         ` : html`
         <div class='blankDiv'></div>
       `}
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     const buttonUpBlock = new htmlBlockButtonUp(this.shutter);
     const buttonStopBlock = new htmlBlockButtonStop(this.shutter);
     const buttonDownBlock = new htmlBlockButtonDown(this.shutter);
@@ -496,8 +483,7 @@ export class htmlBlockLeftButtons extends htmlBlock{
 
     if (!this.cfg.buttonGroupInRow()) xy.switch();
 
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
   showButtonUpDown(feature,action,upDown,icon){
 
@@ -521,23 +507,21 @@ export class htmlBlockLeftButtons extends htmlBlock{
   }
 }
 export class htmlBlockButtonUp extends htmlBlockLeftButtons{
-
-  show(){
-        return this.showButtonUpDown(C.ESC_FEATURE_OPEN,C.ACTION_SHUTTER_OPEN,C.UP,'mdi:arrow-up');
+  defineHtml(){
+    this.setHtmlString(this.showButtonUpDown(C.ESC_FEATURE_OPEN,C.ACTION_SHUTTER_OPEN,C.UP,'mdi:arrow-up'));
   }
-  size(){
+  defineSize(){
     let xy = this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockButtonStop extends htmlBlockLeftButtons{
-  show(){
+  defineHtml(){
     const action = C.ACTION_SHUTTER_STOP;
     const feature = C.ESC_FEATURE_STOP;
     const icon = "mdi:stop"
 
-    return html`
+    this.setHtmlString(html`
       ${this.cfg.showStandardButtons() &&
         !this.cfg.buttonStopHideStates().includes(this.cfg.positionToState()) &&
          this.cfg.isCoverFeatureActive(feature)
@@ -553,28 +537,26 @@ export class htmlBlockButtonStop extends htmlBlockLeftButtons{
         </ha-icon-button>
       `
       : ''
-    }`;
+    }`);
   }
-  size(){
+  defineSize(){
     let xy =this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 
 }
 export class htmlBlockButtonDown extends htmlBlockLeftButtons{
-  show(){
-    return this.showButtonUpDown(C.ESC_FEATURE_CLOSE,C.ACTION_SHUTTER_CLOSE,C.DOWN,'mdi:arrow-down');
+  defineHtml(){
+    this.setHtmlString(this.showButtonUpDown(C.ESC_FEATURE_CLOSE,C.ACTION_SHUTTER_CLOSE,C.DOWN,'mdi:arrow-down'))
   }
-  size(){
+  defineSize(){
     let xy =this.cfg.showStandardButtons() ? this.sizeButton() : new xyPair();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockButtonPartial extends htmlBlockLeftButtons{
-  show(){
-    return html`
+  defineHtml(){
+    this.setHtmlString(html`
       ${this.cfg.partialActive() && this.cfg.showStandardButtons() /* TODO localize texts */
         ? html`
           <ha-icon-button
@@ -584,26 +566,25 @@ export class htmlBlockButtonPartial extends htmlBlockLeftButtons{
             <ha-icon class="${C.ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
           </ha-icon-button>
         ` : ''}
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     let xy =  this.cfg.showStandardButtons()? this.sizeButton() : new xyPair(0,0) ;
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockTiltButtons extends htmlBlock{
-  show(){
+  defineHtml(){
     const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.shutter);
     const tiltPositionBlock = new htmlBlockTiltPosition(this.shutter);
     const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.shutter);
-    return html`
+    this.setHtmlString(html`
       <div class="${C.ESC_CLASS_TILT_BUTTONS}">
         ${buttonTiltUpBlock.show()}
         ${tiltPositionBlock.show()}
         ${buttonTiltDownBlock.show()}
       </div>
-    `;
+    `);
   }
   showButtonTilt(action,icon){
     return html`
@@ -615,7 +596,7 @@ export class htmlBlockTiltButtons extends htmlBlock{
           </ha-icon-button>
     `;
   }
-  size(){
+  defineSize(){
     const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.shutter);
     const tiltPositionBlock = new htmlBlockTiltPosition(this.shutter);
     const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.shutter);
@@ -632,37 +613,33 @@ export class htmlBlockTiltButtons extends htmlBlock{
        xy = this.gridAddVertical(xyButtonTiltUp,xyTiltPosition);
        xy = this.gridAddVertical(xy,xyButtonTiltDown);
     }
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 
 }
 export class htmlBlockButtonTiltDown extends htmlBlockTiltButtons{
-  show(){
+  defineHtml(){
     const icon = this.cfg.buttonGroupInRow() ? "mdi:arrow-bottom-right":"mdi:arrow-bottom-left" ;
-    return this.showButtonTilt(C.ACTION_SHUTTER_CLOSE_TILT,icon);
-
+    this.setHtmlString(this.showButtonTilt(C.ACTION_SHUTTER_CLOSE_TILT,icon));
   }
-  size(){
+  defineSize(){
     let xy = this.sizeButton();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockButtonTiltUp extends htmlBlockTiltButtons{
-  show(){
+  defineHtml(){
     const icon = this.cfg.buttonGroupInRow() ? "mdi:arrow-top-right":"mdi:arrow-bottom-right" ;
-    return this.showButtonTilt(C.ACTION_SHUTTER_OPEN_TILT,icon);
+    this.setHtmlString(this.showButtonTilt(C.ACTION_SHUTTER_OPEN_TILT,icon));
   }
-  size(){
+  defineSize(){
     let xy = this.sizeButton();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockTiltPosition extends htmlBlockTiltButtons{
-  show(){
-    return html`
+  defineHtml(){
+    this.setHtmlString(html`
       <div class="${C.ESC_CLASS_TILT_CONTAINER}">
         <div class="${C.ESC_CLASS_TILT_CLASS}">
           <div class="${C.ESC_CLASS_TILT_LINE}"></div>
@@ -674,26 +651,25 @@ export class htmlBlockTiltPosition extends htmlBlockTiltButtons{
           <div class="${C.ESC_CLASS_TILT_LINE}"></div>
         </div>
       </div>
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     // question on box-sizing: border-box: can't see difference ..??
     let size = C.ICON_SIZE* this.cfg.buttonScaleFactor();
     let xy = new xyPair(size,3*size);
     if (!this.cfg.buttonGroupInRow()) xy.switch();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockTiltSlider extends htmlBlock{
-  show(){
-    return html`
+  defineHtml(){
+    this.setHtmlString(html`
       <div class="${C.ESC_CLASS_SLIDER_WRAP}">
         <input type="range" class ="${C.ESC_CLASS_SLIDER_CLASS} tilt" min="0" max="100" value="${this.actualTiltPosition}">
       </div>
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     /**
      * questions about size due to browswer definitions of <input> html
      */
@@ -703,20 +679,18 @@ export class htmlBlockTiltSlider extends htmlBlock{
 
     let xy = new xyPair(zoom*width,zoom*height);
     if (!this.cfg.buttonGroupInRow()) xy.switch();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockOpenCloseSlider extends htmlBlock{
-  show(){
-    //console.log(this.cfg.friendlyName() + ' show open close slider',this.actualScreenPosition);
-    return html`
+  defineHtml(){
+    this.setHtmlString(html`
       <div class="${C.ESC_CLASS_SLIDER_WRAP}">
         <input type="range" class ="${C.ESC_CLASS_SLIDER_CLASS} openclose" min="0" max="100" value="${this.actualScreenPosition}">
       </div>
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     /**
      * questions about size due to browswer definitions of <input> html
      */
@@ -726,23 +700,21 @@ export class htmlBlockOpenCloseSlider extends htmlBlock{
 
     let xy = new xyPair(zoom*width,zoom*height);
     if (!this.cfg.buttonGroupInRow()) xy.switch();
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockTiltSection extends htmlBlock{
 
   tilt_position = this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_TILT_POSITION)
-
-  show(){
+  defineHtml(){
     const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter);
     const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter);
-    return html`
+    this.setHtmlString(html`
         ${this.cfg.showTiltButtonBlock() ? tiltButtonsBlock.show() : html``}
         ${this.cfg.showTiltSliderBlock() && this.tilt_position ? tiltSliderBlock.show() :html``}
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     let xy = new xyPair();
     const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter);
     const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter);
@@ -757,13 +729,12 @@ export class htmlBlockTiltSection extends htmlBlock{
       xy = this.cfg.showTiltSliderBlock() && this.tilt_position ? this.gridAddVertical(xy,xyTiltSlider) : xy;
 
     }
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }
 export class htmlBlockCentralWindow extends htmlBlock{
-  show(){
-    return html`
+  defineHtml(){
+    this.setHtmlString(html`
       ${this.cfg.showWindow()
       ? html`
         <div class="${C.ESC_CLASS_SELECTOR}">
@@ -786,17 +757,16 @@ export class htmlBlockCentralWindow extends htmlBlock{
             : ''}
         </div>
       `: html``}
-    `;
+    `);
   }
-  size(){
+  defineSize(){
     let xy = new xyPair();
     if (this.cfg.showWindow()){
       let x = this.cfg.windowWidthPx() + 2 * C.SELECTOR_MARGIN;
       let y = this.cfg.windowHeightPx() + 2 * C.SELECTOR_MARGIN;
       xy.fill(x,y);
     }
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
   showSlide(){
      return html`
@@ -848,7 +818,7 @@ export class htmlBlockCentralWindow extends htmlBlock{
   }
 }
 export class htmlBlockRightButtons extends htmlBlock{
-  show(){
+  defineHtml(){
     const icons= {
       0: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z",
       1: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z",
@@ -894,7 +864,7 @@ export class htmlBlockRightButtons extends htmlBlock{
       [0, 1, 2, 3, 4, 5].map(j => [j, () => this.shutter.doOnclick(`${C.ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(pct[j]))])
     );
 
-    return html`
+    this.setHtmlString(html`
         ${[0, 1].map(i => html`
           <div class="${C.ESC_CLASS_BUTTONS}">
             ${[i * 3, i * 3 + 1, i * 3 + 2].map(j => html`
@@ -907,9 +877,9 @@ export class htmlBlockRightButtons extends htmlBlock{
             `)}
           </div>
         `)}
-    `;
+    `);
   }
-  size(){
+  defineSize(){
 
     const haButtonSize = this.cfg.iconButtonSize();
 
@@ -917,7 +887,6 @@ export class htmlBlockRightButtons extends htmlBlock{
     if (!this.cfg.buttonGroupInRow()){
       xy.switch();
     }
-    this.displaySize(xy);
-    return xy;
+    this.setXySize(xy);
   }
 }

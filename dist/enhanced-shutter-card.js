@@ -337,14 +337,7 @@ class EnhancedShutterCardNew extends LitElement{
     super.updated(changedProperties);
   }
   getGrid(){
-    if (!this.gridContainer){
-      this.defGridContainer();
-    }
-    if (this.gridContainer){
-      this.getGridOptions('from getGrid()');
-    } else {
-      console.warn('Could not find grid container');
-    }
+      this.getGridOptions('internal from getGrid()');
   }
   defGridContainer(){
       let el = this;
@@ -377,23 +370,66 @@ class EnhancedShutterCardNew extends LitElement{
   startResizeObserver() {
     const onResize = (entries) => {
       /* Things todo when resize is detected */
+      if (C.DEBUG) this.resizeDebugger(entries);
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
         });
       }
-      this.getGrid();
+      if (this.initializeReady && this.config && this.config.entities){
+        console_log('Call getGrid');
+        this.getGrid();
+      }
     }
     this.resizeObserver = new ResizeObserver(onResize);
     this.resizeObserver.observe(Globals.huiView);
   }
-  // Check the orientation based on the window and div visibility
+
+  resizeDebugger(entries) {
+  entries.forEach((entry, i) => {
+    const reasons = [];
+
+    const { width, height } = entry.contentRect;
+    const target = entry.target;
+    // Check if target dimensions actually changed vs last observation
+    const prevSize = target._prevResizeSize;
+
+    if (!prevSize) {
+      reasons.push('🆕 first observation — no previous size to compare');
+    } else if (prevSize.width === width && prevSize.height === height) {
+      reasons.push('⚠️ fired but NO SIZE CHANGE — possibly reflow/style recalc triggered this');
+    } else {
+      if (prevSize.width !== width)  reasons.push(`↔️ width changed: ${prevSize.width}px → ${width}px`);
+      if (prevSize.height !== height) reasons.push(`↕️ height changed: ${prevSize.height}px → ${height}px`);
+    }
+
+    // Check borderBoxSize if available
+    if (entry.borderBoxSize?.length) {
+      reasons.push(`📦 borderBox: ${entry.borderBoxSize[0].inlineSize} × ${entry.borderBoxSize[0].blockSize}`);
+    }
+
+    // Check contentRect change
+    reasons.push(`📐 contentRect: ${width} × ${height}`);
+
+
+    console.group(`🔁 ResizeObserver fired — entry ${i}`);
+    console.log('target:', target);
+    console.log('reasons:', reasons);
+    console.log('target_prev:', target._prevResizeSize);
+    console.trace();
+    console.groupEnd();
+
+    target._prevResizeSize = { width, height };
+  });
+}
+
   disconnectedCallback() {
     super.disconnectedCallback();
     this.resizeObserver?.disconnect();
   }
 
   checkOrientation(element) {
+    // Check the orientation based on the window and div visibility
 
     this.isResizeInProgress = true; // Set flag to indicate a resize operation is in progress
 
@@ -548,6 +584,10 @@ class EnhancedShutterCardNew extends LitElement{
   getGridOptionsInternal(text){
 
     //const debug=0;
+    if (!this.gridContainer){
+      this.defGridContainer();
+    }
+    let options={};
     let tempCardName="";
 
     let sizeCard = new xyPair();
@@ -555,8 +595,11 @@ class EnhancedShutterCardNew extends LitElement{
     console_log(`getGridOptionsInternal: ${text}; cols  & rows:`,this.nbCols,this.nbRows,this.gridPixelHeight,this.gridPixelWidth,this.previousGridWidth);
 
 
-    if (this.initializeReady && this.config && this.config.entities){
-
+    if (this.initializeReady &&
+        this.gridContainer &&
+        this.config &&
+        this.config.entities
+      ){
       this.previousGridWidth = this.gridPixelWidth;
       const style = getComputedStyle(this.gridContainer);
       const columns = style.getPropertyValue('grid-template-columns');
@@ -605,41 +648,43 @@ class EnhancedShutterCardNew extends LitElement{
       }else{
         console_log('No recalc rows and cols');
       }
+      const divCard= this.closestElement('div.card');
+      /* Set CSS variables for number of rows and columns */
+      /* Used in CSS to set sizes */
+
+      if (divCard){
+        divCard.style.setProperty('--row-size',this.nbRows);
+        divCard.style.setProperty('--column-size',this.nbCols);
+      }else{
+        console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
+      }
       /*
       * Calculate the number of rows and columns
       * Use sizes from calculated cardSize and HA grid sizes
       */
       //console.log('=====>Size Card: ', sizeCard);
+      let min_rows= this.nbRows;
+      let min_cols = this.nbCols;
+
+      if (this.inEditor()) {
+        min_rows = 4;
+        min_cols = 4;
+      }
+
+      options = {
+        rows: this.nbRows,
+        columns: this.nbCols,
+        min_rows: min_rows,
+        min_columns: min_cols,
+        // max_rows: 6,
+        // max_columns: 28,
+      };
     }else{
         console_log('ShutterCard  .. no content yet ??.. No (new) nbRows and nbCols calculated');
     }
       //const divCard= this.closest('div.card');
-    const divCard= this.closestElement('div.card');
-    /* Set CSS variables for number of rows and columns */
-    /* Used in CSS to set sizes */
-
-    if (divCard){
-      divCard.style.setProperty('--row-size',this.nbRows);
-      divCard.style.setProperty('--column-size',this.nbCols);
-    }else{
-      console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
-    }
-    let min_rows= this.nbRows;
-    let min_cols = this.nbCols;
-
-    if (this.inEditor()) {
-       min_rows = 4;
-       min_cols = 4;
-    }
-
-    return {
-      rows: this.nbRows,
-      columns: this.nbCols,
-      min_rows: min_rows,
-      min_columns: min_cols,
-      // max_rows: 6,
-      // max_columns: 28,
-    };
+    console_log('options: ',options);
+    return options;
   }
   inEditor(){
     return this.closestElement('hui-dialog-edit-card') !== null;
@@ -844,6 +889,7 @@ class EnhancedShutter extends LitElement
     }
   }
   getOverflow(){
+    return 'hidden';
     return this.cfg.debug()?'visible':'hidden';
   }
 
@@ -1566,7 +1612,7 @@ class shutterCfg {
 
     this.showName(escConfig[C.CONFIG_SHOW_NAME]);
     this.showOpening(escConfig[C.CONFIG_SHOW_OPENING]);
-    this.showTiltButtonBlock(escConfig[C.CONFIG_SHOW_TILT_BUTTON]);
+    this.showTiltButtonBlock(escConfig[C.CONFIG_SHOW_TILT_BUTTONS]);
     this.showStandardButtons(escConfig[C.CONFIG_SHOW_STANDARD_BUTTONS]);
     this.showPartialOpenButtons(escConfig[C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]);
 
@@ -1726,7 +1772,7 @@ class shutterCfg {
     return this.#getCfg(C.CONFIG_SHOW_OPENING,value);
    }
   showTiltButtonBlock(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_TILT_BUTTON,value);
+    return this.#getCfg(C.CONFIG_SHOW_TILT_BUTTONS,value);
   }
   showStandardButtons(value = null){
     return this.#getCfg(C.CONFIG_SHOW_STANDARD_BUTTONS,value);
@@ -2209,15 +2255,15 @@ class shutterCfg {
         }else{
           const UiPosition = this.applyInvertToUiPosition(position)
           let state= this.positionToState(UiPosition);
-          if (!this.debug()){
+//          if (!this.debug()){
             if (state != C.SHUTTER_STATE_PARTIAL_OPEN){
               text = this.getLocalize(C.LOCALIZE_TEXT[(state)]);
             } else{
               text = position + '%';
             }
-          }else{
-            text = `Dev: ${this.getCoverEntity().getState()} (${this.currentDevicePosition()}%)\nCard: ${state} (${position}%)`;
-          }
+//          }else{
+//            text = `Dev: ${this.getCoverEntity().getState()} (${this.currentDevicePosition()}%)\nCard: ${state} (${position}%)`;
+//          }
         }
       } else {
         text = this.getLocalize(C.LOCALIZE_TEXT[C.UNAVAILABLE]);

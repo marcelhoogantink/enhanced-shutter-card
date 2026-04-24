@@ -1,6 +1,9 @@
 export const VERSION = 'v1.6.0b1';
-export const DEBUG = false;
+export const DEBUG = VERSION.includes('b');
+//export const DEBUG = false;
+export const NONE = 'none';
 
+export const HORIZONTAL = 'horizontal';
 export const VERTICAL = 'vertical';
 export const TOP = 'top';
 export const BOTTOM = 'bottom';
@@ -67,7 +70,6 @@ export const ICON_SIZE = 24;
 export const ICON_DIV_SIZE = 34;
 export const LINE_HEIGHT_POSITION = 20;
 export const SELECTOR_MARGIN = 4;
-export const NONE = 'none';
 
 export const ESC_FEATURE_OPEN              = 0b00000001; // 1
 export const ESC_FEATURE_CLOSE             = 0b00000010; // 2
@@ -154,7 +156,6 @@ export const SPACE = ' ';
 export const UNKNOWN = 'unknown';
 export const NOT_KNOWN =[UNAVAILABLE,UNKNOWN,undefined, null ];
 
-export const AUTO = 'auto';
 
 export const MOUSEUP = 'mouse-up';
 export const MOUSEDOWN = 'mouse-down';
@@ -166,13 +167,15 @@ export const REMOVE_EVENT = 'remove';
 
 export const IS_HORIZONTAL = [LEFT,RIGHT];
 export const IS_VERTICAL = [UP,DOWN];
-export const HORIZONTAL = 'horizontal';
-// const VERTICAL = 'vertical';
+
+export const AUTO = 'auto';
 
 export const AUTO_TL = `${AUTO}-${TOP}-${LEFT}`;
 export const AUTO_TR = `${AUTO}-${TOP}-${RIGHT}`;
 export const AUTO_BL = `${AUTO}-${BOTTOM}-${LEFT}`;
 export const AUTO_BR = `${AUTO}-${BOTTOM}-${RIGHT}`;
+
+export const POSITIONS =[AUTO,AUTO_BL,AUTO_BR,AUTO_TL,AUTO_TR,LEFT,RIGHT,TOP,BOTTOM,NONE];
 
 
 /*
@@ -216,7 +219,6 @@ export const ESC_CLASS_BUTTONS_LEFT = `${ESC_CLASS_BUTTONS}-${LEFT}`;
 export const ESC_CLASS_BUTTONS_RIGHT = `${ESC_CLASS_BUTTONS}-${RIGHT}`;
 export const ESC_CLASS_BUTTON = `${ESC_CLASS_BASE_NAME}-button`;
 
-export const POSITIONS =[AUTO,AUTO_BL,AUTO_BR,AUTO_TL,AUTO_TR,LEFT,RIGHT,TOP,BOTTOM,NONE];
 
 export const ICON_BUTTON_SIZE = 36; // original: 48
 
@@ -286,7 +288,7 @@ export const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons
 
 export const CONFIG_SHOW_NAME = 'show_name'; // new    SHOW 1
 export const CONFIG_SHOW_OPENING = "show_opening"; //new SHOW 2
-export const CONFIG_SHOW_TILT_BUTTON = 'show_tilt_button'; // SHOW 4
+export const CONFIG_SHOW_TILT_BUTTONS = 'show_tilt_buttons'; // SHOW 4
 export const CONFIG_SHOW_STANDARD_BUTTONS = 'show_standard_buttons'; //SHOW 5
 export const CONFIG_SHOW_PARTIAL_OPEN_BUTTONS = 'show_partial_open_buttons';//SHOW 6
 
@@ -307,10 +309,10 @@ export const invertBoolean = (value) => !value;
 export const DEPRECATED={
   [CONFIG_NAME_DISABLED]: {new: CONFIG_SHOW_NAME, value: invertBoolean},
   [CONFIG_OPENING_DISABLED]: {new: CONFIG_SHOW_OPENING, value: invertBoolean},
-  [CONFIG_TILT_SLIDER_ONLY]: {new: CONFIG_SHOW_TILT_SLIDER, value: invertBoolean},
+  [CONFIG_TILT_SLIDER_ONLY]: {new: CONFIG_SHOW_TILT_BUTTONS, value: invertBoolean},
+  [CONFIG_SHOW_TILT]: {new: CONFIG_SHOW_TILT_SLIDER}, // only name change, value remains the same
   [CONFIG_DISABLE_STANDARD_BUTTONS]: {new: CONFIG_SHOW_STANDARD_BUTTONS, value: invertBoolean},
   [CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: {new: CONFIG_SHOW_PARTIAL_OPEN_BUTTONS, value: invertBoolean},
-  [CONFIG_SHOW_TILT]: {new: CONFIG_SHOW_TILT_BUTTON}, // only name change, value remains the same
 };
 export const REMOVED={
   [CONFIG_INVERT_PCT]: {new: CONFIG_INVERT_PCT_COVER}, // april 2026 v1.6.0 // jan 2026 1.4.0-alpha
@@ -394,7 +396,7 @@ export const ESC_INVERT_PCT_TILT_COVER = false;
 export const ESC_TILT_SLIDER_ONLY = false; // deprecated
 export const ESC_SHOW_OPEN_CLOSE_SLIDER = false;
 export const ESC_SHOW_TILT_SLIDER = true;
-export const ESC_SHOW_TILT_BUTTON = true;
+export const ESC_SHOW_TILT_BUTTONS = true;
 
 export const ESC_SHOW_TILT = true;
 export const ESC_TILT_ANGLE_MIN = 0;
@@ -506,7 +508,7 @@ export const CONFIG_DEFAULT ={
 
   [CONFIG_SHOW_NAME]: ESC_SHOW_NAME, // replace
   [CONFIG_SHOW_OPENING]: ESC_SHOW_OPENING, // replace
-  [CONFIG_SHOW_TILT_BUTTON]: ESC_SHOW_TILT_BUTTON, // replace
+  [CONFIG_SHOW_TILT_BUTTONS]: ESC_SHOW_TILT_BUTTONS, // replace
   [CONFIG_SHOW_STANDARD_BUTTONS]: ESC_SHOW_STANDARD_BUTTONS, // replace
   [CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]: ESC_SHOW_PARTIAL_OPEN_BUTTONS, // replace
 
@@ -573,11 +575,11 @@ export const ESC_PRESET = {
     [CONFIG_SHOW_NAME]: true,
     [CONFIG_SHOW_OPENING]: true,
     [CONFIG_SHOW_STANDARD_BUTTONS]: true,
-    [CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]: false,
-    [CONFIG_SHOW_TILT_BUTTON]: true,
+    [CONFIG_SHOW_WINDOW]: false,
+    [CONFIG_SHOW_TILT_BUTTONS]: true,
     [CONFIG_SHOW_TILT_SLIDER]: true,
     [CONFIG_SHOW_OPEN_CLOSE_SLIDER]: true,
-    [CONFIG_SHOW_WINDOW]: false,
+    [CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]: false,
     [CONFIG_NAME]: 'Compact',
   }
 }
