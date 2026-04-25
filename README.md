@@ -31,6 +31,12 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
+### New in this beta-version v1.6.0b2:
+
+- #### Solved issues:
+  - [#160](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/160) Show Dividers between Group Row entities
+  - [#159](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/159) Percentage precision
+---
 ### New in this beta-version v1.6.0b1:
 
 - #### new options: `show_open_close_slider` en `show_window`
@@ -278,7 +284,7 @@ The following `shutter_preset` settings are available:
 |                    | `show_tilt_buttons`         | `true`                |
 |                    | `show_tilt_slider`          | `true`                |
 |                    | `show_partial_open_buttons` | `false`               |
-|                    | `name`                      | Compact               |   
+|                    | `name`                      | Compact               |
 
 
 ### Sample
