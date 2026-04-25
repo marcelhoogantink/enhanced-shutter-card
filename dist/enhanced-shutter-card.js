@@ -2224,7 +2224,7 @@ class shutterCfg {
             if (state != C.SHUTTER_STATE_PARTIAL_OPEN){
               text = this.getLocalize(C.LOCALIZE_TEXT[(state)]);
             } else{
-              text = position + '%';
+              text = position.toFixed(C.DISPLAY_DECIMALS) + '%';
             }
 //          }else{
 //            text = `Dev: ${this.getCoverEntity().getState()} (${this.currentDevicePosition()}%)\nCard: ${state} (${position}%)`;
@@ -2252,10 +2252,10 @@ class shutterCfg {
       displayPosition = this.currentUiPosition(displayPosition);
       positionText = this.positionToText(displayPosition);
       if (this.offsetActive()) {
-        positionText += ` (${this.currentUiPosition(position)}%)`;
+        positionText += ` (${this.currentUiPosition(position).toFixed(C.DISPLAY_DECIMALS)}%)`;
       }
       if (this.canTilt()) {
-        tiltPosition = this.currentUiTiltPosition(tiltPosition);
+        tiltPosition = this.currentUiTiltPosition(tiltPosition).toFixed(C.DISPLAY_DECIMALS);
         positionText += ` / Tilt: ${tiltPosition}%`;
       }
     }

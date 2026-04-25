@@ -17,6 +17,7 @@ export const DOWN = 'down';
 export const LEFT = 'left';
 export const RIGHT = 'right';
 export const HA_TITLE_FONT = 'Roboto, Noto, sans-serif';
+export const DISPLAY_DECIMALS = 0;
 
 export const ESC_CLASS_BASE_NAME = 'esc-shutter';
 export const ESC_CLASS_SHUTTER_SEPARATE = `${ESC_CLASS_BASE_NAME}-separate`

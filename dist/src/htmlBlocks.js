@@ -342,7 +342,7 @@ export class htmlBlockState extends htmlBlock{
       let y1 = C.LINE_HEIGHT_POSITION * this.cfg.textScaleFactor() + 2*C.MARGIN_POSITION;  // including margin
       const shutterTitleHeight = C.FONT_SIZE_POSITION * this.cfg.textScaleFactor();
       if (this.cfg.alwaysPercentage()) {
-        text += '100%';
+        text += (100).toFixed(C.DISPLAY_DECIMALS) + '%';
           //console.log(text, this.stateSize);
       }else{
         let maxSize=0;
@@ -358,7 +358,7 @@ export class htmlBlockState extends htmlBlock{
         text += maxText;
       }
       if (this.cfg.canTilt()){
-        text += ' / Tilt: 100%';
+        text += ' / Tilt: ' + (100).toFixed(C.DISPLAY_DECIMALS) + '%';
         //console.log(text, size);
       }
       this.text=text;
