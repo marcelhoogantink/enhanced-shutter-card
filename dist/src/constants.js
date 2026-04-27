@@ -800,6 +800,16 @@ export const SHUTTER_CSS =`
         display: flex;
         white-space: nowrap;
       }
+      .${ESC_CLASS_TOP_BOTTOM} > :last-child {
+        margin-left: auto;
+      }
+      .${ESC_CLASS_TOP_BOTTOM} > :first-child {
+        margin-right: auto;
+      }
+      .${ESC_CLASS_TOP_BOTTOM} > :only-child {
+        margin-left: auto;
+        margin-right: auto;
+      }
       .${ESC_CLASS_TOP}, .${ESC_CLASS_BOTTOM} {
         display: flex;
         flex-flow: var(--esc-flex-name_opening-flow);
