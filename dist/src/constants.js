@@ -3,7 +3,7 @@ import {
 } from './functions.js';
 
 
-export const VERSION = 'v1.6.0b2';
+export const VERSION = 'v1.6.0b3';
 export const IS_LOCAL = isRunningLocally();
 export const DEBUG = VERSION.includes('b') && IS_LOCAL;
 export const NONE = 'none';
@@ -228,8 +228,10 @@ export const ESC_CLASS_BUTTON = `${ESC_CLASS_BASE_NAME}-button`;
 
 export const ICON_BUTTON_SIZE = 36; // original: 48
 
-
+// just to suppress warnings for legal settings (global, not used by ESC)
+export const CONFIG_CARD_MOD = "card_mod"; // !!customElements.get('card-mod')
 export const CONFIG_TYPE = "type";
+
 export const CONFIG_STACKED = "stacked";
 export const CONFIG_SHUTTER_PRESET = 'shutter_preset';
 export const CONFIG_TITLE = "title";
@@ -450,6 +452,7 @@ export const CONFIG_DEFAULT ={
   [CONFIG_ID]:"",
   [CONFIG_GROUP]: "",
   [CONFIG_ENTITIES]: "",
+  [CONFIG_CARD_MOD]: !!customElements.get('card-mod'),
 
   [CONFIG_DEBUG]: ESC_DEBUG,
   [CONFIG_STACKED]: ESC_STACKED,
@@ -589,7 +592,7 @@ export const ESC_PRESET = {
     [CONFIG_NAME]: 'Compact',
   }
 }
-
+export const ICON_MARGIN = 3;
 export const SHUTTER_CSS =`
 
       .${ESC_CLASS_SHUTTER} {
@@ -792,13 +795,13 @@ export const SHUTTER_CSS =`
         display: flex;
         white-space: nowrap;
       }
-      .${ESC_CLASS_TOP_BOTTOM} > :last-child {
+      .${ESC_CLASS_TOP_BOTTOM}a > :last-child {
         margin-left: auto;
       }
-      .${ESC_CLASS_TOP_BOTTOM} > :first-child {
+      .${ESC_CLASS_TOP_BOTTOM}a > :first-child {
         margin-right: auto;
       }
-      .${ESC_CLASS_TOP_BOTTOM} > :only-child {
+      .${ESC_CLASS_TOP_BOTTOM}a > :only-child {
         margin-left: auto;
         margin-right: auto;
       }

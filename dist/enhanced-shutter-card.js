@@ -456,8 +456,8 @@ class EnhancedShutterCardNew extends LitElement{
 
         height: ${100}px;
         margin-top: auto;
-        margin-left: 8px;
-        margin-right: 8px;
+        margin-left: 5px;
+        margin-right: 5px;
         margin-bottom: auto;
       }
     `;
@@ -1284,12 +1284,12 @@ class EnhancedShutter extends LitElement
   }
   getTiltOnScreenPosition(){
     // since Tilt uses Slider, event is not needed
-    const  tiltPosition = this.tiltSlider.value ?? 0;
+    const  tiltPosition = parseFloat(this.tiltSlider.value) ?? 0;
     return tiltPosition; // between 0-100
   }
   getOpenCloseOnScreenPosition(){
     // since Tilt uses Slider, event is not needed
-    const  shutterPosition =  parseInt(this.openCloseSlider.value, 10) ?? 0;
+    const  shutterPosition =  parseFloat(this.openCloseSlider.value) ?? 0;
     return shutterPosition; // between 0-100
   }
 
@@ -1643,10 +1643,12 @@ class shutterCfg {
 
   batteryLevel(){
     let state = this.subEntity[C.DEVICE_CLASS_BATTERY].entity?.getState() ?? C.UNAVAILABLE;
+    state = parseFloat(state).toFixed(C.DISPLAY_DECIMALS);
     return C.NOT_KNOWN.includes (state) ? '?' : state ;
   }
   signalLevel(){
     let state = this.subEntity[C.DEVICE_CLASS_SIGNAL].entity?.getState() ?? C.UNAVAILABLE;
+    state = parseFloat(state).toFixed(C.DISPLAY_DECIMALS);
     return  C.  NOT_KNOWN.includes (state) ? '?' : state ;
   }
   batteryUnit(){

@@ -31,6 +31,13 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
+### New in this beta-version v1.6.0b3:
+
+- forceformat values
+- improve icons placements
+- 
+
+---
 ### New in this beta-version v1.6.0b2:
 
 - #### Solved issues:

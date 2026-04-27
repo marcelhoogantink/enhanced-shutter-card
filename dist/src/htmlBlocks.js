@@ -103,7 +103,7 @@ export class htmlBlock
     return xy;
   }
   sizeIcon(){
-    let xy= new xyPair(C.ICON_DIV_SIZE,C.ICON_DIV_SIZE+4); // +4 from browser info (to be improved)
+    let xy= new xyPair(C.ICON_DIV_SIZE+2*C.ICON_MARGIN,C.ICON_DIV_SIZE+4); // +4: from looking to browser info (38) (to be improved)
     return xy;
   }
 }
@@ -181,7 +181,9 @@ export class htmlBlockShutterSeperate extends htmlBlock{
     `);
   }
   defineSize(){
-    let xy = this.cfg.stacked()===C.VERTICAL ? new xyPair(100,4) : new xyPair(20,100);
+    let xy = this.cfg.stacked()===C.VERTICAL
+      ? new xyPair(100,4)
+      : new xyPair(14,100);
     this.setXySize(xy);
   }
 }
