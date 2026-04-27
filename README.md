@@ -33,8 +33,8 @@ Thank you !
 ---
 ### New in this beta-version v1.6.0b3:
 
-- #### force format values
-  Force format values to prevent unneded decimals.(solves [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131))
+- #### force format values to zero decimals
+  Force format values to prevent unneeded decimals.(solves [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131))
 - #### improve battery- and signal-icons placements
 - #### Solved issues:
    - [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131) Battery percentage - display precision
