@@ -118,6 +118,10 @@ export const UNAVAILABLE = 'unavailable';
 export const SHUTTER_OPEN_PCT = 100;
 export const SHUTTER_CLOSED_PCT = 0;
 
+export const SEPARATE_LENGHT = 100;
+export const SEPARATE_BORDER_WIDTH = 2;
+export const SEPARATE_MARGIN_TB=1;
+export const SEPARATE_MARGIN_LR=5;
 
 export const LOCALIZE_TEXT= {
   // Search for this in Lokalise.com : component::cover::entity_component::_::state::
@@ -592,7 +596,8 @@ export const ESC_PRESET = {
     [CONFIG_NAME]: 'Compact',
   }
 }
-export const ICON_MARGIN = 3;
+export const ICON_MARGIN_LR = 3;
+export const ICON_MARGIN_TB = 8;
 export const SHUTTER_CSS =`
 
       .${ESC_CLASS_SHUTTER} {

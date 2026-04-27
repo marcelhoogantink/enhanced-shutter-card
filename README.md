@@ -102,7 +102,7 @@ Thank you !
 - #### Group-member display.
   When displaying a cover-group, it is now possible to display the group-members in stead of the group-cover itself.
   Use the new `show_group_members` setting and set it `true` like `show_group_members: true`.
-  When you also use the `auto` setting for the sub-entitties (see above), the Card wil search for these entities for each group-member seperately
+  When you also use the `auto` setting for the sub-entitties (see above), the Card wil search for these entities for each group-member separately
 
 - #### Place battery and Signal icons on Top or Bottom.
   New option to put the battery and signal icons on top or bottom of the card: `icons_position` (default `top`).

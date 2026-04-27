@@ -74,7 +74,9 @@ export class htmlShutter{
       --mdc-icon-size: ${this.cfg.iconSize()}${C.UNITY};
       --esc-icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${C.UNITY};
       --esc-icon-div-size: ${C.ICON_DIV_SIZE/C.ICON_SIZE*this.cfg.iconSizeWifiBattery()}${C.UNITY};
-      --esc-icons-margins: ${this.cfg.iconsPosition()==C.TOP ? `8px ${C.ICON_MARGIN}px auto ${C.ICON_MARGIN}px` : `auto ${C.ICON_MARGIN}px 8px ${C.ICON_MARGIN}px`};
+      --esc-icons-margins: ${this.cfg.iconsPosition()==C.TOP
+          ? `${C.ICON_MARGIN_TB}${C.UNITY} ${C.ICON_MARGIN_LR}${C.UNITY} auto ${C.ICON_MARGIN_LR}${C.UNITY}`
+          : `auto ${C.ICON_MARGIN_LR}${C.UNITY} ${C.ICON_MARGIN_TB}${C.UNITY} ${C.ICON_MARGIN_LR}${C.UNITY}`};
 
       --esc-overflow: ${this.enhancedShutter.getOverflow()};
 

@@ -144,10 +144,10 @@ class EnhancedShutterCardNew extends LitElement{
     if (typeof configSub !== 'object' || configSub === null){
       configSub={[C.CONFIG_ENTITY_ID]: configSub};
     }
-    let uniqueKeys = this.getUniqueKeysFromObjects(configSub,configBase);
-    // handle unkown keywords
-    if (uniqueKeys.length > 0){
-      uniqueKeys.forEach((key) =>
+    let unknownKeys = this.getUniqueKeysFromObjects(configSub,configBase);
+    // handle unknown keywords
+    if (unknownKeys.length > 0){
+      unknownKeys.forEach((key) =>
       {
         this.messageManager.addMessage(
           `Unknown keyword: [${key}], check your input!`,
@@ -294,7 +294,7 @@ class EnhancedShutterCardNew extends LitElement{
     }
     let showMessages = this.messageManager.countMessages() && this.inEditor();
     let htmlParts = new htmlCard(this);
-    let shutterSeperateBlock= new HtmlBlocks.htmlBlockShutterSeperate(this.cardCfg);
+    let shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
 
     let htmlout = html`
         ${showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
@@ -322,7 +322,7 @@ class EnhancedShutterCardNew extends LitElement{
                     </enhanced-shutter>
                     ${showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
                   </div>
-                  ${shutterSeperateBlock.show()}
+                  ${shutterSeparateBlock.show()}
                 `;
               }
             )}
@@ -441,23 +441,22 @@ class EnhancedShutterCardNew extends LitElement{
       }
       .${C.ESC_CLASS_SHUTTER_SEPARATE}-${C.VERTICAL}:not(:last-child) {
         box-sizing: border-box;
-        border: 2px solid var(--divider-color);
+        border: ${C.SEPARATE_BORDER_WIDTH}px solid var(--divider-color);
 
-        width: ${100}px;
-        margin-top: 0px;
+        width: ${C.SEPARATE_LENGHT}px;
+        margin-top: ${C.SEPARATE_MARGIN_TB}px;
         margin-left: auto;
         margin-right: auto;
-        margin-bottom: 2px;
+        margin-bottom: ${C.SEPARATE_MARGIN_TB}px;
       }
       .${C.ESC_CLASS_SHUTTER_SEPARATE}-${C.HORIZONTAL}:not(:last-child) {
         box-sizing: border-box;
+        border: ${C.SEPARATE_BORDER_WIDTH}px solid var(--divider-color);
 
-        border: 2px solid var(--divider-color);
-
-        height: ${100}px;
+        height: ${C.SEPARATE_LENGHT}px;
         margin-top: auto;
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: ${C.SEPARATE_MARGIN_LR}px;
+        margin-right:${C.SEPARATE_MARGIN_LR}px;
         margin-bottom: auto;
       }
     `;
@@ -569,10 +568,10 @@ class EnhancedShutterCardNew extends LitElement{
       this.gridPixelWidth = (parseFloat(columns.split(/\s+/)[0]));
 
       if (!this.nbCols || !this.nbRows || this.previousGridWidth !== this.gridPixelWidth){
-        let seperate=false;
+        let separate=false;
 
-        let shutterSeperateBlock= new HtmlBlocks.htmlBlockShutterSeperate(this.cardCfg);
-        let sizeSeperate = shutterSeperateBlock.size();
+        let shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
+        let sizeSeparate = shutterSeparateBlock.size();
         let cardTilteSize = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
         let sizeTitle = cardTilteSize.size();
 
@@ -582,11 +581,11 @@ class EnhancedShutterCardNew extends LitElement{
           console_log(`${cfg.friendlyName()} HtmLblock for Size`);
           let shutterBlock = new HtmlBlocks.htmlBlockShutter(block);
 
-          if (seperate){
+          if (separate){
             if (this.cardCfg.stacked() == C.VERTICAL){
-              sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeperate);
+              sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeparate);
             }else{
-              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeperate);
+              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeparate);
             }
           }else{
             sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
@@ -597,7 +596,7 @@ class EnhancedShutterCardNew extends LitElement{
           }else{
             sizeCard = shutterBlock.gridAddHorizontal(sizeCard,shutterBlock.size());
           }
-        seperate=true;
+        separate=true;
 
         });
         this.nbRows= Math.ceil((sizeCard.y()+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
