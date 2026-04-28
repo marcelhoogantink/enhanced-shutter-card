@@ -128,7 +128,10 @@ class EnhancedShutterCardNew extends LitElement{
         entitiesInGroup.forEach(entityId => {
           let newSubConfig = {...subConfig, entity: entityId, group: subConfig.entity, id: id++};
           let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
-          shutterConfig.name = shutterConfig.name.replace("@", counter++);
+          let counter =1;
+          if (shutterConfig.name) {
+            shutterConfig.name = shutterConfig.name.replace("@", counter++);
+          }
           this.shutterCfgs.push(new shutterCfg(this.hass,shutterConfig));
         });
       }else{
