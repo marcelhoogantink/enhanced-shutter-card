@@ -121,13 +121,14 @@ class EnhancedShutterCardNew extends LitElement{
       let newSubConfig = {...subConfig,  id: id++};
       let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
       let cfg = new shutterCfg(this.hass,shutterConfig)
-
+      let counter =1;
       if (cfg.showGroupMembers() && baseEntity && baseEntity.isGroup()){
         const groupEntities = baseEntity.getAttributes().entity_id || [];
         const entitiesInGroup = groupEntities.filter(entityId => this.hass.states[entityId]);
         entitiesInGroup.forEach(entityId => {
           let newSubConfig = {...subConfig, entity: entityId, group: subConfig.entity, id: id++};
           let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+          shutterConfig.name = shutterConfig.name.replace("@", counter++);
           this.shutterCfgs.push(new shutterCfg(this.hass,shutterConfig));
         });
       }else{
@@ -432,9 +433,7 @@ class EnhancedShutterCardNew extends LitElement{
         flex-direction: var(--esc-card-flex-direction);
         overflow-x: auto;
         overflow-y: hidden;
-        padding-left: 0px;
-        padding-right: 0px;
-        padding-bottom: 6px;
+        padding: ${C.CARD_PADDING}${C.UNITY};
       }
       .${C.ESC_CLASS_SHUTTER_FLEX} {
         margin: 0 auto;
@@ -443,20 +442,20 @@ class EnhancedShutterCardNew extends LitElement{
         box-sizing: border-box;
         border: ${C.SEPARATE_BORDER_WIDTH}px solid var(--divider-color);
 
-        width: ${C.SEPARATE_LENGHT}px;
-        margin-top: ${C.SEPARATE_MARGIN_TB}px;
+        width: ${C.SEPARATE_LENGHT}${C.UNITY};
+        margin-top: ${C.SEPARATE_MARGIN_TB}${C.UNITY};
         margin-left: auto;
         margin-right: auto;
-        margin-bottom: ${C.SEPARATE_MARGIN_TB}px;
+        margin-bottom: ${C.SEPARATE_MARGIN_TB}${C.UNITY};
       }
       .${C.ESC_CLASS_SHUTTER_SEPARATE}-${C.HORIZONTAL}:not(:last-child) {
         box-sizing: border-box;
         border: ${C.SEPARATE_BORDER_WIDTH}px solid var(--divider-color);
 
-        height: ${C.SEPARATE_LENGHT}px;
+        height: ${C.SEPARATE_LENGHT}${C.UNITY};
         margin-top: auto;
-        margin-left: ${C.SEPARATE_MARGIN_LR}px;
-        margin-right:${C.SEPARATE_MARGIN_LR}px;
+        margin-left: ${C.SEPARATE_MARGIN_LR}${C.UNITY};
+        margin-right:${C.SEPARATE_MARGIN_LR}${C.UNITY};
         margin-bottom: auto;
       }
     `;
@@ -599,6 +598,9 @@ class EnhancedShutterCardNew extends LitElement{
         separate=true;
 
         });
+        sizeCard = cardTilteSize.gridAddBoth(sizeCard,new xyPair(2*C.CARD_PADDING,2*C.CARD_PADDING)); // padding Card
+
+
         this.nbRows= Math.ceil((sizeCard.y()+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
         this.nbCols= Math.ceil((sizeCard.x()+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
 

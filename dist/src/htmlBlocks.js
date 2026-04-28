@@ -153,17 +153,14 @@ export class htmlBlockCardTitle extends htmlBlock{
   }
   defineSize(){
 
-    let xy;
-    //let title2 = "TestTitle";
+    let xy = new xyPair();
+
     let title = this.cfg.title();
     if (title){
       const haCardTitleFontHeight= 24;
       const haTitleHeightPx = 76;
       const titleSize= getTextSize(title,C.HA_TITLE_FONT,haCardTitleFontHeight);
       xy = new xyPair(titleSize.width,haTitleHeightPx);
-    }
-    else{
-      xy = new xyPair();
     }
     this.setXySize(xy);
   }
@@ -298,6 +295,7 @@ export class htmlBlockName extends htmlBlock{
         ? html`
           <div class="${C.ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${C.ESC_CLASS_LABEL_DISABLED}` : ''}"
             @click="${() => this.shutter.doHassMoreInfoOpen(this.cfg.entityId())}"
+            title="${this.cfg.getCoverEntity().getFriendlyName()}"
           >
             ${this.cfg.friendlyName()}
             ${this.cfg.passiveMode() ? html`
@@ -320,6 +318,9 @@ export class htmlBlockName extends htmlBlock{
       let x1 = titleSize.width;
       let y1 = C.LINE_HEIGHT_LABEL * this.cfg.textScaleFactor();
       xy = new xyPair(x1,y1);
+      if (this.cfg.passiveMode()) {
+        xy = this.gridAddHorizontal(xy,new xyPair(C.ICON_SIZE_LOCK,C.ICON_SIZE_LOCK));
+      }
     }
     this.setXySize(xy);
   }

@@ -122,6 +122,8 @@ export const SEPARATE_LENGHT = 100;
 export const SEPARATE_BORDER_WIDTH = 2;
 export const SEPARATE_MARGIN_TB=1;
 export const SEPARATE_MARGIN_LR=5;
+export const CARD_PADDING=6;
+export const ICON_SIZE_LOCK=10;
 
 export const LOCALIZE_TEXT= {
   // Search for this in Lokalise.com : component::cover::entity_component::_::state::
@@ -860,7 +862,7 @@ export const SHUTTER_CSS =`
       .${ESC_CLASS_HA_ICON_LOCK} {
         position: relative;
         top: -0.3em;
-        --mdc-icon-size: 10px;
+        --mdc-icon-size: ${ICON_SIZE_LOCK}px;
       }
       .blankDiv{
         width: calc(var(--mdc-icon-size)*1.5);

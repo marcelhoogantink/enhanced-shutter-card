@@ -33,6 +33,14 @@ Thank you !
 ---
 ### New in this beta-version v1.6.0b3:
 
+- #### Added counter for group membernames
+  Whwn using groupcovers and `show_group_memebres: true`, Adding an `@` to the defined name wil add a number to the group-member.
+
+- #### Solved issues:
+
+---
+### New in this beta-version v1.6.0b3:
+
 - #### Force format values to zero decimals
   Force format values to prevent unneeded decimals.(solves [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131))
 - #### Improve battery- and signal-icons placements
