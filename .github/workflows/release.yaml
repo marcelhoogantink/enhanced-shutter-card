@@ -1,0 +1,44 @@
+name: HACS cache bust release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create versioned JS file
+        run: |
+          NEWFILE="enhanced-shutter-card-v${{ steps.version.outputs.version }}.js"
+          cp enhanced-shutter-card.js $NEWFILE
+          echo "Created $NEWFILE"
+
+      - name: Update hacs.json
+        run: |
+          NEWFILE="your-card-v${{ steps.version.outputs.version }}.js"
+          jq --arg file "$NEWFILE" '.filename = $file' hacs.json > tmp.json
+          mv tmp.json hacs.json
+          echo "Updated hacs.json"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Release v${{ steps.version.outputs.version }} (auto versioned file)" || echo "Nothing to commit"
+          git push
