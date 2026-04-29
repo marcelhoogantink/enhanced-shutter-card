@@ -12,49 +12,45 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
+    env:
+      BASE: enhanced-shutter-card
+
     steps:
-      - name: Checkout repo
+      - name: Checkout tagged commit
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get version from tag
         id: version
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Set base name
-        run: echo "BASE=enhanced-shutter-card" >> $GITHUB_ENV
-
-      - name: Create versioned JS file
+      - name: Build versioned JS file
         run: |
           set -e
-      
+
+          VERSION=${{ steps.version.outputs.version }}
+
           SOURCE="dist/${BASE}.js"
-          NEWFILE="dist/${BASE}-v${{ steps.version.outputs.version }}.js"
-      
-          cp "$SOURCE" "$NEWFILE"
-          echo "Created $NEWFILE"
+          OUT="dist/${BASE}-v${VERSION}.js"
 
-      - name: Update hacs.json
-        run: |
-          NEWFILE="${BASE}-v${{ steps.version.outputs.version }}.js"
-          jq --arg file "$NEWFILE" '.filename = $file' hacs.json > tmp.json
-          mv tmp.json hacs.json
-          echo "Updated hacs.json -> $NEWFILE"
+          cp "$SOURCE" "$OUT"
+          echo "Created $OUT"
 
-      - name: Commit changes
+      - name: Create HACS manifest for release
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-      
-          git add .
-      
-          git diff --cached --quiet && echo "No changes" && exit 0
-      
-          git commit -m "Release v${{ steps.version.outputs.version }}"
-      
-          if [[ "${GITHUB_REF_TYPE}" == "branch" ]]; then
-            git push origin HEAD:${GITHUB_REF_NAME}
-          else
-            echo "Tag build detected - skipping push (tags are immutable)"
-          fi
+          VERSION=${{ steps.version.outputs.version }}
+          FILE="${BASE}-v${VERSION}.js"
+
+          jq --arg file "$FILE" '.filename = $file' hacs.json > hacs.release.json
+
+          echo "Generated hacs.release.json"
+
+      - name: Create GitHub Release + upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref_name }}
+          files: |
+            dist/${{ env.BASE }}-v${{ steps.version.outputs.version }}.js
+            hacs.release.json
