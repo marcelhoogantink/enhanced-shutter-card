@@ -16,41 +16,44 @@ jobs:
       BASE: enhanced-shutter-card
 
     steps:
-      - name: Checkout tagged commit
+      - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Get version from tag
         id: version
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Build versioned JS file
+      - name: Install dependencies (optional)
         run: |
-          set -e
+          if [ -f package.json ]; then npm ci; fi
 
-          VERSION=${{ steps.version.outputs.version }}
+      - name: Build (if applicable)
+        run: |
+          if [ -f package.json ]; then npm run build; fi
 
-          SOURCE="dist/${BASE}.js"
-          OUT="dist/${BASE}-v${VERSION}.js"
-
-          cp "$SOURCE" "$OUT"
-          echo "Created $OUT"
-
-      - name: Create HACS manifest for release
+      - name: Inject version into JS (cache-safe)
         run: |
           VERSION=${{ steps.version.outputs.version }}
-          FILE="${BASE}-v${VERSION}.js"
 
-          jq --arg file "$FILE" '.filename = $file' hacs.json > hacs.release.json
+          FILE="dist/${BASE}.js"
 
-          echo "Generated hacs.release.json"
+          # Append version constant for runtime access
+          echo "" >> "$FILE"
+          echo "window.${BASE}_version = \"$VERSION\";" >> "$FILE"
 
-      - name: Create GitHub Release + upload assets
+      - name: Create HACS manifest (stable filename)
+        run: |
+          jq '.filename = "enhanced-shutter-card.js"' hacs.json > hacs.release.json
+
+      - name: Rename build to stable HACS filename
+        run: |
+          cp dist/${BASE}.js dist/enhanced-shutter-card.js
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: v${{ steps.version.outputs.version }}
           tag_name: ${{ github.ref_name }}
           files: |
-            dist/${{ env.BASE }}-v${{ steps.version.outputs.version }}.js
+            dist/enhanced-shutter-card.js
             hacs.release.json
