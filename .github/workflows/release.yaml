@@ -50,5 +50,5 @@ jobs:
           name: v${{ steps.version.outputs.version }}
           tag_name: ${{ github.ref_name }}
           files: |
-            dist/enhanced-shutter-card.js
+            dist/*
             hacs.json
