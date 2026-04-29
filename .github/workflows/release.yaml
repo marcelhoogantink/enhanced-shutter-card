@@ -30,7 +30,7 @@ jobs:
 
       - name: Update hacs.json
         run: |
-          NEWFILE="your-card-v${{ steps.version.outputs.version }}.js"
+          NEWFILE="enhanced-shutter-card-v${{ steps.version.outputs.version }}.js"
           jq --arg file "$NEWFILE" '.filename = $file' hacs.json > tmp.json
           mv tmp.json hacs.json
           echo "Updated hacs.json"
