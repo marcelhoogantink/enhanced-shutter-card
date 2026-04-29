@@ -27,8 +27,12 @@ jobs:
 
       - name: Create versioned JS file
         run: |
-          NEWFILE="${BASE}-v${{ steps.version.outputs.version }}.js"
-          cp ${BASE}.js $NEWFILE
+          set -e
+      
+          SOURCE="dist/${BASE}.js"
+          NEWFILE="dist/${BASE}-v${{ steps.version.outputs.version }}.js"
+      
+          cp "$SOURCE" "$NEWFILE"
           echo "Created $NEWFILE"
 
       - name: Update hacs.json
