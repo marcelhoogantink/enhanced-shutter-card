@@ -43,5 +43,8 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add .
-          git commit -m "Release v${{ steps.version.outputs.version }}" || echo "No changes"
+      
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+      
+          git commit -m "Release v${{ steps.version.outputs.version }}"
           git push
