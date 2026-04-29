@@ -40,10 +40,6 @@ jobs:
           echo "" >> "$FILE"
           echo "window.enhanced_shutter_card_version = \"$VERSION\";" >> "$FILE"
 
-      - name: Rename to HACS stable filename
-        run: |
-          cp dist/${BASE}.js dist/enhanced-shutter-card.js
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
