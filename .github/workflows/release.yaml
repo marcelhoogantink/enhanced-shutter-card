@@ -1,0 +1,60 @@
+name: Release Enhanced Shutter Card
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set base name
+        run: echo "BASE=enhanced-shutter-card" >> $GITHUB_ENV
+
+      - name: Create versioned JS file
+        run: |
+          set -e
+      
+          SOURCE="dist/${BASE}.js"
+          NEWFILE="dist/${BASE}-v${{ steps.version.outputs.version }}.js"
+      
+          cp "$SOURCE" "$NEWFILE"
+          echo "Created $NEWFILE"
+
+      - name: Update hacs.json
+        run: |
+          NEWFILE="${BASE}-v${{ steps.version.outputs.version }}.js"
+          jq --arg file "$NEWFILE" '.filename = $file' hacs.json > tmp.json
+          mv tmp.json hacs.json
+          echo "Updated hacs.json -> $NEWFILE"
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+      
+          git add .
+      
+          git diff --cached --quiet && echo "No changes" && exit 0
+      
+          git commit -m "Release v${{ steps.version.outputs.version }}"
+      
+          if [[ "${GITHUB_REF_TYPE}" == "branch" ]]; then
+            git push origin HEAD:${GITHUB_REF_NAME}
+          else
+            echo "Tag build detected - skipping push (tags are immutable)"
+          fi
