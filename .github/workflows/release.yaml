@@ -42,7 +42,7 @@ jobs:
           mv tmp.json hacs.json
           echo "Updated hacs.json -> $NEWFILE"
 
-      - name: Commit and push changes
+      - name: Commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
@@ -53,6 +53,8 @@ jobs:
       
           git commit -m "Release v${{ steps.version.outputs.version }}"
       
-          BRANCH="${GITHUB_REF_NAME}"
-      
-          git push origin HEAD:$BRANCH
+          if [[ "${GITHUB_REF_TYPE}" == "branch" ]]; then
+            git push origin HEAD:${GITHUB_REF_NAME}
+          else
+            echo "Tag build detected - skipping push (tags are immutable)"
+          fi
