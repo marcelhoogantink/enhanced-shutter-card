@@ -23,29 +23,24 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Install dependencies (optional)
+      - name: Install dependencies
         run: |
           if [ -f package.json ]; then npm ci; fi
 
-      - name: Build (if applicable)
+      - name: Build project
         run: |
           if [ -f package.json ]; then npm run build; fi
 
-      - name: Inject version into JS (cache-safe)
+      - name: Inject version into JS
         run: |
           VERSION=${{ steps.version.outputs.version }}
 
           FILE="dist/${BASE}.js"
 
-          # Append version constant for runtime access
           echo "" >> "$FILE"
-          echo "window.${BASE}_version = \"$VERSION\";" >> "$FILE"
+          echo "window.enhanced_shutter_card_version = \"$VERSION\";" >> "$FILE"
 
-      - name: Create HACS manifest (stable filename)
-        run: |
-          jq '.filename = "enhanced-shutter-card.js"' hacs.json > hacs.release.json
-
-      - name: Rename build to stable HACS filename
+      - name: Rename to HACS stable filename
         run: |
           cp dist/${BASE}.js dist/enhanced-shutter-card.js
 
@@ -56,4 +51,4 @@ jobs:
           tag_name: ${{ github.ref_name }}
           files: |
             dist/enhanced-shutter-card.js
-            hacs.release.json
+            hacs.json
