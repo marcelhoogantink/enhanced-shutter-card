@@ -24,59 +24,115 @@ When you're done, you can...
 
 Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target="_blank">  ⭐ <b>Enhanced Shutter Card</b> </a> on GitHub
 
- ... or ...
+ ... and ...
 
 <a href="https://www.buymeacoffee.com/marcelhoogantink" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height= "60px" width=  "217px" ></a>
 
 Thank you !
 
 ---
-### New in version v1.5.2:
+### New in this beta-version v1.6.0b4:
 
-Improved Tilt (3d-tilt) and tilt slat visible at 90 degrees.
+- #### Added counter for group member names
+  When using grouped covers and `show_group_memebers: true`, Adding an `@` to the defined `name` wil put a number at the `@` in the group-member.
 
 - #### Solved issues:
+  - [#161](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/161) [FR] modify Entity names in Stack, they are messy :)
+  - [#163](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/163) [Bug] beta3 completely broke everything - stacked and not stacked
+---
+### New in this beta-version v1.6.0b3:
 
-    [#151](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/151) Does not work anymore without internet access
+- #### Force format values to zero decimals
+  Force format values to prevent unneeded decimals.(solves [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131))
+- #### Improve battery- and signal-icons placements
+- #### Solved issues:
+   - [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131) Battery percentage - display precision
 
 ---
-### New in version v1.5.1:
+### New in this beta-version v1.6.0b2:
 
-Version `v1.5.1` is the Tilt-version !!!
-Now, fully tilt capacities are included:
+- #### Solved issues:
+  - [#160](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/160) Show Dividers between Group Row entities
+  - [#159](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/159) Percentage precision
+---
+### New in this beta-version v1.6.0b1:
 
-  ![FullTiltOptions](FullTiltOptions.gif) ![FullTiltOptions](FullTiltOptions2.gif)
+- #### new options: `show_open_close_slider` en `show_window`
+  When you have little room, eq. on your mobile, you can hide the main-window-image by `show_window: false` (default `true`) and use a slider `show_open_close_slider: true` (default `false`). You can use both settings independently of each other.
 
-Also a new preset setting-option is added: `shutter_preset: blind`. This one is used in the example above.
+  This solves also [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) and expands the options to hide/view parts of the card.
 
-- #### New tilt-setting options are added:
+- #### new options `show_tilt_slider` and `show_tilt_buttons`
+  For the tilt-section (when the cover can tilt), the setting `show_tilt_slider` is introduced. Together with `show_tilt_buttons` you can set the tilt options the way you like.
+  This also solves [#153](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/153)
 
-- ##### New option [invert_percentage_tilt_ui]
-  (boolean) Invert/alter the setting for tilt-percentage on user-interface level. (default `false`)
-- ##### New option [invert_percentage_tilt_cover]
-  (boolean) Invert/alter the setting for tilt-percentage on device level. (default `false`)
-- ##### New option [tilt_slider_only]
-  (boolean) Display only the tilt-silder, not the buttons and visualisation (default `false`)
-  Only active when the cover has a tilt option and `show_tilt` equals `true`
-- ##### New option [tilt_angle_min]
-  (int) Set the maximum tilt-level (in degrees)
-  values between [0] and [180] and less then `tilt_angle_max` (default 0)
-  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
-- ##### New option [tilt_angle_max]
-  (int) Set the minimum tilt-level (in degrees)
-  values between [0] and [180] and greater then `tilt_angle_min` (default 180)
-  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
+- #### renamed settings (deprecations)
+
+  To make the enabling/disalbling of element of the Car more Straightforeward, all these setting are now aligned to
+  `show_XXXX` being true or false:
+    | new name | old name (deprecated)| comment|
+    | -- | -- | -- |
+    | show_name | name_disabled | reversed setting (`true`<>`false`) |
+    | show_opening | opening_disabled | reversed setting (`true`<>`false`) |
+    | show_tilt_button | tilt_slider_only | reversed setting (`true`<>`false`) |
+    | show_tilt_slider | show_tilt | same setting |
+    | show_standard_buttons | disable_standard_buttons | reversed setting (`true`<>`false`) |
+    | show_partial_open_buttons | disable_partial_open_buttons | reversed setting (`true`<>`false`) |
+    | show_window | - | new |
+    | show_open_close_slider | - | new |
+
+- #### setting `stacked: horizontal` improved
+  This setting has now automatic horizontal scroll-bars when the cover does not fit in the section.
+
+- #### new option for `preset_shutter`
+  A new `preset_shutter`-option is now available: `compact` for little displays like a mobile-phone, displaying a tiny card without the (big) main window, but instead with a slider for opening/closing (see `show_window` and `show_open_close_slider` options).
 
 - #### Solved issues:
 
-  - [#100](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/100) Roller Shades with Tilt
-  - [#45](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/45) [Feature Request] Add tilt positional options and icons to the Card
-  - [#145](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/145) Extra options for new tilt function
+  - [#153](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/153) (bug) Tilt options!
+  - [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) Configuration variable to hide the central graphical window (Minimalist UI)
 
 
+### New in this beta-version v1.6.0b0:
+
+
+- #### New `auto`-option for finding sub-entities
+  For the `battery_entity` and `signal_entity` settings, a new added option `auto` is available. When this is set to `auto`, the Card tries to find a battery or signal entity in the device of the cover-entity and displays its icon and status.
+
+  Examples:
+        `battery_entity: auto`
+    `signal_entity: auto`
+
+  Of course, you can still enter the name of these sub-entities.
+
+- #### Horizontal stacked card.
+  With the new setting `stacked` (default `vertical`), you can create a horizontal stacked Card by setting `stacked: horizontal`.
+
+- #### Group-member display.
+  When displaying a cover-group, it is now possible to display the group-members in stead of the group-cover itself.
+  Use the new `show_group_members` setting and set it `true` like `show_group_members: true`.
+  When you also use the `auto` setting for the sub-entitties (see above), the Card wil search for these entities for each group-member separately
+
+- #### Place battery and Signal icons on Top or Bottom.
+  New option to put the battery and signal icons on top or bottom of the card: `icons_position` (default `top`).
+  Set to `icons_position: bottom` to move the icons to the bottom of the card.
+
+- #### Solved issues:
+
+  - [#51](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/51) How to do a Horizonal Stack?
+  - [#132](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/132) Multiple Shade Row Card
+  - [#156](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/156) (bug) Curtain buttons do not show left and right, but up and down
+  - [#157](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/157) (bug) unreachable code after return statement
+
+
+- #### to be done:
+
+  - [#153](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/153) (bug) Tilt options!
+  - [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) Configuration variable to hide the central graphical window (Minimalist UI)
+
+
+---
 ### For previous release-changes go to [Previous-release changes](#previous-release-changes)
-
-
 ---
 
 ## All functions of the Card
@@ -130,142 +186,123 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 
 ## Configuration
 
+In the table below all the possible settings are listed.
+The columns _Global_ and _Local_ show wheter teh setting can be used in the card header or in the  `entities`  section in the `- entity` sections.
+The settings are defined in the follwing logic:
+- first Global:
+  - The program defaults are taken. (See foe these defaults in the `Default`column below)
+  - These settings are overruled with the settings of the `shutter_preset` setting in the global section. (see `Shutter Presets`)
+  - Then all other entered settings in the global section are taken into account.
+- then per `- entity`:
+  - These settings are now overruled with the defined settings of the `shutter_preset` setting for this entity.
+  - Then, at last, all other settings under this entity section are taken into account.
+
 ### General
 
-| Name                         | Type          | Required | Default                                       | Description                                                                                                                                                                                                                                                                | Remarks                                  |
-| ---------------------------- | ------------- | -------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| type                         | string        | Yes      | -                                             | Must be "custom:enhanced-shutter-card"
-| title                        | string        | no       | -                                             | Title of the card
-| shutter_preset               | string        | no       | `roller-shutter`                              | Several preset-shutters-setting-groups, which creates a good start-setting for a specific type of cover. See the table below for possible definitions and the settings of them
-| passive_mode                 | boolean       | no       | false                                         | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.
-| image_map                    | string        | No       | /local/community/enhanced-shutter-card/images | map of the images.
-| window_image                 | string        | No       | esc-window.png                                | image of the window shutter.
-| view_image                   | string        | No       | esc-back-view.png                             | background-image through the window, or a HTML color.
-| shutter_slat_image           | string        | No       | esc-shutter-slat.png                          | Image of one slat of the shutter.
-| shutter_bottom_image         | string        | No       | esc-shutter-bottom.png                        | the bottom bar of the shutter.
-| rotate_slat_image            | boolean       | No       | true                                          | defines whether the `shutter_slat_image` wil rotate with the closing_direction (`true`) or not (`false`)
-| stretch_bottom_image         | boolean       | No       | true                                          | defines whether the `shutter_bottom_image` wil be stretched to the windows-size (`true`)  or not (`false`). (Only perpendicular to the `closing_direction`)
-| base_height_px               | int           | No       | 150                                           | height of image in pixels.
-| base_width_px                | int           | No       | 150                                           | witdh of image in pixels.
-| resize_height_pct            | int           | No       | 100                                           | resize of the base height in percent. (limited between 20% and 500%)
-| resize_width_pct             | int           | No       | 100                                           | resize of the base width in percent. (limited between 20% and 500%)
-| top_offset_pct               | int           | No       | 0                                             | space between top image/window and top shutter.
-| bottom_offset_pct            | int           | No       | 0                                             | space between bottom image/window and bottom shutter.
-| closing_direction            | string        | No       | `down`                                        | Set the closing direction: `down`, `left` or `right`.
-| buttons_position             | string        | No       | `left`                                        | Set buttons on `left`, `right`, `top` or `bottom` of the shutter. For automatic placement on Landscape or Portrait-format of the visible Dashboard, you can also use the `auto-top-left` (or `auto`), `auto-top-right`, `auto-bottom-left` or `auto-bottom-right` options.
-| scale_texts                  | boolean/float | No       | false                                         | Scale the texts according to the window-size (`true`) or scale it with a factor (`0.5` - `2.0`)
-| scale_buttons                | boolean/float | No       | false                                         | Scale the buttons when the windows-image gets smaller then 150px in the direction of the button-placement (`true`), or scale it with a factor (`0.5` - `2.0`).
-| scale_icons                  | boolean/float | No       | true                                          | Scale the icon for battery and signal icons windows-image gets smaller then 150px in the horizonal direction (`true`), or scale it with a factor (`0.5` - `2.0`).
-| name_position                | string        | No       | `top`                                         | Set title/name shutter on `top` or on `bottom` of the shutter image.
-| name_disabled                | boolean       | No       | false                                         | hide title/name of shutter
-| opening_position             | string        | No       | _name_position_                               | set position info of shutter on `top` or `bottom` of the shutter image.
-| opening_disabled             | boolean       | No       | false                                         | hide position info of shutter
-| inline_header                | boolean       | No       | false                                         | place the shutter-header (name and position) in one line.
-| invert_percentage_ui         | boolean       | No       | `false`                                       | Inverts the percentage on UI-level when set to `true`. Will not change the cover behavior.                                                                                                                                                                                 |
-| invert_percentage_cover      | boolean       | No       | `false`                                       | Inverts the precentage on device-level when set to `true`. Possibly changes to cover behavior.
-| invert_open_close_ui         | boolean       | No       | `false`                                       | Inverts the open-close texts on UI-level when set to `true`. Will not change the cover behavior.
-| invert_open_close_cover      | boolean       | No       | `false`                                       | Inverts the opec-close commands on device-level when set to `true`. Possibly changes to cover behavior.                                                                                                                                                                    |
-| invert_percentage_tilt_ui    | boolean       | No       | `false`                                       | Inverts the tilt-percentage on UI-level when set to `true`. Will not change the cover-tilt behavior.
-| invert_percentage_tilt_cover | boolean       | No       | `false`                                       | Inverts the tilt-percentage on device-level when set to `true`. Possibly changes to cover-tilt behavior.                                                                                                                                                                    |
-| show_tilt                    | boolean       | No       | `true`                                        | Show the `tilt` options and buttons, only active when the shutter supports `tilt`                                                                                                                                                                                          |
-| tilt_slider_only             | boolean       | No       | `true`                                        | Display only the tilt-silder, not the buttons and visualisation. Only active when the cover supports`tilt` and `show_tilt` equals `true`                                                                                                                                                                                           |
-| tilt_angle_max               | int           | No       | 180                                           | Maximum angle for visualiation of the tilt-function. This is representation for the 100% value of the tilt-value. |
-| tilt_angle_min               | int           | No       | 0                                             | Minimum angle for visualiation of the tilt-function. This is representation for the 0% value of the tilt-value. |
-| partial_close_percentage     | int           | No       | 0                                             | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.                                                                                                                                                       |
-| offset_closed_percentage     | int           | No       | 0                                             | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.                                                                                                                                                              |
-| always_percentage            | boolean       | No       | `false`                                       | If set to `true`, the end states (opened/closed) will be also as numbers (0 / 100 % ) instead of a text                                                                                                                                                                    |
-| disable_end_buttons          | boolean       | No       | `false`                                       | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button                                                                                                                                                 |
-| disable_standard_buttons     | boolean       | No       | false                                         | Show or hide the default up, down and stop buttons                                                                                                                                                                                                                         |
-| disable_partial_open_buttons | boolean       | No       | true                                          | Show or hide the partial open buttons.                                                                                                                                                                                                                                     |
-| button_up_hide_states        | string list   | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                   |
-| button_stop_hide_states      | string list   | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |
-| button_down_hide_states      | string list   | No       | empty list                                    | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |
+|             Name             |     Type      | Required |                    Default                    | Global | Local |                                                                                                                                Description                                                                                                                                 |  Remarks   |
+| ---------------------------- | ------------- | -------- | --------------------------------------------- | ------ | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| type                         | string        | Yes      | -                                             | Yes    | No    | Must be "custom:enhanced-shutter-card"                                                                                                                                                                                                                                     |            |
+| name                         | string        | No       | _Friendly name of the entity_                 | No     | Yes   | Name to display for the shutter. When using `show_group_members: true` for grouped covers, A `@` can be used to put a number in the name of each member.                                                                                                                   |            |
+| title                        | string        | no       | -                                             | Yes    | No    | Title of the card                                                                                                                                                                                                                                                          |            |
+| stacked                      | string        | no       | vertical                                      | Yes    | No    | Set the stacked direction when using multiple covers in one Card.                                                                                                                                                                                                          |            |
+| shutter_preset               | string        | no       | roller-shutter                                | Yes    | Yes   | Several preset-shutters-setting-groups, which creates a good start-setting for a specific type of cover. See the table below for possible definitions and the settings of them                                                                                             |            |
+| battery_entity               | string        | No       | `null`                                        | Yes    | Yes   | EntityId of the sensor represenating the battery-level of the shutter (as a number), or `auto` for automatic search. For global setting just use `auto` for automatic search                                                                                               |            |
+| signal_entity                | string        | No       | `null`                                        | Yes    | Yes   | EntityId of the sensor represenating the Wireless signal-level of the shutter (as a number), or `auto` for automatic search. For global setting just use `auto` for automatic search                                                                                       |            |
+| show_group_members           | boolean       | No       | `false`                                       | Yes    | Yes   | When using a grouped-cover in the Card, set to 'true'to display the member covers in stead of the group-cover.                                                                                                                                                             |            |
+| passive_mode                 | boolean       | no       | `false`                                       | Yes    | Yes   | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.                                                                                                                                                                |            |
+| image_map                    | string        | No       | /local/community/enhanced-shutter-card/images | Yes    | Yes   | map of the images. Change thsi when using own images.                                                                                                                                                                                                                      |            |
+| window_image                 | string        | No       | esc-window.png                                | Yes    | Yes   | image of the window shutter.                                                                                                                                                                                                                                               |            |
+| view_image                   | string        | No       | esc-back-view.png                             | Yes    | Yes   | background-image through the window, or a HTML color.                                                                                                                                                                                                                      |            |
+| shutter_slat_image           | string        | No       | esc-shutter-slat.png                          | Yes    | Yes   | Image of one slat of the shutter.                                                                                                                                                                                                                                          |            |
+| shutter_bottom_image         | string        | No       | esc-shutter-bottom.png                        | Yes    | Yes   | the bottom bar of the shutter.                                                                                                                                                                                                                                             |            |
+| rotate_slat_image            | boolean       | No       | `true`                                        | Yes    | Yes   | defines whether the `shutter_slat_image` wil rotate with the closing_direction (`true`) or not (`false`)                                                                                                                                                                   |            |
+| stretch_bottom_image         | boolean       | No       | `true`                                        | Yes    | Yes   | defines whether the `shutter_bottom_image` wil be stretched to the windows-size (`true`)  or not (`false`). (Only perpendicular to the `closing_direction`)                                                                                                                |            |
+| base_height_px               | int           | No       | 150                                           | Yes    | Yes   | height of image in pixels.                                                                                                                                                                                                                                                 |            |
+| base_width_px                | int           | No       | 150                                           | Yes    | Yes   | witdh of image in pixels.                                                                                                                                                                                                                                                  |            |
+| resize_height_pct            | int           | No       | 100                                           | Yes    | Yes   | resize of the base height in percent. (limited between 20% and 500%)                                                                                                                                                                                                       |            |
+| resize_width_pct             | int           | No       | 100                                           | Yes    | Yes   | resize of the base width in percent. (limited between 20% and 500%)                                                                                                                                                                                                        |            |
+| top_offset_pct               | int           | No       | 0                                             | Yes    | Yes   | space between top image/window and top shutter.                                                                                                                                                                                                                            |            |
+| bottom_offset_pct            | int           | No       | 0                                             | Yes    | Yes   | space between bottom image/window and bottom shutter.                                                                                                                                                                                                                      |            |
+| closing_direction            | string        | No       | `down`                                        | Yes    | Yes   | Set the closing direction: `down`, `left` or `right`.                                                                                                                                                                                                                      |            |
+| buttons_position             | string        | No       | `left`                                        | Yes    | Yes   | Set buttons on `left`, `right`, `top` or `bottom` of the shutter. For automatic placement on Landscape or Portrait-format of the visible Dashboard, you can also use the `auto-top-left` (or `auto`), `auto-top-right`, `auto-bottom-left` or `auto-bottom-right` options. |            |
+| scale_texts                  | boolean/float | No       | `false`                                       | Yes    | Yes   | Scale the texts according to the window-size (`true`) or scale it with a factor (`0.5` - `2.0`)                                                                                                                                                                            |            |
+| scale_buttons                | boolean/float | No       | `false`                                       | Yes    | Yes   | Scale the buttons when the windows-image gets smaller then 150px in the direction of the button-placement (`true`), or scale it with a factor (`0.5` - `2.0`).                                                                                                             |            |
+| scale_icons                  | boolean/float | No       | `true`                                        | Yes    | Yes   | Scale the icon for battery and signal icons windows-image gets smaller then 150px in the horizonal direction (`true`), or scale it with a factor (`0.5` - `2.0`).                                                                                                          |            |
+| name_position                | string        | No       | `top`                                         | Yes    | Yes   | Set title/name shutter on `top` or on `bottom` of the shutter image.                                                                                                                                                                                                       |            |
+| opening_position             | string        | No       | _name_position_ -setting                      | Yes    | Yes   | set position info of shutter on `top` or `bottom` of the shutter image.                                                                                                                                                                                                    |            |
+| inline_header                | boolean       | No       | `false`                                       | Yes    | Yes   | place the shutter-header (name and position) in one line.                                                                                                                                                                                                                  |            |
+| invert_percentage_ui         | boolean       | No       | `false`                                       | Yes    | Yes   | Inverts the percentage on UI-level when set to `true`. Will not change the cover behavior.                                                                                                                                                                                 |            |
+| invert_percentage_cover      | boolean       | No       | `false`                                       | Yes    | Yes   | Inverts the precentage on device-level when set to `true`. Possibly changes to cover behavior.                                                                                                                                                                             |            |
+| invert_open_close_ui         | boolean       | No       | `false`                                       | Yes    | Yes   | Inverts the open-close texts on UI-level when set to `true`. Will not change the cover behavior.                                                                                                                                                                           |            |
+| invert_open_close_cover      | boolean       | No       | `false`                                       | Yes    | Yes   | Inverts the opec-close commands on device-level when set to `true`. Possibly changes to cover behavior.                                                                                                                                                                    |            |
+| invert_percentage_tilt_ui    | boolean       | No       | `false`                                       | Yes    | Yes   | Inverts the tilt-percentage on UI-level when set to `true`. Will not change the cover-tilt behavior.                                                                                                                                                                       |            |
+| invert_percentage_tilt_cover | boolean       | No       | `false`                                       | Yes    | Yes   | Inverts the tilt-percentage on device-level when set to `true`. Possibly changes to cover-tilt behavior.                                                                                                                                                                   |            |
+| tilt_angle_max               | int           | No       | 180                                           | Yes    | Yes   | Maximum angle for visualiation of the tilt-function. This is representation for the 100% value of the tilt-value.                                                                                                                                                          |            |
+| tilt_angle_min               | int           | No       | 0                                             | Yes    | Yes   | Minimum angle for visualiation of the tilt-function. This is representation for the 0% value of the tilt-value.                                                                                                                                                            |            |
+| partial_close_percentage     | int           | No       | 0                                             | Yes    | Yes   | Set it to a percentage (0-100) if you want to be able to quickly go to this "partially closed" state using a button.                                                                                                                                                       |            |
+| offset_closed_percentage     | int           | No       | 0                                             | Yes    | Yes   | Set it to a percentage (0-100) of travel that will still be considered a "closed" state in the visualization.                                                                                                                                                              |            |
+| always_percentage            | boolean       | No       | `false`                                       | Yes    | Yes   | If set to `true`, the end states (opened/closed) will be also as numbers (0 / 100 % ) instead of a text                                                                                                                                                                    |            |
+| disable_end_buttons          | boolean       | No       | `false`                                       | Yes    | Yes   | If set to `true`, the end states (opened/closed) will also deactivate the buttons for that direction (i.e. the "up" button                                                                                                                                                 |            |
+| button_up_hide_states        | string list   | No       | empty list                                    | Yes    | Yes   | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `up` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                   |            |
+| button_stop_hide_states      | string list   | No       | empty list                                    | Yes    | Yes   | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `stop` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |            |
+| button_down_hide_states      | string list   | No       | empty list                                    | Yes    | Yes   | Entered state strings (`opening`, `open`, `closed`, `closing` or `partial_open`) added will hide the `down` button when the cover is in any of the listed states. This can be combined with other `*_hide_states` options.                                                 |            |
+| show_window                  | boolean       | No       | `true`                                        | Yes    | Yes   | Show main window (or not)                                                                                                                                                                                                                                                  |            |
+| show_name                    | boolean       | No       | `true`                                        | Yes    | Yes   | Show the cover name (or not)                                                                                                                                                                                                                                               |            |
+| show_opening                 | boolean       | No       | `true`                                        | Yes    | Yes   | Show the cover position (and tilt) (or not)                                                                                                                                                                                                                                |            |
+| show_standard_buttons        | boolean       | No       | `true`                                        | Yes    | Yes   | Show the standard button block (or not)                                                                                                                                                                                                                                    |            |
+| show_open_close_slider       | boolean       | No       | `false`                                       | Yes    | Yes   | Show Show the slider for open and close (or not)                                                                                                                                                                                                                           |            |
+| show_tilt_buttons            | boolean       | No       | `true`                                        | Yes    | Yes   | Show tilt button block (or not) (only active when cover supprts tilt)                                                                                                                                                                                                      |            |
+| show_tilt_slider             | boolean       | No       | `true`                                        | Yes    | Yes   | Show tilt slider (or not) (only active when cover supprts tilt)                                                                                                                                                                                                            |            |
+| show_partial_open_buttons    | boolean       | No       | `true`                                        | Yes    | Yes   | Show partail open button-block (or not)                                                                                                                                                                                                                                    |            |
+| **deprecated**               |               |          |                                               | Yes    | Yes   | Show main window (or not)                                                                                                                                                                                                                                                  |            |
+| name_disabled                | boolean       | No       | `false`                                       | Yes    | Yes   | hide title/name of shutter                                                                                                                                                                                                                                                 | deprecated |
+| opening_disabled             | boolean       | No       | `false`                                       | Yes    | Yes   | hide position info of shutter                                                                                                                                                                                                                                              | deprecated |
+| show_tilt                    | boolean       | No       | `true`                                        | Yes    | Yes   | Show the `tilt` options and buttons, only active when the shutter supports `tilt`                                                                                                                                                                                          | deprecated |
+| tilt_slider_only             | boolean       | No       | `false`                                       | Yes    | Yes   | Display only the tilt-silder, not the buttons and visualisation. Only active when the cover supports`tilt` and `show_tilt` equals `true`                                                                                                                                   | deprecated |
+| disable_standard_buttons     | boolean       | No       | `false`                                       | Yes    | Yes   | Show or hide the default up, down and stop buttons                                                                                                                                                                                                                         | deprecated |
+| disable_partial_open_buttons | boolean       | No       | `true`                                        | Yes    | Yes   | Show or hide the partial open buttons.                                                                                                                                                                                                                                     | deprecated |
 
-### Entities
-
-| Name                         | Type        | Required | Default                                  | Description                                                                                 | remarks                                      |
-| ---------------------------- | ----------- | -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| entity                       | string      | Yes      | -                                        | The shutter entity ID                                                                       |
-| name                         | string      | No       | _Friendly name of the entity_            | Name to display for the shutter                                                             |
-| battery_entity               | string      | No       | `null`                                   | EntityId of the sensor represenating the battery-level of the shutter (as a number)         |
-| signal_entity                | string      | No       | `null`                                   | EntityId of the sensor represenating the Wireless signal-level of the shutter (as a number) |
-| shutter_preset               | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| passive_mode                 | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| image_map                    | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| window_image                 | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| view_image                   | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| shutter_slat_image           | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| shutter_bottom_image         | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| rotate_slat_image            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| stretch_bottom_image         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| base_height_px               | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| base_width_px                | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| resize_height_pct            | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| resize_width_pct             | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| top_offset_pct               | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| bottom_offset_pct            | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| closing_direction            | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| buttons_position             | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| scale_buttons                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| scale_icons                  | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| name_position                | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| name_disabled                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| opening_position             | string      | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| opening_disabled             | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| inline_header                | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_percentage_ui         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_percentage_cover      | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_open_close_ui         | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_open_close_cover      | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_open_close_tilt_ui    | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| invert_open_close_tilt_cover | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| show_tilt                    | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| titl_slider_only             | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| tilt_angle_max               | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| tilt_angle_min               | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| partial_close_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| offset_closed_percentage     | int         | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| always_percentage            | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| disable_end_buttons          | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| disable_standard_buttons     | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| disable_partial_open_buttons | boolean     | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| button_up_hide_states        | string list | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| button_stop_hide_states      | string list | No       | global item setting, see under _General_ | see under _General_                                                                         |
-| button_down_hide_states      | string list | No       | global item setting, see under _General_ | see under _General_                                                                         |
-
-_Remark : you can also just give the entity ID (without to specify `entity:`) if you don't need to specify the other configurations._
+_Remark: you can also just give the entity ID (without to specify `entity:`) if you don't need to specify the other configurations._
 
 ### Shutter Presets
 The following `shutter_preset` settings are available:
 
-| **Preset Name**    | **Setting**                 | **Value**                 |
-| ------------------ | --------------------------- | ------------------------- |
-| **roller-shutter** | `rotate_slat_image`         | `true`                    |
-|                    | `name`                      | `Roller Shutter`          |
-| **awning**         | `invert_open_close_ui`      | `true`                    |
-|                    | `invert_percentage_ui`      | `true`                    |
-|                    | `shutter_slat_image`        | `esc-awning.png`          |
-|                    | `shutter_bottom_image`      | `esc-awning-bottom.png`   |
-|                    | `bottom_offset_pct`         | `50`                      |
-|                    | `stretch_bottom_image`      | `false`                   |
-|                    | `closing_direction`         | `down`                    |
-|                    | `name`                      | `Awning`                  |
-| **curtain**        | `closing_direction`         | `right`                   |
-|                    | `shutter_slat_image`        | `esc-curtain.png`         |
-|                    | `shutter_bottom_image`      | `''`                      |
-|                    | `rotate_slat_image`         | `false`                   |
-|                    | `closing_direction`         | `down`                    |
-|                    | `name`                      | `Curtain`                 |
-| **shade**          | `shutter_slat_image`        | `'#00000080'`           |
-|                    | `closing_direction`         | `down`                    |
-|                    | `name`                      | `Shade`                   |
-| **blind**          | `closing_direction`         | `right`                   |
-|                    | `shutter_slat_image`        | `esc-awning.png`          |
-|                    | `rotate_slat_image`         | `false`                   |
-|                    | `windows_image`             | `esc-windows2.png`        |
-|                    | `shutter_bottom_image`      | `''`                      |
-|                    | `name`                      | `Blind`                   |
-
+|  **Preset Name**   |         **Setting**         |       **Value**       |
+| ------------------ | --------------------------- | --------------------- |
+| **roller-shutter** | `rotate_slat_image`         | `true`                |
+|                    | `name`                      | Roller Shutter        |
+| **awning**         | `invert_open_close_ui`      | `true`                |
+|                    | `invert_percentage_ui`      | `true`                |
+|                    | `shutter_slat_image`        | esc-awning.png        |
+|                    | `shutter_bottom_image`      | esc-awning-bottom.png |
+|                    | `bottom_offset_pct`         | 50                    |
+|                    | `stretch_bottom_image`      | `false`               |
+|                    | `closing_direction`         | `down`                |
+|                    | `name`                      | Awning                |
+| **curtain**        | `closing_direction`         | `right`               |
+|                    | `shutter_slat_image`        | esc-curtain.png       |
+|                    | `shutter_bottom_image`      | ''                    |
+|                    | `rotate_slat_image`         | `false`               |
+|                    | `closing_direction`         | `down`                |
+|                    | `name`                      | Curtain               |
+| **shade**          | `shutter_slat_image`        | `'#00000080'`         |
+|                    | `closing_direction`         | `down`                |
+|                    | `name`                      | Shade                 |
+| **blind**          | `closing_direction`         | `right`               |
+|                    | `shutter_slat_image`        | esc-awning.png        |
+|                    | `rotate_slat_image`         | `false`               |
+|                    | `windows_image`             | esc-windows2.png      |
+|                    | `shutter_bottom_image`      | ''                    |
+|                    | `name`                      | `Blind`               |
+| **compact**        | `show_window`               | `false`               |
+|                    | `show_name`                 | `true`                |
+|                    | `show_opening`              | `true`                |
+|                    | `show_standard_buttons`     | `true`                |
+|                    | `show_open_close_slider`    | `true`                |
+|                    | `show_tilt_buttons`         | `true`                |
+|                    | `show_tilt_slider`          | `true`                |
+|                    | `show_partial_open_buttons` | `false`               |
+|                    | `name`                      | Compact               |
 
 
 ### Sample
@@ -318,8 +355,49 @@ entities:
 ```
 
 ---
-## Previous release-changes
+## Previous release-changes:
 ---
+### New in version v1.5.2:
+
+Improved Tilt (3d-tilt) and tilt slat visible at 90 degrees.
+
+- #### Solved issues:
+
+    [#151](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/151) Does not work anymore without internet access
+
+---
+### New in version v1.5.1:
+
+#### Version `v1.5.1` is the Tilt-version !!!
+Now, fully tilt capacities are included:
+
+  ![FullTiltOptions](FullTiltOptions.gif) ![FullTiltOptions](FullTiltOptions2.gif)
+
+Also a new preset setting-option is added: `shutter_preset: blind`. This one is used in the example above.
+
+- #### New tilt-setting options are added:
+
+- ##### New option [invert_percentage_tilt_ui]
+  (boolean) Invert/alter the setting for tilt-percentage on user-interface level. (default `false`)
+- ##### New option [invert_percentage_tilt_cover]
+  (boolean) Invert/alter the setting for tilt-percentage on device level. (default `false`)
+- ##### New option [tilt_slider_only]
+  (boolean) Display only the tilt-silder, not the buttons and visualisation (default `false`)
+  Only active when the cover has a tilt option and `show_tilt` equals `true`
+- ##### New option [tilt_angle_min]
+  (int) Set the maximum tilt-level (in degrees)
+  values between [0] and [180] and less then `tilt_angle_max` (default 0)
+  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
+- ##### New option [tilt_angle_max]
+  (int) Set the minimum tilt-level (in degrees)
+  values between [0] and [180] and greater then `tilt_angle_min` (default 180)
+  This value is for tilt-visualisation, the value send to the cover are always from 100 (for `tilt_angle_max`) to 0 (for `tilt_angle_min`)
+
+- #### Solved issues:
+
+  - [#100](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/100) Roller Shades with Tilt
+  - [#45](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/45) [Feature Request] Add tilt positional options and icons to the Card
+  - [#145](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/145) Extra options for new tilt function
 ### New in version v1.4.3:
 
 This a interim release for (hopefully) repairing all the problems and issues that this card had with variuos cover-types.
