@@ -31,6 +31,10 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
+### New in this beta-version v1.6.0b6:
+- #### Solved issues:
+  - [#163](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/163) [Bug] beta3 completely broke everything - stacked and not stacked
+---
 ### New in this beta-version v1.6.0b4:
 
 - #### Added counter for group member names
@@ -38,7 +42,6 @@ Thank you !
 
 - #### Solved issues:
   - [#161](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/161) [FR] modify Entity names in Stack, they are messy :)
-  - [#163](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/163) [Bug] beta3 completely broke everything - stacked and not stacked
 ---
 ### New in this beta-version v1.6.0b3:
 
