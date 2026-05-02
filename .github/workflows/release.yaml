@@ -39,7 +39,7 @@ jobs:
           cp -r images/ dist/images/
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@6
+        uses: actions/upload-artifact@7
         with:
           name: enhanced-shutter-card
           path: dist/    
