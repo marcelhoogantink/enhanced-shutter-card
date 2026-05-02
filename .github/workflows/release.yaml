@@ -27,6 +27,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Copy lit and images to dist
+        run: |
+          cp lit/* dist/
+          cp images/* dist/          
+
       - name: Verify build output
         run: |
           echo "Built file:"
@@ -35,11 +40,6 @@ jobs:
           ls -lah dist/images/          
           echo "First 5 lines:"
           head -5 dist/enhanced-shutter-card.js
-
-      - name: Copy lit and images to dist
-        run: |
-          cp lit/* dist/
-          cp images/* dist/          
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v6.0.0
