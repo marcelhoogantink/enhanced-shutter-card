@@ -8,18 +8,18 @@
 // https://www.jsdelivr.com/package/gh/lit/dist
 
 import {LitElement, html, css, unsafeCSS } from './dist/lit/lit-core.min.js';
-import * as C from './dist/src/constants.js';
+import * as C from './src/constants.js';
 import {
   xyPair,
   //htmlShutter,
-} from './dist/src/classes.js';
+} from './src/classes.js';
 import {
   resizeDebugger,
   console_log,
 } from'./dist/src/functions.js';
 
-import * as HtmlBlocks from './dist/src/htmlBlocks.js';
-import {EscImages} from './dist/src/escImages.js';
+import * as HtmlBlocks from './src/htmlBlocks.js';
+import {EscImages} from './src/escImages.js';
 
 // import {html, css, unsafeCSS } from './lit/lit-core.min.js';
 // import {LitElement} from './lit/lit-debug.js'; // <-- dit is nu de debug versie
