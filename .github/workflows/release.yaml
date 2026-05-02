@@ -12,12 +12,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -33,10 +33,25 @@ jobs:
           echo "First 5 lines:"
           head -5 dist/enhanced-shutter-card.js
 
+      - name: Copy lit and images to dist
+        run: |
+          cp -r lit/ dist/lit/
+          cp -r images/ dist/images/
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: enhanced-shutter-card
+          path: dist/    
+      
       - name: Upload to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/enhanced-shutter-card.js
+          files: |
+            dist/enhanced-shutter-card.js
+            dist/lit/lit-core.min.js
+            dist/lit/lit-debug.js
+            dist/images/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
