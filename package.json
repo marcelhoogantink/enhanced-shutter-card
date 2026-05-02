@@ -3,7 +3,8 @@
   "version": "v1.6.0b6.1",
   "type": "module",
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "watch": "rollup -c --watch"
   },
   "devDependencies": {
     "rollup": "^4.0.0",
