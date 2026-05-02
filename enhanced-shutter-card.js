@@ -2677,6 +2677,7 @@ console.info(
   'color: white; background: green; font-weight: 700',
   'color: black;background: white; font-weight: bold'
 );
+console.info(`my-card version __VERSION__`);
 /**
  * test functions
  */

@@ -1,0 +1,14 @@
+{
+  "name": "enhanced-shutter-card",
+  "version": "v1.6.0b6.1",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "rollup": "^4.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-terser": "^0.4.0",
+    "@rollup/plugin-replace": "^5.0.0"
+  }
+}
