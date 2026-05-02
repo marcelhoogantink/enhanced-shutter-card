@@ -31,6 +31,8 @@ jobs:
         run: |
           echo "Built file:"
           ls -lah dist/
+          ls -lah dist/lit/
+          ls -lah dist/images/          
           echo "First 5 lines:"
           head -5 dist/enhanced-shutter-card.js
 
