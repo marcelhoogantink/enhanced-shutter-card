@@ -7,7 +7,7 @@
 // // local copy of RELEASE 3.0.1 of Lit-element:
 // https://www.jsdelivr.com/package/gh/lit/dist
 
-import {LitElement, html, css, unsafeCSS } from './dist/lit/lit-core.min.js';
+import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
 import * as C from './src/constants.js';
 import {
   xyPair,
