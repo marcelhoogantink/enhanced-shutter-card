@@ -27,11 +27,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Copy lit and images to dist
-        run: |
-          cp -r lit/ dist/lit/
-          cp -r images/ dist/images/
-
       - name: Verify build output
         run: |
           echo "Built file:"
