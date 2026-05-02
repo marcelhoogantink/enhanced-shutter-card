@@ -37,12 +37,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: enhanced-shutter-card
-          path: dist/enhanced-shutter-card.js      
+          path: | 
+            dist/enhanced-shutter-card.js      
+            lit/
+            images/
       
       - name: Upload to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/enhanced-shutter-card.js
+          files: |
+            dist/enhanced-shutter-card.js
+            lit/lit-core.min.js
+            lit/lit-debug.js
+            images/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
