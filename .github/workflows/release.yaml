@@ -33,14 +33,16 @@ jobs:
           echo "First 5 lines:"
           head -5 dist/enhanced-shutter-card.js
 
+      - name: Copy lit and images to dist
+        run: |
+          cp -r lit/ dist/lit/
+          cp -r images/ dist/images/
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: enhanced-shutter-card
-          path: | 
-            dist/enhanced-shutter-card.js      
-            lit/
-            images/
+          path: dist/    
       
       - name: Upload to release
         if: github.event_name == 'release'
@@ -48,8 +50,8 @@ jobs:
         with:
           files: |
             dist/enhanced-shutter-card.js
-            lit/lit-core.min.js
-            lit/lit-debug.js
-            images/*
+            dist/lit/lit-core.min.js
+            dist/lit/lit-debug.js
+            dist/images/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
