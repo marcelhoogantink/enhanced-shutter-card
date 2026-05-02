@@ -3,7 +3,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs) [![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buymeacoffee-orange?style=for-the-badge)](https://buymeacoffee.com/marcelhoogantink)
 ---
 
-## Installation: 
+## Installation:
 
 Use this button:
 
@@ -30,6 +30,11 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 
 Thank you !
 
+---
+### New in this beta-version v1.6.0b7:
+- fully rebuild the release process.
+- #### Solved issues:
+  - [#163](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/163) [Bug] beta3 completely broke everything - stacked and not stacked
 ---
 ### New in this beta-version v1.6.0b6:
 - #### Solved issues:

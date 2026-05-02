@@ -3,7 +3,7 @@ import {
 } from './functions.js';
 
 
-export const VERSION = 'v1.6.0b6';
+export const VERSION = 'v1.6.0b7';
 export const IS_LOCAL = isRunningLocally();
 export const DEBUG = VERSION.includes('b') && IS_LOCAL;
 export const NONE = 'none';
