@@ -27,7 +27,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Copy lit and images to dist
+      - name: Copy lit and images to dist map
         run: |
           cp lit/* dist/
           cp images/* dist/          
