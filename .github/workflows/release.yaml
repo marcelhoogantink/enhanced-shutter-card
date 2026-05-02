@@ -9,7 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -26,17 +27,19 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Verify build output
-        run: |
-          echo "Built file:"
-          ls -lah dist/
-          echo "First 5 lines:"
-          head -5 dist/enhanced-shutter-card.js
-
       - name: Copy lit and images to dist
         run: |
           cp -r lit/ dist/lit/
           cp -r images/ dist/images/
+
+      - name: Verify build output
+        run: |
+          echo "Built file:"
+          ls -lah dist/
+          ls -lah dist/lit/
+          ls -lah dist/images/          
+          echo "First 5 lines:"
+          head -5 dist/enhanced-shutter-card.js
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v6.0.0
