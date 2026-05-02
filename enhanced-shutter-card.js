@@ -16,7 +16,7 @@ import {
 import {
   resizeDebugger,
   console_log,
-} from'./dist/src/functions.js';
+} from'./src/functions.js';
 
 import * as HtmlBlocks from './src/htmlBlocks.js';
 import {EscImages} from './src/escImages.js';
