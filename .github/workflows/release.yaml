@@ -27,6 +27,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Copy lit and images to dist
+        run: |
+          cp -r lit/ dist/lit/
+          cp -r images/ dist/images/
+          
       - name: Verify build output
         run: |
           echo "Built file:"
@@ -36,20 +41,27 @@ jobs:
           echo "First 5 lines:"
           head -5 dist/enhanced-shutter-card.js
 
+      - name: Commit dist to repo
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add dist/
+          git commit -m "Build dist for release" || echo "Nothing to commit"
+          git push
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v6.0.0
         with:
           name: enhanced-shutter-card
           path: dist/    
-      
-      - name: Create release zip
-        if: github.event_name == 'release'
-        run: zip -r enhanced-shutter-card.zip dist/
 
       - name: Upload to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: enhanced-shutter-card.zip
+          files: |
+            dist/enhanced-shutter-card.js
+            dist/lit/*
+            dist/images/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
