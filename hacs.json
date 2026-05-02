@@ -3,5 +3,5 @@
     "filename": "enhanced-shutter-card.js",
     "render_readme": true,
     "homeassistant": "2024.10.0",
-    "hide_default_branch": true
+    "zip_release": true
 }
