@@ -29,8 +29,9 @@ jobs:
 
       - name: Copy lit and images to dist
         run: |
+          rm -rf dist/lit dist/images
           cp -r lit/ dist/lit/
-          cp -r images/ dist/images/
+          cp -r images/ dist/images/          
           
       - name: Verify build output
         run: |
@@ -47,7 +48,7 @@ jobs:
           git config user.email "github-actions@github.com"
           git add dist/
           git commit -m "Build dist for release" || echo "Nothing to commit"
-          git push
+          git push origin ${{ github.ref_name }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v6.0.0
