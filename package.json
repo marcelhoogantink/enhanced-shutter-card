@@ -1,6 +1,6 @@
 {
   "name": "enhanced-shutter-card",
-  "version": "v1.6.0b6.1",
+  "version": "v1.6.0",
   "type": "module",
   "scripts": {
     "build": "rollup -c",

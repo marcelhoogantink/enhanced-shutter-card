@@ -31,42 +31,35 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in this beta-version v1.6.0b7:
-- fully rebuild the release process.
-- #### Solved issues:
-  - [#163](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/163) [Bug] beta3 completely broke everything - stacked and not stacked
----
-### New in this beta-version v1.6.0b6:
-- #### Solved issues:
-  - [#163](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/163) [Bug] beta3 completely broke everything - stacked and not stacked
----
-### New in this beta-version v1.6.0b4:
+### New in version v1.6.0:
 
+- #### New `auto`-option for finding sub-entities
+  For the `battery_entity` and `signal_entity` settings, a new added option `auto` is available. When this is set to `auto`, the Card tries to find a battery or signal entity in the device of the cover-entity and displays its icon and status.
+
+  Examples:
+    `battery_entity: auto`
+    `signal_entity: auto`
+
+  Of course, you can still enter the name of these sub-entities.
+
+- #### New option `stacked` implementing horizontal stacked card.
+  With the new setting `stacked` (default `vertical`), you can create a horizontal stacked Card by setting `stacked: horizontal`.
+  This setting has automatic horizontal scroll-bars when the cover does not fit in the section.
+  This is a `global` Card-setting.
+- #### Group-member display.
+  When displaying a cover-group, it is now possible to display the group-members in stead of the group-cover itself.
+  Use the new `show_group_members` setting and set it `true` like `show_group_members: true`.
+  When you also use the `auto` setting for the sub-entitties (see above), the Card wil search for these entities for each group-member separately
+- #### Place battery and Signal icons on Top or Bottom.
+  New option to put the battery and signal icons on top or bottom of the card: `icons_position` (default `top`).
+  Set to `icons_position: bottom` to move the icons to the bottom of the card.
 - #### Added counter for group member names
-  When using grouped covers and `show_group_memebers: true`, Adding an `@` to the defined `name` wil put a number at the `@` in the group-member.
-
-- #### Solved issues:
-  - [#161](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/161) [FR] modify Entity names in Stack, they are messy :)
----
-### New in this beta-version v1.6.0b3:
-
+  When using grouped covers and `show_group_memebers: true`, Adding an `@` to the defined `name` wil put a number at the `@` in the name of the group-member.
 - #### Force format values to zero decimals
   Force format values to prevent unneeded decimals.(solves [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131))
-- #### Improve battery- and signal-icons placements
-- #### Solved issues:
-   - [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131) Battery percentage - display precision
-
----
-### New in this beta-version v1.6.0b2:
-
-- #### Solved issues:
-  - [#160](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/160) Show Dividers between Group Row entities
-  - [#159](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/159) Percentage precision
----
-### New in this beta-version v1.6.0b1:
-
+- #### Improved battery- and signal-icons placements
 - #### new options: `show_open_close_slider` en `show_window`
-  When you have little room, eq. on your mobile, you can hide the main-window-image by `show_window: false` (default `true`) and use a slider `show_open_close_slider: true` (default `false`). You can use both settings independently of each other.
+  When there is little room, eq. on your mobile, you can hide the main-window-image by `show_window: false` (default `true`) and use a slider `show_open_close_slider: true` (default `false`). You can use both settings independently of each other.
 
   This solves also [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) and expands the options to hide/view parts of the card.
 
@@ -76,7 +69,7 @@ Thank you !
 
 - #### renamed settings (deprecations)
 
-  To make the enabling/disalbling of element of the Car more Straightforeward, all these setting are now aligned to
+  To make the enabling/disalbling of element of the Card more straightforward, all these setting are now aligned to
   `show_XXXX` being true or false:
     | new name | old name (deprecated)| comment|
     | -- | -- | -- |
@@ -89,55 +82,24 @@ Thank you !
     | show_window | - | new |
     | show_open_close_slider | - | new |
 
-- #### setting `stacked: horizontal` improved
-  This setting has now automatic horizontal scroll-bars when the cover does not fit in the section.
+
 
 - #### new option for `preset_shutter`
   A new `preset_shutter`-option is now available: `compact` for little displays like a mobile-phone, displaying a tiny card without the (big) main window, but instead with a slider for opening/closing (see `show_window` and `show_open_close_slider` options).
-
+- #### Complete rebuild of the release process.
 - #### Solved issues:
-
+  - [#51](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/51) How to do a Horizonal Stack?
+  - [#131](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/131) Battery percentage - display precision
+  - [#132](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/132) Multiple Shade Row Card
   - [#153](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/153) (bug) Tilt options!
   - [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) Configuration variable to hide the central graphical window (Minimalist UI)
+  - [#159](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/159) Percentage precision
+  - [#160](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/160) Show Dividers between Group Row entities
+  - [#161](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/161) [FR] modify Entity names in Stack, they are messy :)
+  - [#163](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/163) [Bug] beta3 completely broke everything - stacked and not stacked
 
-
-### New in this beta-version v1.6.0b0:
-
-
-- #### New `auto`-option for finding sub-entities
-  For the `battery_entity` and `signal_entity` settings, a new added option `auto` is available. When this is set to `auto`, the Card tries to find a battery or signal entity in the device of the cover-entity and displays its icon and status.
-
-  Examples:
-        `battery_entity: auto`
-    `signal_entity: auto`
-
-  Of course, you can still enter the name of these sub-entities.
-
-- #### Horizontal stacked card.
-  With the new setting `stacked` (default `vertical`), you can create a horizontal stacked Card by setting `stacked: horizontal`.
-
-- #### Group-member display.
-  When displaying a cover-group, it is now possible to display the group-members in stead of the group-cover itself.
-  Use the new `show_group_members` setting and set it `true` like `show_group_members: true`.
-  When you also use the `auto` setting for the sub-entitties (see above), the Card wil search for these entities for each group-member separately
-
-- #### Place battery and Signal icons on Top or Bottom.
-  New option to put the battery and signal icons on top or bottom of the card: `icons_position` (default `top`).
-  Set to `icons_position: bottom` to move the icons to the bottom of the card.
-
-- #### Solved issues:
-
-  - [#51](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/51) How to do a Horizonal Stack?
-  - [#132](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/132) Multiple Shade Row Card
   - [#156](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/156) (bug) Curtain buttons do not show left and right, but up and down
   - [#157](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/157) (bug) unreachable code after return statement
-
-
-- #### to be done:
-
-  - [#153](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/153) (bug) Tilt options!
-  - [#154](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/154) Configuration variable to hide the central graphical window (Minimalist UI)
-
 
 ---
 ### For previous release-changes go to [Previous-release changes](#previous-release-changes)
@@ -195,7 +157,7 @@ And last but not least, the `view_image` and `shutter_slat_image`-settings also 
 ## Configuration
 
 In the table below all the possible settings are listed.
-The columns _Global_ and _Local_ show wheter teh setting can be used in the card header or in the  `entities`  section in the `- entity` sections.
+The columns _Global_ and _Local_ show whether the setting can be used in the card header or in the  `entities`  section in the `- entity` sections.
 The settings are defined in the follwing logic:
 - first Global:
   - The program defaults are taken. (See foe these defaults in the `Default`column below)
@@ -210,9 +172,9 @@ The settings are defined in the follwing logic:
 |             Name             |     Type      | Required |                    Default                    | Global | Local |                                                                                                                                Description                                                                                                                                 |  Remarks   |
 | ---------------------------- | ------------- | -------- | --------------------------------------------- | ------ | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | type                         | string        | Yes      | -                                             | Yes    | No    | Must be "custom:enhanced-shutter-card"                                                                                                                                                                                                                                     |            |
-| name                         | string        | No       | _Friendly name of the entity_                 | No     | Yes   | Name to display for the shutter. When using `show_group_members: true` for grouped covers, A `@` can be used to put a number in the name of each member.                                                                                                                   |            |
 | title                        | string        | no       | -                                             | Yes    | No    | Title of the card                                                                                                                                                                                                                                                          |            |
 | stacked                      | string        | no       | vertical                                      | Yes    | No    | Set the stacked direction when using multiple covers in one Card.                                                                                                                                                                                                          |            |
+| name                         | string        | No       | _Friendly name of the entity_                 | No     | Yes   | Name to display for the shutter. When using `show_group_members: true` for grouped covers, A `@` can be used to put a number in the name of each member.                                                                                                                   |            |
 | shutter_preset               | string        | no       | roller-shutter                                | Yes    | Yes   | Several preset-shutters-setting-groups, which creates a good start-setting for a specific type of cover. See the table below for possible definitions and the settings of them                                                                                             |            |
 | battery_entity               | string        | No       | `null`                                        | Yes    | Yes   | EntityId of the sensor represenating the battery-level of the shutter (as a number), or `auto` for automatic search. For global setting just use `auto` for automatic search                                                                                               |            |
 | signal_entity                | string        | No       | `null`                                        | Yes    | Yes   | EntityId of the sensor represenating the Wireless signal-level of the shutter (as a number), or `auto` for automatic search. For global setting just use `auto` for automatic search                                                                                       |            |
