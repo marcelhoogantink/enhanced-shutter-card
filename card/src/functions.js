@@ -1,6 +1,7 @@
 //import * as C from './constants.js';
 //import {EscImages} from './escImages.js';
-import {DEBUG} from './constants.js';
+let DEBUG = false;
+export function setDebug(flag) { DEBUG = flag; }
 
 export function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
   // Create a temporary canvas element

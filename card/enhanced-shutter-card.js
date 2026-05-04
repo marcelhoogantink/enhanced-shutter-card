@@ -7,6 +7,9 @@
 // // local copy of RELEASE 3.0.1 of Lit-element:
 // https://www.jsdelivr.com/package/gh/lit/dist
 
+
+
+
 import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
 import * as C from './src/constants.js';
 import {
@@ -14,9 +17,16 @@ import {
   //htmlShutter,
 } from './src/classes.js';
 import {
+  setDebug,
   resizeDebugger,
   console_log,
 } from'./src/functions.js';
+
+const VERSION = 'v1.6.0';
+const IS_LOCAL = isRunningLocally();
+const DEBUG = VERSION.includes('b') && IS_LOCAL;
+
+setDebug(DEBUG);
 
 import * as HtmlBlocks from './src/htmlBlocks.js';
 import {EscImages} from './src/escImages.js';
@@ -373,7 +383,7 @@ class EnhancedShutterCardNew extends LitElement{
   startResizeObserver() {
     const onResize = (entries) => {
       /* Things todo when resize is detected */
-      if (C.DEBUG) resizeDebugger(entries);
+      if (DEBUG) resizeDebugger(entries);
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
@@ -747,7 +757,7 @@ class EnhancedShutter extends LitElement
 
   startResizeObserver() {
     const onResize = (entries) => {
-      if (C.DEBUG) resizeDebugger(entries);
+      if (DEBUG) resizeDebugger(entries);
 
       /* Things todo when resize is detected */
       entries.forEach(entry =>{
