@@ -661,7 +661,6 @@ class EnhancedShutterCardNew extends LitElement{
     }else{
         console_log('ShutterCard  .. no content yet ??.. No (new) nbRows and nbCols calculated');
     }
-      //const divCard= this.closest('div.card');
     console_log('options: ',options);
     return options;
   }
