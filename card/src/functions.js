@@ -2,6 +2,7 @@
 //import {EscImages} from './escImages.js';
 let DEBUG = false;
 export function setDebug(flag) { DEBUG = flag; }
+export function getDebug() { return DEBUG; }
 
 export function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') {
   // Create a temporary canvas element
@@ -183,7 +184,7 @@ export function isRunningLocally() {
   ];
   return localPatterns.some(pattern => pattern.test(hostname));
 }
-export function resizeDebugger(entries) {
+export function resizeDebugger(entries,name="[No Name]") {
     entries.forEach((entry, i) => {
       const reasons = [];
 
@@ -210,7 +211,7 @@ export function resizeDebugger(entries) {
       reasons.push(`📐 contentRect: ${width} × ${height}`);
 
 
-      console.group(`🔁 ResizeObserver fired — entry ${i}`);
+      console.group(`🔁 ResizeObserver fired [${name}] — entry ${i}`);
       console.log('target:', target);
       console.log('reasons:', reasons);
       console.log('target_prev:', target._prevResizeSize);

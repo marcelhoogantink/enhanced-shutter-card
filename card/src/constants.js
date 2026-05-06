@@ -1,11 +1,10 @@
 import {
+  setDebug,
+  getDebug,
   isRunningLocally,
 } from './functions.js';
 
 
-export const VERSION = 'v1.6.0';
-export const IS_LOCAL = isRunningLocally();
-export const DEBUG = VERSION.includes('b') && IS_LOCAL;
 export const NONE = 'none';
 
 export const HORIZONTAL = 'horizontal';
@@ -384,7 +383,7 @@ export const ESC_BASE_WIDTH_PX = 150;  // image-width
 export const ESC_RESIZE_HEIGHT_PCT = 100;
 export const ESC_RESIZE_WIDTH_PCT  = 100;
 
-export const ESC_DEBUG = DEBUG || false;
+export const ESC_DEBUG = getDebug() || false;
 export const ESC_SCALE_ICONS = true;
 export const ESC_SCALE_TEXTS = false;
 export const ESC_SCALE_BUTTONS = false;

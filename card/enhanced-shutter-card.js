@@ -20,9 +20,10 @@ import {
   setDebug,
   resizeDebugger,
   console_log,
+  isRunningLocally,
 } from'./src/functions.js';
 
-const VERSION = 'v1.6.0';
+const VERSION = 'v1.6.1b0';
 const IS_LOCAL = isRunningLocally();
 const DEBUG = VERSION.includes('b') && IS_LOCAL;
 
@@ -383,7 +384,7 @@ class EnhancedShutterCardNew extends LitElement{
   startResizeObserver() {
     const onResize = (entries) => {
       /* Things todo when resize is detected */
-      if (DEBUG) resizeDebugger(entries);
+      if (DEBUG) resizeDebugger(entries,this.cardCfg.title());
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
@@ -583,8 +584,8 @@ class EnhancedShutterCardNew extends LitElement{
 
         let shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
         let sizeSeparate = shutterSeparateBlock.size();
-        let cardTilteSize = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
-        let sizeTitle = cardTilteSize.size();
+        let cardTitleSize = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
+        let sizeTitle = cardTitleSize.size();
 
         this.shutterCfgs.forEach(cfg =>{
 
@@ -610,7 +611,7 @@ class EnhancedShutterCardNew extends LitElement{
         separate=true;
 
         });
-        sizeCard = cardTilteSize.gridAddBoth(sizeCard,new xyPair(2*C.CARD_PADDING,2*C.CARD_PADDING)); // padding Card
+        sizeCard = cardTitleSize.gridAddBoth(sizeCard,new xyPair(2*C.CARD_PADDING,2*C.CARD_PADDING)); // padding Card
 
 
         this.nbRows= Math.ceil((sizeCard.y()+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
@@ -629,8 +630,10 @@ class EnhancedShutterCardNew extends LitElement{
       /* Used in CSS to set sizes */
 
       if (divCard){
-        divCard.style.setProperty('--row-size',this.nbRows);
-        divCard.style.setProperty('--column-size',this.nbCols);
+        // version v1.6.1b0: (temporary) removed due to issue 168
+
+        //divCard.style.setProperty('--row-size',this.nbRows);
+        //divCard.style.setProperty('--column-size',this.nbCols);
       }else{
         console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
       }
@@ -757,7 +760,7 @@ class EnhancedShutter extends LitElement
 
   startResizeObserver() {
     const onResize = (entries) => {
-      if (DEBUG) resizeDebugger(entries);
+      if (DEBUG) resizeDebugger(entries,this.cfg.friendlyName());
 
       /* Things todo when resize is detected */
       entries.forEach(entry =>{
