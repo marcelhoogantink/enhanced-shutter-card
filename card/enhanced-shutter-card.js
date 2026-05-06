@@ -7,8 +7,7 @@
 // // local copy of RELEASE 3.0.1 of Lit-element:
 // https://www.jsdelivr.com/package/gh/lit/dist
 
-
-
+const VERSION = 'v1.6.1b0';
 
 import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
 import * as C from './src/constants.js';
@@ -23,7 +22,6 @@ import {
   isRunningLocally,
 } from'./src/functions.js';
 
-const VERSION = 'v1.6.1b0';
 const IS_LOCAL = isRunningLocally();
 const DEBUG = VERSION.includes('b') && IS_LOCAL;
 
