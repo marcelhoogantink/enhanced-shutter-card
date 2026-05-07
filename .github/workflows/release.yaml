@@ -28,8 +28,8 @@ jobs:
       - name: Copy lit and images to dist
         run: |
           rm -rf dist/lit dist/images
-          cp -r lit/ dist/lit/
-          cp -r images/ dist/images/          
+          cp -r card/lit/ dist/lit/
+          cp -r card/images/ dist/images/          
           
       - name: Verify build output
         run: |
