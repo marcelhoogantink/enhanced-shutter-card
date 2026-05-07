@@ -2683,7 +2683,7 @@ window.customCards.push({
 });
 
 console.info(
-  `%c ENHANCED-SHUTTER-CARD %c Version ${C.VERSION}`,
+  `%c ENHANCED-SHUTTER-CARD %c Version ${VERSION}`,
   'color: white; background: green; font-weight: 700',
   'color: black;background: white; font-weight: bold'
 );
