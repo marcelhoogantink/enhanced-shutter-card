@@ -62,9 +62,6 @@ jobs:
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v3
         with:
-          files: |
-            dist/enhanced-shutter-card.js
-            dist/lit/*
-            dist/images/*
+          files: dist/enhanced-shutter-card.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
