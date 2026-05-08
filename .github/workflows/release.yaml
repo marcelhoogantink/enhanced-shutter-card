@@ -58,10 +58,10 @@ jobs:
           name: enhanced-shutter-card
           path: dist/    
 
-      - name: Upload to release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v3
-        with:
-          files: dist/enhanced-shutter-card.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Upload to release
+#        if: github.event_name == 'release'
+#        uses: softprops/action-gh-release@v3
+#        with:
+#          files: dist/enhanced-shutter-card.js
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
