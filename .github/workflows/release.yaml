@@ -43,15 +43,26 @@ jobs:
           echo "First 5 lines:"
           head -5 dist/enhanced-shutter-card.js
 
+#      - name: Commit dist to repo
+#        run: |
+#          git config user.name "github-actions"
+#          git config user.email "github-actions@github.com"
+#          git checkout ${{ github.ref_name }}
+#          git add dist/
+#          git commit -m "Build dist for release" || echo "Nothing to commit"
+#          git push origin ${{ github.ref_name }}
+
       - name: Commit dist to repo
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git checkout ${{ github.ref_name }}
+          git checkout ${{ github.event.release.target_commitish }}
           git add dist/
-          git commit -m "Build dist for release" || echo "Nothing to commit"
-          git push origin ${{ github.ref_name }}
-
+          git commit -m "Build dist for release ${{ github.ref_name }}" || echo "Nothing to commit"
+          git push origin ${{ github.event.release.target_commitish }}
+          git tag -f ${{ github.ref_name }}
+          git push origin ${{ github.ref_name }} --force
+          
       - name: Upload build artifact
         uses: actions/upload-artifact@v6.0.0
         with:
