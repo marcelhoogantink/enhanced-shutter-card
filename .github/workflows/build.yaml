@@ -1,34 +1,40 @@
 name: Build
+
 on:
   push:
-    branches: [main, develop]  # whichever branches you release from
-  workflow_dispatch:     
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
-      - run: npm install
-      - run: npm run build
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
       - name: Copy lit and images to dist
         run: |
           rm -rf dist/lit dist/images
           cp -r card/lit/. dist/lit/
           cp -r card/images/. dist/images/
+
       - name: Commit dist to repo
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git fetch origin ${{ github.event.release.target_commitish }}
-          git checkout ${{ github.event.release.target_commitish }}
           git add dist/
-          git commit -m "Build dist for release ${{ github.ref_name }}" || echo "Nothing to commit"
-          git push origin ${{ github.event.release.target_commitish }}
-          git tag -f ${{ github.ref_name }}
-          git push origin ${{ github.ref_name }} --force          
+          git diff --staged --quiet || git commit -m "Build dist"
+          git push
