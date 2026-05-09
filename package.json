@@ -10,7 +10,7 @@
     "rollup": "^4.40.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.0",
-    "@rollup/plugin-replace": "^5.0.0"
+    "@rollup/plugin-replace": "^5.0.0",
     "rollup-plugin-copy": "^3.5.0"
   }
 } 
