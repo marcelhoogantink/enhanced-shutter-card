@@ -23,15 +23,15 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
         
       - name: Build
         run: npm run build
         
-      - name: Inject version
-        run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          sed -i "1s;^;window.enhanced_shutter_card_version='${VERSION}';\n;" dist/enhanced-shutter-card.js
+#      - name: Inject version
+#        run: |
+#          VERSION=${GITHUB_REF_NAME#v}
+#          sed -i "1s;^;window.enhanced_shutter_card_version='${VERSION}';\n;" dist/enhanced-shutter-card.js
           
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
