@@ -21,10 +21,14 @@ jobs:
           rm -rf dist/lit dist/images
           cp -r card/lit/. dist/lit/
           cp -r card/images/. dist/images/
-      - name: Commit dist
+      - name: Commit dist to repo
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          git fetch origin ${{ github.event.release.target_commitish }}
+          git checkout ${{ github.event.release.target_commitish }}
           git add dist/
-          git commit -m "Build dist" || echo "Nothing to commit"
-          git push
+          git commit -m "Build dist for release ${{ github.ref_name }}" || echo "Nothing to commit"
+          git push origin ${{ github.event.release.target_commitish }}
+          git tag -f ${{ github.ref_name }}
+          git push origin ${{ github.ref_name }} --force          
