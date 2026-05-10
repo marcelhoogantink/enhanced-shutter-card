@@ -10,15 +10,16 @@ const plugins = [
   copy({
     targets: [
       {
-        src: "cards/images/**/*",
+        src: "card/images/**/*",
         dest: "dist/images",
       },
       {
-        src: "cards/lit/**/*",
+        src: "card/lit/**/*",
         dest: "dist/lit",
       },
     ],
     hook: "writeBundle",
+    verbose: true,
     }),
 ];
 
