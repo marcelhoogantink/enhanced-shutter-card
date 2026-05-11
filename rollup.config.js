@@ -13,14 +13,15 @@ const plugins = [
         src: "card/*.png",
         dest: "dist",
       },
-      {
-        src: "card/images/**/*",
-        dest: "dist/images",
-      },
-      {
-        src: "card/lit/**/*",
-        dest: "dist/lit",
-      },
+
+//      {
+//        src: "card/images/**/*",
+//        dest: "dist/images",
+//      },
+//      {
+//        src: "card/lit/**/*",
+//        dest: "dist/lit",
+//      },
     ],
     hook: "writeBundle",
     verbose: true,
