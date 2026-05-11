@@ -11,7 +11,7 @@ const plugins = [
     targets: [
       {
         src: "card/do_not_delete.md",
-        dest: "dist/do_not_delete.md",
+        dest: "dist",
       },
       {
         src: "card/images/**/*",
