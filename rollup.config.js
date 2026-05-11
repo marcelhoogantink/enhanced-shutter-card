@@ -10,7 +10,7 @@ const plugins = [
   copy({
     targets: [
       {
-        src: "card/do_not_delete.md",
+        src: "card/*.png",
         dest: "dist",
       },
       {
