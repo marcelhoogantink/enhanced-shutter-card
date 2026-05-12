@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Copy lit and images to dist
+        run: |
+          rm -rf dist/lit dist/images
+          cp -r lit/ dist/lit/
+          cp -r images/ dist/images/          
+          
+      - name: Verify build output
+        run: |
+          echo "Built file:"
+          ls -lah dist/
+          ls -lah dist/lit/
+          ls -lah dist/images/          
+          echo "First 5 lines:"
+          head -5 dist/enhanced-shutter-card.js
+
+      - name: Commit dist to repo
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git checkout ${{ github.ref_name }}
+          git add dist/
+          git commit -m "Build dist for release" || echo "Nothing to commit"
+          git push origin ${{ github.ref_name }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: enhanced-shutter-card
+          path: dist/    
+
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/enhanced-shutter-card.js
+            dist/lit/*
+            dist/images/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
