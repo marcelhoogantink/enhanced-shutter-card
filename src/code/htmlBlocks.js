@@ -1,4 +1,4 @@
-import {html} from '../lit/lit-core.min.js';
+import {html} from './lit/lit-core.min.js';
 import * as C from './constants.js';
 import {
   xyPair,

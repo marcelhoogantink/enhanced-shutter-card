@@ -221,3 +221,90 @@ export function resizeDebugger(entries,name="[No Name]") {
       target._prevResizeSize = { width, height };
     });
   }
+export function boundary(value,val1=0,val2=100){
+  let min = Math.min(val1,val2);
+  let max = Math.max(val1,val2);
+  return Math.max(min,Math.min(max,value));
+}
+/**
+ * function findElement() to find an element in DOM body, inluding shadow DOMs.
+ * @param {*} selector
+ * @returns
+ */
+export function findElementInBody(selector) {
+  return findElement(document.body,selector);
+}
+
+// TODO: merge FinElement and findElements into one
+export function findElement(base,selector) {
+  // Search in the regular DOM
+  let foundInDom = base.querySelector(selector);
+
+  // If not found directly, search the element
+  if (!foundInDom) foundInDom= recursiveSearch(base);
+  return foundInDom;
+
+  // Function to recursively search in shadow roots
+  function searchInShadowDom(node) {
+    // Check if the node has a shadow root
+    if (node.shadowRoot) {
+      // Search in the shadow root's DOM
+      const foundInShadow = node.shadowRoot.querySelector(selector);
+      if (foundInShadow) {
+        //console_log('Found in recursiveSearch2:',foundInShadow.nodeName,foundInShadow.className);
+        return foundInShadow;
+      }
+      // Recurse into any shadow DOMs within this shadow root
+      for (const child of node.shadowRoot.children) {
+        const result = searchInShadowDom(child);
+        if (result) {
+          //console_log('Found in recursiveSearch3:',result.nodeName,result.className);
+          return result;
+        }
+      }
+    }
+    for (const child of node.children) {
+      const result = recursiveSearch(child);
+      if (result) {
+        //console_log('Found in recursiveSearch4:',result.nodeName,result.className);
+        return result;
+      }
+    }
+    return null;
+  }
+
+  // Start the search in the whole document, including all shadow DOMs
+  export function recursiveSearch(node) {
+    // Search in the node itself
+    if (node.matches && node.matches(selector)) {
+      //console_log('Found in recursiveSearch5:',node.nodeName,node.ClassName);
+      return node;
+    }
+
+    // Recurse into child nodes, including shadow roots if present
+    if (node.shadowRoot) {
+      const result = searchInShadowDom(node);
+      if (result) {
+        //console_log('Found in recursiveSearch6:',result.nodeName,result.className);
+        return result;
+      }
+    }
+
+    // Recurse into child nodes (excluding shadow roots)
+    for (const child of node.children) {
+      const result = recursiveSearch(child);
+      if (result) {
+        //console_log('Found in recursiveSearch7:',result.nodeName,result.className);
+        return result;
+      }
+    }
+
+    return null;
+  }
+
+}
+
+
+
+
+

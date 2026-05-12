@@ -1,55 +1,8 @@
-/**
- * Enhanced Shutter Card for Home Assistant
- * HA-dev-page for cover:
- * https://developers.home-assistant.io/docs/core/entity/cover
- */
-
-// // local copy of RELEASE 3.0.1 of Lit-element:
-// https://www.jsdelivr.com/package/gh/lit/dist
-
-const VERSION = 'v1.6.1b0';
-
+import * as C from './constants.js';
+//import {EscImages} from './escImages.js';
 import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
-import * as C from './src/constants.js';
-import {
-  xyPair,
-  //htmlShutter,
-} from './src/classes.js';
-import {
-  setDebug,
-  resizeDebugger,
-  console_log,
-  isRunningLocally,
-} from'./src/functions.js';
 
-const IS_LOCAL = isRunningLocally();
-const DEBUG = VERSION.includes('b') && IS_LOCAL;
-
-setDebug(DEBUG);
-
-import * as HtmlBlocks from './src/htmlBlocks.js';
-import {EscImages} from './src/escImages.js';
-
-// import {html, css, unsafeCSS } from './lit/lit-core.min.js';
-// import {LitElement} from './lit/lit-debug.js'; // <-- dit is nu de debug versie
-
-
-
-/**
- * LIT- element flow of update cycle:
- *
- * someProperty.hasChanged
- * requestUpdate
- * performUpdate
- * shouldUpdate
- * update
- * render
- * firstUpdated
- * updated
- * updateComplete
- */
-
-class EnhancedShutterCardNew extends LitElement{
+export class EnhancedShutterCardNew extends LitElement{
   //reactive properties
   constructor() {
     super(); //  mandetory by Lit-element
@@ -699,7 +652,7 @@ class EnhancedShutterCardNew extends LitElement{
 }
 
 
-class EnhancedShutter extends LitElement
+export class EnhancedShutter extends LitElement
 {
   // loaded from EnhancedShutterCardNew():
   // - react_ShutterState
@@ -1469,7 +1422,7 @@ class EnhancedShutter extends LitElement
     `
   }
 }
-class cardCfg {
+export class cardCfg {
 
   #cfg={};
 
@@ -1497,7 +1450,7 @@ class cardCfg {
     return this.#getCfg(C.CONFIG_TITLE,value);
   }
 }
-class shutterCfg {
+export class shutterCfg {
 
   #cfg={};
   #coverEntity=null;
@@ -2436,19 +2389,19 @@ class shutterCfg {
     let roundedLevel = Math.round(level / 10) * 10;
     roundedLevel = isNaN(roundedLevel) ? -1 : Math.min(roundedLevel,100);
 
-		switch (roundedLevel) {
-			case -1:
-				icon = 'mdi:battery-off-outline'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
-				break;
-			case 100:
-				icon = 'mdi:battery'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
-				break;
-			case 0:
-				icon = 'mdi:battery-outline'; // mdi:battery-outline should have an alias of mdi:battery-0, doesn't work in current HASS
-				break;
-			default:
-				icon = 'mdi:battery-' + roundedLevel;
-		}
+    switch (roundedLevel) {
+      case -1:
+        icon = 'mdi:battery-off-outline'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
+        break;
+      case 100:
+        icon = 'mdi:battery'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
+        break;
+      case 0:
+        icon = 'mdi:battery-outline'; // mdi:battery-outline should have an alias of mdi:battery-0, doesn't work in current HASS
+        break;
+      default:
+        icon = 'mdi:battery-' + roundedLevel;
+    }
     return icon;
   }
   batteryIconColor(){
@@ -2500,7 +2453,7 @@ class shutterCfg {
   }
 
 }
-class htmlCard{
+export class htmlCard{
   constructor(enhancedShutterCard){
     this.enhancedShutterCard=enhancedShutterCard;
   }
@@ -2512,7 +2465,7 @@ class htmlCard{
   }
 }
 
-class haEntity{
+export class haEntity{
   #state;
   #attributes;
   //#lastChanged;
@@ -2568,7 +2521,7 @@ class haEntity{
     return this.getAttributes()?.entity_id !== undefined;
   }
 }
-class MessageManager {
+export class MessageManager {
   constructor() {
     this.messageGroup = {};
   }
@@ -2622,14 +2575,14 @@ class MessageManager {
     return counter;
   }
 }
-class Message {
+export class Message {
   constructor(text, severity = C.HA_ALERT_INFO, subject = 'General') {
     this.text = text;
     this.severity = severity;
     this.subject = subject;
   }
 }
-class haSubEntity{
+export class haSubEntity{
 
   constructor(hass,type,entityId=false){
     this.hass= hass;
@@ -2651,127 +2604,149 @@ class haSubEntity{
     this.entity=haEntity;
   }
 }
-/**
- * global functions
- */
-
-function boundary(value,val1=0,val2=100){
-  let min = Math.min(val1,val2);
-  let max = Math.max(val1,val2);
-  return Math.max(min,Math.min(max,value));
+export class xyPair{
+  #coordX;
+  #coordY;
+  constructor(x=0,y=0){
+    this.#coordX = x;
+    this.#coordY = y;
+  }
+  x(){
+    return this.#coordX;
+  }
+  y(){
+    return this.#coordY;
+  }
+  switch(){
+    const tmp= this.#coordX;
+    this.#coordX = this.#coordY;
+    this.#coordY = tmp;
+  }
+  size(){
+    return this.x()*this.y();
+  }
+  rotate90(){
+    const tmp= this.#coordX;
+    this.#coordX = -this.#coordY;
+    this.#coordY = tmp;
+  }
+  rotate180(){
+    this.#coordX = -this.#coordX;
+    this.#coordY = -this.#coordY;
+  }
+  rotate270(){
+    const tmp= this.#coordX;
+    this.#coordX = this.#coordY;
+    this.#coordY = -tmp;
+  }
+  rotate360(){
+  }
+  fill(x,y){
+    this.#coordX = x;
+    this.#coordY = y;
+  }
+  fill2(xy){
+    this.#coordX = xy.x();
+    this.#coordY = xy.y();
+  }
 }
+export class htmlShutter{
 
-
-/**
- * Main code
- */
-const Globals={
-  huiView: null,
-  screenOrientation: {value:C.LANDSCAPE },
-}
-
-customElements.define(C.HA_CARD_NAME , EnhancedShutterCardNew);
-customElements.define(C.HA_SHUTTER_NAME, EnhancedShutter);
-
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "enhanced-shutter-card",
-  name: "Enhanced Shutter Card",
-  preview: true,
-  description: "An enhanced shutter card for easy control of shutters",
-  documentationURL: "https://github.com/marcelhoogantink/enhanced-shutter-card"
-});
-
-console.info(
-  `%c ENHANCED-SHUTTER-CARD %c Version ${VERSION}`,
-  'color: white; background: green; font-weight: 700',
-  'color: black;background: white; font-weight: bold'
-);
-console.info(`my-card version __VERSION__`);
-/**
- * test functions
- */
-
-
-/**
- * function findElement() to find an element in DOM body, inluding shadow DOMs.
- * @param {*} selector
- * @returns
- */
-function findElementInBody(selector) {
-  return findElement(document.body,selector);
-}
-
-// TODO: merge FinElement and findElements into one
-function findElement(base,selector) {
-  // Search in the regular DOM
-  let foundInDom = base.querySelector(selector);
-
-  // If not found directly, search the element
-  if (!foundInDom) foundInDom= recursiveSearch(base);
-  return foundInDom;
-
-  // Function to recursively search in shadow roots
-  function searchInShadowDom(node) {
-    // Check if the node has a shadow root
-    if (node.shadowRoot) {
-      // Search in the shadow root's DOM
-      const foundInShadow = node.shadowRoot.querySelector(selector);
-      if (foundInShadow) {
-        //console_log('Found in recursiveSearch2:',foundInShadow.nodeName,foundInShadow.className);
-        return foundInShadow;
-      }
-      // Recurse into any shadow DOMs within this shadow root
-      for (const child of node.shadowRoot.children) {
-        const result = searchInShadowDom(child);
-        if (result) {
-          //console_log('Found in recursiveSearch3:',result.nodeName,result.className);
-          return result;
-        }
-      }
-    }
-    for (const child of node.children) {
-      const result = recursiveSearch(child);
-      if (result) {
-        //console_log('Found in recursiveSearch4:',result.nodeName,result.className);
-        return result;
-      }
-    }
-    return null;
+  constructor(enhancedShutter){
+    this.enhancedShutter=enhancedShutter;
+    this.cfg =enhancedShutter.cfg;
+    this.actualScreenPosition = enhancedShutter.actualScreenPosition;
+    this.actualTiltPosition = enhancedShutter.actualTiltPosition;
+    this.actualShutterPosition = enhancedShutter.actualShutterPosition;
+    this.positionText =this.cfg.computePositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
+    this.escImages= enhancedShutter.escImages;
   }
 
-  // Start the search in the whole document, including all shadow DOMs
-  function recursiveSearch(node) {
-    // Search in the node itself
-    if (node.matches && node.matches(selector)) {
-      //console_log('Found in recursiveSearch5:',node.nodeName,node.ClassName);
-      return node;
-    }
+  defStyleVarsShutter(){
+    let escState=this.cfg.positionToState();
+    const viewImage=this.escImages.getViewImageSrc(this.cfg.id());
 
-    // Recurse into child nodes, including shadow roots if present
-    if (node.shadowRoot) {
-      const result = searchInShadowDom(node);
-      if (result) {
-        //console_log('Found in recursiveSearch6:',result.nodeName,result.className);
-        return result;
-      }
-    }
+    // solves #103 see other lines with shutterSlatImage
+    const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.id());
+    const shutterBottomImage=this.escImages.getShutterBottomImageSrc(this.cfg.id());
 
-    // Recurse into child nodes (excluding shadow roots)
-    for (const child of node.children) {
-      const result = recursiveSearch(child);
-      if (result) {
-        //console_log('Found in recursiveSearch7:',result.nodeName,result.className);
-        return result;
-      }
-    }
+    return `
+      --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${C.UNITY};
+      --ha-icon-button-size: ${this.cfg.iconButtonSize()}${C.UNITY};
+      --mdc-icon-size: ${this.cfg.iconSize()}${C.UNITY};
+      --esc-icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${C.UNITY};
+      --esc-icon-div-size: ${C.ICON_DIV_SIZE/C.ICON_SIZE*this.cfg.iconSizeWifiBattery()}${C.UNITY};
+      --esc-icons-margins: ${this.cfg.iconsPosition()==C.TOP
+          ? `${C.ICON_MARGIN_TB}${C.UNITY} ${C.ICON_MARGIN_LR}${C.UNITY} auto ${C.ICON_MARGIN_LR}${C.UNITY}`
+          : `auto ${C.ICON_MARGIN_LR}${C.UNITY} ${C.ICON_MARGIN_TB}${C.UNITY} ${C.ICON_MARGIN_LR}${C.UNITY}`};
 
-    return null;
+      --esc-overflow: ${this.enhancedShutter.getOverflow()};
+
+      --esc-flex-name_opening-flow: ${this.cfg.inlineHeader() ? 'row' : 'column'} nowrap;
+      --esc-flex-flow-middle: ${!this.cfg.buttonGroupInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
+      --esc-window-height: ${this.cfg.windowHeightPx()+C.UNITY};
+      --esc-window-width1: ${this.cfg.buttonGroupInRow() ? '100%': this.cfg.windowWidthPx()+C.UNITY};
+      --esc-window-width: ${this.cfg.windowWidthPx()+C.UNITY};
+      --esc-window-background-image: ${viewImage.includes('.') ?  `url(${viewImage})` : ''};
+      --esc-window-background-color: ${viewImage.includes('.') ? '' : `${viewImage}`};
+      --esc-window-rotate: ${this.cfg.viewImageRotate()};
+      --esc-button-rotate: ${this.cfg.buttonRotate()};
+
+      --esc-transform-slide:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};
+      --esc-transform-picker: ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
+      --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngleDeg(this.enhancedShutter.react_TiltPosition)};
+      --esc-tilt-angle-deg-graph: ${this.enhancedShutter.getTiltAngleDegGraph(this.enhancedShutter.react_TiltPosition)};
+
+      --esc-transform-undo-slats-rotate:  ${this.enhancedShutter.transformUndoSlatsRotate()};
+      --esc-transform-tilt-slat-rotate:  ${this.enhancedShutter.transformTiltSlatRotate()};
+      --esc-transform-movement: ${this.enhancedShutter.transformMovement()};
+
+      --esc-picker-top: -${this.cfg.pickerOverlapPx()+C.UNITY};
+      --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+C.UNITY};
+
+      --esc-slat-height: ${this.enhancedShutter.slatHeightPx()+C.UNITY};
+
+      --esc-tilt-slat-height: ${this.enhancedShutter.tiltSlatHeightPx()+C.UNITY};
+      --esc-tilt-slat-width: ${this.enhancedShutter.tiltSlatWidthPx()};
+      --esc-tilt-slat-origin: ${this.enhancedShutter.tiltSlatOrigin()};
+      --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};
+      --esc-slider-writing-mode: ${this.enhancedShutter.sliderWritingMode()};
+      --esc-slider-direction: ${this.enhancedShutter.sliderDirection()};
+      --esc-tilt-icon-rotate: ${(this.enhancedShutter.tiltIconRotate3())};
+
+      --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+C.UNITY};
+      --esc-slide-edge-height: ${this.enhancedShutter.shutterBottomSize().y()+C.UNITY};
+
+      --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
+
+      --esc-buttons-flex-flow:      ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
+      --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
+
+      --esc-movement-overlay-display: ${(escState == C.SHUTTER_STATE_OPENING || escState == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+      --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
+      --esc-movement-overlay-down-display: ${escState == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+
+      --esc-slide-background-main-image: ${shutterSlatImage.includes('.') ?  `url(${shutterSlatImage})` : ''};
+      --esc-slide-background-edge-image: ${shutterBottomImage.includes('.') ?  `url(${shutterBottomImage})` : ''};
+
+      --esc-slide-background-main-color: ${shutterSlatImage.includes('.') ? '' : `${shutterSlatImage}`};
+      --esc-slide-background-edge-color: ${shutterBottomImage.includes('.') ? '' : `${shutterBottomImage}`};
+
+      --esc-slide-background-slat-size: ${this.enhancedShutter.shutterSlatSizePercentage()};
+      --esc-slide-background-slats-size: ${this.enhancedShutter.shutterSlatsSizePercentage()};
+      --esc-slide-background-edge-size: ${this.enhancedShutter.shutterBottomSizePercentage()};
+
+      --esc-slide-background-main-position: ${this.enhancedShutter.shutterMainBackgroundPosition()};
+      --esc-slide-background-edge-position: ${this.enhancedShutter.shutterEdgeBackgroundPosition()};
+
+      --esc-top-right-color: ${this.cfg.signalIconColor()};
+      --esc-top-left-color: ${this.cfg.batteryIconColor()};
+
+      --esc-top-icon-text-line-height: ${this.cfg.iconScalePercent()};
+      --esc-top-icon-text-font-size: ${this.cfg.iconScalePercent()};
+      --esc-text-scale: ${this.cfg.textScaleFactor()};
+      --esc-button-scale: ${this.cfg.buttonScaleFactor()};
+
+    `;
   }
-
 }
-
-
-
-
-
