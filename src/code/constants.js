@@ -600,6 +600,12 @@ export const ESC_PRESET = {
 }
 export const ICON_MARGIN_LR = 3;
 export const ICON_MARGIN_TB = 8;
+
+export const Globals={
+  huiView: null,
+  screenOrientation: {value:LANDSCAPE },
+}
+
 export const SHUTTER_CSS =`
 
       .${ESC_CLASS_SHUTTER} {

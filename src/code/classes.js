@@ -2,6 +2,19 @@ import * as C from './constants.js';
 //import {EscImages} from './escImages.js';
 import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
 
+import {
+  boundary,
+  findElementInBody,
+  findElement,
+  console_log,
+  getDebug,
+  resizeDebugger
+} from './functions.js';
+
+import * as HtmlBlocks from './htmlBlocks.js';
+import {EscImages} from './escImages.js';
+
+
 export class EnhancedShutterCardNew extends LitElement{
   //reactive properties
   constructor() {
@@ -328,14 +341,14 @@ export class EnhancedShutterCardNew extends LitElement{
     //this.defGridContainer();
     //this.getGridOptionsInternal();
     /* get element of hui-view to detect resizing */
-    Globals.huiView = findElementInBody(C.HA_HUI_VIEW);
+    C.Globals.huiView = findElementInBody(C.HA_HUI_VIEW);
 
     this.startResizeObserver();
   }
   startResizeObserver() {
     const onResize = (entries) => {
       /* Things todo when resize is detected */
-      if (DEBUG) resizeDebugger(entries,this.cardCfg.title());
+      if (getDebug()) resizeDebugger(entries,this.cardCfg.title());
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
@@ -347,7 +360,7 @@ export class EnhancedShutterCardNew extends LitElement{
       }
     }
     this.resizeObserver = new ResizeObserver(onResize);
-    this.resizeObserver.observe(Globals.huiView);
+    this.resizeObserver.observe(C.Globals.huiView);
   }
 
 
@@ -373,8 +386,8 @@ export class EnhancedShutterCardNew extends LitElement{
     const visibleHeight = Math.max(0, Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0));
 
     // Determine the orientation based on visible area and window size
-    Globals.screenOrientation = {value: visibleWidth*1.4 > visibleHeight ? C.LANDSCAPE : C.PORTRAIT};
-    this.screenOrientation = Globals.screenOrientation.value;
+    C.Globals.screenOrientation = {value: visibleWidth*1.4 > visibleHeight ? C.LANDSCAPE : C.PORTRAIT};
+    this.screenOrientation = C.Globals.screenOrientation.value;
 
     // After orientation check is done, reset the flag
     this.isResizeInProgress = false;
@@ -710,7 +723,7 @@ export class EnhancedShutter extends LitElement
 
   startResizeObserver() {
     const onResize = (entries) => {
-      if (DEBUG) resizeDebugger(entries,this.cfg.friendlyName());
+      if (getDebug()) resizeDebugger(entries,this.cfg.friendlyName());
 
       /* Things todo when resize is detected */
       entries.forEach(entry =>{
@@ -2074,7 +2087,7 @@ export class shutterCfg {
   }
 
   getOrientation(){
-    return Globals.screenOrientation.value; // global variable !!
+    return C.Globals.screenOrientation.value; // global variable !!
   }
 
   positionToState(position = this.currentDevicePosition()){

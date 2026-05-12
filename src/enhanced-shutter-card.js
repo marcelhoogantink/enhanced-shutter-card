@@ -11,6 +11,7 @@ const VERSION = 'v1.6.1b0';
 
 import {LitElement, html, css, unsafeCSS } from './code/lit/lit-core.min.js';
 import * as C from './code/constants.js';
+
 import {
   EnhancedShutterCardNew,
   EnhancedShutter,
@@ -23,6 +24,7 @@ import {
   xyPair,
   //htmlShutter,
 } from './code/classes.js';
+
 import {
   setDebug,
   resizeDebugger,
@@ -43,30 +45,8 @@ import {EscImages} from './code/escImages.js';
 
 
 
-/**
- * LIT- element flow of update cycle:
- *
- * someProperty.hasChanged
- * requestUpdate
- * performUpdate
- * shouldUpdate
- * update
- * render
- * firstUpdated
- * updated
- * updateComplete
- */
 
 
-
-
-/**
- * Main code
- */
-const Globals={
-  huiView: null,
-  screenOrientation: {value:C.LANDSCAPE },
-}
 
 customElements.define(C.HA_CARD_NAME , EnhancedShutterCardNew);
 customElements.define(C.HA_SHUTTER_NAME, EnhancedShutter);
@@ -86,8 +66,8 @@ console.info(
   'color: black;background: white; font-weight: bold'
 );
 console.info(`my-card version __VERSION__`);
-/**
- * test functions
- */
+ console.log('Versie=', VERSION);
+/*
+*/
 
 

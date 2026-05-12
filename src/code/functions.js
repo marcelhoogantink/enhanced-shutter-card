@@ -274,7 +274,7 @@ export function findElement(base,selector) {
   }
 
   // Start the search in the whole document, including all shadow DOMs
-  export function recursiveSearch(node) {
+  function recursiveSearch(node) {
     // Search in the node itself
     if (node.matches && node.matches(selector)) {
       //console_log('Found in recursiveSearch5:',node.nodeName,node.ClassName);
