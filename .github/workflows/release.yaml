@@ -30,6 +30,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          PRE_RELEASE: ${{ github.event.release.prerelease }}
 
       - name: Copy image files to dist
         run: |
