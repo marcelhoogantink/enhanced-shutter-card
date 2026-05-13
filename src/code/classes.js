@@ -501,6 +501,7 @@ export class EnhancedShutterCardNew extends LitElement{
     this.config = config;
   }
   getCardSize() {
+    console_log('getCardSize called, number of entities:', this.config.entities.length);
     return this.config.entities.length + 1;
   }
 
