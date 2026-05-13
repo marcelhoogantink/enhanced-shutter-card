@@ -24,12 +24,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Clear dist
+        run: |
+          rm -rf dist/*
+
       - name: Build
         run: npm run build
 
-      - name: Copy files to dist
+      - name: Copy image files to dist
         run: |
-          rm -rf dist/*
           cp -r src/*.png dist/
           
       - name: Verify build output
