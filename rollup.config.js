@@ -29,7 +29,7 @@ const plugins = [
 ];
 
 export default {
-  input: 'card/enhanced-shutter-card.js',
+  input: 'src/enhanced-shutter-card.js',
   output: {
     file: 'dist/enhanced-shutter-card.js',
     format: 'es',
