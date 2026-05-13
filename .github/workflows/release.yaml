@@ -29,7 +29,7 @@ jobs:
           rm -rf dist/*
 
       - name: Build
-        run: npm run build --foreground-scripts
+        run: npx rollup -c
         env:
           PRE_RELEASE: ${{ github.event.release.prerelease }}
 
