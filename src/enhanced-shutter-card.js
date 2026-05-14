@@ -15,20 +15,10 @@ import * as C from './code/constants.js';
 import {
   EnhancedShutterCardNew,
   EnhancedShutter,
-  cardCfg,
-  shutterCfg,
-  haEntity,
-  MessageManager,
-  Message,
-  haSubEntity,
-  xyPair,
-  //htmlShutter,
 } from './code/classes.js';
 
 import {
   setDebug,
-  resizeDebugger,
-  console_log,
   isRunningLocally,
 } from'./code/functions.js';
 

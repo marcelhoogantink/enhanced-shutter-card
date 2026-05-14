@@ -1,9 +1,7 @@
 import {html} from './lit/lit-core.min.js';
 import * as C from './constants.js';
-import {
-  xyPair,
-  htmlShutter,
-} from './classes.js';
+import {htmlShutter} from './htmlShutter.js';
+import {xyPair} from './xyPair.js';
 import {
   getTextSize,
   console_log
@@ -563,7 +561,7 @@ export class htmlBlockButtonPartial extends htmlBlockLeftButtons{
       ${this.cfg.partialActive() && this.cfg.showStandardButtons() /* TODO localize texts */
         ? html`
           <ha-icon-button
-            label="Partially ${this.cfg.applyInvertOpenClose(C.SHUTTER_STATE_CLOSED)} (${C.SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
+            label="Partially ${this.cfg.applyInvertOpenCloseUi(C.SHUTTER_STATE_CLOSED)} (${C.SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
             .disabled=${this.cfg.disabledGlobaly()}
             @click="${()=> this.shutter.doOnclick(`${C.ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(this.cfg.partial()))}" >
             <ha-icon class="${C.ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
@@ -850,12 +848,12 @@ export class htmlBlockRightButtons extends htmlBlock{
     };
 
     const labels={
-      0: `Fully ${this.cfg.applyInvertOpenClose(C.SHUTTER_STATE_OPEN)}`,
-      1: `Partially ${this.cfg.applyInvertOpenClose(C.SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[1])}% )`,
-      2: `Partially ${this.cfg.applyInvertOpenClose(C.SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[2])}% )`,
-      3: `Partially ${this.cfg.applyInvertOpenClose(C.SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[3])}% )`,
-      4: `Partially ${this.cfg.applyInvertOpenClose(C.SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[4])}% )`,
-      5: `Fully ${this.cfg.applyInvertOpenClose(C.SHUTTER_STATE_CLOSED)}`,
+      0: `Fully ${this.cfg.applyInvertOpenCloseUi(C.SHUTTER_STATE_OPEN)}`,
+      1: `Partially ${this.cfg.applyInvertOpenCloseUi(C.SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[1])}% )`,
+      2: `Partially ${this.cfg.applyInvertOpenCloseUi(C.SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[2])}% )`,
+      3: `Partially ${this.cfg.applyInvertOpenCloseUi(C.SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[3])}% )`,
+      4: `Partially ${this.cfg.applyInvertOpenCloseUi(C.SHUTTER_STATE_CLOSED)} ( ${this.cfg.invertPosition(pct[4])}% )`,
+      5: `Fully ${this.cfg.applyInvertOpenCloseUi(C.SHUTTER_STATE_CLOSED)}`,
     };
 
     const disabled = {

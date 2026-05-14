@@ -34,7 +34,7 @@ jobs:
       - name: Copy image files to dist
         run: |
           cp -r src/*.png dist/
-          
+
       - name: Verify build output
         run: |
           echo "Built file:"
@@ -55,11 +55,11 @@ jobs:
         uses: actions/upload-artifact@v6.0.0
         with:
           name: enhanced-shutter-card
-          path: dist/    
+          path: dist/
 
       - name: Upload to release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             dist/**
