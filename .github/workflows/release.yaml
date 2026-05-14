@@ -29,7 +29,9 @@ jobs:
           rm -rf dist/*
 
       - name: Build
-        run: npm run build
+        run: npx rollup -c
+        env:
+          PRE_RELEASE: ${{ github.event.release.prerelease }}
 
       - name: Copy image files to dist
         run: |
