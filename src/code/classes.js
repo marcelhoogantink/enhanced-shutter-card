@@ -137,7 +137,8 @@ export class EnhancedShutterCardNew extends LitElement{
     };
     // handle PRESET TYPE
     //
-    let configPreset = { ...(C.ESC_PRESET[configSub[C.CONFIG_SHUTTER_PRESET]] || {}) };
+    let shutterPreset = (configSub[C.CONFIG_SHUTTER_PRESET] || '').toLowerCase();
+    let configPreset = { ...(C.ESC_PRESET[shutterPreset] || {}) };
 
     let newConfigSub = { ...configSub };
 
@@ -2014,14 +2015,20 @@ export class shutterCfg {
   }
 
   applyInvertForPositionToText(setting,debug=false){
-    setting = this.applyInvertOpenCloseUi(setting,debug);
+    //setting = this.applyInvertOpenCloseUi(setting,debug);
+    //setting = this.applyInvertOpenCloseCover(setting,debug);
+    setting = this.applyInvertPercentageUi(setting,debug);
+    setting = this.applyInvertPercentageCover(setting,debug);
     return setting;
   }
   applyInvertForOverlayDisplay(setting,debug=false){
-    setting = this.applyInvertOpenCloseUi(setting,debug);
+    //setting = this.applyInvertOpenCloseUi(setting,debug);
+    //setting = this.applyInvertOpenCloseCover(setting,debug);
+    //setting = this.applyInvertPercentageUi(setting,debug);
+    setting = this.applyInvertPercentageCover(setting,debug);
     return setting;
   }
-  applyInvertForShowButtonUpDownLabel(setting,debug=false){
+applyInvertForShowButtonUpDownLabel(setting,debug=false){
     setting = this.applyInvertOpenCloseUi(setting,debug);
     setting = this.applyInvertDirection(setting,debug);
     return setting;
@@ -2109,9 +2116,7 @@ export class shutterCfg {
       }
     }else  {
       //  shutter is moving,
-      escState = this.applyInvertOpenCloseUi(state);
-      //escState = this.applyInvertOpenCloseAndPercentage(state);
-
+      escState = this.applyInvertForPositionToText(state);
     }
     // solve issue #54
     if (position == this.applyInvertToPosition(C.SHUTTER_OPEN_PCT) && escState == (this.applyInvertOpenCloseAndPercentage(C.SHUTTER_STATE_OPENING))) {

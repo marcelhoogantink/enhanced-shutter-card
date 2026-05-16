@@ -399,8 +399,9 @@ export const ESC_ICONS_POSITION = TOP;
 export const ESC_OPENING_DISABLED = false;
 export const ESC_SHOW_OPENING = true;
 export const ESC_INLINE_HEADER = false;
-export const ESC_INVERT_PCT_COVER = false;
+
 export const ESC_INVERT_PCT_UI = false;
+export const ESC_INVERT_PCT_COVER = false;
 export const ESC_INVERT_OPEN_CLOSE_UI = false
 export const ESC_INVERT_OPEN_CLOSE_COVER = false
 

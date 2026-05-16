@@ -21,7 +21,7 @@ export function getTextSize(text, font = 'Arial', fontHeight=16, fontWeight='') 
 }
 export function console_log(...args){
 
-  if (!DEBUG) return;
+  if (!getDebug()) return;
 
   const stackLine = new Error().stack.split('\n')[2].trim();
 
