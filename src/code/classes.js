@@ -592,18 +592,19 @@ export class EnhancedShutterCardNew extends LitElement{
       }else{
         console_log('No recalc rows and cols');
       }
+// version v1.6.1b0: (temporary) removed due to issue #168
+/*
       const divCard= this.closestElement('div.card');
-      /* Set CSS variables for number of rows and columns */
-      /* Used in CSS to set sizes */
 
       if (divCard){
-        // version v1.6.1b0: (temporary) removed due to issue 168
 
-        //divCard.style.setProperty('--row-size',this.nbRows);
-        //divCard.style.setProperty('--column-size',this.nbCols);
+        divCard.style.setProperty('--row-size',this.nbRows);
+        divCard.style.setProperty('--column-size',this.nbCols);
       }else{
         console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
       }
+*/
+
       /*
       * Calculate the number of rows and columns
       * Use sizes from calculated cardSize and HA grid sizes
