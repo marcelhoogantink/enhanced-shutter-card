@@ -24,21 +24,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Copy lit and images to dist
+      - name: Clear dist
         run: |
-          rm -rf dist/lit dist/images
-          cp -r card/lit/ dist/lit/
-          cp -r card/images/ dist/images/          
-          
+          rm -rf dist/*
+
+      - name: Build
+        run: npx rollup -c
+        env:
+          PRE_RELEASE: ${{ github.event.release.prerelease }}
+
+      - name: Copy image files to dist
+        run: |
+          cp -r src/*.png dist/
+
       - name: Verify build output
         run: |
           echo "Built file:"
           ls -lah dist/
-          ls -lah dist/lit/
-          ls -lah dist/images/          
           echo "First 5 lines:"
           head -5 dist/enhanced-shutter-card.js
 
@@ -55,15 +57,13 @@ jobs:
         uses: actions/upload-artifact@v6.0.0
         with:
           name: enhanced-shutter-card
-          path: dist/    
+          path: dist/
 
       - name: Upload to release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
-            dist/enhanced-shutter-card.js
-            dist/lit/*
-            dist/images/*
+            dist/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

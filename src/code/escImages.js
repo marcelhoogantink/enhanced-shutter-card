@@ -1,7 +1,5 @@
 import * as C from './constants.js';
-import {
-  xyPair
-} from './classes.js';
+import {xyPair} from './xyPair.js';
 import {
   defImagePathOrColor,
   isUrl

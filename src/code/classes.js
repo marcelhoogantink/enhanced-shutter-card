@@ -1,55 +1,22 @@
-/**
- * Enhanced Shutter Card for Home Assistant
- * HA-dev-page for cover:
- * https://developers.home-assistant.io/docs/core/entity/cover
- */
-
-// // local copy of RELEASE 3.0.1 of Lit-element:
-// https://www.jsdelivr.com/package/gh/lit/dist
-
-const VERSION = 'v1.6.1b0';
-
+import * as C from './constants.js';
+//import {EscImages} from './escImages.js';
 import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
-import * as C from './src/constants.js';
+
 import {
-  xyPair,
-  //htmlShutter,
-} from './src/classes.js';
-import {
-  setDebug,
-  resizeDebugger,
+  boundary,
+  findElementInBody,
+  findElement,
   console_log,
-  isRunningLocally,
-} from'./src/functions.js';
+  getDebug,
+  resizeDebugger
+} from './functions.js';
 
-const IS_LOCAL = isRunningLocally();
-const DEBUG = VERSION.includes('b') && IS_LOCAL;
-
-setDebug(DEBUG);
-
-import * as HtmlBlocks from './src/htmlBlocks.js';
-import {EscImages} from './src/escImages.js';
-
-// import {html, css, unsafeCSS } from './lit/lit-core.min.js';
-// import {LitElement} from './lit/lit-debug.js'; // <-- dit is nu de debug versie
+import * as HtmlBlocks from './htmlBlocks.js';
+import {EscImages} from './escImages.js';
+import {xyPair} from './xyPair.js';
 
 
-
-/**
- * LIT- element flow of update cycle:
- *
- * someProperty.hasChanged
- * requestUpdate
- * performUpdate
- * shouldUpdate
- * update
- * render
- * firstUpdated
- * updated
- * updateComplete
- */
-
-class EnhancedShutterCardNew extends LitElement{
+export class EnhancedShutterCardNew extends LitElement{
   //reactive properties
   constructor() {
     super(); //  mandetory by Lit-element
@@ -170,7 +137,8 @@ class EnhancedShutterCardNew extends LitElement{
     };
     // handle PRESET TYPE
     //
-    let configPreset = { ...(C.ESC_PRESET[configSub[C.CONFIG_SHUTTER_PRESET]] || {}) };
+    let shutterPreset = (configSub[C.CONFIG_SHUTTER_PRESET] || '').toLowerCase();
+    let configPreset = { ...(C.ESC_PRESET[shutterPreset] || {}) };
 
     let newConfigSub = { ...configSub };
 
@@ -375,14 +343,14 @@ class EnhancedShutterCardNew extends LitElement{
     //this.defGridContainer();
     //this.getGridOptionsInternal();
     /* get element of hui-view to detect resizing */
-    Globals.huiView = findElementInBody(C.HA_HUI_VIEW);
+    C.Globals.huiView = findElementInBody(C.HA_HUI_VIEW);
 
     this.startResizeObserver();
   }
   startResizeObserver() {
     const onResize = (entries) => {
       /* Things todo when resize is detected */
-      if (DEBUG) resizeDebugger(entries,this.cardCfg.title());
+      if (getDebug()) resizeDebugger(entries,this.cardCfg.title());
       if (!this.isResizeInProgress) {
         entries.forEach(entry => {
           this.checkOrientation(entry); // check orientation on huiView resize
@@ -394,7 +362,7 @@ class EnhancedShutterCardNew extends LitElement{
       }
     }
     this.resizeObserver = new ResizeObserver(onResize);
-    this.resizeObserver.observe(Globals.huiView);
+    this.resizeObserver.observe(C.Globals.huiView);
   }
 
 
@@ -420,8 +388,8 @@ class EnhancedShutterCardNew extends LitElement{
     const visibleHeight = Math.max(0, Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0));
 
     // Determine the orientation based on visible area and window size
-    Globals.screenOrientation = {value: visibleWidth*1.4 > visibleHeight ? C.LANDSCAPE : C.PORTRAIT};
-    this.screenOrientation = Globals.screenOrientation.value;
+    C.Globals.screenOrientation = {value: visibleWidth*1.4 > visibleHeight ? C.LANDSCAPE : C.PORTRAIT};
+    this.screenOrientation = C.Globals.screenOrientation.value;
 
     // After orientation check is done, reset the flag
     this.isResizeInProgress = false;
@@ -535,6 +503,7 @@ class EnhancedShutterCardNew extends LitElement{
     this.config = config;
   }
   getCardSize() {
+    console_log('getCardSize called, number of entities:', this.config.entities.length);
     return this.config.entities.length + 1;
   }
 
@@ -623,18 +592,19 @@ class EnhancedShutterCardNew extends LitElement{
       }else{
         console_log('No recalc rows and cols');
       }
+// version v1.6.1b0: (temporary) removed due to issue #168
+/*
       const divCard= this.closestElement('div.card');
-      /* Set CSS variables for number of rows and columns */
-      /* Used in CSS to set sizes */
 
       if (divCard){
-        // version v1.6.1b0: (temporary) removed due to issue 168
 
-        //divCard.style.setProperty('--row-size',this.nbRows);
-        //divCard.style.setProperty('--column-size',this.nbCols);
+        divCard.style.setProperty('--row-size',this.nbRows);
+        divCard.style.setProperty('--column-size',this.nbCols);
       }else{
         console.warn(`Could not find div.card to set CSS variables. Cardname: '${tempCardName}'`);
       }
+*/
+
       /*
       * Calculate the number of rows and columns
       * Use sizes from calculated cardSize and HA grid sizes
@@ -699,7 +669,7 @@ class EnhancedShutterCardNew extends LitElement{
 }
 
 
-class EnhancedShutter extends LitElement
+export class EnhancedShutter extends LitElement
 {
   // loaded from EnhancedShutterCardNew():
   // - react_ShutterState
@@ -757,7 +727,7 @@ class EnhancedShutter extends LitElement
 
   startResizeObserver() {
     const onResize = (entries) => {
-      if (DEBUG) resizeDebugger(entries,this.cfg.friendlyName());
+      if (getDebug()) resizeDebugger(entries,this.cfg.friendlyName());
 
       /* Things todo when resize is detected */
       entries.forEach(entry =>{
@@ -1237,7 +1207,7 @@ class EnhancedShutter extends LitElement
   actualGlobalWidthPx() {
     let width;
     if (this.actualWidthEdit) {
-      width= this.actualWidthEdit; // Should be solved by an async /await / promise ...
+      width = this.actualWidthEdit; // Should be solved by an async /await / promise ...
     }else{
       width = this[C.ESC_CLASS_SELECTOR]?.getBoundingClientRect()?.width ?? this.cfg.windowWidthPx();
     }
@@ -1469,7 +1439,7 @@ class EnhancedShutter extends LitElement
     `
   }
 }
-class cardCfg {
+export class cardCfg {
 
   #cfg={};
 
@@ -1497,7 +1467,7 @@ class cardCfg {
     return this.#getCfg(C.CONFIG_TITLE,value);
   }
 }
-class shutterCfg {
+export class shutterCfg {
 
   #cfg={};
   #coverEntity=null;
@@ -2046,25 +2016,31 @@ class shutterCfg {
   }
 
   applyInvertForPositionToText(setting,debug=false){
-    setting = this.applyInvertOpenClose(setting,debug);
+    //setting = this.applyInvertOpenCloseUi(setting,debug);
+    //setting = this.applyInvertOpenCloseCover(setting,debug);
+    setting = this.applyInvertPercentageUi(setting,debug);
+    setting = this.applyInvertPercentageCover(setting,debug);
     return setting;
   }
   applyInvertForOverlayDisplay(setting,debug=false){
-    setting = this.applyInvertOpenClose(setting,debug);
+    //setting = this.applyInvertOpenCloseUi(setting,debug);
+    //setting = this.applyInvertOpenCloseCover(setting,debug);
+    //setting = this.applyInvertPercentageUi(setting,debug);
+    setting = this.applyInvertPercentageCover(setting,debug);
     return setting;
   }
-  applyInvertForShowButtonUpDownLabel(setting,debug=false){
-    setting = this.applyInvertOpenClose(setting,debug);
+applyInvertForShowButtonUpDownLabel(setting,debug=false){
+    setting = this.applyInvertOpenCloseUi(setting,debug);
     setting = this.applyInvertDirection(setting,debug);
     return setting;
   }
   applyInvertForShowButtonUpDownClick(setting,debug){
     setting = this.applyInvertDirection(setting,debug);
-    setting = this.applyInvertCommands(setting,debug);
+    setting = this.applyInvertOpenCloseCover(setting,debug);
     return setting;
   }
   applyInvertForButtonOpenCloseHideStates(setting,debug=false){
-    setting = this.applyInvertOpenClose(setting,debug);
+    setting = this.applyInvertOpenCloseUi(setting,debug);
     setting = this.applyInvertDirection(setting,debug);
     return setting;
   }
@@ -2072,15 +2048,15 @@ class shutterCfg {
     return setting;
   }
   applyInvertOpenCloseAndPercentage(setting,debug=false){
-    setting = this.applyInvertOpenClose(setting,debug);
-    setting = this.applyInvertPercentage(setting,debug);
+    setting = this.applyInvertOpenCloseUi(setting,debug);
+    setting = this.applyInvertPercentageCover(setting,debug);
     return setting;
   }
   applyInvertAll(setting,debug=false){
-    setting = this.applyInvertOpenClose(setting,debug);
-    setting = this.applyInvertPercentage(setting,debug);
+    setting = this.applyInvertOpenCloseUi(setting,debug);
+    setting = this.applyInvertPercentageCover(setting,debug);
     setting = this.applyInvertDirection(setting,debug);
-    setting = this.applyInvertCommands(setting,debug);
+    setting = this.applyInvertOpenCloseCover(setting,debug);
     return setting;
   }
 
@@ -2089,19 +2065,19 @@ class shutterCfg {
     return setting;
   }
 
-  applyInvertOpenClose(setting){
+  applyInvertOpenCloseUi(setting){
     if (this.invertOpenCloseUi()) setting = Object.keys(C.INVERT_OPEN_CLOSE_SETTING).includes(setting) ? C.INVERT_OPEN_CLOSE_SETTING[setting] : setting;
     return setting;
   }
-  applyInvertCommands(setting){
+  applyInvertOpenCloseCover(setting){
     if (this.invertOpenCloseCover()) setting = Object.keys(C.INVERT_OPEN_CLOSE_SETTING).includes(setting) ? C.INVERT_OPEN_CLOSE_SETTING[setting] : setting;
     return setting;
   }
-  applyInvertPercentage(setting){
+  applyInvertPercentageCover(setting){
     if (this.invertPercentageCover()) setting = Object.keys(C.INVERT_OPEN_CLOSE_SETTING).includes(setting) ? C.INVERT_OPEN_CLOSE_SETTING[setting] : setting;
     return setting;
   }
-  applyInvertUiPercentage(setting){
+  applyInvertPercentageUi(setting){
     if (this.invertPercentageUi()) setting = Object.keys(C.INVERT_OPEN_CLOSE_SETTING).includes(setting) ? C.INVERT_OPEN_CLOSE_SETTING[setting] : setting;
     return setting;
   }
@@ -2121,7 +2097,7 @@ class shutterCfg {
   }
 
   getOrientation(){
-    return Globals.screenOrientation.value; // global variable !!
+    return C.Globals.screenOrientation.value; // global variable !!
   }
 
   positionToState(position = this.currentDevicePosition()){
@@ -2137,13 +2113,11 @@ class shutterCfg {
         escState= C.SHUTTER_STATE_PARTIAL_OPEN;
       }else{
         // shutter is 0% or 100%
-        escState = position ? this.applyInvertOpenClose(C.SHUTTER_STATE_OPEN) : this.applyInvertOpenClose(C.SHUTTER_STATE_CLOSED);
+        escState = position ? this.applyInvertOpenCloseUi(C.SHUTTER_STATE_OPEN) : this.applyInvertOpenCloseUi(C.SHUTTER_STATE_CLOSED);
       }
     }else  {
       //  shutter is moving,
-      escState = this.applyInvertOpenClose(state);
-      //escState = this.applyInvertOpenCloseAndPercentage(state);
-
+      escState = this.applyInvertForPositionToText(state);
     }
     // solve issue #54
     if (position == this.applyInvertToPosition(C.SHUTTER_OPEN_PCT) && escState == (this.applyInvertOpenCloseAndPercentage(C.SHUTTER_STATE_OPENING))) {
@@ -2436,19 +2410,19 @@ class shutterCfg {
     let roundedLevel = Math.round(level / 10) * 10;
     roundedLevel = isNaN(roundedLevel) ? -1 : Math.min(roundedLevel,100);
 
-		switch (roundedLevel) {
-			case -1:
-				icon = 'mdi:battery-off-outline'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
-				break;
-			case 100:
-				icon = 'mdi:battery'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
-				break;
-			case 0:
-				icon = 'mdi:battery-outline'; // mdi:battery-outline should have an alias of mdi:battery-0, doesn't work in current HASS
-				break;
-			default:
-				icon = 'mdi:battery-' + roundedLevel;
-		}
+    switch (roundedLevel) {
+      case -1:
+        icon = 'mdi:battery-off-outline'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
+        break;
+      case 100:
+        icon = 'mdi:battery'; // mdi:battery should have an alias of mdi:battery-100, doesn't work in current HASS
+        break;
+      case 0:
+        icon = 'mdi:battery-outline'; // mdi:battery-outline should have an alias of mdi:battery-0, doesn't work in current HASS
+        break;
+      default:
+        icon = 'mdi:battery-' + roundedLevel;
+    }
     return icon;
   }
   batteryIconColor(){
@@ -2500,7 +2474,7 @@ class shutterCfg {
   }
 
 }
-class htmlCard{
+export class htmlCard{
   constructor(enhancedShutterCard){
     this.enhancedShutterCard=enhancedShutterCard;
   }
@@ -2512,7 +2486,7 @@ class htmlCard{
   }
 }
 
-class haEntity{
+export class haEntity{
   #state;
   #attributes;
   //#lastChanged;
@@ -2568,7 +2542,7 @@ class haEntity{
     return this.getAttributes()?.entity_id !== undefined;
   }
 }
-class MessageManager {
+export class MessageManager {
   constructor() {
     this.messageGroup = {};
   }
@@ -2622,14 +2596,14 @@ class MessageManager {
     return counter;
   }
 }
-class Message {
+export class Message {
   constructor(text, severity = C.HA_ALERT_INFO, subject = 'General') {
     this.text = text;
     this.severity = severity;
     this.subject = subject;
   }
 }
-class haSubEntity{
+export class haSubEntity{
 
   constructor(hass,type,entityId=false){
     this.hass= hass;
@@ -2651,127 +2625,3 @@ class haSubEntity{
     this.entity=haEntity;
   }
 }
-/**
- * global functions
- */
-
-function boundary(value,val1=0,val2=100){
-  let min = Math.min(val1,val2);
-  let max = Math.max(val1,val2);
-  return Math.max(min,Math.min(max,value));
-}
-
-
-/**
- * Main code
- */
-const Globals={
-  huiView: null,
-  screenOrientation: {value:C.LANDSCAPE },
-}
-
-customElements.define(C.HA_CARD_NAME , EnhancedShutterCardNew);
-customElements.define(C.HA_SHUTTER_NAME, EnhancedShutter);
-
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "enhanced-shutter-card",
-  name: "Enhanced Shutter Card",
-  preview: true,
-  description: "An enhanced shutter card for easy control of shutters",
-  documentationURL: "https://github.com/marcelhoogantink/enhanced-shutter-card"
-});
-
-console.info(
-  `%c ENHANCED-SHUTTER-CARD %c Version ${VERSION}`,
-  'color: white; background: green; font-weight: 700',
-  'color: black;background: white; font-weight: bold'
-);
-console.info(`my-card version __VERSION__`);
-/**
- * test functions
- */
-
-
-/**
- * function findElement() to find an element in DOM body, inluding shadow DOMs.
- * @param {*} selector
- * @returns
- */
-function findElementInBody(selector) {
-  return findElement(document.body,selector);
-}
-
-// TODO: merge FinElement and findElements into one
-function findElement(base,selector) {
-  // Search in the regular DOM
-  let foundInDom = base.querySelector(selector);
-
-  // If not found directly, search the element
-  if (!foundInDom) foundInDom= recursiveSearch(base);
-  return foundInDom;
-
-  // Function to recursively search in shadow roots
-  function searchInShadowDom(node) {
-    // Check if the node has a shadow root
-    if (node.shadowRoot) {
-      // Search in the shadow root's DOM
-      const foundInShadow = node.shadowRoot.querySelector(selector);
-      if (foundInShadow) {
-        //console_log('Found in recursiveSearch2:',foundInShadow.nodeName,foundInShadow.className);
-        return foundInShadow;
-      }
-      // Recurse into any shadow DOMs within this shadow root
-      for (const child of node.shadowRoot.children) {
-        const result = searchInShadowDom(child);
-        if (result) {
-          //console_log('Found in recursiveSearch3:',result.nodeName,result.className);
-          return result;
-        }
-      }
-    }
-    for (const child of node.children) {
-      const result = recursiveSearch(child);
-      if (result) {
-        //console_log('Found in recursiveSearch4:',result.nodeName,result.className);
-        return result;
-      }
-    }
-    return null;
-  }
-
-  // Start the search in the whole document, including all shadow DOMs
-  function recursiveSearch(node) {
-    // Search in the node itself
-    if (node.matches && node.matches(selector)) {
-      //console_log('Found in recursiveSearch5:',node.nodeName,node.ClassName);
-      return node;
-    }
-
-    // Recurse into child nodes, including shadow roots if present
-    if (node.shadowRoot) {
-      const result = searchInShadowDom(node);
-      if (result) {
-        //console_log('Found in recursiveSearch6:',result.nodeName,result.className);
-        return result;
-      }
-    }
-
-    // Recurse into child nodes (excluding shadow roots)
-    for (const child of node.children) {
-      const result = recursiveSearch(child);
-      if (result) {
-        //console_log('Found in recursiveSearch7:',result.nodeName,result.className);
-        return result;
-      }
-    }
-
-    return null;
-  }
-
-}
-
-
-
-
-

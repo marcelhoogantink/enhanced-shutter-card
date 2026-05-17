@@ -3,7 +3,7 @@
   "domain": "enhanced-shutter-card",
   "name": "Enhanced Shutter Card",
   "codeowners": ["@marcelhoogantink"],
-  "documentation": "https://github.com/marcelhoogantik/enhnced-shutter-card/readme.md",
-  "issue_tracker": "https://github.com/vingerha/marcelhoogantik/enhnced-shutter-card/issues",
+  "documentation": "https://github.com/marcelhoogantink/enhanced-shutter-card/blob/main/README.md",
+  "issue_tracker": "https://github.com/marcelhoogantink/enhanced-shutter-card/issues",
   "version": "1.6.0b1"
 }

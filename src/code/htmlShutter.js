@@ -1,53 +1,5 @@
 import * as C from './constants.js';
-//import {EscImages} from './escImages.js';
 
-
-export class xyPair{
-  #coordX;
-  #coordY;
-  constructor(x=0,y=0){
-    this.#coordX = x;
-    this.#coordY = y;
-  }
-  x(){
-    return this.#coordX;
-  }
-  y(){
-    return this.#coordY;
-  }
-  switch(){
-    const tmp= this.#coordX;
-    this.#coordX = this.#coordY;
-    this.#coordY = tmp;
-  }
-  size(){
-    return this.x()*this.y();
-  }
-  rotate90(){
-    const tmp= this.#coordX;
-    this.#coordX = -this.#coordY;
-    this.#coordY = tmp;
-  }
-  rotate180(){
-    this.#coordX = -this.#coordX;
-    this.#coordY = -this.#coordY;
-  }
-  rotate270(){
-    const tmp= this.#coordX;
-    this.#coordX = this.#coordY;
-    this.#coordY = -tmp;
-  }
-  rotate360(){
-  }
-  fill(x,y){
-    this.#coordX = x;
-    this.#coordY = y;
-  }
-  fill2(xy){
-    this.#coordX = xy.x();
-    this.#coordY = xy.y();
-  }
-}
 export class htmlShutter{
 
   constructor(enhancedShutter){
@@ -61,7 +13,7 @@ export class htmlShutter{
   }
 
   defStyleVarsShutter(){
-    let escState=this.cfg.positionToState();
+    let stateForOverlay = this.cfg.getCoverEntity().getState() || C.UNAVAILABLE;
     const viewImage=this.escImages.getViewImageSrc(this.cfg.id());
 
     // solves #103 see other lines with shutterSlatImage
@@ -120,9 +72,9 @@ export class htmlShutter{
       --esc-buttons-flex-flow:      ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
       --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
 
-      --esc-movement-overlay-display: ${(escState == C.SHUTTER_STATE_OPENING || escState == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
-      --esc-movement-overlay-up-display: ${escState == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
-      --esc-movement-overlay-down-display: ${escState == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+      --esc-movement-overlay-display: ${(stateForOverlay == C.SHUTTER_STATE_OPENING || stateForOverlay == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+      --esc-movement-overlay-up-display: ${stateForOverlay == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
+      --esc-movement-overlay-down-display: ${stateForOverlay == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
 
       --esc-slide-background-main-image: ${shutterSlatImage.includes('.') ?  `url(${shutterSlatImage})` : ''};
       --esc-slide-background-edge-image: ${shutterBottomImage.includes('.') ?  `url(${shutterBottomImage})` : ''};
