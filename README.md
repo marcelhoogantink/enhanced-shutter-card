@@ -31,8 +31,18 @@ Star <a href="https://github.com/marcelhoogantink/enhanced-shutter-card" target=
 Thank you !
 
 ---
-### New in version v1.6.0:
+### New in version v1.6.1:
 
+- #### Solved issues:
+  - [#168](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/168) v1.6.0 breaks card display - cards appear smaller/grouped
+  - [#169](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/169) Incorrect movement arrow display
+  - [#170](https://github.com/marcelhoogantink/enhanced-shutter-card/issues/170) Failed to load images
+
+- #### Relocated images
+  Due to issues with creating HACS-releases the default image-files do not have their own map /images/ anymore, but are now located beside the main javascript file (enhanced-shutter-card.js) in the main-directory of the card.
+
+---
+### New in version v1.6.0:
 - #### New `auto`-option for finding sub-entities
   For the `battery_entity` and `signal_entity` settings, a new added option `auto` is available. When this is set to `auto`, the Card tries to find a battery or signal entity in the device of the cover-entity and displays its icon and status.
 
@@ -180,7 +190,7 @@ The settings are defined in the follwing logic:
 | signal_entity                | string        | No       | `null`                                        | Yes    | Yes   | EntityId of the sensor represenating the Wireless signal-level of the shutter (as a number), or `auto` for automatic search. For global setting just use `auto` for automatic search                                                                                       |            |
 | show_group_members           | boolean       | No       | `false`                                       | Yes    | Yes   | When using a grouped-cover in the Card, set to 'true'to display the member covers in stead of the group-cover.                                                                                                                                                             |            |
 | passive_mode                 | boolean       | no       | `false`                                       | Yes    | Yes   | Interface works normal, but no action is sent to the shutters. A lock-icon is shown after the shutter-name.                                                                                                                                                                |            |
-| image_map                    | string        | No       | /local/community/enhanced-shutter-card/images | Yes    | Yes   | map of the images. Change thsi when using own images.                                                                                                                                                                                                                      |            |
+| image_map                    | string        | No       | /local/community/enhanced-shutter-card        | Yes    | Yes   | map of the images. Change thsi when using own images.                                                                                                                                                                                                                      |            |
 | window_image                 | string        | No       | esc-window.png                                | Yes    | Yes   | image of the window shutter.                                                                                                                                                                                                                                               |            |
 | view_image                   | string        | No       | esc-back-view.png                             | Yes    | Yes   | background-image through the window, or a HTML color.                                                                                                                                                                                                                      |            |
 | shutter_slat_image           | string        | No       | esc-shutter-slat.png                          | Yes    | Yes   | Image of one slat of the shutter.                                                                                                                                                                                                                                          |            |
