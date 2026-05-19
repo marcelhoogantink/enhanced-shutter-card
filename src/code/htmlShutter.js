@@ -43,7 +43,6 @@ export class htmlShutter{
       --esc-button-rotate: ${this.cfg.buttonRotate()};
 
       --esc-transform-slide:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};
-      --esc-transform-picker: ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
       --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngleDeg(this.enhancedShutter.react_TiltPosition)};
       --esc-tilt-angle-deg-graph: ${this.enhancedShutter.getTiltAngleDegGraph(this.enhancedShutter.react_TiltPosition)};
 
@@ -53,6 +52,7 @@ export class htmlShutter{
 
       --esc-picker-top: -${this.cfg.pickerOverlapPx()+C.UNITY};
       --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+C.UNITY};
+      --esc-picker-transform: ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
 
       --esc-slat-height: ${this.enhancedShutter.slatHeightPx()+C.UNITY};
 

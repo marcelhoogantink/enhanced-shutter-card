@@ -43,9 +43,9 @@ export const ESC_CLASS_SELECTOR = `${ESC_CLASS_BASE_NAME}-selector`;
 export const ESC_CLASS_SELECTOR_PICTURE = `${ESC_CLASS_BASE_NAME}-selector-picture`;
 export const ESC_CLASS_SELECTOR_PICKER = `${ESC_CLASS_BASE_NAME}-selector-picker`;
 export const ESC_CLASS_SELECTOR_PARTIAL = `${ESC_CLASS_BASE_NAME}-selector-partial`;
-export const ESC_CLASS_SELECTOR_SLIDE = `${ESC_CLASS_BASE_NAME}-selector-slide`;
-export const ESC_CLASS_SELECTOR_SLIDE_SLATS = `${ESC_CLASS_SELECTOR_SLIDE}-slats`;
-export const ESC_CLASS_SELECTOR_SLIDE_EDGE = `${ESC_CLASS_SELECTOR_SLIDE}-edge`;
+export const ESC_CLASS_SELECTOR_SLIDE = `${ESC_CLASS_BASE_NAME}-selector-slide`; // esc-shutter-selector-slide
+export const ESC_CLASS_SELECTOR_SLIDE_SLATS = `${ESC_CLASS_SELECTOR_SLIDE}-slats`; // esc-shutter-selector-slide-slats
+export const ESC_CLASS_SELECTOR_SLIDE_EDGE = `${ESC_CLASS_SELECTOR_SLIDE}-edge`; // esc-shutter-selector-slide-edge
 
 export const ESC_CLASS_MOVEMENT_OVERLAY = `${ESC_CLASS_BASE_NAME}-movement-overlay`; // esc-shutter-movement-overlay
 export const ESC_CLASS_MOVEMENT_UP = `${ESC_CLASS_BASE_NAME}-movement-up`; // esc-shutter-movement-up
@@ -692,11 +692,11 @@ export const SHUTTER_CSS =`
         position: absolute;
         left: -50%;
         width: 100%;
+        transform-origin: center;
+        transform: var(--esc-picker-transform);
         top: var(--esc-picker-top);
         height: var(--esc-picker-height);
         cursor: pointer;
-        transform-origin: center;
-        transform: var(--esc-transform-picker);
         touch-action: none;
         user-select: none;
       }
