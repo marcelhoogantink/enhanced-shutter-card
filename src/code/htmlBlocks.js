@@ -740,22 +740,12 @@ export class htmlBlockCentralWindow extends htmlBlock{
       ? html`
         <div class="${C.ESC_CLASS_SELECTOR}">
           <div class="${C.ESC_CLASS_SELECTOR_PICTURE}">
-            ${this.escImages.getWindowImageSrc(this.cfg.id()) ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">` : ''}
-
+            ${this.showWindowImage()}
             ${this.showSlide()}
-            ${this.cfg.partialActive()
-              ? html`<div class="${C.ESC_CLASS_SELECTOR_PARTIAL}"></div>`
-              : ''}
-            <div class="${C.ESC_CLASS_MOVEMENT_OVERLAY}">
-              <ha-icon class="${C.ESC_CLASS_MOVEMENT_UP}" icon="mdi:arrow-up">
-              </ha-icon>
-              <ha-icon class="${C.ESC_CLASS_MOVEMENT_DOWN}" icon="mdi:arrow-down">
-              </ha-icon>
-            </div>
+            ${this.showPartial()}
+            ${this.showOverlay()}
           </div>
-          ${this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
-            ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}"></div>`
-            : ''}
+          ${this.showPicker()}
         </div>
       `: html``}
     `);
@@ -768,6 +758,29 @@ export class htmlBlockCentralWindow extends htmlBlock{
       xy.fill(x,y);
     }
     this.setXySize(xy);
+  }
+  showWindowImage(){
+    return this.escImages.getWindowImageSrc(this.cfg.id())
+      ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">`
+      : html``;
+  }
+  showPicker(){
+    return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
+      ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}"></div>`
+      : html``
+  }
+  showPartial(){
+    return this.cfg.partialActive()
+      ? html`<div class="${C.ESC_CLASS_SELECTOR_PARTIAL}"></div>`
+      : html``;
+  }
+  showOverlay(){
+    return html`
+      <div class="${C.ESC_CLASS_MOVEMENT_OVERLAY}">
+        <ha-icon class="${C.ESC_CLASS_MOVEMENT_UP}" icon="mdi:arrow-up"></ha-icon>
+        <ha-icon class="${C.ESC_CLASS_MOVEMENT_DOWN}" icon="mdi:arrow-down"></ha-icon>
+      </div>
+    `;
   }
   showSlide(){
      return html`
