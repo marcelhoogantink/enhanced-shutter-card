@@ -715,15 +715,13 @@ export const SHUTTER_CSS =`
         image-rendering: crisp-edges;
         image-rendering: -webkit-optimize-contrast;
       }
-
-
       .${ESC_CLASS_SELECTOR_SLIDE_SLATS} {
         height: var(--esc-slide-slats-height);
-        background-position: var(--esc-slide-background-main-position);
         background-image: var(--esc-slide-background-main-image);
-        background-color: var(--esc-slide-background-main-color);
-        background-repeat: repeat;
         background-size: var(--esc-slide-background-slats-size);
+        background-repeat: repeat;
+        background-position: var(--esc-slide-background-main-position);
+        background-color: var(--esc-slide-background-main-color);
         transform: var(--esc-transform-undo-slats-rotate);
       }
       .${ESC_CLASS_TILT_SLAT1} {
@@ -753,21 +751,21 @@ export const SHUTTER_CSS =`
         position: absolute;
         height: var(--esc-tilt-slat-height);
         width: var(--esc-tilt-slat-width);
+        background-image: var(--esc-slide-background-main-image);
         background-size: var(--esc-tilt-slat-background-size);
-        transform-origin: var(--esc-tilt-slat-origin);
-        transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-tilt-slat-rotate);
         background-repeat: repeat;
         background-position: var(--esc-slide-background-main-position);
         background-color: var(--esc-slide-background-main-color);
-        background-image: var(--esc-slide-background-main-image);
+        transform-origin: var(--esc-tilt-slat-origin);
+        transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-tilt-slat-rotate);
       }
       .${ESC_CLASS_SELECTOR_SLIDE_EDGE} {
         height: var(--esc-slide-edge-height);
-        background-position: var(--esc-slide-background-edge-position);
         background-image: var(--esc-slide-background-edge-image);
-        background-color: var(--esc-slide-background-edge-color);
-        background-repeat: repeat;
         background-size: var(--esc-slide-background-edge-size);
+        background-repeat: repeat;
+        background-position: var(--esc-slide-background-edge-position);
+        background-color: var(--esc-slide-background-edge-color);
       }
       .${ESC_CLASS_SELECTOR_PARTIAL} {
         z-index: ${Z_INDEX_PARTIAL};
