@@ -740,12 +740,12 @@ export class htmlBlockCentralWindow extends htmlBlock{
       ? html`
         <div class="${C.ESC_CLASS_SELECTOR}">
           <div class="${C.ESC_CLASS_SELECTOR_PICTURE}">
-            ${this.showWindowImage()}
-            ${this.showSlide()}
+            ${this.showWindowImage()} 
             ${this.showPartial()}
+            ${this.showSlide()}
+            ${this.showPicker()}
             ${this.showOverlay()}
           </div>
-          ${this.showPicker()}
         </div>
       `: html``}
     `);
@@ -764,23 +764,15 @@ export class htmlBlockCentralWindow extends htmlBlock{
       ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">`
       : html``;
   }
-  showPicker(){
-    return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
-      ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}"></div>`
-      : html``
-  }
   showPartial(){
     return this.cfg.partialActive()
       ? html`<div class="${C.ESC_CLASS_SELECTOR_PARTIAL}"></div>`
       : html``;
   }
-  showOverlay(){
-    return html`
-      <div class="${C.ESC_CLASS_MOVEMENT_OVERLAY}">
-        <ha-icon class="${C.ESC_CLASS_MOVEMENT_UP}" icon="mdi:arrow-up"></ha-icon>
-        <ha-icon class="${C.ESC_CLASS_MOVEMENT_DOWN}" icon="mdi:arrow-down"></ha-icon>
-      </div>
-    `;
+  showPicker(){
+    return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
+      ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}"></div>`
+      : html``
   }
   showSlide(){
      return html`
@@ -790,23 +782,23 @@ export class htmlBlockCentralWindow extends htmlBlock{
         </div>
       `;
   }
+  showOverlay(){
+    return html`
+      <div class="${C.ESC_CLASS_MOVEMENT_OVERLAY}">
+        <ha-icon class="${C.ESC_CLASS_MOVEMENT_UP}" icon="mdi:arrow-up"></ha-icon>
+        <ha-icon class="${C.ESC_CLASS_MOVEMENT_DOWN}" icon="mdi:arrow-down"></ha-icon>
+      </div>
+    `;
+  }
   showSlideSlats(){
-    // Only Tilt when SHowTilt and there is a size
     const output = this.cfg.canTilt() && this.shutter.canShowTilt()
-     ? html`
-        ${this.showSlatsTilt()}
-      `
-     : html`
-        ${this.showSlats()}
-      `;
+     ? this.showSlatsTilt()
+     : this.showSlats();
     return output;
   }
   showSlatsTilt(){
-
     const sizeSlide = this.shutter.windowSizeMovingDirectionPx();
     const sizeSlat = this.shutter.slatSizeMovingDirectionPx() ;
-
-    //const sizeSlat = new xyPair(100,51);
     const number = sizeSlat ? Math.ceil(sizeSlide / sizeSlat): 1;
 
     return html`
@@ -824,7 +816,6 @@ export class htmlBlockCentralWindow extends htmlBlock{
     `;
   }
   showSlats(){
-
     return html`
         <div class="${C.ESC_CLASS_SELECTOR_SLIDE_SLATS}">
         </div>

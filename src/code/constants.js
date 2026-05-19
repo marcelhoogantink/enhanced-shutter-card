@@ -668,10 +668,10 @@ export const SHUTTER_CSS =`
         flex: none;
       }
       .${ESC_CLASS_SELECTOR_PICTURE} {
+        z-index: ${Z_INDEX_PICTURE};
         width: var(--esc-window-width);
         height: var(--esc-window-height);
         max-width: 100%;
-        z-index: ${Z_INDEX_PICTURE};
         justify-content: center;
         position: relative;
         margin: auto;
@@ -715,58 +715,6 @@ export const SHUTTER_CSS =`
         image-rendering: crisp-edges;
         image-rendering: -webkit-optimize-contrast;
       }
-      .${ESC_CLASS_SELECTOR_SLIDE_SLATS} {
-        height: var(--esc-slide-slats-height);
-        background-image: var(--esc-slide-background-main-image);
-        background-size: var(--esc-slide-background-slats-size);
-        background-repeat: repeat;
-        background-position: var(--esc-slide-background-main-position);
-        background-color: var(--esc-slide-background-main-color);
-        transform: var(--esc-transform-undo-slats-rotate);
-      }
-      .${ESC_CLASS_TILT_SLAT1} {
-        height: var(--esc-slide-slats-height);
-        display: flex;
-        flex-direction: column-reverse;
-        overflow: var(--esc-overflow);
-      }
-      .${ESC_CLASS_TILT_SLAT2} {
-        height: var(--esc-slat-height);
-        width: 100%;
-        flex-shrink: 0;
-        overflow: var(--esc-overflow);
-        perspective: 500px;
-      }
-      .${ESC_CLASS_TILT_EDGE} {
-        z-index: 1;
-        position: absolute;
-        top: 50%;
-        left: 0;
-        width: 100%;
-        height: 1px;
-        background-color: grey;
-      }
-      .${ESC_CLASS_TILT_SLAT3} {
-        z-index: 2;
-        position: absolute;
-        height: var(--esc-tilt-slat-height);
-        width: var(--esc-tilt-slat-width);
-        background-image: var(--esc-slide-background-main-image);
-        background-size: var(--esc-tilt-slat-background-size);
-        background-repeat: repeat;
-        background-position: var(--esc-slide-background-main-position);
-        background-color: var(--esc-slide-background-main-color);
-        transform-origin: var(--esc-tilt-slat-origin);
-        transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-tilt-slat-rotate);
-      }
-      .${ESC_CLASS_SELECTOR_SLIDE_EDGE} {
-        height: var(--esc-slide-edge-height);
-        background-image: var(--esc-slide-background-edge-image);
-        background-size: var(--esc-slide-background-edge-size);
-        background-repeat: repeat;
-        background-position: var(--esc-slide-background-edge-position);
-        background-color: var(--esc-slide-background-edge-color);
-      }
       .${ESC_CLASS_SELECTOR_PARTIAL} {
         z-index: ${Z_INDEX_PARTIAL};
         position: absolute;
@@ -802,6 +750,59 @@ export const SHUTTER_CSS =`
       }
       .${ESC_CLASS_MOVEMENT_DOWN} {
         display: var(--esc-movement-overlay-down-display);
+      }
+      .${ESC_CLASS_SELECTOR_SLIDE_SLATS} {
+        height: var(--esc-slide-slats-height);
+        background-image: var(--esc-slide-background-main-image);
+        background-size: var(--esc-slide-background-slats-size);
+        background-repeat: repeat;
+        background-position: var(--esc-slide-background-main-position);
+        background-color: var(--esc-slide-background-main-color);
+        transform: var(--esc-transform-undo-slats-rotate);
+      }
+      .${ESC_CLASS_TILT_SLAT1} {
+        height: var(--esc-slide-slats-height);
+        display: flex;
+        flex-direction: column-reverse;
+        overflow: var(--esc-overflow);
+      }
+      .${ESC_CLASS_TILT_SLAT2} {
+        height: var(--esc-slat-height);
+        width: 100%;
+        flex-shrink: 0;
+        overflow: var(--esc-overflow);
+        perspective: 500px;
+      }
+      ` /*   */ +`
+      .${ESC_CLASS_TILT_EDGE} {
+        z-index: 1;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: grey;
+      }
+      .${ESC_CLASS_TILT_SLAT3} {
+        z-index: 2;
+        position: absolute;
+        height: var(--esc-tilt-slat-height);
+        width: var(--esc-tilt-slat-width);
+        background-image: var(--esc-slide-background-main-image);
+        background-size: var(--esc-tilt-slat-background-size);
+        background-repeat: repeat;
+        background-position: var(--esc-slide-background-main-position);
+        background-color: var(--esc-slide-background-main-color);
+        transform-origin: var(--esc-tilt-slat-origin);
+        transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-tilt-slat-rotate);
+      }
+      .${ESC_CLASS_SELECTOR_SLIDE_EDGE} {
+        height: var(--esc-slide-edge-height);
+        background-image: var(--esc-slide-background-edge-image);
+        background-size: var(--esc-slide-background-edge-size);
+        background-repeat: repeat;
+        background-position: var(--esc-slide-background-edge-position);
+        background-color: var(--esc-slide-background-edge-color);
       }
       .${ESC_CLASS_TOP_BOTTOM} {
         display: flex;
