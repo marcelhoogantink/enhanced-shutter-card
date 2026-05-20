@@ -288,7 +288,7 @@ export const CONFIG_SHOW_TILT = 'show_tilt'; // deprecated
 export const CONFIG_TILT_ANGLE_MIN = 'tilt_angle_min';
 export const CONFIG_TILT_ANGLE_MAX = 'tilt_angle_max';
 
-export const CONFIG_CLOSING_DIRECTION = 'closing_direction'
+export const CONFIG_CLOSING_DIRECTION = 'closing_direction';
 export const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
 export const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
 export const CONFIG_ALWAYS_PCT = 'always_percentage';
@@ -450,6 +450,8 @@ export const INVERT_OPEN_CLOSE_SETTING ={
   [SHUTTER_CLOSED_PCT]: SHUTTER_OPEN_PCT,
   [UP]: DOWN,
   [DOWN]: UP,
+  [LEFT]: RIGHT,
+  [RIGHT]: LEFT,
 };
 
 export const CONFIG_DEFAULT ={
@@ -700,6 +702,19 @@ export const SHUTTER_CSS =`
         touch-action: none;
         user-select: none;
       }
+      .${ESC_CLASS_SELECTOR_PICKER}_2 {
+        z-index: ${Z_INDEX_PICKER};
+        position: absolute;
+        left: -50%;
+        width: 100%;
+        transform-origin: center;
+        transform: var(--esc-picker-transform_2);
+        top: var(--esc-picker-top);
+        height: var(--esc-picker-height);
+        cursor: pointer;
+        touch-action: none;
+        user-select: none;
+      }
       .${ESC_CLASS_SELECTOR_SLIDE} {
         z-index: ${Z_INDEX_SLIDE};
         text-align: start;` /* align to left, solves #104 */ +`
@@ -710,6 +725,21 @@ export const SHUTTER_CSS =`
         bottom: 100%;
         transform-origin: bottom;
         transform: var(--esc-transform-slide);
+        image-rendering: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+      }
+      .${ESC_CLASS_SELECTOR_SLIDE}_2 {
+        z-index: ${Z_INDEX_SLIDE};
+        text-align: start;` /* align to left, solves #104 */ +`
+        position: absolute;
+        left: -50%;
+        width: 100%;
+        overflow: var(--esc-overflow);
+        bottom: 100%;
+        transform-origin: bottom;
+        transform: var(--esc-transform-slide_2);
         image-rendering: auto;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
@@ -797,6 +827,14 @@ export const SHUTTER_CSS =`
         transform: rotateX(var(--esc-tilt-angle-deg)) var(--esc-transform-tilt-slat-rotate);
       }
       .${ESC_CLASS_SELECTOR_SLIDE_EDGE} {
+        height: var(--esc-slide-edge-height);
+        background-image: var(--esc-slide-background-edge-image);
+        background-size: var(--esc-slide-background-edge-size);
+        background-repeat: repeat;
+        background-position: var(--esc-slide-background-edge-position);
+        background-color: var(--esc-slide-background-edge-color);
+      }
+      .${ESC_CLASS_SELECTOR_SLIDE_EDGE}_2 {
         height: var(--esc-slide-edge-height);
         background-image: var(--esc-slide-background-edge-image);
         background-size: var(--esc-slide-background-edge-size);

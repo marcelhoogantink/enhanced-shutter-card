@@ -898,6 +898,21 @@ export class EnhancedShutter extends LitElement
 
     ].join(C.SPACE);
   }
+  transformPicker_2(screenPosition){
+    // TODO: improve handling screenPosition
+    const size_x = this.actualGlobalWidthPx();
+    const size_y = this.actualGlobalHeightPx();
+    const size_global = new xyPair(size_x,size_y);
+    const size_local=this.cfg.switchAxis(size_global);
+    return [
+      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
+      this.cfg.transformRotate_2(), // rotate around div transform-origin
+      this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
+      this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
+
+    ].join(C.SPACE);
+  }
+
   transformSlide(screenPosition){
     // TODO: improve handling screenPosition
     const size_x = this.actualGlobalWidthPx();
@@ -913,6 +928,22 @@ export class EnhancedShutter extends LitElement
 
     ].join(C.SPACE);
   }
+  transformSlide_2(screenPosition){
+    // TODO: improve handling screenPosition
+    const size_x = this.actualGlobalWidthPx();
+    const size_y = this.actualGlobalHeightPx();
+    const size_global = new xyPair(size_x,size_y);
+    const size_local=this.cfg.switchAxis(size_global);
+    return [
+      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
+      this.cfg.transformRotate_2(), // rotate around div transform-origin
+      //this.cfg.transformScale(size_global.x(),size_global.y()), // correct local width of the Picker
+      this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
+      this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
+
+    ].join(C.SPACE);
+  }
+
   transformUndoSlatsRotate(){
 
     let rotate;
@@ -1714,6 +1745,10 @@ export class shutterCfg {
     let transform =`rotate(${r}deg)`;
     return transform;
   }
+  transformRotate_2(r = this.getCloseAngle_2()){
+    let transform =`rotate(${r}deg)`;
+    return transform;
+  }
 
   showName(value = null){
     return this.#getCfg(C.CONFIG_SHOW_NAME,value);
@@ -2094,6 +2129,15 @@ applyInvertForShowButtonUpDownLabel(setting,debug=false){
       [C.UP]:180
     };
     return direction[this.unrollUnfoldDirection()] || 0;
+  }
+  getCloseAngle_2(){
+    const direction= {
+      [C.DOWN]:0,
+      [C.LEFT]:90,
+      [C.RIGHT]:270,
+      [C.UP]:180
+    };
+    return direction[C.INVERT_OPEN_CLOSE_SETTING[this.unrollUnfoldDirection()]] || 0;
   }
 
   getOrientation(){

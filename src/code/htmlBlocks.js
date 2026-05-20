@@ -740,10 +740,11 @@ export class htmlBlockCentralWindow extends htmlBlock{
       ? html`
         <div class="${C.ESC_CLASS_SELECTOR}">
           <div class="${C.ESC_CLASS_SELECTOR_PICTURE}">
-            ${this.showWindowImage()} 
+            ${this.showWindowImage()}
             ${this.showPartial()}
             ${this.showSlide()}
             ${this.showPicker()}
+            ${this.showSlide_2()}
             ${this.showOverlay()}
           </div>
         </div>
@@ -774,11 +775,24 @@ export class htmlBlockCentralWindow extends htmlBlock{
       ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}"></div>`
       : html``
   }
+  showPicker_2(){
+    return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
+      ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}_2"></div>`
+      : html``
+  }
   showSlide(){
      return html`
         <div class="${C.ESC_CLASS_SELECTOR_SLIDE}">
           ${this.showSlideSlats(this.shutter)}
           <div class="${C.ESC_CLASS_SELECTOR_SLIDE_EDGE}"></div>
+        </div>
+      `;
+  }
+  showSlide_2(){
+     return html`
+        <div class="${C.ESC_CLASS_SELECTOR_SLIDE}_2">
+          ${this.showSlideSlats(this.shutter)}
+          <div class="${C.ESC_CLASS_SELECTOR_SLIDE_EDGE}_2"></div>
         </div>
       `;
   }
