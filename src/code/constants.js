@@ -254,6 +254,8 @@ export const CONFIG_ENTITY_ID = 'entity';
 export const CONFIG_HEIGHT_PX = 'height_px';
 export const CONFIG_WIDTH_PX = 'width_px';
 
+export const CONFIG_CENTER_CLOSING = 'center_closing';
+
 export const CONFIG_SUPPORTED_FEATURES = 'supported_features';
 export const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
 export const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
@@ -354,6 +356,8 @@ export const ESC_BATTERY_ENTITY_ID = null;
 export const ESC_SIGNAL_ENTITY_ID = null;
 
 export const ESC_SHOW_GROUP_MEMBERS = false;
+
+export const ESC_CENTER_CLOSING = false;
 
 export const ESC_SUPPORTED_FEATURES = ESC_FEATURE_ALL;
 
@@ -465,6 +469,8 @@ export const CONFIG_DEFAULT ={
 
   [CONFIG_DEBUG]: ESC_DEBUG,
   [CONFIG_STACKED]: ESC_STACKED,
+
+  [CONFIG_CENTER_CLOSING]: ESC_CENTER_CLOSING,
 
   [CONFIG_SHUTTER_PRESET]: ESC_SHUTTER_PRESET,
   [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
