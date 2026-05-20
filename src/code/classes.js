@@ -1508,8 +1508,26 @@ export class shutterCfg {
   #id=null;
   enhancedShutter=null;
 
+
+  static #CFG_METHODS = {
+    buttonsPosition:   C.CONFIG_BUTTONS_POSITION,
+/*
+    supportedFeatures: C.CONFIG_SUPPORTED_FEATURES,
+    disableEndButtons: C.CONFIG_DISABLE_END_BUTTONS,
+    entityId:          C.CONFIG_ENTITY_ID,
+    batteryEntityId:   C.CONFIG_BATTERY_ENTITY_ID,
+    signalEntityId:    C.CONFIG_SIGNAL_ENTITY_ID,
+*/
+  };
+
+
   constructor(hass,escConfig)
   {
+    for (const [method, key] of Object.entries(shutterCfg.#CFG_METHODS)) {
+      this[method] = (value = null) => this.#getCfg(key, value);
+    }
+
+
     let entityId = this.entityId(escConfig[C.CONFIG_ENTITY_ID] ? escConfig[C.CONFIG_ENTITY_ID] : escConfig);
 
     this.hass = hass;
@@ -1778,9 +1796,9 @@ export class shutterCfg {
   }
 
 
-  buttonsPosition(value = null){
-    return this.#getCfg(C.CONFIG_BUTTONS_POSITION,value);
-  }
+ // buttonsPosition(value = null){
+ //  return this.#getCfg(C.CONFIG_BUTTONS_POSITION,value);
+ // }
   supportedFeatures(value = null){
     return this.#getCfg(C.CONFIG_SUPPORTED_FEATURES,value);
   }
