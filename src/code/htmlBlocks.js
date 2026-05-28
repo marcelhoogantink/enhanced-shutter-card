@@ -731,7 +731,10 @@ export class htmlBlockTiltSection extends htmlBlock{
 }
 export class htmlBlockCentralWindow extends htmlBlock{
   defineHtml(){
-    this.setHtmlString(html`
+   /*
+      Here a loop with possible 1 or more picker/cover situations should be created
+   */
+   this.setHtmlString(html`
       ${this.cfg.showWindow()
       ? html`
         <div class="${C.ESC_CLASS_SELECTOR}">
@@ -744,6 +747,7 @@ export class htmlBlockCentralWindow extends htmlBlock{
             ${this.cfg.centerClosing()
               ? html`
                 ${this.showSlide_2()}
+                ${this.showPicker_2()}
                 ${this.showOverlay_2()}
                `
               : nothing}
@@ -777,6 +781,7 @@ export class htmlBlockCentralWindow extends htmlBlock{
       : nothing
   }
   showPicker_2(){
+    return nothing; // temporary ....
     return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
       ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}_2"></div>`
       : nothing
