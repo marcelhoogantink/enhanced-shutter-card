@@ -1,4 +1,4 @@
-import {html} from './lit/lit-core.min.js';
+import {html,nothing} from './lit/lit-core.min.js';
 import * as C from './constants.js';
 import {htmlShutter} from './htmlShutter.js';
 import {xyPair} from './xyPair.js';
@@ -47,7 +47,7 @@ export class htmlBlock
     this.#xySize = xy;
   }
   defineHtml(){
-    this.setHtmlString(html``);
+    this.setHtmlString(nothing);
   }
   setHtmlString(htmlString){
     this.#htmlString = htmlString;
@@ -145,10 +145,6 @@ export class htmlBlockCardTitle extends htmlBlock{
     let block = {cfg: cfg};
     super(block);
   }
-  defineHtml(){
-    // dummy code, done by HA
-    this.setHtmlString(html``);
-  }
   defineSize(){
 
     let xy = new xyPair();
@@ -207,7 +203,7 @@ export class htmlBlockBatteryIcon extends htmlBlock{
               </ha-icon>
             </div>`
           }
-          ` : html``
+          ` : nothing
         }
     `);
 
@@ -260,8 +256,8 @@ export class htmlBlockNameAndState extends htmlBlock{
     const nameBlock = new htmlBlockName(this.shutter);
     return html`
       <div class = "${escClassName}">
-        ${this.cfg.namePosition() === position ? nameBlock.show() : html``}
-        ${this.cfg.openingPosition() === position ? stateBlock.show() : html``}
+        ${this.cfg.namePosition() === position ? nameBlock.show() : nothing}
+        ${this.cfg.openingPosition() === position ? stateBlock.show() : nothing}
       </div>
     `;
   }
@@ -303,7 +299,7 @@ export class htmlBlockName extends htmlBlock{
             `:''}
           </div>
           `
-        : html``
+        : nothing
       }
     `);
   }
@@ -333,7 +329,7 @@ export class htmlBlockState extends htmlBlock{
           <div class="${C.ESC_CLASS_POSITION} ${this.cfg.disabledGlobaly() ? `${C.ESC_CLASS_LABEL_DISABLED}` : ''}">
             <span style="white-space: pre-line;">${positionText}</span>
           </div>`
-        : html``
+        : nothing
      }
     `);
   }
@@ -393,15 +389,15 @@ export class htmlBlockMiddle extends htmlBlock{
 
     this.setHtmlString(html`
       <div class="${C.ESC_CLASS_MIDDLE}">
-        ${this.cfg.buttonsLeftActive() ? leftButtonsBlock.show() : html``}
-        ${this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.show() : html``}
+        ${this.cfg.buttonsLeftActive() ? leftButtonsBlock.show() : nothing}
+        ${this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.show() : nothing}
         ${centralWindowBlock.show()}
         ${this.cfg.showPartialOpenButtons() || this.cfg.canTilt()
           ? html`
             ${(this.cfg.canTilt()) ? tiltSectionBlock.show():''}
             ${this.cfg.showPartialOpenButtons() ? rightButtonsBlock.show():''}
           `
-          : html`` //`<div class='blankDiv'></div>`
+          : nothing //`<div class='blankDiv'></div>`
         }
       </div>
     `);
@@ -711,8 +707,8 @@ export class htmlBlockTiltSection extends htmlBlock{
     const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter);
     const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter);
     this.setHtmlString(html`
-        ${this.cfg.showTiltButtonBlock() ? tiltButtonsBlock.show() : html``}
-        ${this.cfg.showTiltSliderBlock() && this.tilt_position ? tiltSliderBlock.show() :html``}
+        ${this.cfg.showTiltButtonBlock() ? tiltButtonsBlock.show() : nothing}
+        ${this.cfg.showTiltSliderBlock() && this.tilt_position ? tiltSliderBlock.show() :nothing}
     `);
   }
   defineSize(){
@@ -744,11 +740,16 @@ export class htmlBlockCentralWindow extends htmlBlock{
             ${this.showPartial()}
             ${this.showSlide()}
             ${this.showPicker()}
-            ${this.showSlide_2()}
             ${this.showOverlay()}
-          </div>
+            ${this.cfg.centerClosing()
+              ? html`
+                ${this.showSlide_2()}
+                ${this.showOverlay_2()}
+               `
+              : nothing}
+           </div>
         </div>
-      `: html``}
+      `: nothing}
     `);
   }
   defineSize(){
@@ -763,22 +764,22 @@ export class htmlBlockCentralWindow extends htmlBlock{
   showWindowImage(){
     return this.escImages.getWindowImageSrc(this.cfg.id())
       ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">`
-      : html``;
+      : nothing;
   }
   showPartial(){
     return this.cfg.partialActive()
       ? html`<div class="${C.ESC_CLASS_SELECTOR_PARTIAL}"></div>`
-      : html``;
+      : nothing;
   }
   showPicker(){
     return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
       ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}"></div>`
-      : html``
+      : nothing
   }
   showPicker_2(){
     return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
       ? html`<div class="${C.ESC_CLASS_SELECTOR_PICKER}_2"></div>`
-      : html``
+      : nothing
   }
   showSlide(){
      return html`
@@ -801,6 +802,14 @@ export class htmlBlockCentralWindow extends htmlBlock{
       <div class="${C.ESC_CLASS_MOVEMENT_OVERLAY}">
         <ha-icon class="${C.ESC_CLASS_MOVEMENT_UP}" icon="mdi:arrow-up"></ha-icon>
         <ha-icon class="${C.ESC_CLASS_MOVEMENT_DOWN}" icon="mdi:arrow-down"></ha-icon>
+      </div>
+    `;
+  }
+  showOverlay_2(){
+    return html`
+      <div class="${C.ESC_CLASS_MOVEMENT_OVERLAY}_2">
+        <ha-icon class="${C.ESC_CLASS_MOVEMENT_UP}_2" icon="mdi:arrow-up"></ha-icon>
+        <ha-icon class="${C.ESC_CLASS_MOVEMENT_DOWN}_2" icon="mdi:arrow-down"></ha-icon>
       </div>
     `;
   }

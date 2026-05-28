@@ -793,6 +793,15 @@ export class EnhancedShutter extends LitElement
       this.manageEvents(C.ADD_EVENT, C.MOUSEDOWN, openClosePicker, this.mouseDownOpenClosePicker);
 
     }
+/*
+    // possible picker2 detection, not sure yet (MHA)
+
+    const openClosePicker_2 = findElement(this, `.${C.ESC_CLASS_SELECTOR_PICKER}_2`);
+    if (openClosePicker_2) {
+      this.manageEvents(C.ADD_EVENT, C.MOUSEDOWN, openClosePicker_2, this.mouseDownOpenClosePicker_2);
+
+    }
+*/
     // openCloseSlider
     if (this.cfg.showOpenCloseSliderBlock() && this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)){
       this.openCloseSlider = findElement(this,`.${C.ESC_CLASS_SLIDER_CLASS}.openclose`);
@@ -884,7 +893,7 @@ export class EnhancedShutter extends LitElement
       this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
     ].join(C.SPACE);
   }
-  transformPicker(screenPosition){
+  transformPicker(screenPosition,mirror=false){
     // TODO: improve handling screenPosition
     const size_x = this.actualGlobalWidthPx();
     const size_y = this.actualGlobalHeightPx();
@@ -893,27 +902,13 @@ export class EnhancedShutter extends LitElement
     return [
       this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
+      mirror ? this.cfg.transformMirrorY() : '',
       this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
       this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
 
     ].join(C.SPACE);
   }
-  transformPicker_2(screenPosition){
-    // TODO: improve handling screenPosition
-    const size_x = this.actualGlobalWidthPx();
-    const size_y = this.actualGlobalHeightPx();
-    const size_global = new xyPair(size_x,size_y);
-    const size_local=this.cfg.switchAxis(size_global);
-    return [
-      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
-      this.cfg.transformRotate_2(), // rotate around div transform-origin
-      this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
-      this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
-
-    ].join(C.SPACE);
-  }
-
-  transformSlide(screenPosition){
+  transformSlide(screenPosition,mirror=false){
     // TODO: improve handling screenPosition
     const size_x = this.actualGlobalWidthPx();
     const size_y = this.actualGlobalHeightPx();
@@ -922,22 +917,7 @@ export class EnhancedShutter extends LitElement
     return [
       this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
-      //this.cfg.transformScale(size_global.x(),size_global.y()), // correct local width of the Picker
-      this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
-      this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
-
-    ].join(C.SPACE);
-  }
-  transformSlide_2(screenPosition){
-    // TODO: improve handling screenPosition
-    const size_x = this.actualGlobalWidthPx();
-    const size_y = this.actualGlobalHeightPx();
-    const size_global = new xyPair(size_x,size_y);
-    const size_local=this.cfg.switchAxis(size_global);
-    return [
-      this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
-      this.cfg.transformRotate_2(), // rotate around div transform-origin
-      //this.cfg.transformScale(size_global.x(),size_global.y()), // correct local width of the Picker
+      mirror ? this.cfg.transformMirrorY() : '',
       this.cfg.transformScalePicker(size_global.x(),size_global.y()), // correct local width of the Picker
       this.cfg.transformTranslate(0,-size_local.y()/2 + screenPosition),  // Move to correct position
 
@@ -1015,7 +995,7 @@ export class EnhancedShutter extends LitElement
       this.cfg.transformTranslate(0,-size_local.y()/2+position),  // Move to correct position
     ].join(C.SPACE);
   }
-  transformMovement(){
+  transformMovement(mirror=false){
     const size_x = this.actualGlobalWidthPx();
     const size_y = this.actualGlobalHeightPx();
     const size_global = new xyPair(size_x,size_y);
@@ -1025,9 +1005,11 @@ export class EnhancedShutter extends LitElement
       'translate(-50%, -50%)',
       this.cfg.transformTranslate(size_global.x()/2,size_global.y()/2), // to mid-point
       this.cfg.transformRotate(), // rotate around div transform-origin
+      mirror ? this.cfg.transformMirrorY() : '',
       this.cfg.transformTranslate(0,-size_local.y()/2+position),  // Move to correct position
     ].join(C.SPACE);
   }
+
 
   coverSizeMovingDirectionPx(){
     return this.cfg.verticalMovement() ? this.coverHeightPx():this.coverWidthPx();
@@ -1222,7 +1204,8 @@ export class EnhancedShutter extends LitElement
     if (this.cfg.rotateSlatsImage()){
       value = this.shutterSlatSizePercentage();
     }else{
-      value = '100% '+(this.shutterSlatSize().y()/this.cfg.windowHeightPx()*100)+'%';
+      // value = '100% '+(this.shutterSlatSize().y()/this.cfg.windowHeightPx()*100)+'%';
+      value = '100% 100%';
     }
     return value;
   }
@@ -1511,6 +1494,7 @@ export class shutterCfg {
 
   static #CFG_METHODS = {
     buttonsPosition:   C.CONFIG_BUTTONS_POSITION,
+    centerClosing:     C.CONFIG_CENTER_CLOSING,
 /*
     supportedFeatures: C.CONFIG_SUPPORTED_FEATURES,
     disableEndButtons: C.CONFIG_DISABLE_END_BUTTONS,
@@ -1578,6 +1562,8 @@ export class shutterCfg {
     this.rotateSlatsImage(escConfig[C.CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]);
     this.stretchEdgeImage(escConfig[C.CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]);
 
+    this.centerClosing(escConfig[C.CONFIG_CENTER_CLOSING]);
+
     this.scaleButtons(escConfig[C.CONFIG_SCALE_BUTTONS]);
     this.scaleIcons(escConfig[C.CONFIG_SCALE_ICONS]);
     this.scaleTexts(escConfig[C.CONFIG_SCALE_TEXTS]);
@@ -1593,7 +1579,7 @@ export class shutterCfg {
     this.tiltAngleMin(escConfig[C.CONFIG_TILT_ANGLE_MIN]);
     this.tiltAngleMax(escConfig[C.CONFIG_TILT_ANGLE_MAX]);
 
-    this.defButtonPosition(escConfig);
+    this.defButtonsPosition(escConfig);
 
     this.namePosition(escConfig[C.CONFIG_NAME_POSITION]);
 
@@ -1755,15 +1741,19 @@ export class shutterCfg {
     let transform =`${this.verticalMovement() ? '': `scale(${y/x},${x/y})`}`;
     return transform;
    }
+  transformMirrorY(){
+    let transform =`scale(1,-1)`;
+    return transform;
+   }
+  transformMirrorX(){
+    let transform =`scale(-1,1)`;
+    return transform;
+   }
   transformTranslate(x=this.actualGlobalWidthPx(),y=this.actualGlobalHeightPx()){
     let transform =`translate(${x}px,${y}px)`;
     return transform;
   }
   transformRotate(r = this.getCloseAngle()){
-    let transform =`rotate(${r}deg)`;
-    return transform;
-  }
-  transformRotate_2(r = this.getCloseAngle_2()){
     let transform =`rotate(${r}deg)`;
     return transform;
   }
@@ -2148,15 +2138,6 @@ applyInvertForShowButtonUpDownLabel(setting,debug=false){
     };
     return direction[this.unrollUnfoldDirection()] || 0;
   }
-  getCloseAngle_2(){
-    const direction= {
-      [C.DOWN]:0,
-      [C.LEFT]:90,
-      [C.RIGHT]:270,
-      [C.UP]:180
-    };
-    return direction[C.INVERT_OPEN_CLOSE_SETTING[this.unrollUnfoldDirection()]] || 0;
-  }
 
   getOrientation(){
     return C.Globals.screenOrientation.value; // global variable !!
@@ -2255,7 +2236,7 @@ applyInvertForShowButtonUpDownLabel(setting,debug=false){
     return position;
   }
 
-  defButtonPosition(config) {
+  defButtonsPosition(config) {
     const buttonsPosition = config[C.CONFIG_BUTTONS_POSITION]?.toLowerCase();
     this.buttonsPosition(C.POSITIONS.includes(buttonsPosition) ? buttonsPosition : C.ESC_BUTTONS_POSITION);
   }

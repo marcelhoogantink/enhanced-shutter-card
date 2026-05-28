@@ -1,4 +1,4 @@
-import { LitElement, html, css } from "https://unpkg.com/lit@2/index.js?module";
+import { LitElement, html, css ,nothing} from "https://unpkg.com/lit@2/index.js?module";
 // or if you're bundling alongside your enhanced-shutter-card:
 // import { LitElement, html, css } from './lit/lit-core.min.js';
 
@@ -108,7 +108,7 @@ class DeviceGroupCard extends LitElement {
   // No manual _render() calls needed.
 
   render() {
-    if (!this.hass || !this.config) return html``;
+    if (!this.hass || !this.config) return nothing;
 
     return html`
       <ha-card .header=${this.config.title ?? "Device Group"}>

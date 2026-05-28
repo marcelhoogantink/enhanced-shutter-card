@@ -27,8 +27,8 @@ export class htmlShutter{
       --esc-icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${C.UNITY};
       --esc-icon-div-size: ${C.ICON_DIV_SIZE/C.ICON_SIZE*this.cfg.iconSizeWifiBattery()}${C.UNITY};
       --esc-icons-margins: ${this.cfg.iconsPosition()==C.TOP
-          ? `${C.ICON_MARGIN_TB}${C.UNITY} ${C.ICON_MARGIN_LR}${C.UNITY} auto ${C.ICON_MARGIN_LR}${C.UNITY}`
-          : `auto ${C.ICON_MARGIN_LR}${C.UNITY} ${C.ICON_MARGIN_TB}${C.UNITY} ${C.ICON_MARGIN_LR}${C.UNITY}`};
+          ?      `${C.ICON_MARGIN_TB}${C.UNITY} ${C.ICON_MARGIN_LR}${C.UNITY} auto ${C.ICON_MARGIN_LR}${C.UNITY}`
+          : `auto ${C.ICON_MARGIN_LR}${C.UNITY} ${C.ICON_MARGIN_TB}${C.UNITY}      ${C.ICON_MARGIN_LR}${C.UNITY}`};
 
       --esc-overflow: ${this.enhancedShutter.getOverflow()};
 
@@ -48,21 +48,21 @@ export class htmlShutter{
       --esc-transform-undo-slats-rotate:  ${this.enhancedShutter.transformUndoSlatsRotate()};
       --esc-transform-tilt-slat-rotate:  ${this.enhancedShutter.transformTiltSlatRotate()};
       --esc-transform-movement: ${this.enhancedShutter.transformMovement()};
+      --esc-transform-movement_2: ${this.enhancedShutter.transformMovement(true)};
 
       --esc-picker-top: -${this.cfg.pickerOverlapPx()+C.UNITY};
       --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+C.UNITY};
 
-      --esc-picker-transform: ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
-      --esc-picker-transform_2: ${this.enhancedShutter.transformPicker_2(this.actualScreenPosition)};
-      --esc-transform-slide:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};
-      --esc-transform-slide_2:  ${this.enhancedShutter.transformSlide_2(this.actualScreenPosition)};
+      --esc-transform-picker:   ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
+      --esc-transform-picker_2: ${this.enhancedShutter.transformPicker(this.actualScreenPosition,true)};
+      --esc-transform-slide:    ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};
+      --esc-transform-slide_2:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition,true)};
 
       --esc-slat-height: ${this.enhancedShutter.slatHeightPx()+C.UNITY};
 
       --esc-tilt-slat-height: ${this.enhancedShutter.tiltSlatHeightPx()+C.UNITY};
       --esc-tilt-slat-width: ${this.enhancedShutter.tiltSlatWidthPx()};
       --esc-tilt-slat-origin: ${this.enhancedShutter.tiltSlatOrigin()};
-      --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};
       --esc-slider-writing-mode: ${this.enhancedShutter.sliderWritingMode()};
       --esc-slider-direction: ${this.enhancedShutter.sliderDirection()};
       --esc-tilt-icon-rotate: ${(this.enhancedShutter.tiltIconRotate3())};
@@ -87,6 +87,8 @@ export class htmlShutter{
 
       --esc-slide-background-slat-size: ${this.enhancedShutter.shutterSlatSizePercentage()};
       --esc-slide-background-slats-size: ${this.enhancedShutter.shutterSlatsSizePercentage()};
+      --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};
+
       --esc-slide-background-edge-size: ${this.enhancedShutter.shutterBottomSizePercentage()};
 
       --esc-slide-background-main-position: ${this.enhancedShutter.shutterMainBackgroundPosition()};

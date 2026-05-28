@@ -145,7 +145,7 @@ export const CONFIG_WINDOW_IMAGE = 'window_image';
 export const CONFIG_VIEW_IMAGE = 'view_image';
 export const CONFIG_SHUTTER_SLAT_IMAGE = 'shutter_slat_image';
 export const CONFIG_SHUTTER_BOTTOM_IMAGE = 'shutter_bottom_image';
-export const CONFIG_ROTATE_SLATS_SHUTTER_IMAGE = 'rotate_slat_image';
+export const CONFIG_ROTATE_SLATS_SHUTTER_IMAGE = 'rotate_slat_image'; //
 export const CONFIG_STRETCH_EDGE_SHUTTER_IMAGE = 'stretch_bottom_image';
 export const CONFIG_BASE_HEIGHT_PX = 'base_height_px';
 export const CONFIG_BASE_WIDTH_PX = 'base_width_px';
@@ -347,7 +347,7 @@ export const Z_INDEX_PARTIAL = 5;
 export const Z_INDEX_PICKER  = 3;
 export const Z_INDEX_PICTURE = 1;
 export const Z_INDEX_MOVEMENT_ICON = 2;  // !important ??
-export const Z_INDEX_SLIDE  = -1;
+export const Z_INDEX_SLIDE  = -2;
 export const Z_INDEX_OVERLAY =-1;
 
 export const ESC_ENTITY_ID = null;
@@ -701,7 +701,7 @@ export const SHUTTER_CSS =`
         left: -50%;
         width: 100%;
         transform-origin: center;
-        transform: var(--esc-picker-transform);
+        transform: var(--esc-transform-picker);
         top: var(--esc-picker-top);
         height: var(--esc-picker-height);
         cursor: pointer;
@@ -714,7 +714,7 @@ export const SHUTTER_CSS =`
         left: -50%;
         width: 100%;
         transform-origin: center;
-        transform: var(--esc-picker-transform_2);
+        transform: var(--esc-transform-picker_2);
         top: var(--esc-picker-top);
         height: var(--esc-picker-height);
         cursor: pointer;
@@ -762,29 +762,42 @@ export const SHUTTER_CSS =`
         transform-origin: center center;
         transform: var(--esc-transform-partial);
       }
-      .${ESC_CLASS_MOVEMENT_OVERLAY} {
+      .${ESC_CLASS_MOVEMENT_OVERLAY},
+      .${ESC_CLASS_MOVEMENT_OVERLAY}_2 {
         z-index: ${Z_INDEX_OVERLAY};
         display: var(--esc-movement-overlay-display);
         top : 0;
         height: 100%;
         width: 100%;
         position: absolute;
-        background-color: rgba(0,0,0,0.3);
         text-align: center;
-        --mdc-icon-size: 60px;
         transform-origin: center center;
+      }
+      .${ESC_CLASS_MOVEMENT_OVERLAY} {
+        background-color: rgba(0,0,0,0.3);
       }
       .${ESC_CLASS_MOVEMENT_UP},
       .${ESC_CLASS_MOVEMENT_DOWN} {
+        --mdc-icon-size: 60px;
         z-index: ${Z_INDEX_MOVEMENT_ICON} !important;
         transform: var(--esc-transform-movement);
         position: absolute;
         display: block;
       }
-      .${ESC_CLASS_MOVEMENT_UP} {
+      .${ESC_CLASS_MOVEMENT_UP}_2,
+      .${ESC_CLASS_MOVEMENT_DOWN}_2 {
+        --mdc-icon-size: 60px;
+        z-index: ${Z_INDEX_MOVEMENT_ICON} !important;
+        transform: var(--esc-transform-movement_2);
+        position: absolute;
+        display: block;
+      }
+      .${ESC_CLASS_MOVEMENT_UP},
+      .${ESC_CLASS_MOVEMENT_UP}_2 {
         display: var(--esc-movement-overlay-up-display);
       }
-      .${ESC_CLASS_MOVEMENT_DOWN} {
+      .${ESC_CLASS_MOVEMENT_DOWN},
+      .${ESC_CLASS_MOVEMENT_DOWN}_2 {
         display: var(--esc-movement-overlay-down-display);
       }
       .${ESC_CLASS_SELECTOR_SLIDE_SLATS} {
@@ -809,7 +822,7 @@ export const SHUTTER_CSS =`
         overflow: var(--esc-overflow);
         perspective: 500px;
       }
-      ` /*   */ +`
+      ` /* test remark row */ +`
       .${ESC_CLASS_TILT_EDGE} {
         z-index: 1;
         position: absolute;
