@@ -106,34 +106,30 @@ export class htmlBlock
   }
 }
 export class htmlBlockShutter extends htmlBlock{
-  defineHtml(){
-    const entityId = this.cfg.entityId();
-    const htmlParts = new htmlShutter(this.shutter);
-    const topBlock = new htmlBlockTop(this.shutter);
-    const middleBlock = new htmlBlockMiddle(this.shutter);
-    const bottomBlock = new htmlBlockBottom(this.shutter);
+  htmlParts = new htmlShutter(this.shutter);
+  entityId = this.cfg.entityId();
+  htmlParts = new htmlShutter(this.shutter);
+  topBlock = new htmlBlockTop(this.shutter);
+  middleBlock = new htmlBlockMiddle(this.shutter);
+  bottomBlock = new htmlBlockBottom(this.shutter);
 
+  defineHtml(){
     this.setHtmlString(html`
       <div
         class=${C.ESC_CLASS_SHUTTER}
-        data-shutter="${entityId}"
-        style = "${htmlParts.defStyleVarsShutter()}"
+        data-shutter="${this.entityId}"
+        style = "${this.htmlParts.defStyleVarsShutter()}"
       >
-        ${topBlock.show()}
-        ${middleBlock.show()}
-        ${bottomBlock.show()}
+      ${this.topBlock.show()}
+      ${this.middleBlock.show()}
+      ${this.bottomBlock.show()}
       </div>
     `);
-
   }
   defineSize(){
-    const topBlock = new htmlBlockTop(this.shutter);
-    const middleBlock = new htmlBlockMiddle(this.shutter);
-    const bottomBlock = new htmlBlockBottom(this.shutter);
-
-    let xyTopDiv = topBlock.size();
-    let xyMiddleDiv = middleBlock.size();
-    let xyBottomDiv =bottomBlock.size();
+    let xyTopDiv = this.topBlock.size();
+    let xyMiddleDiv = this.middleBlock.size();
+    let xyBottomDiv = this.bottomBlock.size();
 
     let xy = this.gridAddVertical(xyTopDiv,xyMiddleDiv);
     this.setXySize(this.gridAddVertical(xy,xyBottomDiv));
@@ -151,8 +147,8 @@ export class htmlBlockCardTitle extends htmlBlock{
 
     let title = this.cfg.title();
     if (title){
-      const haCardTitleFontHeight= 24;
-      const haTitleHeightPx = 76;
+      const haCardTitleFontHeight= 24; // TODO: set constant or derive from constants
+      const haTitleHeightPx = 76; // TODO: set constant or derive from constants
       const titleSize= getTextSize(title,C.HA_TITLE_FONT,haCardTitleFontHeight);
       xy = new xyPair(titleSize.width,haTitleHeightPx);
     }
@@ -597,8 +593,7 @@ export class htmlBlockTiltButtons extends htmlBlock{
     const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.shutter);
     const tiltPositionBlock = new htmlBlockTiltPosition(this.shutter);
     const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.shutter);
-
-    let xyButtonTiltUp = buttonTiltUpBlock.size();
+  let xyButtonTiltUp = buttonTiltUpBlock.size();
     let xyTiltPosition = tiltPositionBlock.size();
     let xyButtonTiltDown = buttonTiltDownBlock.size();
     let xy;

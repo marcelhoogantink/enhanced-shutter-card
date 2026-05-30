@@ -20,7 +20,7 @@ export class htmlShutter{
     const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.id());
     const shutterBottomImage=this.escImages.getShutterBottomImageSrc(this.cfg.id());
 
-    return `
+    const windows_vars = `
       --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${C.UNITY};
       --ha-icon-button-size: ${this.cfg.iconButtonSize()}${C.UNITY};
       --mdc-icon-size: ${this.cfg.iconSize()}${C.UNITY};
@@ -42,6 +42,34 @@ export class htmlShutter{
       --esc-window-rotate: ${this.cfg.viewImageRotate()};
       --esc-button-rotate: ${this.cfg.buttonRotate()};
 
+      --esc-slide-background-main-image: ${shutterSlatImage.includes('.') ?  `url(${shutterSlatImage})` : ''};
+      --esc-slide-background-edge-image: ${shutterBottomImage.includes('.') ?  `url(${shutterBottomImage})` : ''};
+
+      --esc-slide-background-main-color: ${shutterSlatImage.includes('.') ? '' : `${shutterSlatImage}`};
+      --esc-slide-background-edge-color: ${shutterBottomImage.includes('.') ? '' : `${shutterBottomImage}`};
+
+
+      --esc-top-right-color: ${this.cfg.signalIconColor()};
+      --esc-top-left-color: ${this.cfg.batteryIconColor()};
+
+      --esc-top-icon-text-line-height: ${this.cfg.iconScalePercent()};
+      --esc-top-icon-text-font-size: ${this.cfg.iconScalePercent()};
+      --esc-text-scale: ${this.cfg.textScaleFactor()};
+      --esc-button-scale: ${this.cfg.buttonScaleFactor()};
+
+      --esc-picker-top: -${this.cfg.pickerOverlapPx()+C.UNITY};
+      --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+C.UNITY};
+
+      --esc-buttons-flex-flow:      ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
+      --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
+
+      --esc-movement-overlay-display: ${(stateForOverlay == C.SHUTTER_STATE_OPENING || stateForOverlay == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+      --esc-movement-overlay-up-display: ${stateForOverlay == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
+      --esc-movement-overlay-down-display: ${stateForOverlay == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+
+    `;
+
+    const shutter_vars = `
       --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngleDeg(this.enhancedShutter.react_TiltPosition)};
       --esc-tilt-angle-deg-graph: ${this.enhancedShutter.getTiltAngleDegGraph(this.enhancedShutter.react_TiltPosition)};
 
@@ -50,8 +78,6 @@ export class htmlShutter{
       --esc-transform-movement: ${this.enhancedShutter.transformMovement()};
       --esc-transform-movement_2: ${this.enhancedShutter.transformMovement(true)};
 
-      --esc-picker-top: -${this.cfg.pickerOverlapPx()+C.UNITY};
-      --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+C.UNITY};
 
       --esc-transform-picker:   ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
       --esc-transform-picker_2: ${this.enhancedShutter.transformPicker(this.actualScreenPosition,true)};
@@ -72,19 +98,6 @@ export class htmlShutter{
 
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
 
-      --esc-buttons-flex-flow:      ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
-      --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
-
-      --esc-movement-overlay-display: ${(stateForOverlay == C.SHUTTER_STATE_OPENING || stateForOverlay == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
-      --esc-movement-overlay-up-display: ${stateForOverlay == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
-      --esc-movement-overlay-down-display: ${stateForOverlay == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
-
-      --esc-slide-background-main-image: ${shutterSlatImage.includes('.') ?  `url(${shutterSlatImage})` : ''};
-      --esc-slide-background-edge-image: ${shutterBottomImage.includes('.') ?  `url(${shutterBottomImage})` : ''};
-
-      --esc-slide-background-main-color: ${shutterSlatImage.includes('.') ? '' : `${shutterSlatImage}`};
-      --esc-slide-background-edge-color: ${shutterBottomImage.includes('.') ? '' : `${shutterBottomImage}`};
-
       --esc-slide-background-slat-size: ${this.enhancedShutter.shutterSlatSizePercentage()};
       --esc-slide-background-slats-size: ${this.enhancedShutter.shutterSlatsSizePercentage()};
       --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};
@@ -94,14 +107,7 @@ export class htmlShutter{
       --esc-slide-background-main-position: ${this.enhancedShutter.shutterMainBackgroundPosition()};
       --esc-slide-background-edge-position: ${this.enhancedShutter.shutterEdgeBackgroundPosition()};
 
-      --esc-top-right-color: ${this.cfg.signalIconColor()};
-      --esc-top-left-color: ${this.cfg.batteryIconColor()};
-
-      --esc-top-icon-text-line-height: ${this.cfg.iconScalePercent()};
-      --esc-top-icon-text-font-size: ${this.cfg.iconScalePercent()};
-      --esc-text-scale: ${this.cfg.textScaleFactor()};
-      --esc-button-scale: ${this.cfg.buttonScaleFactor()};
-
     `;
+    return windows_vars+shutter_vars;
   }
 }
