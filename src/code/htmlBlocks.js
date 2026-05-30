@@ -558,7 +558,7 @@ export class htmlBlockButtonPartial extends htmlBlockLeftButtons{
     `);
   }
   defineSize(){
-    let xy =  this.cfg.showStandardButtons()? this.sizeButton() : new xyPair(0,0) ;
+    let xy =  this.cfg.showStandardButtons()? this.sizeButton() : new xyPair() ;
     this.setXySize(xy);
   }
 }
