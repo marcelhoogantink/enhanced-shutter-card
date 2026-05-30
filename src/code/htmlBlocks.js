@@ -30,9 +30,6 @@ export class htmlBlock
   size(){
     if (!this.#xySize.size()) {
       this.defineSize()
-      this.displaySize(this.#xySize);
-    }else{
-      this.displaySize(this.#xySize);
     }
     this.displaySize(this.#xySize);
     return this.#xySize;
@@ -106,7 +103,6 @@ export class htmlBlock
   }
 }
 export class htmlBlockShutter extends htmlBlock{
-  htmlParts = new htmlShutter(this.shutter);
   entityId = this.cfg.entityId();
   htmlParts = new htmlShutter(this.shutter);
   topBlock = new htmlBlockTop(this.shutter);
@@ -246,24 +242,24 @@ export class htmlBlockSignalIcon extends htmlBlock{
 }
 export class htmlBlockNameAndState extends htmlBlock{
 
-  show(position=C.TOP){
-    const escClassName = position === C.TOP ? C.ESC_CLASS_TOP : C.ESC_CLASS_BOTTOM;
+  show(blockPosition=C.TOP){
+    const escClassName = blockPosition === C.TOP ? C.ESC_CLASS_TOP : C.ESC_CLASS_BOTTOM;
     const stateBlock= new htmlBlockState(this.shutter);
     const nameBlock = new htmlBlockName(this.shutter);
     return html`
       <div class = "${escClassName}">
-        ${this.cfg.namePosition() === position ? nameBlock.show() : nothing}
-        ${this.cfg.openingPosition() === position ? stateBlock.show() : nothing}
+        ${this.cfg.namePosition() === blockPosition ? nameBlock.show() : nothing}
+        ${this.cfg.openingPosition() === blockPosition ? stateBlock.show() : nothing}
       </div>
     `;
   }
-  size(position=C.TOP){
+  size(blockPosition=C.TOP){
 
     const stateBlock= new htmlBlockState(this.shutter);
     const nameBlock = new htmlBlockName(this.shutter);
 
-    let xyName = this.cfg.openingPosition() === position ? nameBlock.size() : new xyPair();
-    let xyState = this.cfg.namePosition() === position ? stateBlock.size() : new xyPair();
+    let xyName = this.cfg.namePosition() === blockPosition ? nameBlock.size() : new xyPair();
+    let xyState = this.cfg.openingPosition() === blockPosition ? stateBlock.size() : new xyPair();
     let xy;
     if (this.cfg.inlineHeader()){
        xy = this.gridAddHorizontal(xyName,xyState);
