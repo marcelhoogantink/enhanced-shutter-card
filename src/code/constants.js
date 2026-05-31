@@ -18,31 +18,30 @@ export const RIGHT = 'right';
 export const HA_TITLE_FONT = 'Roboto, Noto, sans-serif';
 export const DISPLAY_DECIMALS = 0;
 
-export const ESC_CLASS_BASE_NAME = 'esc-shutter';
-export const ESC_CLASS_SHUTTER_SEPARATE = `${ESC_CLASS_BASE_NAME}-separate`
-export const ESC_CLASS_TOP = `${ESC_CLASS_BASE_NAME}-${TOP}`;
-export const ESC_CLASS_MIDDLE = `${ESC_CLASS_BASE_NAME}-middle`;
-export const ESC_CLASS_BOTTOM = `${ESC_CLASS_BASE_NAME}-${BOTTOM}`;
-export const ESC_CLASS_TOP_BOTTOM = `${ESC_CLASS_BASE_NAME}-${TOP}-${BOTTOM}`;
-export const ESC_CLASS_LABEL = `${ESC_CLASS_BASE_NAME}-label`;
-export const ESC_CLASS_POSITION = `${ESC_CLASS_BASE_NAME}-position`;
-export const ESC_CLASS_LABEL_DISABLED = `${ESC_CLASS_LABEL}-disabled`;
-export const ESC_CLASS_BUTTONS = `${ESC_CLASS_BASE_NAME}-buttons`;
-export const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}`;
+export const ESC_CLASS_BASE_NAME = 'esc-shutter'; // esc-shutter
+export const ESC_CLASS_SHUTTER_SEPARATE = `${ESC_CLASS_BASE_NAME}-separate`; // esc-shutter-separate
+export const ESC_CLASS_TOP = `${ESC_CLASS_BASE_NAME}-${TOP}`; // esc-shutter-top
+export const ESC_CLASS_MIDDLE = `${ESC_CLASS_BASE_NAME}-middle`; // esc-shutter-middle
+export const ESC_CLASS_BOTTOM = `${ESC_CLASS_BASE_NAME}-${BOTTOM}`; // esc-shutter-bottom
+export const ESC_CLASS_TOP_BOTTOM = `${ESC_CLASS_BASE_NAME}-${TOP}-${BOTTOM}`; // esc-shutter-top-bottom
+export const ESC_CLASS_LABEL = `${ESC_CLASS_BASE_NAME}-label`; // esc-shutter-label
+export const ESC_CLASS_POSITION = `${ESC_CLASS_BASE_NAME}-position`; // esc-shutter-position
+export const ESC_CLASS_LABEL_DISABLED = `${ESC_CLASS_LABEL}-disabled`; // esc-shutter-label-disabled
+export const ESC_CLASS_BUTTONS = `${ESC_CLASS_BASE_NAME}-buttons`; // esc-shutter-buttons
+export const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}`; // esc-shutter
 
-export const ESC_CLASS_HA_ICON = `${ESC_CLASS_BASE_NAME}-ha-icon`;
-export const ESC_CLASS_HA_ICON_LOCK = `${ESC_CLASS_HA_ICON}-lock`;
-export const ESC_CLASS_HA_ICON_TILT = `${ESC_CLASS_HA_ICON}-tilt`;
+export const ESC_CLASS_HA_ICON = `${ESC_CLASS_BASE_NAME}-ha-icon`; // esc-shutter-ha-icon
+export const ESC_CLASS_HA_ICON_LOCK = `${ESC_CLASS_HA_ICON}-lock`; // esc-shutter-ha-icon-lock
+export const ESC_CLASS_HA_ICON_TILT = `${ESC_CLASS_HA_ICON}-tilt`; // esc-shutter-ha-icon-tilt
 
-export const ESC_CLASS_ICON_LEFT = `${ESC_CLASS_BASE_NAME}-icon-${LEFT}`;
-export const ESC_CLASS_ICON_RIGHT = `${ESC_CLASS_BASE_NAME}-icon-${RIGHT}`;
-export const ESC_CLASS_TOP_ICON_TEXT = `${ESC_CLASS_BASE_NAME}-icon-text`;
+export const ESC_CLASS_ICON_LEFT = `${ESC_CLASS_BASE_NAME}-icon-${LEFT}`; // esc-shutter-icon-left
+export const ESC_CLASS_ICON_RIGHT = `${ESC_CLASS_BASE_NAME}-icon-${RIGHT}`; // esc-shutter-icon-right
+export const ESC_CLASS_TOP_ICON_TEXT = `${ESC_CLASS_BASE_NAME}-icon-text`; // esc-shutter-icon-text
 
-
-export const ESC_CLASS_SELECTOR = `${ESC_CLASS_BASE_NAME}-selector`;
-export const ESC_CLASS_SELECTOR_PICTURE = `${ESC_CLASS_BASE_NAME}-selector-picture`;
-export const ESC_CLASS_SELECTOR_PICKER = `${ESC_CLASS_BASE_NAME}-selector-picker`;
-export const ESC_CLASS_SELECTOR_PARTIAL = `${ESC_CLASS_BASE_NAME}-selector-partial`;
+export const ESC_CLASS_SELECTOR = `${ESC_CLASS_BASE_NAME}-selector`; // esc-shutter-selector
+export const ESC_CLASS_SELECTOR_PICTURE = `${ESC_CLASS_BASE_NAME}-selector-picture`; // esc-shutter-selector-picture
+export const ESC_CLASS_SELECTOR_PICKER = `${ESC_CLASS_BASE_NAME}-selector-picker`; // esc-shutter-selector-picker
+export const ESC_CLASS_SELECTOR_PARTIAL = `${ESC_CLASS_BASE_NAME}-selector-partial`; // esc-shutter-selector-partial
 export const ESC_CLASS_SELECTOR_SLIDE = `${ESC_CLASS_BASE_NAME}-selector-slide`; // esc-shutter-selector-slide
 export const ESC_CLASS_SELECTOR_SLIDE_SLATS = `${ESC_CLASS_SELECTOR_SLIDE}-slats`; // esc-shutter-selector-slide-slats
 export const ESC_CLASS_SELECTOR_SLIDE_EDGE = `${ESC_CLASS_SELECTOR_SLIDE}-edge`; // esc-shutter-selector-slide-edge
@@ -52,18 +51,18 @@ export const ESC_CLASS_MOVEMENT_UP = `${ESC_CLASS_BASE_NAME}-movement-up`; // es
 export const ESC_CLASS_MOVEMENT_DOWN = `${ESC_CLASS_BASE_NAME}-movement-down`; // esc-shutter-movement-down
 
 
-export const ESC_CLASS_TILT = `${ESC_CLASS_BASE_NAME}-tilt`;
-export const ESC_CLASS_TILT_CONTAINER = `${ESC_CLASS_TILT}-container`;
-export const ESC_CLASS_TILT_CLASS = `${ESC_CLASS_TILT}-class`;
-export const ESC_CLASS_TILT_LINE = `${ESC_CLASS_TILT}-line`;
-export const ESC_CLASS_TILT_SLAT1 = `${ESC_CLASS_TILT}-slat1`;
-export const ESC_CLASS_TILT_SLAT2 = `${ESC_CLASS_TILT}-slat2`;
-export const ESC_CLASS_TILT_SLAT3 = `${ESC_CLASS_TILT}-slat3`;
-export const ESC_CLASS_TILT_EDGE = `${ESC_CLASS_TILT}-slat-edge`;
+export const ESC_CLASS_TILT = `${ESC_CLASS_BASE_NAME}-tilt`; // esc-shutter-tilt
+export const ESC_CLASS_TILT_CONTAINER = `${ESC_CLASS_TILT}-container`; // esc-shutter-tilt-container
+export const ESC_CLASS_TILT_CLASS = `${ESC_CLASS_TILT}-class`; // esc-shutter-tilt-class
+export const ESC_CLASS_TILT_LINE = `${ESC_CLASS_TILT}-line`; // esc-shutter-tilt-line
+export const ESC_CLASS_TILT_SLAT1 = `${ESC_CLASS_TILT}-slat1`; // esc-shutter-tilt-slat1
+export const ESC_CLASS_TILT_SLAT2 = `${ESC_CLASS_TILT}-slat2`; // esc-shutter-tilt-slat2
+export const ESC_CLASS_TILT_SLAT3 = `${ESC_CLASS_TILT}-slat3`; // esc-shutter-tilt-slat3
+export const ESC_CLASS_TILT_EDGE = `${ESC_CLASS_TILT}-slat-edge`; // esc-shutter-tilt-slat-edge
 
-export const ESC_CLASS_SLIDER = `${ESC_CLASS_TILT}-slider`;
-export const ESC_CLASS_SLIDER_WRAP = `${ESC_CLASS_SLIDER}-wrap`;
-export const ESC_CLASS_SLIDER_CLASS = `${ESC_CLASS_SLIDER}-class`;
+export const ESC_CLASS_SLIDER = `${ESC_CLASS_TILT}-slider`; // esc-shutter-slider
+export const ESC_CLASS_SLIDER_WRAP = `${ESC_CLASS_SLIDER}-wrap`; // esc-shutter-slider-wrap
+export const ESC_CLASS_SLIDER_CLASS = `${ESC_CLASS_SLIDER}-class`; // esc-shutter-slider-class
 
 
 export const FONT_SIZE_LABEL = 20;
@@ -822,7 +821,7 @@ export const SHUTTER_CSS =`
         overflow: var(--esc-overflow);
         perspective: 500px;
       }
-      ` /* test remark row */ +`
+       ${/* test remark row */``}
       .${ESC_CLASS_TILT_EDGE} {
         z-index: 1;
         position: absolute;
