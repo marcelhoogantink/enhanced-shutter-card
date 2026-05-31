@@ -967,10 +967,6 @@ export class EnhancedShutter extends LitElement
     let rotate= this.cfg.buttonGroupInRow() ? 0 : -90;
     return rotate;
   }
-  tiltIconRotate3(){
-    let rotate= -this.tiltIconRotate2();
-    return this.cfg.transformRotate(rotate);
-  }
   tiltSlatOrigin(){
     // --esc-tilt-slat-origin
     let origin;

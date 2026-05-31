@@ -70,42 +70,43 @@ export class htmlShutter{
     `;
 
     const shutter_vars = `
-      --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngleDeg(this.enhancedShutter.react_TiltPosition)};
-      --esc-tilt-angle-deg-graph: ${this.enhancedShutter.getTiltAngleDegGraph(this.enhancedShutter.react_TiltPosition)};
+      ${/* this is a working comment example */ ``}
+      --esc-tilt-angle-deg: ${this.enhancedShutter.getTiltAngleDeg(this.enhancedShutter.react_TiltPosition)};              ${/* ESC_CLASS_TILT_SLAT3 */ ``}
+      --esc-tilt-slat-height: ${this.enhancedShutter.tiltSlatHeightPx()+C.UNITY};                                          ${/* ESC_CLASS_TILT_SLAT3 */ ``}
+      --esc-tilt-slat-width: ${this.enhancedShutter.tiltSlatWidthPx()};                                                    ${/* ESC_CLASS_TILT_SLAT3 */ ``}
+      --esc-tilt-slat-origin: ${this.enhancedShutter.tiltSlatOrigin()};                                                    ${/* ESC_CLASS_TILT_SLAT3 */ ``}
+      --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};                                   ${/* ESC_CLASS_TILT_SLAT3 */ ``}
+      --esc-transform-tilt-slat-rotate:  ${this.enhancedShutter.transformTiltSlatRotate()};                                ${/* ESC_CLASS_TILT_SLAT3 */ ``}
 
-      --esc-transform-undo-slats-rotate:  ${this.enhancedShutter.transformUndoSlatsRotate()};
-      --esc-transform-tilt-slat-rotate:  ${this.enhancedShutter.transformTiltSlatRotate()};
-      --esc-transform-movement: ${this.enhancedShutter.transformMovement()};
-      --esc-transform-movement_2: ${this.enhancedShutter.transformMovement(true)};
+      --esc-tilt-angle-deg-graph: ${this.enhancedShutter.getTiltAngleDegGraph(this.enhancedShutter.react_TiltPosition)};   ${/* ESC_CLASS_TILT_CLASS */ ``}
+
+      --esc-transform-undo-slats-rotate:  ${this.enhancedShutter.transformUndoSlatsRotate()};                              ${/* ESC_CLASS_SELECTOR_SLIDE_SLATS */ ``}
+      --esc-slide-background-slats-size: ${this.enhancedShutter.shutterSlatsSizePercentage()};                             ${/* ESC_CLASS_SELECTOR_SLIDE_SLATS */ ``}
+      --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+C.UNITY};                                      ${/* ESC_CLASS_SELECTOR_SLIDE_SLATS / ESC_CLASS_TILT_SLAT1  */ ``}
+      --esc-slide-background-main-position: ${this.enhancedShutter.shutterMainBackgroundPosition()};                       ${/* ESC_CLASS_SELECTOR_SLIDE_SLATS / ESC_CLASS_TILT_SLAT3 */ ``}
+
+      --esc-slat-height: ${this.enhancedShutter.slatHeightPx()+C.UNITY};                                                   ${/* ESC_CLASS_TILT_SLAT2 */ ``}
+
+      --esc-transform-movement: ${this.enhancedShutter.transformMovement()};                                               ${/* ESC_CLASS_MOVEMENT_UP / ESC_CLASS_MOVEMENT_DOWN */ ``}
+      --esc-transform-movement_2: ${this.enhancedShutter.transformMovement(true)};                                         ${/* ESC_CLASS_MOVEMENT_UP_2 / ESC_CLASS_MOVEMENT_DOWN_2 */ ``}
+
+      --esc-transform-picker:   ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};                        ${/* ESC_CLASS_SELECTOR_PICKER */ ``}
+      --esc-transform-picker_2: ${this.enhancedShutter.transformPicker(this.actualScreenPosition,true)};                   ${/* ESC_CLASS_SELECTOR_PICKER_2 */ ``}
+
+      --esc-transform-slide:    ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};                         ${/* ESC_CLASS_SELECTOR_SLIDE */ ``}
+      --esc-transform-slide_2:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition,true)};                    ${/* ESC_CLASS_SELECTOR_SLIDE_2 */ ``}
+
+      --esc-slider-writing-mode: ${this.enhancedShutter.sliderWritingMode()};                                              ${/* ESC_CLASS_SLIDER_CLASS */ ``}
+      --esc-slider-direction: ${this.enhancedShutter.sliderDirection()};                                                   ${/* ESC_CLASS_SLIDER_CLASS */ ``}
+
+      --esc-slide-edge-height: ${this.enhancedShutter.shutterBottomSize().y()+C.UNITY};                                    ${/* ESC_CLASS_SELECTOR_SLIDE_EDGE / ESC_CLASS_SELECTOR_SLIDE_EDGE_2 */ ``}
+      --esc-slide-background-edge-position: ${this.enhancedShutter.shutterEdgeBackgroundPosition()};                       ${/* ESC_CLASS_SELECTOR_SLIDE_EDGE / ESC_CLASS_SELECTOR_SLIDE_EDGE_2 */ ``}
+      --esc-slide-background-edge-size: ${this.enhancedShutter.shutterBottomSizePercentage()};                             ${/* ESC_CLASS_SELECTOR_SLIDE_EDGE / ESC_CLASS_SELECTOR_SLIDE_EDGE_2 */ ``}
+
+      --esc-transform-partial: ${this.enhancedShutter.transformPartial()};                                                 ${/* ESC_CLASS_SELECTOR_PARTIAL */ ``}
 
 
-      --esc-transform-picker:   ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};
-      --esc-transform-picker_2: ${this.enhancedShutter.transformPicker(this.actualScreenPosition,true)};
-      --esc-transform-slide:    ${this.enhancedShutter.transformSlide(this.actualScreenPosition)};
-      --esc-transform-slide_2:  ${this.enhancedShutter.transformSlide(this.actualScreenPosition,true)};
 
-      --esc-slat-height: ${this.enhancedShutter.slatHeightPx()+C.UNITY};
-
-      --esc-tilt-slat-height: ${this.enhancedShutter.tiltSlatHeightPx()+C.UNITY};
-      --esc-tilt-slat-width: ${this.enhancedShutter.tiltSlatWidthPx()};
-      --esc-tilt-slat-origin: ${this.enhancedShutter.tiltSlatOrigin()};
-      --esc-slider-writing-mode: ${this.enhancedShutter.sliderWritingMode()};
-      --esc-slider-direction: ${this.enhancedShutter.sliderDirection()};
-      --esc-tilt-icon-rotate: ${(this.enhancedShutter.tiltIconRotate3())};
-
-      --esc-slide-slats-height: ${this.enhancedShutter.slatsSlideHeightPx()+C.UNITY};
-      --esc-slide-edge-height: ${this.enhancedShutter.shutterBottomSize().y()+C.UNITY};
-
-      --esc-transform-partial: ${this.enhancedShutter.transformPartial()};
-
-      --esc-slide-background-slat-size: ${this.enhancedShutter.shutterSlatSizePercentage()};
-      --esc-slide-background-slats-size: ${this.enhancedShutter.shutterSlatsSizePercentage()};
-      --esc-tilt-slat-background-size: ${this.enhancedShutter.tiltSlatBackgroundSize()};
-
-      --esc-slide-background-edge-size: ${this.enhancedShutter.shutterBottomSizePercentage()};
-
-      --esc-slide-background-main-position: ${this.enhancedShutter.shutterMainBackgroundPosition()};
-      --esc-slide-background-edge-position: ${this.enhancedShutter.shutterEdgeBackgroundPosition()};
 
     `;
     return windows_vars+shutter_vars;
