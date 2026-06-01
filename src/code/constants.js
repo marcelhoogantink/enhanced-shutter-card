@@ -268,6 +268,7 @@ export const CONFIG_SCALE_BUTTONS = 'scale_buttons';
 export const CONFIG_OFFSET_OPENED_PCT = 'top_offset_pct'; // TODO  rename: top->opened
 export const CONFIG_OFFSET_CLOSED_PCT = 'bottom_offset_pct'; // TODO rename bottom->closed
 export const CONFIG_BUTTONS_POSITION = 'buttons_position';
+export const CONFIG_NUMBER_DEVICES = 'number_devices';
 export const CONFIG_NAME_POSITION = 'name_position';
 export const CONFIG_OPENING_POSITION = 'opening_position';
 export const CONFIG_ICONS_POSITION = 'icons_position';
@@ -362,13 +363,14 @@ export const ESC_SUPPORTED_FEATURES = ESC_FEATURE_ALL;
 
 export const ESC_AWNING = 'awning';
 export const ESC_CURTAIN = 'curtain';
+export const ESC_CURTAIN_CC = 'curtain_center_close';
 export const ESC_TEST = 'test';
 export const ESC_COMPACT = 'compact';
 export const ESC_SHADE = 'shade';
 export const ESC_BLIND = 'blind';
 export const ESC_ROLLER_SHUTTER = 'roller-shutter';
 export const ESC_TYPES =
-  [ESC_AWNING, ESC_CURTAIN, ESC_ROLLER_SHUTTER,ESC_SHADE,ESC_BLIND];
+  [ESC_AWNING, ESC_CURTAIN, ESC_CURTAIN_CC, ESC_ROLLER_SHUTTER,ESC_SHADE,ESC_BLIND];
 
 export const ESC_SHUTTER_PRESET = ESC_ROLLER_SHUTTER;
 export const ESC_STACKED = VERTICAL;
@@ -394,6 +396,7 @@ export const ESC_SCALE_BUTTONS = false;
 export const ESC_OPENED_OFFSET_PCT = 13;
 export const ESC_CLOSED_OFFSET_PCT = 0;
 export const ESC_BUTTONS_POSITION = LEFT;
+export const ESC_NUMBER_DEVICES = 1;
 export const ESC_NAME_POSITION =TOP;
 export const ESC_NAME_DISABLED = false;
 export const ESC_SHOW_NAME = true;
@@ -498,6 +501,7 @@ export const CONFIG_DEFAULT ={
   [CONFIG_OFFSET_OPENED_PCT]: ESC_OPENED_OFFSET_PCT,
   [CONFIG_OFFSET_CLOSED_PCT]: ESC_CLOSED_OFFSET_PCT,
   [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
+  [CONFIG_NUMBER_DEVICES]: ESC_NUMBER_DEVICES,
   [CONFIG_NAME_POSITION]: ESC_NAME_POSITION,
   [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION,
   [CONFIG_ICONS_POSITION]: ESC_ICONS_POSITION,
@@ -572,6 +576,17 @@ export const ESC_PRESET = {
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
     [CONFIG_NAME]: 'Curtain',
+  },
+  // ESC_CURTAIN_CC should generate the oteher part ..... ( I think)
+  [ESC_CURTAIN_CC]: {
+    [CONFIG_CLOSING_DIRECTION]: RIGHT,
+    [CONFIG_SHUTTER_SLAT_IMAGE]: 'esc-curtain.png',
+    [CONFIG_SHUTTER_BOTTOM_IMAGE]: '',
+    [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false,
+    [CONFIG_NAME]: 'Curtain',
+    [CONFIG_NUMBER_DEVICES]: 2,
+    [CONFIG_CENTER_CLOSING]: true,
+    [CONFIG_OFFSET_CLOSED_PCT]: 50,  // 100-50 for the other one ...
   },
   [ESC_SHADE]: {
     [CONFIG_SHUTTER_SLAT_IMAGE]: '#00000080',

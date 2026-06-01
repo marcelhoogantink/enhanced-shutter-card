@@ -98,12 +98,15 @@ export class EnhancedShutterCardNew extends LitElement{
       let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
       let cfg = new shutterCfg(this.hass,shutterConfig)
       let counter =1;
-      if (cfg.showGroupMembers() && baseEntity && baseEntity.isGroup()){
+      if (baseEntity?.isGroup() && cfg.showGroupMembers()){
+        // get the entityId's from the group
         const groupEntities = baseEntity.getAttributes().entity_id || [];
+        // get the full entities form the id's
         const entitiesInGroup = groupEntities.filter(entityId => this.hass.states[entityId]);
         entitiesInGroup.forEach(entityId => {
           let newSubConfig = {...subConfig, entity: entityId, group: subConfig.entity, id: id++};
           let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+          // when a name is defined, check for '@'and fill in the countnumber.
           if (shutterConfig.name) {
             shutterConfig.name = shutterConfig.name.replace("@", counter++);
           }
@@ -1487,10 +1490,16 @@ export class shutterCfg {
   #id=null;
   enhancedShutter=null;
 
+  static #CFG_METHODS_TEST = {
+    buttonsPosition:   { key: C.CONFIG_BUTTONS_POSITION, default: C.ESC_BUTTONS_POSITION },
+    centerClosing:     { key: 'center_closing',   default: false},
+  };
+
 
   static #CFG_METHODS = {
     buttonsPosition:   C.CONFIG_BUTTONS_POSITION,
     centerClosing:     C.CONFIG_CENTER_CLOSING,
+    nDevices:          C.CONFIG_NUMBER_DEVICES,
 /*
     supportedFeatures: C.CONFIG_SUPPORTED_FEATURES,
     disableEndButtons: C.CONFIG_DISABLE_END_BUTTONS,
