@@ -94,25 +94,27 @@ export class EnhancedShutterCardNew extends LitElement{
     this.config.entities.map((subConfig) => {
 
       let baseEntity = subConfig.entity ? new haEntity(this.hass,subConfig.entity) : null;
-      let newSubConfig = {...subConfig,  id: id++};
-      let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
-      let cfg = new shutterCfg(this.hass,shutterConfig)
       let counter =1;
       if (baseEntity?.isGroup() && cfg.showGroupMembers()){
         // get the entityId's from the group
-        const groupEntities = baseEntity.getAttributes().entity_id || [];
-        // get the full entities form the id's
-        const entitiesInGroup = groupEntities.filter(entityId => this.hass.states[entityId]);
+        const groupEntityIds = baseEntity.getAttributes().entity_id || [];
+        // get the full entities from the id's
+        const entitiesInGroup = groupEntityIds.filter(entityId => this.hass.states[entityId]);
         entitiesInGroup.forEach(entityId => {
-          let newSubConfig = {...subConfig, entity: entityId, group: subConfig.entity, id: id++};
+          //let newSubConfig = {...subConfig, [C.CONFIG_ENTITY_ID]: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
+          let newSubConfig = {...subConfig, entity: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
           let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
           // when a name is defined, check for '@'and fill in the countnumber.
           if (shutterConfig.name) {
             shutterConfig.name = shutterConfig.name.replace("@", counter++);
           }
-          this.shutterCfgs.push(new shutterCfg(this.hass,shutterConfig));
+          let cfg = new shutterCfg(this.hass,shutterConfig)
+          this.shutterCfgs.push(cfg);
         });
       }else{
+        let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+        let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+        let cfg = new shutterCfg(this.hass,shutterConfig)
         this.shutterCfgs.push(cfg);
       }
     });
@@ -1097,7 +1099,7 @@ export class EnhancedShutter extends LitElement
     return value;
   }
   shutterSlatSize(){
-    let imageSize = this.escImages.getShutterSlatImageSize(this.cfg.id())
+    const imageSize = this.escImages.getShutterSlatImageSize(this.cfg.id())
     return imageSize;
   }
 

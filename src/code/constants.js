@@ -232,14 +232,29 @@ export const ESC_CLASS_BUTTON = `${ESC_CLASS_BASE_NAME}-button`;
 
 export const ICON_BUTTON_SIZE = 36; // original: 48
 
+// CONFIG CARD LEVEL
+export const CONFIG_TYPE = "type"; // just for cardtype: type: custom:enhanced-shutter-card
 // just to suppress warnings for legal settings (global, not used by ESC)
 export const CONFIG_CARD_MOD = "card_mod"; // !!customElements.get('card-mod')
-export const CONFIG_TYPE = "type";
-
 export const CONFIG_STACKED = "stacked";
-export const CONFIG_SHUTTER_PRESET = 'shutter_preset';
 export const CONFIG_TITLE = "title";
+
+// CONFIG WINDOW LEVEL
+
+// CONFIG COVER LEVEL
+
+export const CONFIG_SHUTTER_PRESET = 'shutter_preset';
 export const CONFIG_ENTITIES = 'entities';
+export const CONFIG_ENTITY_ID = 'entity';
+export const CONFIG_SUPPORTED_FEATURES = 'supported_features';
+export const CONFIG_CENTER_CLOSING = 'center_closing';
+
+// CONFIG ENTITY LEVEL
+export const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
+export const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
+
+// CONFIG NOT LEVELED YET
+
 export const CONFIG_ID = "id";
 export const CONFIG_GROUP = "group";
 
@@ -249,15 +264,10 @@ export const HA_ALERT_ERROR = 'error';
 export const HA_ALERT_INFO = 'info';
 
 export const CONFIG_DEBUG = 'debug';
-export const CONFIG_ENTITY_ID = 'entity';
 export const CONFIG_HEIGHT_PX = 'height_px';
 export const CONFIG_WIDTH_PX = 'width_px';
 
-export const CONFIG_CENTER_CLOSING = 'center_closing';
 
-export const CONFIG_SUPPORTED_FEATURES = 'supported_features';
-export const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
-export const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
 
 export const CONFIG_SHOW_GROUP_MEMBERS = 'show_group_members';
 
