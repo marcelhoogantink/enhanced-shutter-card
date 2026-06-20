@@ -125,17 +125,16 @@ export const ICON_SIZE_LOCK=10;
 
 export const LOCALIZE_TEXT= {
   // Search for this in Lokalise.com : component::cover::entity_component::_::state::
-  [SHUTTER_STATE_OPEN]:    'component.cover.entity_component._.state.open',
-  [SHUTTER_STATE_CLOSED]:  'component.cover.entity_component._.state.closed',
-  [SHUTTER_STATE_CLOSING]: 'component.cover.entity_component._.state.closing',
-  [SHUTTER_STATE_OPENING]: 'component.cover.entity_component._.state.opening',
+  [SHUTTER_STATE_OPEN]:        'component.cover.entity_component._.state.open',
+  [SHUTTER_STATE_CLOSED]:      'component.cover.entity_component._.state.closed',
+  [SHUTTER_STATE_CLOSING]:     'component.cover.entity_component._.state.closing',
+  [SHUTTER_STATE_OPENING]:     'component.cover.entity_component._.state.opening',
   [ACTION_SHUTTER_OPEN]:       'ui.card.cover.open_cover',
   [ACTION_SHUTTER_OPEN_TILT]:  'ui.card.cover.open_cover_tilt',
   [ACTION_SHUTTER_STOP]:       'ui.card.cover.stop_cover',
   [ACTION_SHUTTER_CLOSE]:      'ui.card.cover.close_cover',
   [ACTION_SHUTTER_CLOSE_TILT]: 'ui.card.cover.close_cover_tilt',
-
-  [UNAVAILABLE]: 'state.default.unavailable',
+  [UNAVAILABLE]:               'state.default.unavailable',
 };
 export const CONFIG_NAME = 'name';
 export const CONFIG_PASSIVE_MODE = 'passive_mode';
@@ -229,6 +228,11 @@ export const ESC_CLASS_BUTTONS_LEFT = `${ESC_CLASS_BUTTONS}-${LEFT}`;
 export const ESC_CLASS_BUTTONS_RIGHT = `${ESC_CLASS_BUTTONS}-${RIGHT}`;
 export const ESC_CLASS_BUTTON = `${ESC_CLASS_BASE_NAME}-button`;
 
+export const HA_ALERT_SUCCESS = 'success';
+export const HA_ALERT_WARNING = 'warning';
+export const HA_ALERT_ERROR = 'error';
+export const HA_ALERT_INFO = 'info';
+
 
 export const ICON_BUTTON_SIZE = 36; // original: 48
 
@@ -239,7 +243,16 @@ export const CONFIG_CARD_MOD = "card_mod"; // !!customElements.get('card-mod')
 export const CONFIG_STACKED = "stacked";
 export const CONFIG_TITLE = "title";
 
-// CONFIG WINDOW LEVEL
+// CONFIG CARD LEVEL
+
+export const CONFIG_DEBUG = 'debug';
+export const CONFIG_SCALE_ICONS = 'scale_icons';
+export const CONFIG_SCALE_TEXTS = 'scale_texts';
+export const CONFIG_SCALE_BUTTONS = 'scale_buttons';
+export const CONFIG_HEIGHT_PX = 'height_px'; // Not a config, but a result of base-height-px and resize-height-pct
+export const CONFIG_WIDTH_PX = 'width_px';   // Not a config, but a result of base-width-px and resize-width-pct
+
+// CONFIG WINDOW LEVEL (not active yet; for multiple covers in a window-frame  (eq: awning, roller-shutter, blind and curtain))
 
 // CONFIG COVER LEVEL
 
@@ -248,40 +261,29 @@ export const CONFIG_ENTITIES = 'entities';
 export const CONFIG_ENTITY_ID = 'entity';
 export const CONFIG_SUPPORTED_FEATURES = 'supported_features';
 export const CONFIG_CENTER_CLOSING = 'center_closing';
-
-// CONFIG ENTITY LEVEL
+export const CONFIG_OFFSET_OPENED_PCT = 'top_offset_pct'; // TODO  rename: top->opened
+export const CONFIG_OFFSET_CLOSED_PCT = 'bottom_offset_pct'; // TODO rename bottom->closed
+// positions of objects around the cover
+export const CONFIG_BUTTONS_POSITION = 'buttons_position';
+export const CONFIG_NAME_POSITION = 'name_position';
+export const CONFIG_OPENING_POSITION = 'opening_position';
+export const CONFIG_ICONS_POSITION = 'icons_position'; // for battery and signal icons
+// TODO: what whwn cover has two entities with both a battery or so ??
 export const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
 export const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
 
+export const CONFIG_INLINE_HEADER = 'inline_header';
+
+// CONFIG ENTITY LEVEL
+
 // CONFIG NOT LEVELED YET
 
+// for cover-group support
 export const CONFIG_ID = "id";
 export const CONFIG_GROUP = "group";
-
-export const HA_ALERT_SUCCESS = 'success';
-export const HA_ALERT_WARNING = 'warning';
-export const HA_ALERT_ERROR = 'error';
-export const HA_ALERT_INFO = 'info';
-
-export const CONFIG_DEBUG = 'debug';
-export const CONFIG_HEIGHT_PX = 'height_px';
-export const CONFIG_WIDTH_PX = 'width_px';
-
-
-
 export const CONFIG_SHOW_GROUP_MEMBERS = 'show_group_members';
 
-
-export const CONFIG_SCALE_ICONS = 'scale_icons';
-export const CONFIG_SCALE_TEXTS = 'scale_texts';
-export const CONFIG_SCALE_BUTTONS = 'scale_buttons';
-export const CONFIG_OFFSET_OPENED_PCT = 'top_offset_pct'; // TODO  rename: top->opened
-export const CONFIG_OFFSET_CLOSED_PCT = 'bottom_offset_pct'; // TODO rename bottom->closed
-export const CONFIG_BUTTONS_POSITION = 'buttons_position';
-export const CONFIG_NUMBER_DEVICES = 'number_devices';
-export const CONFIG_NAME_POSITION = 'name_position';
-export const CONFIG_OPENING_POSITION = 'opening_position';
-export const CONFIG_ICONS_POSITION = 'icons_position';
+export const CONFIG_NUMBER_DEVICES = 'number_devices'; // to be removed: this should be counted from the entered enitites in a cover -section or (for centered curtain, be set to 2)
 
 export const CONFIG_INLINE_HEADER = 'inline_header';
 
@@ -330,14 +332,17 @@ export const CONFIG_BUTTON_STOP_HIDE_STATES = 'button_stop_hide_states';
 export const CONFIG_BUTTON_OPENED_HIDE_STATES = 'button_up_hide_states';  // TODO rename up->opened
 export const CONFIG_BUTTON_CLOSED_HIDE_STATES = 'button_down_hide_states'; // TODO rename down->closed
 
+
+
+
 export const invertBoolean = (value) => !value;
 export const DEPRECATED={
   [CONFIG_NAME_DISABLED]: {new: CONFIG_SHOW_NAME, value: invertBoolean},
   [CONFIG_OPENING_DISABLED]: {new: CONFIG_SHOW_OPENING, value: invertBoolean},
   [CONFIG_TILT_SLIDER_ONLY]: {new: CONFIG_SHOW_TILT_BUTTONS, value: invertBoolean},
-  [CONFIG_SHOW_TILT]: {new: CONFIG_SHOW_TILT_SLIDER}, // only name change, value remains the same
   [CONFIG_DISABLE_STANDARD_BUTTONS]: {new: CONFIG_SHOW_STANDARD_BUTTONS, value: invertBoolean},
   [CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: {new: CONFIG_SHOW_PARTIAL_OPEN_BUTTONS, value: invertBoolean},
+  [CONFIG_SHOW_TILT]: {new: CONFIG_SHOW_TILT_SLIDER}, // only name change, value remains the same
 };
 export const REMOVED={
   [CONFIG_INVERT_PCT]: {new: CONFIG_INVERT_PCT_COVER}, // april 2026 v1.6.0 // jan 2026 1.4.0-alpha
