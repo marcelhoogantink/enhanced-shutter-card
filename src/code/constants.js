@@ -243,8 +243,6 @@ export const CONFIG_CARD_MOD = "card_mod"; // !!customElements.get('card-mod')
 export const CONFIG_STACKED = "stacked";
 export const CONFIG_TITLE = "title";
 
-// CONFIG CARD LEVEL
-
 export const CONFIG_DEBUG = 'debug';
 export const CONFIG_SCALE_ICONS = 'scale_icons';
 export const CONFIG_SCALE_TEXTS = 'scale_texts';
@@ -252,10 +250,37 @@ export const CONFIG_SCALE_BUTTONS = 'scale_buttons';
 export const CONFIG_HEIGHT_PX = 'height_px'; // Not a config, but a result of base-height-px and resize-height-pct
 export const CONFIG_WIDTH_PX = 'width_px';   // Not a config, but a result of base-width-px and resize-width-pct
 
+//======
+export const CONFIG_NAME_DISABLED = 'name_disabled'; //deprecated SHOW 1
+export const CONFIG_OPENING_DISABLED = 'opening_disabled';  // deprecated SHOW 2
+export const CONFIG_TILT_SLIDER_ONLY = 'tilt_slider_only';  // deprecated SHOW 4
+export const CONFIG_DISABLE_STANDARD_BUTTONS = 'disable_standard_buttons'; // deprecated SHOW 5
+export const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons'; // deprecated SHOW 6
+
+export const CONFIG_SHOW_NAME = 'show_name'; // new    SHOW 1
+export const CONFIG_SHOW_OPENING = "show_opening"; //new SHOW 2
+export const CONFIG_SHOW_TILT_BUTTONS = 'show_tilt_buttons'; // SHOW 4
+export const CONFIG_SHOW_STANDARD_BUTTONS = 'show_standard_buttons'; //SHOW 5
+export const CONFIG_SHOW_PARTIAL_OPEN_BUTTONS = 'show_partial_open_buttons';//SHOW 6
+
+export const CONFIG_SHOW_TILT_SLIDER = 'show_tilt_slider'; // new SHOW 3 new
+export const CONFIG_SHOW_OPEN_CLOSE_SLIDER = 'show_open_close_slider'; // new SHOW 3 new
+export const CONFIG_SHOW_WINDOW = 'show_window'; // SHOW 7 new
+//======
+
 // CONFIG WINDOW LEVEL (not active yet; for multiple covers in a window-frame  (eq: awning, roller-shutter, blind and curtain))
+// Handled as COVER LEVEL now
+export const CONFIG_DISABLE_END_BUTTONS = 'disable_end_buttons'; // grey out the endbuttons when not functional
+
+
+export const CONFIG_BUTTON_STOP_HIDE_STATES = 'button_stop_hide_states';
+export const CONFIG_BUTTON_OPENED_HIDE_STATES = 'button_up_hide_states';  // TODO rename up->opened
+export const CONFIG_BUTTON_CLOSED_HIDE_STATES = 'button_down_hide_states'; // TODO rename down->closed
+
 
 // CONFIG COVER LEVEL
 
+export const CONFIG_INLINE_HEADER = 'inline_header';
 export const CONFIG_SHUTTER_PRESET = 'shutter_preset';
 export const CONFIG_ENTITIES = 'entities';
 export const CONFIG_ENTITY_ID = 'entity';
@@ -274,19 +299,6 @@ export const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
 
 export const CONFIG_INLINE_HEADER = 'inline_header';
 
-// CONFIG ENTITY LEVEL
-
-// CONFIG NOT LEVELED YET
-
-// for cover-group support
-export const CONFIG_ID = "id";
-export const CONFIG_GROUP = "group";
-export const CONFIG_SHOW_GROUP_MEMBERS = 'show_group_members';
-
-export const CONFIG_NUMBER_DEVICES = 'number_devices'; // to be removed: this should be counted from the entered enitites in a cover -section or (for centered curtain, be set to 2)
-
-export const CONFIG_INLINE_HEADER = 'inline_header';
-
 export const CONFIG_INVERT_PCT       = 'invert_percentage'; // deprecated
 export const CONFIG_INVERT_PCT_COVER = 'invert_percentage_cover'; // new
 export const CONFIG_INVERT_PCT_UI    = 'invert_percentage_ui'; //
@@ -302,36 +314,27 @@ export const CONFIG_SHOW_TILT = 'show_tilt'; // deprecated
 export const CONFIG_TILT_ANGLE_MIN = 'tilt_angle_min';
 export const CONFIG_TILT_ANGLE_MAX = 'tilt_angle_max';
 
-export const CONFIG_CLOSING_DIRECTION = 'closing_direction';
 export const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
-export const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
 export const CONFIG_ALWAYS_PCT = 'always_percentage';
-//======
-export const CONFIG_NAME_DISABLED = 'name_disabled'; //deprecated SHOW 1
-export const CONFIG_OPENING_DISABLED = 'opening_disabled';  // deprecated SHOW 2
-export const CONFIG_TILT_SLIDER_ONLY = 'tilt_slider_only';  // deprecated SHOW 4
-export const CONFIG_DISABLE_STANDARD_BUTTONS = 'disable_standard_buttons'; // deprecated SHOW 5
-export const CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS = 'disable_partial_open_buttons'; // deprecated SHOW 6
 
-export const CONFIG_SHOW_NAME = 'show_name'; // new    SHOW 1
-export const CONFIG_SHOW_OPENING = "show_opening"; //new SHOW 2
-export const CONFIG_SHOW_TILT_BUTTONS = 'show_tilt_buttons'; // SHOW 4
-export const CONFIG_SHOW_STANDARD_BUTTONS = 'show_standard_buttons'; //SHOW 5
-export const CONFIG_SHOW_PARTIAL_OPEN_BUTTONS = 'show_partial_open_buttons';//SHOW 6
+// CONFIG ENTITY LEVEL
 
-export const CONFIG_SHOW_TILT_SLIDER = 'show_tilt_slider'; // new SHOW 3 new
-export const CONFIG_SHOW_OPEN_CLOSE_SLIDER = 'show_open_close_slider'; // new SHOW 3 new
-export const CONFIG_SHOW_WINDOW = 'show_window'; // SHOW 7 new
-//======
-export const CONFIG_DISABLE_END_BUTTONS = 'disable_end_buttons'; // grey out the endbuttons when not functional
+export const CONFIG_CLOSING_DIRECTION = 'closing_direction';
+export const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
 
-export const CONFIG_PICKER_OVERLAP_PX = 'picker_overlap_px';
-export const CONFIG_CURRENT_POSITION = 'current_position';
+// CONFIG NOT LEVELED YET
 
-export const CONFIG_BUTTON_STOP_HIDE_STATES = 'button_stop_hide_states';
-export const CONFIG_BUTTON_OPENED_HIDE_STATES = 'button_up_hide_states';  // TODO rename up->opened
-export const CONFIG_BUTTON_CLOSED_HIDE_STATES = 'button_down_hide_states'; // TODO rename down->closed
 
+export const CONFIG_NUMBER_DEVICES = 'number_devices'; // to be removed: this should be counted from the entered enitites in a cover -section or (for centered curtain, be set to 2)
+
+
+export const CONFIG_PICKER_OVERLAP_PX = 'picker_overlap_px'; // not a real config; it is a system setting
+export const CONFIG_CURRENT_POSITION = 'current_position';  // not a real config; it is a device/entity setting
+
+// for cover-group support
+export const CONFIG_ID = "id";
+export const CONFIG_GROUP = "group";
+export const CONFIG_SHOW_GROUP_MEMBERS = 'show_group_members';
 
 
 
