@@ -89,6 +89,7 @@ export class EnhancedShutterCardNew extends LitElement{
   #defAllShutterConfig()
   {
     const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
+    const cardConfigNew = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW,this.config);
     const windowsConfig =1;
     //const coversConfig;
 
@@ -145,7 +146,7 @@ export class EnhancedShutterCardNew extends LitElement{
 
   #buildConfig(configBase,configSub)
   {
-    const id = configSub.id === undefined ? 'General' : configSub.id;
+    const idMessage = configSub.id === undefined ? 'General' : configSub.id;
 
     if (typeof configSub !== 'object' || configSub === null){
       configSub={[C.CONFIG_ENTITY_ID]: configSub};
@@ -158,7 +159,7 @@ export class EnhancedShutterCardNew extends LitElement{
         this.messageManager.addMessage(
           `Unknown keyword: [${key}], check your input!`,
           C.HA_ALERT_WARNING,
-          id
+          idMessage
         );
       });
     };
@@ -177,7 +178,7 @@ export class EnhancedShutterCardNew extends LitElement{
         this.messageManager.addMessage(
           `Deprecated: [${key}], use '${oldKey.new}'!`,
           C.HA_ALERT_WARNING,
-          id
+          idMessage
         );
         this.replaceKey(newConfigSub, key,oldKey);
       }
@@ -189,7 +190,63 @@ export class EnhancedShutterCardNew extends LitElement{
         this.messageManager.addMessage(
           `Removed: [${key}], use '${oldKey.new}'!`,
           C.HA_ALERT_ERROR,
-          id
+          idMessage
+        );
+        this.replaceKey(newConfigSub, key,oldKey);
+      }
+    });
+
+    let config = { ...configBase, ...configPreset, ...newConfigSub};
+
+    return config;
+  }
+  #buildConfigNew(configBase,configSub)
+  {
+    const idMessage = configSub.id === undefined ? 'General' : configSub.id;
+
+    if (typeof configSub !== 'object' || configSub === null){
+      configSub={[C.CONFIG_ENTITY_ID]: configSub};
+    }
+    let unknownKeys = this.getUniqueKeysFromObjects(configSub,configBase);
+    // handle unknown keywords
+    if (unknownKeys.length > 0){
+      unknownKeys.forEach((key) =>
+      {
+        this.messageManager.addMessage(
+          `Unknown keyword: [${key}], check your input!`,
+          C.HA_ALERT_WARNING,
+          idMessage
+        );
+      });
+    };
+    // handle PRESET TYPE
+    //
+    let shutterPreset = (configSub[C.CONFIG_SHUTTER_PRESET] || '').toLowerCase();
+    let configPreset = { ...(C.ESC_PRESET[shutterPreset] || {}) };
+
+    let newConfigSub = { ...configSub };
+
+    // check deprecated and removed
+    // TODO: combine:
+    Object.keys(C.DEPRECATED).forEach(key => {
+      if (newConfigSub[key] != null) {
+        let oldKey = C.DEPRECATED[key];
+        this.messageManager.addMessage(
+          `Deprecated: [${key}], use '${oldKey.new}'!`,
+          C.HA_ALERT_WARNING,
+          idMessage
+        );
+        this.replaceKey(newConfigSub, key,oldKey);
+      }
+    });
+
+    Object.keys(C.REMOVED).forEach(key => {
+      if (newConfigSub[key] != null) {
+        let oldKey = C.REMOVED[key];
+        this.messageManager.addMessage(
+          `Removed: [${key}], use '${oldKey.new}'!`,
+          C.HA_ALERT_ERROR,
+          idMessage
         );
         this.replaceKey(newConfigSub, key,oldKey);
       }
@@ -574,13 +631,13 @@ export class EnhancedShutterCardNew extends LitElement{
       this.gridPixelWidth = (parseFloat(columns.split(/\s+/)[0]));
 
       if (!this.nbCols || !this.nbRows || this.previousGridWidth !== this.gridPixelWidth){
-        let separate=false;
 
         let shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
         let sizeSeparate = shutterSeparateBlock.size();
         let cardTitleSize = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
         let sizeTitle = cardTitleSize.size();
 
+        let separate=false;
         this.shutterCfgs.forEach(cfg =>{
 
           let block = {cfg: cfg,escImages: this.escImages};
@@ -602,7 +659,7 @@ export class EnhancedShutterCardNew extends LitElement{
           }else{
             sizeCard = shutterBlock.gridAddHorizontal(sizeCard,shutterBlock.size());
           }
-        separate=true;
+          separate=true;
 
         });
         sizeCard = cardTitleSize.gridAddBoth(sizeCard,new xyPair(2*C.CARD_PADDING,2*C.CARD_PADDING)); // padding Card
