@@ -72,7 +72,7 @@ export class EnhancedShutterCardNew extends LitElement{
       await this.resolveSubEntities();
       await this.escImages.processImages();
     } catch (err) {
-      console.warn('Error during initialization:', err);
+      console.warn('ESC: Error during initialization:', err);
     } finally {
       this.initializeReady = true;
         console_log('initialize Is Ready');
@@ -89,35 +89,57 @@ export class EnhancedShutterCardNew extends LitElement{
   #defAllShutterConfig()
   {
     const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
-    this.cardCfg = new cardCfg(cardConfig);
-    let id =0;
-    this.config.entities.map((subConfig) => {
+    const windowsConfig =1;
+    //const coversConfig;
 
-      let baseEntity = subConfig.entity ? new haEntity(this.hass,subConfig.entity) : null;
-      let counter =1;
-      if (baseEntity?.isGroup() && cfg.showGroupMembers()){
-        // get the entityId's from the group
-        const groupEntityIds = baseEntity.getAttributes().entity_id || [];
-        // get the full entities from the id's
-        const entitiesInGroup = groupEntityIds.filter(entityId => this.hass.states[entityId]);
-        entitiesInGroup.forEach(entityId => {
-          //let newSubConfig = {...subConfig, [C.CONFIG_ENTITY_ID]: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
-          let newSubConfig = {...subConfig, entity: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
-          let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
-          // when a name is defined, check for '@'and fill in the countnumber.
-          if (shutterConfig.name) {
-            shutterConfig.name = shutterConfig.name.replace("@", counter++);
-          }
-          let cfg = new shutterCfg(this.hass,shutterConfig)
-          this.shutterCfgs.push(cfg);
-        });
-      }else{
+    this.cardCfg = new cardCfg(cardConfig);
+    //this.windowsCfg = new windowsCfg(windowsCfg);
+    //this.coversCfg = new coversCfg(windowsCfg);
+
+    let id =0;
+
+    if (this.config.windows) {
+      let test=1;
+    } else if(this.config.covers) {
+      let test=1;
+      this.config.covers.map((subConfig) => {
         let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
         let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
         let cfg = new shutterCfg(this.hass,shutterConfig)
-        this.shutterCfgs.push(cfg);
-      }
-    });
+        // this.shutterCfgs.push(cfg);
+
+      });
+    } else {
+
+
+      this.config.entities.map((subConfig) => {
+
+        let baseEntity = subConfig.entity ? new haEntity(this.hass,subConfig.entity) : null;
+        let counter =1;
+        if (baseEntity?.isGroup() && cfg.showGroupMembers()){
+          // get the entityId's from the group
+          const groupEntityIds = baseEntity.getAttributes().entity_id || [];
+          // get the full entities from the id's
+          const entitiesInGroup = groupEntityIds.filter(entityId => this.hass.states[entityId]);
+          entitiesInGroup.forEach(entityId => {
+            //let newSubConfig = {...subConfig, [C.CONFIG_ENTITY_ID]: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
+            let newSubConfig = {...subConfig, entity: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
+            let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+            // when a name is defined, check for '@'and fill in the countnumber.
+            if (shutterConfig.name) {
+              shutterConfig.name = shutterConfig.name.replace("@", counter++);
+            }
+            let cfg = new shutterCfg(this.hass,shutterConfig)
+            this.shutterCfgs.push(cfg);
+          });
+        }else{
+          let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+          let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+          let cfg = new shutterCfg(this.hass,shutterConfig)
+          this.shutterCfgs.push(cfg);
+        }
+      });
+    }
     return true;
   }
 
@@ -502,8 +524,8 @@ export class EnhancedShutterCardNew extends LitElement{
 */
   setConfig(config)
   {
-    if (!config.entities) {
-      throw new Error('You need to define entities');
+    if (!config.entities && !config.covers && !config.windows) {
+      throw new Error('ESC: You need to define entities, windows or covers in the config.');
     }
     this.config = config;
   }
@@ -1697,7 +1719,7 @@ export class shutterCfg {
       case (0):
         return new xyPair(coord.x(),coord.y());
       default:
-        throw new Error(`Angle must be a multiple of 90 degrees. (angle= ${angle})`);
+        throw new Error(`ESC: Angle must be a multiple of 90 degrees. (angle= ${angle})`);
     }
   }
   rotateBackOrtho(coord,angle=this.getCloseAngle()){
@@ -1712,7 +1734,7 @@ export class shutterCfg {
       case (0):
         return new xyPair(coord.x(),coord.y());
       default:
-        throw new Error(`Angle must be a multiple of 90 degrees. (angle= ${angle})`);
+        throw new Error(`ESC: Angle must be a multiple of 90 degrees. (angle= ${angle})`);
     }
   }
   switchAxis(coord,angle=this.getCloseAngle()){
@@ -1725,7 +1747,7 @@ export class shutterCfg {
       case (0):
         return new xyPair(coord.x(),coord.y() );
       default:
-       throw new Error(`Angle must be a multiple of 90 degrees. (angle= ${angle})`);
+       throw new Error(`ESC: Angle must be a multiple of 90 degrees. (angle= ${angle})`);
     }
   }
 
@@ -1828,7 +1850,7 @@ export class shutterCfg {
         image = this.shutterBottomImage();
         break;
       default:
-        throw new Error(`Unknown imageType: ${imageType}`);
+        throw new Error(`ESC: Unknown imageType: ${imageType}`);
     }
     return image;
   }

@@ -136,26 +136,6 @@ export const LOCALIZE_TEXT= {
   [ACTION_SHUTTER_CLOSE_TILT]: 'ui.card.cover.close_cover_tilt',
   [UNAVAILABLE]:               'state.default.unavailable',
 };
-export const CONFIG_NAME = 'name';
-export const CONFIG_PASSIVE_MODE = 'passive_mode';
-export const CONFIG_IMAGE_MAP = 'image_map';
-export const CONFIG_WINDOW_IMAGE = 'window_image';
-export const CONFIG_VIEW_IMAGE = 'view_image';
-export const CONFIG_SHUTTER_SLAT_IMAGE = 'shutter_slat_image';
-export const CONFIG_SHUTTER_BOTTOM_IMAGE = 'shutter_bottom_image';
-export const CONFIG_ROTATE_SLATS_SHUTTER_IMAGE = 'rotate_slat_image'; //
-export const CONFIG_STRETCH_EDGE_SHUTTER_IMAGE = 'stretch_bottom_image';
-export const CONFIG_BASE_HEIGHT_PX = 'base_height_px';
-export const CONFIG_BASE_WIDTH_PX = 'base_width_px';
-export const CONFIG_RESIZE_HEIGHT_PCT = 'resize_height_pct';
-export const CONFIG_RESIZE_WIDTH_PCT = 'resize_width_pct';
-
-export const IMAGE_TYPES = [
-  CONFIG_WINDOW_IMAGE,
-  CONFIG_VIEW_IMAGE,
-  CONFIG_SHUTTER_SLAT_IMAGE,
-  CONFIG_SHUTTER_BOTTOM_IMAGE,
-];
 
 export const HA_CARD_NAME = "enhanced-shutter-card";
 export const HA_SHUTTER_NAME = `enhanced-shutter`;
@@ -236,8 +216,16 @@ export const HA_ALERT_INFO = 'info';
 
 export const ICON_BUTTON_SIZE = 36; // original: 48
 
-// CONFIG CARD LEVEL
-export const CONFIG_TYPE = "type"; // just for cardtype: type: custom:enhanced-shutter-card
+export const CARD_CONFIG = 'card';
+export const WINDOWS_CONFIG = 'windows';
+export const COVERS_CONFIG = 'covers';
+export const ENTITIES_CONFIG = 'entities';
+export const NO_GROUP_CONFIG = '_no_group';
+
+// **************************
+// ** CONFIG CARD LEVEL
+// **************************
+export const CONFIG_TYPE = "type"; // just for cardtype-setting: 'type: custom:enhanced-shutter-card'
 // just to suppress warnings for legal settings (global, not used by ESC)
 export const CONFIG_CARD_MOD = "card_mod"; // !!customElements.get('card-mod')
 export const CONFIG_STACKED = "stacked";
@@ -247,8 +235,7 @@ export const CONFIG_DEBUG = 'debug';
 export const CONFIG_SCALE_ICONS = 'scale_icons';
 export const CONFIG_SCALE_TEXTS = 'scale_texts';
 export const CONFIG_SCALE_BUTTONS = 'scale_buttons';
-export const CONFIG_HEIGHT_PX = 'height_px'; // Not a config, but a result of base-height-px and resize-height-pct
-export const CONFIG_WIDTH_PX = 'width_px';   // Not a config, but a result of base-width-px and resize-width-pct
+
 
 //======
 export const CONFIG_NAME_DISABLED = 'name_disabled'; //deprecated SHOW 1
@@ -268,8 +255,25 @@ export const CONFIG_SHOW_OPEN_CLOSE_SLIDER = 'show_open_close_slider'; // new SH
 export const CONFIG_SHOW_WINDOW = 'show_window'; // SHOW 7 new
 //======
 
-// CONFIG WINDOW LEVEL (not active yet; for multiple covers in a window-frame  (eq: awning, roller-shutter, blind and curtain))
-// Handled as COVER LEVEL now
+export const CONFIG_COVERS = 'covers';
+
+export const CONFIG_PASSIVE_MODE = 'passive_mode';
+
+export const CONFIG_WINDOW_IMAGE = 'window_image';
+export const CONFIG_VIEW_IMAGE = 'view_image';
+
+export const CONFIG_BASE_HEIGHT_PX = 'base_height_px';
+export const CONFIG_BASE_WIDTH_PX = 'base_width_px';
+export const CONFIG_RESIZE_HEIGHT_PCT = 'resize_height_pct';
+export const CONFIG_RESIZE_WIDTH_PCT = 'resize_width_pct';
+export const CONFIG_HEIGHT_PX = 'height_px'; // Not a real config, but a result of base-height-px and resize-height-pct
+export const CONFIG_WIDTH_PX = 'width_px';   // Not a real config, but a result of base-width-px and resize-width-pct
+
+export const CONFIG_NAME = 'name';
+export const CONFIG_NAME_POSITION = 'name_position';
+export const CONFIG_INLINE_HEADER = 'inline_header';
+
+
 export const CONFIG_DISABLE_END_BUTTONS = 'disable_end_buttons'; // grey out the endbuttons when not functional
 
 
@@ -278,26 +282,24 @@ export const CONFIG_BUTTON_OPENED_HIDE_STATES = 'button_up_hide_states';  // TOD
 export const CONFIG_BUTTON_CLOSED_HIDE_STATES = 'button_down_hide_states'; // TODO rename down->closed
 
 
-// CONFIG COVER LEVEL
 
-export const CONFIG_INLINE_HEADER = 'inline_header';
+export const CONFIG_COVER = 'cover';
+
 export const CONFIG_SHUTTER_PRESET = 'shutter_preset';
 export const CONFIG_ENTITIES = 'entities';
-export const CONFIG_ENTITY_ID = 'entity';
+export const CONFIG_WINDOWS = 'windows';
 export const CONFIG_SUPPORTED_FEATURES = 'supported_features';
 export const CONFIG_CENTER_CLOSING = 'center_closing';
 export const CONFIG_OFFSET_OPENED_PCT = 'top_offset_pct'; // TODO  rename: top->opened
 export const CONFIG_OFFSET_CLOSED_PCT = 'bottom_offset_pct'; // TODO rename bottom->closed
 // positions of objects around the cover
 export const CONFIG_BUTTONS_POSITION = 'buttons_position';
-export const CONFIG_NAME_POSITION = 'name_position';
 export const CONFIG_OPENING_POSITION = 'opening_position';
+
 export const CONFIG_ICONS_POSITION = 'icons_position'; // for battery and signal icons
 // TODO: what whwn cover has two entities with both a battery or so ??
 export const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
 export const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
-
-export const CONFIG_INLINE_HEADER = 'inline_header';
 
 export const CONFIG_INVERT_PCT       = 'invert_percentage'; // deprecated
 export const CONFIG_INVERT_PCT_COVER = 'invert_percentage_cover'; // new
@@ -316,26 +318,36 @@ export const CONFIG_TILT_ANGLE_MAX = 'tilt_angle_max';
 
 export const CONFIG_PARTIAL_CLOSE_PCT = 'partial_close_percentage';
 export const CONFIG_ALWAYS_PCT = 'always_percentage';
+export const CONFIG_PICKER_OVERLAP_PX = 'picker_overlap_px'; // not a real config; it is a system setting
 
-// CONFIG ENTITY LEVEL
 
+export const CONFIG_ENTITY_ID = 'entity';
 export const CONFIG_CLOSING_DIRECTION = 'closing_direction';
 export const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
-
-// CONFIG NOT LEVELED YET
-
+export const CONFIG_CURRENT_POSITION = 'current_position';  // not a real config; it is a device/entity setting
 
 export const CONFIG_NUMBER_DEVICES = 'number_devices'; // to be removed: this should be counted from the entered enitites in a cover -section or (for centered curtain, be set to 2)
 
 
-export const CONFIG_PICKER_OVERLAP_PX = 'picker_overlap_px'; // not a real config; it is a system setting
-export const CONFIG_CURRENT_POSITION = 'current_position';  // not a real config; it is a device/entity setting
 
 // for cover-group support
 export const CONFIG_ID = "id";
 export const CONFIG_GROUP = "group";
 export const CONFIG_SHOW_GROUP_MEMBERS = 'show_group_members';
 
+export const CONFIG_IMAGE_MAP = 'image_map';
+export const CONFIG_SHUTTER_SLAT_IMAGE = 'shutter_slat_image';
+export const CONFIG_SHUTTER_BOTTOM_IMAGE = 'shutter_bottom_image';
+export const CONFIG_ROTATE_SLATS_SHUTTER_IMAGE = 'rotate_slat_image'; //
+export const CONFIG_STRETCH_EDGE_SHUTTER_IMAGE = 'stretch_bottom_image';
+
+
+export const IMAGE_TYPES = [
+  CONFIG_WINDOW_IMAGE,
+  CONFIG_VIEW_IMAGE,
+  CONFIG_SHUTTER_SLAT_IMAGE,
+  CONFIG_SHUTTER_BOTTOM_IMAGE,
+];
 
 
 export const invertBoolean = (value) => !value;
@@ -484,6 +496,7 @@ export const CONFIG_DEFAULT ={
   [CONFIG_TITLE]: "",
   [CONFIG_ID]:"",
   [CONFIG_GROUP]: "",
+  [CONFIG_COVERS]: "",
   [CONFIG_ENTITIES]: "",
   [CONFIG_CARD_MOD]: !!customElements.get('card-mod'),
 
@@ -570,6 +583,130 @@ export const CONFIG_DEFAULT ={
 // Home assistant key words, not used but to prevent warnings
   ['view_layout']: null,
   ['grid_options']: null,
+
+
+
+};
+export const CONFIG_DEFAULT_NEW ={
+  [CARD_CONFIG]: {
+    [CONFIG_WINDOWS]: "",
+
+    [CONFIG_TYPE]: "",
+    [CONFIG_IMAGE_MAP]: ESC_IMAGE_MAP,
+
+    [CONFIG_CARD_MOD]: !!customElements.get('card-mod'),
+    [CONFIG_DEBUG]: ESC_DEBUG,
+    [CONFIG_STACKED]: ESC_STACKED,
+    [CONFIG_TITLE]: "",
+    [CONFIG_SCALE_ICONS]: ESC_SCALE_ICONS,
+    [CONFIG_SCALE_BUTTONS]: ESC_SCALE_BUTTONS,
+    [CONFIG_SCALE_TEXTS]: ESC_SCALE_TEXTS,
+// ===================
+    [CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,   // deprecated
+    [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,  // deprecated
+    [CONFIG_TILT_SLIDER_ONLY]: ESC_TILT_SLIDER_ONLY, // deprecated
+    [CONFIG_DISABLE_STANDARD_BUTTONS]: ESC_DISABLE_STANDARD_BUTTONS, // deprecated
+    [CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: ESC_DISABLE_PARTIAL_OPEN_BUTTONS, // deprecated
+
+    [CONFIG_SHOW_NAME]: ESC_SHOW_NAME, // replace
+    [CONFIG_SHOW_OPENING]: ESC_SHOW_OPENING, // replace
+    [CONFIG_SHOW_TILT_BUTTONS]: ESC_SHOW_TILT_BUTTONS, // replace
+    [CONFIG_SHOW_STANDARD_BUTTONS]: ESC_SHOW_STANDARD_BUTTONS, // replace
+    [CONFIG_SHOW_PARTIAL_OPEN_BUTTONS]: ESC_SHOW_PARTIAL_OPEN_BUTTONS, // replace
+
+    [CONFIG_SHOW_WINDOW]: ESC_SHOW_WINDOW, // new
+    [CONFIG_SHOW_TILT_SLIDER]: ESC_SHOW_TILT_SLIDER, // new
+    [CONFIG_SHOW_OPEN_CLOSE_SLIDER]: ESC_SHOW_OPEN_CLOSE_SLIDER, // new
+
+  },
+  [WINDOWS_CONFIG]: {
+    // (not active yet; for multiple covers in a window-frame  (eq: awning, roller-shutter, blind and curtain))
+    // Handled as COVER LEVEL now
+    [CONFIG_COVERS]: "",
+    [CONFIG_PASSIVE_MODE]: ESC_PASSIVE_MODE,
+    [CONFIG_WINDOW_IMAGE]: ESC_IMAGE_WINDOW,
+    [CONFIG_VIEW_IMAGE]: ESC_IMAGE_VIEW,
+
+    [CONFIG_NAME]: ESC_NAME,
+    [CONFIG_NAME_POSITION]: ESC_NAME_POSITION,
+
+    [CONFIG_BASE_HEIGHT_PX]: ESC_BASE_HEIGHT_PX,
+    [CONFIG_BASE_WIDTH_PX]: ESC_BASE_WIDTH_PX,
+    [CONFIG_RESIZE_HEIGHT_PCT]: ESC_RESIZE_HEIGHT_PCT,
+    [CONFIG_RESIZE_WIDTH_PCT]: ESC_RESIZE_WIDTH_PCT,
+
+    [CONFIG_INLINE_HEADER]: ESC_INLINE_HEADER,
+
+  },
+  [COVERS_CONFIG]: {
+    [CONFIG_ENTITIES]: "",
+    [CONFIG_SHUTTER_PRESET]: ESC_SHUTTER_PRESET,
+    [CONFIG_BATTERY_ENTITY_ID]: ESC_BATTERY_ENTITY_ID,
+    [CONFIG_SIGNAL_ENTITY_ID]: ESC_SIGNAL_ENTITY_ID,
+
+    [CONFIG_SHUTTER_SLAT_IMAGE]: ESC_IMAGE_SHUTTER_SLAT,
+    [CONFIG_SHUTTER_BOTTOM_IMAGE]: ESC_IMAGE_SHUTTER_BOTTOM,
+    [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: ESC_ROTATE_MAIN_SHUTTER_IMAGE,
+    [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: ESC_STRETCH_EDGE_SHUTTER_IMAGE,
+
+    [CONFIG_OFFSET_OPENED_PCT]: ESC_OPENED_OFFSET_PCT,
+    [CONFIG_OFFSET_CLOSED_PCT]: ESC_CLOSED_OFFSET_PCT,
+
+    [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
+    [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION,
+
+    [CONFIG_INVERT_PCT]   : ESC_INVERT_PCT_UI,
+    [CONFIG_INVERT_PCT_UI]   : ESC_INVERT_PCT_UI,
+    [CONFIG_INVERT_PCT_COVER]: ESC_INVERT_PCT_COVER,
+    [CONFIG_INVERT_OPEN_CLOSE]   : ESC_INVERT_OPEN_CLOSE_UI,
+    [CONFIG_INVERT_OPEN_CLOSE_UI]   : ESC_INVERT_OPEN_CLOSE_UI,
+    [CONFIG_INVERT_OPEN_CLOSE_COVER]: ESC_INVERT_OPEN_CLOSE_COVER,
+
+    [CONFIG_INVERT_PCT_TILT_UI]: ESC_INVERT_PCT_TILT_UI,
+    [CONFIG_INVERT_PCT_TILT_COVER]: ESC_INVERT_PCT_TILT_COVER,
+
+    [CONFIG_TILT_ANGLE_MIN]: ESC_TILT_ANGLE_MIN,
+    [CONFIG_TILT_ANGLE_MAX]: ESC_TILT_ANGLE_MAX,
+
+    [CONFIG_SHOW_TILT]: ESC_SHOW_TILT,  // deprecated
+    [CONFIG_PARTIAL_CLOSE_PCT]: ESC_PARTIAL_CLOSE_PCT,
+    [CONFIG_ALWAYS_PCT]: ESC_ALWAYS_PCT,
+    [CONFIG_PICKER_OVERLAP_PX]: ESC_PICKER_OVERLAP_PX,
+
+    [CONFIG_BUTTON_STOP_HIDE_STATES]: ESC_BUTTON_STOP_HIDE_STATES,
+    [CONFIG_BUTTON_OPENED_HIDE_STATES]: ESC_BUTTON_OPENED_HIDE_STATES,
+    [CONFIG_BUTTON_CLOSED_HIDE_STATES]: ESC_BUTTON_CLOSED_HIDE_STATES,
+    [CONFIG_ICONS_POSITION]: ESC_ICONS_POSITION,
+
+  },
+  [ENTITIES_CONFIG]: {
+    [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
+    [CONFIG_CLOSING_DIRECTION]: ESC_CLOSING_DIRECTION,
+    [CONFIG_OFFSET_IS_CLOSED_PCT]: ESC_OFFSET_CLOSED_PCT,
+    [CONFIG_CURRENT_POSITION]: ESC_CURRENT_POSITION,
+  },
+  [NO_GROUP_CONFIG]: {
+
+
+    [CONFIG_SUPPORTED_FEATURES]: ESC_SUPPORTED_FEATURES,
+
+    [CONFIG_ID]:"",
+    [CONFIG_GROUP]: "",
+
+    [CONFIG_CENTER_CLOSING]: ESC_CENTER_CLOSING,
+    [CONFIG_SHOW_GROUP_MEMBERS]: ESC_SHOW_GROUP_MEMBERS,
+    [CONFIG_NUMBER_DEVICES]: ESC_NUMBER_DEVICES,
+    [CONFIG_DISABLE_END_BUTTONS]: ESC_DISABLE_END_BUTTONS,
+
+// Home assistant key words, not used but to prevent warnings
+    ['view_layout']: null,
+    ['grid_options']: null,
+  },
+
+// ========
+
+
+
 
 
 

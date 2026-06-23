@@ -27,7 +27,7 @@ class DeviceGroupCard extends LitElement {
 
   setConfig(config) {
     if (!config.entities || !Array.isArray(config.entities)) {
-      throw new Error("device-group-card: 'entities' list is required.");
+      throw new Error("ESC: device-group-card: 'entities' list is required.");
     }
     // Reset discovery whenever config changes
     this.config         = config;
