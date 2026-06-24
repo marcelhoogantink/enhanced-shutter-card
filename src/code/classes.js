@@ -88,30 +88,42 @@ export class EnhancedShutterCardNew extends LitElement{
   }
   #defAllShutterConfig()
   {
-    const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
-    const cardConfigNew = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW,this.config);
-    const windowsConfig =1;
     //const coversConfig;
 
-    this.cardCfg = new cardCfg(cardConfig);
-    //this.windowsCfg = new windowsCfg(windowsCfg);
-    //this.coversCfg = new coversCfg(windowsCfg);
 
     let id =0;
 
-    if (this.config.windows) {
-      let test=1;
-    } else if(this.config.covers) {
-      let test=1;
-      this.config.covers.map((subConfig) => {
+    if (this.config.windows  || this.config.covers)
+    {
+      const cardConfigNew = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card,this.config);
+      this.cardCfg = new cardCfg(cardConfigNew);
+
+      let config;
+      if (this.config.windows){
+        config= this.config.windows;
+
+      }else if (this.config.covers){
+        config= this.config.covers;
+
+      }else if (this.config.entities){
+        config= this.config.entities;
+
+      }else{
+        config=null;
+      }
+
+      config.map((subConfig) => {
         let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
-        let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+        let shutterConfig = this.#buildConfigNew(cardConfigNew,newSubConfig);
         let cfg = new shutterCfg(this.hass,shutterConfig)
         // this.shutterCfgs.push(cfg);
 
       });
     } else {
 
+      const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
+      const windowsConfig =1;
+      this.cardCfg = new cardCfg(cardConfig);
 
       this.config.entities.map((subConfig) => {
 
@@ -213,7 +225,7 @@ export class EnhancedShutterCardNew extends LitElement{
       unknownKeys.forEach((key) =>
       {
         this.messageManager.addMessage(
-          `Unknown keyword: [${key}], check your input!`,
+          `buildConfigNew: Unknown keyword: [${key}], check your input!`,
           C.HA_ALERT_WARNING,
           idMessage
         );
@@ -1533,51 +1545,20 @@ export class EnhancedShutter extends LitElement
     `
   }
 }
-export class cardCfg {
 
-  #cfg={};
 
-  constructor(cfg)
-  {
-    this.stacked(cfg[C.CONFIG_STACKED]);
-    this.title(cfg[C.CONFIG_TITLE]);
 
-    Object.preventExtensions(this);
-  }
+class cfg{
+  cfg={};
 
-  /*
-   ** getters/setters
-   */
-  #getCfg(key,value= null){
-    if (value!== null && this.#cfg[key]!=value){
-      this.#cfg[key]= value;
-    }
-    return this.#cfg[key];
-  }
-  stacked(value = null){
-    return this.#getCfg(C.CONFIG_STACKED,value);
-  }
-  title(value = null){
-    return this.#getCfg(C.CONFIG_TITLE,value);
-  }
-}
-export class shutterCfg {
 
-  #cfg={};
-  #coverEntity=null;
-  #localize={};
-  subEntity={};
-  #group=null;
-  #id=null;
-  enhancedShutter=null;
-
-  static #CFG_METHODS_TEST = {
+  static CFG_METHODS_TEST = {
     buttonsPosition:   { key: C.CONFIG_BUTTONS_POSITION, default: C.ESC_BUTTONS_POSITION },
     centerClosing:     { key: 'center_closing',   default: false},
   };
 
 
-  static #CFG_METHODS = {
+  static CFG_METHODS = {
     buttonsPosition:   C.CONFIG_BUTTONS_POSITION,
     centerClosing:     C.CONFIG_CENTER_CLOSING,
     nDevices:          C.CONFIG_NUMBER_DEVICES,
@@ -1590,13 +1571,56 @@ export class shutterCfg {
 */
   };
 
+  constructor(hass,escConfig)
+  {
+    for (const [method, key] of Object.entries(shutterCfg.CFG_METHODS)) {
+      this[method] = (value = null) => this.getCfg(key, value);
+    }
+  }
+  getCfg(key,value= null){
+    if (value!== null && this.cfg[key]!=value){
+      this.cfg[key]= value;
+    }
+    return this.cfg[key];
+  }
+
+}
+
+
+export class cardCfg extends cfg{
+
+  constructor(cfg)
+  {
+    super();
+
+    this.stacked(cfg[C.CONFIG_STACKED]);
+    this.title(cfg[C.CONFIG_TITLE]);
+
+    Object.preventExtensions(this);
+  }
+
+  /*
+   ** getters/setters
+   */
+  stacked(value = null){
+    return this.getCfg(C.CONFIG_STACKED,value);
+  }
+  title(value = null){
+    return this.getCfg(C.CONFIG_TITLE,value);
+  }
+}
+export class shutterCfg extends cfg{
+
+  #coverEntity=null;
+  #localize={};
+  subEntity={};
+  #group=null;
+  #id=null;
+  enhancedShutter=null;
 
   constructor(hass,escConfig)
   {
-    for (const [method, key] of Object.entries(shutterCfg.#CFG_METHODS)) {
-      this[method] = (value = null) => this.#getCfg(key, value);
-    }
-
+    super();
 
     let entityId = this.entityId(escConfig[C.CONFIG_ENTITY_ID] ? escConfig[C.CONFIG_ENTITY_ID] : escConfig);
 
@@ -1699,12 +1723,6 @@ export class shutterCfg {
   /*
    ** getters/setters
    */
-  #getCfg(key,value= null){
-    if (value!== null && this.#cfg[key]!=value){
-      this.#cfg[key]= value;
-    }
-    return this.#cfg[key];
-  }
   isCoverFeatureActive(feature=C.ESC_FEATURE_ALL){
     const features =(this.getCoverEntity()?.getSupportedFeatures() ?? C.ESC_FEATURE_NO_TILT) & feature & this.supportedFeatures();
     return Boolean(features);
@@ -1845,50 +1863,50 @@ export class shutterCfg {
   }
 
   showName(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_NAME,value);
+    return this.getCfg(C.CONFIG_SHOW_NAME,value);
   }
   showOpening(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_OPENING,value);
+    return this.getCfg(C.CONFIG_SHOW_OPENING,value);
    }
   showTiltButtonBlock(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_TILT_BUTTONS,value);
+    return this.getCfg(C.CONFIG_SHOW_TILT_BUTTONS,value);
   }
   showStandardButtons(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_STANDARD_BUTTONS,value);
+    return this.getCfg(C.CONFIG_SHOW_STANDARD_BUTTONS,value);
   }
   showPartialOpenButtons(value = null){
-    const show = this.#getCfg(C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,value);
+    const show = this.getCfg(C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,value);
     return show && this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION);
   }
 
   showTiltSliderBlock(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_TILT_SLIDER,value);
+    return this.getCfg(C.CONFIG_SHOW_TILT_SLIDER,value);
   }
   showOpenCloseSliderBlock(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_OPEN_CLOSE_SLIDER,value);
+    return this.getCfg(C.CONFIG_SHOW_OPEN_CLOSE_SLIDER,value);
   }
   showWindow(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_WINDOW,value);
+    return this.getCfg(C.CONFIG_SHOW_WINDOW,value);
   }
 
 
  // buttonsPosition(value = null){
- //  return this.#getCfg(C.CONFIG_BUTTONS_POSITION,value);
+ //  return this.getCfg(C.CONFIG_BUTTONS_POSITION,value);
  // }
   supportedFeatures(value = null){
-    return this.#getCfg(C.CONFIG_SUPPORTED_FEATURES,value);
+    return this.getCfg(C.CONFIG_SUPPORTED_FEATURES,value);
   }
   disableEndButtons(value = null){
-    return this.#getCfg(C.CONFIG_DISABLE_END_BUTTONS,value);
+    return this.getCfg(C.CONFIG_DISABLE_END_BUTTONS,value);
   }
   entityId(value = null){
-    return this.#getCfg(C.CONFIG_ENTITY_ID,value);
+    return this.getCfg(C.CONFIG_ENTITY_ID,value);
   }
   batteryEntityId(value = null){
-    return this.#getCfg(C.CONFIG_BATTERY_ENTITY_ID,value);
+    return this.getCfg(C.CONFIG_BATTERY_ENTITY_ID,value);
   }
   signalEntityId(value = null){
-    return this.#getCfg(C.CONFIG_SIGNAL_ENTITY_ID,value);
+    return this.getCfg(C.CONFIG_SIGNAL_ENTITY_ID,value);
   }
 
   getImage(imageType){
@@ -1919,69 +1937,69 @@ export class shutterCfg {
     return this.#id;
   }
   showGroupMembers(value = null){
-    return this.#getCfg(C.CONFIG_SHOW_GROUP_MEMBERS,value);
+    return this.getCfg(C.CONFIG_SHOW_GROUP_MEMBERS,value);
   }
   imageMap(value = null){
-    return this.#getCfg(C.CONFIG_IMAGE_MAP,value);
+    return this.getCfg(C.CONFIG_IMAGE_MAP,value);
   }
   windowImage(value = null){
-    return this.#getCfg(C.CONFIG_WINDOW_IMAGE,value);
+    return this.getCfg(C.CONFIG_WINDOW_IMAGE,value);
   }
   viewImage(value = null){
-    return this.#getCfg(C.CONFIG_VIEW_IMAGE,value);
+    return this.getCfg(C.CONFIG_VIEW_IMAGE,value);
   }
   shutterSlatImage(value = null){
-    return this.#getCfg(C.CONFIG_SHUTTER_SLAT_IMAGE,value);
+    return this.getCfg(C.CONFIG_SHUTTER_SLAT_IMAGE,value);
   }
   shutterBottomImage(value = null){
-    return this.#getCfg(C.CONFIG_SHUTTER_BOTTOM_IMAGE,value);
+    return this.getCfg(C.CONFIG_SHUTTER_BOTTOM_IMAGE,value);
   }
 
   friendlyName(value = null){
-    return this.#getCfg(C.CONFIG_NAME,value);
+    return this.getCfg(C.CONFIG_NAME,value);
   }
   debug(value = null){
-    return this.#getCfg(C.CONFIG_DEBUG,value);
+    return this.getCfg(C.CONFIG_DEBUG,value);
   }
   invertPercentageUi(value = null){
-    return this.#getCfg(C.CONFIG_INVERT_PCT_UI,value);
+    return this.getCfg(C.CONFIG_INVERT_PCT_UI,value);
   }
   invertPercentageCover(value = null){
-    return this.#getCfg(C.CONFIG_INVERT_PCT_COVER,value);
+    return this.getCfg(C.CONFIG_INVERT_PCT_COVER,value);
   }
   invertPercentageTiltUi(value = null){
-    return this.#getCfg(C.CONFIG_INVERT_PCT_TILT_UI,value);
+    return this.getCfg(C.CONFIG_INVERT_PCT_TILT_UI,value);
   }
   invertPercentageTiltCover(value = null){
-    return this.#getCfg(C.CONFIG_INVERT_PCT_TILT_COVER,value);
+    return this.getCfg(C.CONFIG_INVERT_PCT_TILT_COVER,value);
   }
   invertOpenCloseUi(value = null){
-    return this.#getCfg(C.CONFIG_INVERT_OPEN_CLOSE_UI,value);
+    return this.getCfg(C.CONFIG_INVERT_OPEN_CLOSE_UI,value);
   }
   invertOpenCloseCover(value = null){
-    return this.#getCfg(C.CONFIG_INVERT_OPEN_CLOSE_COVER,value);
+    return this.getCfg(C.CONFIG_INVERT_OPEN_CLOSE_COVER,value);
   }
 
   passiveMode(value = null){
-    let mode = this.#getCfg(C.CONFIG_PASSIVE_MODE,value)
+    let mode = this.getCfg(C.CONFIG_PASSIVE_MODE,value)
     if (value!== null && mode) console.warn('Passive mode, no action');
     return mode;
   }
   windowHeightPx(value = null){
-    return this.#getCfg(C.CONFIG_HEIGHT_PX,value);
+    return this.getCfg(C.CONFIG_HEIGHT_PX,value);
   }
   windowWidthPx(value = null){
-    return this.#getCfg(C.CONFIG_WIDTH_PX,value);
+    return this.getCfg(C.CONFIG_WIDTH_PX,value);
   }
   partial(value = null){
-    let partial = this.#getCfg(C.CONFIG_PARTIAL_CLOSE_PCT,value);
+    let partial = this.getCfg(C.CONFIG_PARTIAL_CLOSE_PCT,value);
     if (partial == C.SHUTTER_OPEN_PCT ||  partial == C.SHUTTER_CLOSED_PCT) partial = 0;
     partial = this.invertPosition(partial);
     // only when cover can set position
     return this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION) ? partial : 0;
   }
   offset(value = null){
-    let offset = this.#getCfg(C.CONFIG_OFFSET_IS_CLOSED_PCT,value);
+    let offset = this.getCfg(C.CONFIG_OFFSET_IS_CLOSED_PCT,value);
     if (offset == C.SHUTTER_OPEN_PCT ||  offset == C.SHUTTER_CLOSED_PCT) offset = 0;
     offset = this.invertPosition(offset);
     // only when cover can set position
@@ -1995,46 +2013,46 @@ export class shutterCfg {
   }
 
   rotateSlatsImage(value = null){
-    return this.#getCfg(C.CONFIG_ROTATE_SLATS_SHUTTER_IMAGE,value);
+    return this.getCfg(C.CONFIG_ROTATE_SLATS_SHUTTER_IMAGE,value);
   }
   stretchEdgeImage(value = null){
-    return this.#getCfg(C.CONFIG_STRETCH_EDGE_SHUTTER_IMAGE,value);
+    return this.getCfg(C.CONFIG_STRETCH_EDGE_SHUTTER_IMAGE,value);
   }
   scaleButtons(value = null){
-    return this.#getCfg(C.CONFIG_SCALE_BUTTONS,value);
+    return this.getCfg(C.CONFIG_SCALE_BUTTONS,value);
   }
   scaleIcons(value = null){
-    return this.#getCfg(C.CONFIG_SCALE_ICONS,value);
+    return this.getCfg(C.CONFIG_SCALE_ICONS,value);
   }
   scaleTexts(value = null){
-    return this.#getCfg(C.CONFIG_SCALE_TEXTS,value);
+    return this.getCfg(C.CONFIG_SCALE_TEXTS,value);
   }
   offsetOpenedPct(value = null){
-    return this.#getCfg(C.CONFIG_OFFSET_OPENED_PCT,value);
+    return this.getCfg(C.CONFIG_OFFSET_OPENED_PCT,value);
   }
   offsetClosedPct(value = null){
-    return this.#getCfg(C.CONFIG_OFFSET_CLOSED_PCT,value);
+    return this.getCfg(C.CONFIG_OFFSET_CLOSED_PCT,value);
   }
   //showTilt(value=null){
-  //  return (this.#getCfg(C.CONFIG_SHOW_TILT,value)) && this.canTilt()
+  //  return (this.getCfg(C.CONFIG_SHOW_TILT,value)) && this.canTilt()
  // }
   canTilt(){
     return this.isCoverFeatureActive(C.ESC_FEATURE_OPEN_TILT | C.ESC_FEATURE_CLOSE_TILT | C.ESC_FEATURE_SET_TILT_POSITION ) ;
 
   }
   tiltAngleMin(value = null){
-    return this.#getCfg(C.CONFIG_TILT_ANGLE_MIN,value );
+    return this.getCfg(C.CONFIG_TILT_ANGLE_MIN,value );
   }
   tiltAngleMax(value = null){
-    return this.#getCfg(C.CONFIG_TILT_ANGLE_MAX,value );
+    return this.getCfg(C.CONFIG_TILT_ANGLE_MAX,value );
   }
 
 
   unrollUnfoldDirection(value = null){
-    return this.#getCfg(C.CONFIG_CLOSING_DIRECTION,value);
+    return this.getCfg(C.CONFIG_CLOSING_DIRECTION,value);
   }
   buttonStopHideStates(value = null){
-    return this.#getCfg(C.CONFIG_BUTTON_STOP_HIDE_STATES,value);
+    return this.getCfg(C.CONFIG_BUTTON_STOP_HIDE_STATES,value);
   }
   buttonOpenCloseHideStates(upDown){
     upDown = this.applyInvertForButtonOpenCloseHideStates(upDown);
@@ -2045,34 +2063,34 @@ export class shutterCfg {
 
 
   buttonOpenHideStates(value = null){
-    return this.#getCfg(C.CONFIG_BUTTON_OPENED_HIDE_STATES,value);
+    return this.getCfg(C.CONFIG_BUTTON_OPENED_HIDE_STATES,value);
   }
 
   buttonCloseHideStates(value = null){
-    return this.#getCfg(C.CONFIG_BUTTON_CLOSED_HIDE_STATES,value);
+    return this.getCfg(C.CONFIG_BUTTON_CLOSED_HIDE_STATES,value);
   }
 
   namePosition(value = null){
-    return this.#getCfg(C.CONFIG_NAME_POSITION,value);
+    return this.getCfg(C.CONFIG_NAME_POSITION,value);
   }
   inlineHeader(value = null){
-    return this.#getCfg(C.CONFIG_INLINE_HEADER,value);
+    return this.getCfg(C.CONFIG_INLINE_HEADER,value);
   }
   openingPosition(value = null){
-    if (value !== null  && this.#getCfg(C.CONFIG_OPENING_POSITION,value) === null)
+    if (value !== null  && this.getCfg(C.CONFIG_OPENING_POSITION,value) === null)
     {
-      value = this.#getCfg(C.CONFIG_NAME_POSITION);
+      value = this.getCfg(C.CONFIG_NAME_POSITION);
     }
-    return this.#getCfg(C.CONFIG_OPENING_POSITION,value);
+    return this.getCfg(C.CONFIG_OPENING_POSITION,value);
   }
   iconsPosition(value = null){
-    return this.#getCfg(C.CONFIG_ICONS_POSITION,value);
+    return this.getCfg(C.CONFIG_ICONS_POSITION,value);
   }
   alwaysPercentage(value = null){
-    return this.#getCfg(C.CONFIG_ALWAYS_PCT,value);
+    return this.getCfg(C.CONFIG_ALWAYS_PCT,value);
   }
   pickerOverlapPx(value = null){
-    return this.#getCfg(C.CONFIG_PICKER_OVERLAP_PX,value);
+    return this.getCfg(C.CONFIG_PICKER_OVERLAP_PX,value);
   }
   /*
   ** end getters/setters
