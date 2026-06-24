@@ -331,8 +331,8 @@ export const CONFIG_NUMBER_DEVICES = 'number_devices'; // to be removed: this sh
 
 
 // for cover-group support
-export const CONFIG_ID = "id";
-export const CONFIG_GROUP = "group";
+export const CONFIG_ID = "_id";
+export const CONFIG_GROUP = "_group";
 export const CONFIG_SHOW_GROUP_MEMBERS = 'show_group_members';
 
 export const CONFIG_IMAGE_MAP = 'image_map';
@@ -601,7 +601,7 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_SCALE_ICONS]: ESC_SCALE_ICONS,
     [CONFIG_SCALE_BUTTONS]: ESC_SCALE_BUTTONS,
     [CONFIG_SCALE_TEXTS]: ESC_SCALE_TEXTS,
-    
+
 // ===================
     [CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,   // deprecated
     [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,  // deprecated
