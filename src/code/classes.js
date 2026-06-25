@@ -103,24 +103,31 @@ export class EnhancedShutterCardNew extends LitElement{
       let config;
       if (this.config.windows){
         config= this.config.windows;
-
+        config.map((subConfig) => {
+          let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+          let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.windows,newSubConfig);
+          let cfg = new windowCfgNew(this.hass,shutterConfig)
+        });
       }else if (this.config.covers){
         config= this.config.covers;
+        config.map((subConfig) => {
+          let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+          let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.covers,newSubConfig);
+          let cfg = new shutterCfgNew(this.hass,shutterConfig)
+        });
 
       }else if (this.config.entities){
         config= this.config.entities;
+        config.map((subConfig) => {
+          let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+          let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.entities,newSubConfig);
+          let cfg = new entityCfgNew(this.hass,shutterConfig)
+        });
 
       }else{
         config=null;
       }
 
-      config.map((subConfig) => {
-        let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
-        let shutterConfig = this.#buildConfigNew(cardConfigNew,newSubConfig);
-        let cfg = new shutterCfgNew(this.hass,shutterConfig)
-        // this.shutterCfgs.push(cfg);
-
-      });
     } else {
       // classic config
       const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
@@ -1571,12 +1578,63 @@ class cfg{
     centerClosing:     C.CONFIG_CENTER_CLOSING,
     nDevices:          C.CONFIG_NUMBER_DEVICES,
     supportedFeatures: C.CONFIG_SUPPORTED_FEATURES,
-/*
+    stacked:           C.CONFIG_STACKED,
+    title:             C.CONFIG_TITLE,
+    showName:          C.CONFIG_SHOW_NAME,
+    showOpening:       C.CONFIG_SHOW_OPENING,
+    showTiltButtonBlock: C.CONFIG_SHOW_TILT_BUTTONS,
+    showStandardButtons: C.CONFIG_SHOW_STANDARD_BUTTONS,
+    showTiltSliderBlock: C.CONFIG_SHOW_TILT_SLIDER,
+    showOpenCloseSliderBlock: C.CONFIG_SHOW_OPEN_CLOSE_SLIDER,
+    showWindow:        C.CONFIG_SHOW_WINDOW,
     disableEndButtons: C.CONFIG_DISABLE_END_BUTTONS,
     entityId:          C.CONFIG_ENTITY_ID,
     batteryEntityId:   C.CONFIG_BATTERY_ENTITY_ID,
     signalEntityId:    C.CONFIG_SIGNAL_ENTITY_ID,
-*/
+    showGroupMembers:  C.CONFIG_SHOW_GROUP_MEMBERS,
+    imageMap:          C.CONFIG_IMAGE_MAP,
+    windowImage:       C.CONFIG_WINDOW_IMAGE,
+    viewImage:         C.CONFIG_VIEW_IMAGE,
+    shutterSlatImage:  C.CONFIG_SHUTTER_SLAT_IMAGE,
+    shutterBottomImage:C.CONFIG_SHUTTER_BOTTOM_IMAGE,
+    friendlyName:      C.CONFIG_NAME,
+    debug:             C.CONFIG_DEBUG,
+    type:              C.CONFIG_TYPE,
+    cardMod:           C.CONFIG_CARD_MOD,
+    invertPercentageUi: C.CONFIG_INVERT_PCT_UI,
+    invertPercentageCover: C.CONFIG_INVERT_PCT_COVER,
+    invertPercentageTiltUi: C.CONFIG_INVERT_PCT_TILT_UI,
+    invertPercentageTiltCover: C.CONFIG_INVERT_PCT_TILT_COVER,
+    invertOpenCloseUi: C.CONFIG_INVERT_OPEN_CLOSE_UI,
+    invertOpenCloseCover: C.CONFIG_INVERT_OPEN_CLOSE_COVER,
+
+    baseHeightPx:      C.CONFIG_BASE_HEIGHT_PX,
+    baseWidthPx:       C.CONFIG_BASE_WIDTH_PX,
+    resizeHeightPct:   C.CONFIG_RESIZE_HEIGHT_PCT,
+    resizeWidthPct:    C.CONFIG_RESIZE_WIDTH_PCT,
+    windowHeightPx:    C.CONFIG_HEIGHT_PX,
+    windowWidthPx:     C.CONFIG_WIDTH_PX,
+
+    rotateSlatsImage:  C.CONFIG_ROTATE_SLATS_SHUTTER_IMAGE,
+    stretchEdgeImage:  C.CONFIG_STRETCH_EDGE_SHUTTER_IMAGE,
+    scaleButtons:      C.CONFIG_SCALE_BUTTONS,
+    scaleIcons:        C.CONFIG_SCALE_ICONS,
+    scaleTexts:        C.CONFIG_SCALE_TEXTS,
+    offsetOpenedPct:   C.CONFIG_OFFSET_OPENED_PCT,
+    offsetClosedPct:   C.CONFIG_OFFSET_CLOSED_PCT,
+    tiltAngleMin:      C.CONFIG_TILT_ANGLE_MIN,
+    tiltAngleMax:      C.CONFIG_TILT_ANGLE_MAX,
+    unrollUnfoldDirection: C.CONFIG_CLOSING_DIRECTION,
+    buttonStopHideStates: C.CONFIG_BUTTON_STOP_HIDE_STATES,
+    buttonOpenHideStates: C.CONFIG_BUTTON_OPENED_HIDE_STATES,
+    buttonCloseHideStates: C.CONFIG_BUTTON_CLOSED_HIDE_STATES,
+    namePosition:        C.CONFIG_NAME_POSITION,
+    inlineHeader:      C.CONFIG_INLINE_HEADER,
+    iconsPosition:      C.CONFIG_ICONS_POSITION,
+    alwaysPercentage:      C.CONFIG_ALWAYS_PERCENTAGE,
+    pickerOverlapPx:      C.CONFIG_PICKER_OVERLAP_PX,
+    showPartialOpenButtons: C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,
+    passiveMode:            C.CONFIG_PASSIVE_MODE,
   };
 
   constructor()
@@ -1584,7 +1642,7 @@ class cfg{
     for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
       this[method] = (value = null) => this.getCfg(key, value);
       if (method != key){
-        this[key]    = (value = null) => this.getCfg(key, value);
+        this[key]  = (value = null) => this.getCfg(key, value);
       }
     }
   }
@@ -1597,7 +1655,9 @@ class cfg{
   /*
    ** getters/setters
    */
-  stacked(value = null){
+
+   /*
+   stacked(value = null){
     return this.getCfg(C.CONFIG_STACKED,value);
   }
   title(value = null){
@@ -1747,8 +1807,14 @@ class cfg{
   pickerOverlapPx(value = null){
     return this.getCfg(C.CONFIG_PICKER_OVERLAP_PX,value);
   }
+  showPartialOpenButtons(value = null){
+    return this.getCfg(C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,value);
+  }
+  passiveMode(value = null){
+    return this.getCfg(C.CONFIG_PASSIVE_MODE,value)
+  }
 
-
+*/
 
   isCoverFeatureActive(feature=C.ESC_FEATURE_ALL){
     const features =(this.getCoverEntity()?.getSupportedFeatures() ?? C.ESC_FEATURE_NO_TILT) & feature & this.supportedFeatures();
@@ -1889,10 +1955,6 @@ class cfg{
     return transform;
   }
 
-  showPartialOpenButtons(value = null){
-    const show = this.getCfg(C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,value);
-    return show && this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION);
-  }
 
 
   getImage(imageType){
@@ -1922,11 +1984,6 @@ class cfg{
     return this[C.CONFIG_ID];
   }
 
-  passiveMode(value = null){
-    let mode = this.getCfg(C.CONFIG_PASSIVE_MODE,value)
-    if (value!== null && mode) console.warn('Passive mode, no action');
-    return mode;
-  }
   partial(value = null){
     let partial = this.getCfg(C.CONFIG_PARTIAL_CLOSE_PCT,value);
     if (partial == C.SHUTTER_OPEN_PCT ||  partial == C.SHUTTER_CLOSED_PCT) partial = 0;
@@ -2493,7 +2550,9 @@ applyInvertForShowButtonUpDownLabel(setting,debug=false){
   }
   fillCfg(escConfig){
     Object.entries(escConfig).forEach( ([key, value]) => {
-      if (typeof this[key] !== 'function') return;
+      if (typeof this[key] !== 'function') {
+        return;
+      }
       let test= this[key](value);
       let test2 =1;
     });
@@ -2530,21 +2589,28 @@ export class cardCfgNew extends cfg{
 
 }
 
+export class windowCfgNew extends cfg{
+  constructor(hass,escConfig)
+  {
+    super();
+    this.fillCfg(escConfig);
+
+  }
+}
 export class shutterCfgNew extends cfg{
   constructor(hass,escConfig)
   {
     super();
     this.fillCfg(escConfig);
 
-    let entityId = this.entityId(escConfig[C.CONFIG_ENTITY_ID] ? escConfig[C.CONFIG_ENTITY_ID] : escConfig);
+  }
+}
+export class entityCfgNew extends cfg{
+  constructor(hass,escConfig)
+  {
+    super();
+    this.fillCfg(escConfig);
 
-    this.hass = hass;
-
-    this[C.CONFIG_GROUP]=escConfig[C.CONFIG_GROUP];
-    this[C.CONFIG_ID]=escConfig[C.CONFIG_ID];
-
-    this.setLocalize(hass.localize);
-    this.setCoverEntity(hass,entityId);
   }
 }
 export class shutterCfg extends cfg{

@@ -49,6 +49,16 @@ export class htmlBlock
   setHtmlString(htmlString){
     this.#htmlString = htmlString;
   }
+  passiveMode(value = null){
+    let mode = this.cfg.passiveMode();
+    if (value!== null && mode) console.warn('Passive mode, no action');
+    return mode;
+  }
+
+  showPartialOpenButtons(){
+    const show = this.cfg.showPartialOpenButtons();
+    return show && this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION);
+  }
   showTopBottomDiv(position){
     const batteryIconBlock = new htmlBlockBatteryIcon(this.shutter);
     const signalIconBlock = new htmlBlockSignalIcon(this.shutter);
@@ -284,7 +294,7 @@ export class htmlBlockName extends htmlBlock{
             title="${this.cfg.getCoverEntity().getFriendlyName()}"
           >
             ${this.cfg.friendlyName()}
-            ${this.cfg.passiveMode() ? html`
+            ${this.passiveMode() ? html`
               <span class="${C.ESC_CLASS_HA_ICON_LOCK}">
                 <ha-icon icon="mdi:lock"></ha-icon>
               </span>
@@ -304,7 +314,7 @@ export class htmlBlockName extends htmlBlock{
       let x1 = titleSize.width;
       let y1 = C.LINE_HEIGHT_LABEL * this.cfg.textScaleFactor();
       xy = new xyPair(x1,y1);
-      if (this.cfg.passiveMode()) {
+      if (this.passiveMode()) {
         xy = this.gridAddHorizontal(xy,new xyPair(C.ICON_SIZE_LOCK,C.ICON_SIZE_LOCK));
       }
     }
@@ -387,7 +397,7 @@ export class htmlBlockMiddle extends htmlBlock{
         ${this.cfg.showPartialOpenButtons() || this.cfg.canTilt()
           ? html`
             ${(this.cfg.canTilt()) ? tiltSectionBlock.show():''}
-            ${this.cfg.showPartialOpenButtons() ? rightButtonsBlock.show():''}
+            ${this.showPartialOpenButtons() ? rightButtonsBlock.show():''}
           `
           : nothing //`<div class='blankDiv'></div>`
         }
@@ -405,7 +415,7 @@ export class htmlBlockMiddle extends htmlBlock{
     let xyOpenCloseSlider = this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.size() : new xyPair();
     let xyCentralWindow = centralWindowBlock.size();
     let xyTiltSection = this.cfg.canTilt() ? tiltSectionBlock.size(): new xyPair();
-    let xyRightButtons = this.cfg.showPartialOpenButtons() ? rightButtonsBlock.size() : new xyPair();
+    let xyRightButtons = this.showPartialOpenButtons() ? rightButtonsBlock.size() : new xyPair();
 
     let xyRight = this.gridAddBoth(xyTiltSection,xyRightButtons);
     let xy;

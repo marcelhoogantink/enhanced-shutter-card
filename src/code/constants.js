@@ -220,14 +220,12 @@ export const CARD_CONFIG = 'card';
 export const WINDOWS_CONFIG = 'windows';
 export const COVERS_CONFIG = 'covers';
 export const ENTITIES_CONFIG = 'entities';
-export const NO_GROUP_CONFIG = '_no_group';
+export const _NO_GROUP_CONFIG = '_no_group';
 
-// **************************
-// ** CONFIG CARD LEVEL
-// **************************
-export const CONFIG_TYPE = "type"; // just for cardtype-setting: 'type: custom:enhanced-shutter-card'
 // just to suppress warnings for legal settings (global, not used by ESC)
+export const CONFIG_TYPE = "type"; // just for cardtype-setting: 'type: custom:enhanced-shutter-card'
 export const CONFIG_CARD_MOD = "card_mod"; // !!customElements.get('card-mod')
+
 export const CONFIG_STACKED = "stacked";
 export const CONFIG_TITLE = "title";
 
@@ -591,7 +589,7 @@ export const CONFIG_DEFAULT_NEW ={
   [CARD_CONFIG]: {
     [CONFIG_WINDOWS]: "",
 
-    [CONFIG_TYPE]: "",
+    [CONFIG_TYPE]: HA_CARD_NAME,
     [CONFIG_IMAGE_MAP]: ESC_IMAGE_MAP,
 
     [CONFIG_CARD_MOD]: !!customElements.get('card-mod'),
@@ -603,11 +601,11 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_SCALE_TEXTS]: ESC_SCALE_TEXTS,
 
 // ===================
-    [CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,   // deprecated
-    [CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,  // deprecated
-    [CONFIG_TILT_SLIDER_ONLY]: ESC_TILT_SLIDER_ONLY, // deprecated
-    [CONFIG_DISABLE_STANDARD_BUTTONS]: ESC_DISABLE_STANDARD_BUTTONS, // deprecated
-    [CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: ESC_DISABLE_PARTIAL_OPEN_BUTTONS, // deprecated
+    //[CONFIG_NAME_DISABLED]: ESC_NAME_DISABLED,   // deprecated
+    //[CONFIG_OPENING_DISABLED]: ESC_OPENING_DISABLED,  // deprecated
+    //[CONFIG_TILT_SLIDER_ONLY]: ESC_TILT_SLIDER_ONLY, // deprecated
+    //[CONFIG_DISABLE_STANDARD_BUTTONS]: ESC_DISABLE_STANDARD_BUTTONS, // deprecated
+    //[CONFIG_DISABLE_PARTIAL_OPEN_BUTTONS]: ESC_DISABLE_PARTIAL_OPEN_BUTTONS, // deprecated
 
     [CONFIG_SHOW_NAME]: ESC_SHOW_NAME, // replace
     [CONFIG_SHOW_OPENING]: ESC_SHOW_OPENING, // replace
@@ -686,7 +684,7 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_OFFSET_IS_CLOSED_PCT]: ESC_OFFSET_CLOSED_PCT,
     [CONFIG_CURRENT_POSITION]: ESC_CURRENT_POSITION,
   },
-  [NO_GROUP_CONFIG]: {
+  [_NO_GROUP_CONFIG]: {
 
 
     [CONFIG_SUPPORTED_FEATURES]: ESC_SUPPORTED_FEATURES,
