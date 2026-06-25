@@ -95,8 +95,10 @@ export class EnhancedShutterCardNew extends LitElement{
 
     if (this.config.windows  || this.config.covers)
     {
+      // New config with tree
+
       const cardConfigNew = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card,this.config);
-      this.cardCfg = new cardCfg(cardConfigNew);
+      this.cardCfg = new cardCfgNew(cardConfigNew);
 
       let config;
       if (this.config.windows){
@@ -115,12 +117,12 @@ export class EnhancedShutterCardNew extends LitElement{
       config.map((subConfig) => {
         let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
         let shutterConfig = this.#buildConfigNew(cardConfigNew,newSubConfig);
-        let cfg = new shutterCfg(this.hass,shutterConfig)
+        let cfg = new shutterCfgNew(this.hass,shutterConfig)
         // this.shutterCfgs.push(cfg);
 
       });
     } else {
-
+      // classic config
       const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
       const windowsConfig =1;
       this.cardCfg = new cardCfg(cardConfig);
@@ -1568,8 +1570,8 @@ class cfg{
     buttonsPosition:   C.CONFIG_BUTTONS_POSITION,
     centerClosing:     C.CONFIG_CENTER_CLOSING,
     nDevices:          C.CONFIG_NUMBER_DEVICES,
-/*
     supportedFeatures: C.CONFIG_SUPPORTED_FEATURES,
+/*
     disableEndButtons: C.CONFIG_DISABLE_END_BUTTONS,
     entityId:          C.CONFIG_ENTITY_ID,
     batteryEntityId:   C.CONFIG_BATTERY_ENTITY_ID,
@@ -1581,6 +1583,9 @@ class cfg{
   {
     for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
       this[method] = (value = null) => this.getCfg(key, value);
+      if (method != key){
+        this[key]    = (value = null) => this.getCfg(key, value);
+      }
     }
   }
   getCfg(key,value= null){
@@ -1622,9 +1627,9 @@ class cfg{
  // buttonsPosition(value = null){
  //  return this.getCfg(C.CONFIG_BUTTONS_POSITION,value);
  // }
-  supportedFeatures(value = null){
-    return this.getCfg(C.CONFIG_SUPPORTED_FEATURES,value);
-  }
+ // supportedFeatures(value = null){
+ //   return this.getCfg(C.CONFIG_SUPPORTED_FEATURES,value);
+ // }
   disableEndButtons(value = null){
     return this.getCfg(C.CONFIG_DISABLE_END_BUTTONS,value);
   }
@@ -2486,7 +2491,13 @@ applyInvertForShowButtonUpDownLabel(setting,debug=false){
     }
     return icon;
   }
-
+  fillCfg(escConfig){
+    Object.entries(escConfig).forEach( ([key, value]) => {
+      if (typeof this[key] !== 'function') return;
+      let test= this[key](value);
+      let test2 =1;
+    });
+  }
 }
 
 
@@ -2502,6 +2513,39 @@ export class cardCfg extends cfg{
     Object.preventExtensions(this);
   }
 
+}
+export class cardCfgNew extends cfg{
+
+  constructor(escConfig)
+  {
+    super();
+
+    this.fillCfg(escConfig);
+
+//    this.stacked(escConfig[C.CONFIG_STACKED]);
+//    this.title(escConfig[C.CONFIG_TITLE]);
+
+    Object.preventExtensions(this);
+  }
+
+}
+
+export class shutterCfgNew extends cfg{
+  constructor(hass,escConfig)
+  {
+    super();
+    this.fillCfg(escConfig);
+
+    let entityId = this.entityId(escConfig[C.CONFIG_ENTITY_ID] ? escConfig[C.CONFIG_ENTITY_ID] : escConfig);
+
+    this.hass = hass;
+
+    this[C.CONFIG_GROUP]=escConfig[C.CONFIG_GROUP];
+    this[C.CONFIG_ID]=escConfig[C.CONFIG_ID];
+
+    this.setLocalize(hass.localize);
+    this.setCoverEntity(hass,entityId);
+  }
 }
 export class shutterCfg extends cfg{
 
@@ -2520,10 +2564,13 @@ export class shutterCfg extends cfg{
     this.setLocalize(hass.localize);
     this.setCoverEntity(hass,entityId);
 
+    Object.entries(escConfig).forEach( ([key, value]) => {
+      if (typeof this[key] !== 'function') return;
+      let test= this[key](value);
+      let test2 =1;
+    });
     this.showGroupMembers(escConfig[C.CONFIG_SHOW_GROUP_MEMBERS]);
-
     this.imageMap(escConfig[C.CONFIG_IMAGE_MAP]);
-
     this.windowImage(escConfig[C.CONFIG_WINDOW_IMAGE]);
     this.viewImage(escConfig[C.CONFIG_VIEW_IMAGE]);
     this.shutterSlatImage(escConfig[C.CONFIG_SHUTTER_SLAT_IMAGE]);
@@ -2601,9 +2648,15 @@ export class shutterCfg extends cfg{
     this.showOpenCloseSliderBlock(escConfig[C.CONFIG_SHOW_OPEN_CLOSE_SLIDER]);
     this.showWindow(escConfig[C.CONFIG_SHOW_WINDOW]);
 
-    this.buttonStopHideStates(escConfig[C.CONFIG_BUTTON_STOP_HIDE_STATES]  ? escConfig[C.CONFIG_BUTTON_STOP_HIDE_STATES] : C.ESC_BUTTON_STOP_HIDE_STATES);
-    this.buttonOpenHideStates(escConfig[C.CONFIG_BUTTON_OPENED_HIDE_STATES]  ? escConfig[C.CONFIG_BUTTON_OPENED_HIDE_STATES] : C.ESC_BUTTON_OPENED_HIDE_STATES);
-    this.buttonCloseHideStates(escConfig[C.CONFIG_BUTTON_CLOSED_HIDE_STATES]  ? escConfig[C.CONFIG_BUTTON_CLOSED_HIDE_STATES] : C.ESC_BUTTON_CLOSED_HIDE_STATES);
+    this.buttonStopHideStates(escConfig[C.CONFIG_BUTTON_STOP_HIDE_STATES]
+      ? escConfig[C.CONFIG_BUTTON_STOP_HIDE_STATES]
+      : C.ESC_BUTTON_STOP_HIDE_STATES);
+    this.buttonOpenHideStates(escConfig[C.CONFIG_BUTTON_OPENED_HIDE_STATES]
+      ? escConfig[C.CONFIG_BUTTON_OPENED_HIDE_STATES]
+      : C.ESC_BUTTON_OPENED_HIDE_STATES);
+    this.buttonCloseHideStates(escConfig[C.CONFIG_BUTTON_CLOSED_HIDE_STATES]
+      ? escConfig[C.CONFIG_BUTTON_CLOSED_HIDE_STATES]
+      : C.ESC_BUTTON_CLOSED_HIDE_STATES);
 
     Object.preventExtensions(this);
   }
@@ -2613,7 +2666,6 @@ export class htmlCard{
     this.enhancedShutterCard=enhancedShutterCard;
   }
   defStyleVarsCard(){
-
     return `
       --esc-card-flex-direction: ${this.enhancedShutterCard.getCardFlexDirection()};
     `;
