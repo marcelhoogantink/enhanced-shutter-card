@@ -891,6 +891,10 @@ export const SHUTTER_CSS =`
         touch-action: none;
         user-select: none;
       }
+      .${ESC_CLASS_SELECTOR_PICKER}:hover,
+      .${ESC_CLASS_SELECTOR_PICKER}_2:hover {
+        background-color: rgba(128, 128, 128, 0.5);
+      }
       .${ESC_CLASS_SELECTOR_SLIDE} {
         z-index: ${Z_INDEX_SLIDE};
         text-align: start;` /* align to left, solves #104 */ +`
