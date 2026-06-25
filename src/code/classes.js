@@ -106,7 +106,27 @@ export class EnhancedShutterCardNew extends LitElement{
         config.map((subConfig) => {
           let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
           let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.windows,newSubConfig);
-          let cfg = new windowCfgNew(this.hass,shutterConfig)
+          let cfgWindow = new windowCfgNew(this.hass,shutterConfig);
+          let test=1;
+          if (subConfig.covers){
+            let config2= subConfig.covers;
+            config2.map((subConfig) => {
+              let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+              let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.covers,newSubConfig);
+              let cfgCover = new coverCfgNew(this.hass,shutterConfig);
+              let test=1;
+              if (subConfig.entities){
+                let config3= subConfig.entities;
+                config3.map((subConfig) => {
+                  let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+                  let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.entities,newSubConfig);
+                  let cfgEntity = new entityCfgNew(this.hass,shutterConfig);
+                let test=1;
+                });
+              }
+            });
+          }
+
         });
       }else if (this.config.covers){
         config= this.config.covers;
@@ -245,9 +265,11 @@ export class EnhancedShutterCardNew extends LitElement{
     let shutterPreset = (configSub[C.CONFIG_SHUTTER_PRESET] || '').toLowerCase();
     let configPreset = { ...(C.ESC_PRESET[shutterPreset] || {}) };
 
+    // replace deprecated and removed input  settings
+
     let newConfigSub = { ...configSub };
 
-    // check deprecated and removed
+    // check deprecated
     // TODO: combine:
     Object.keys(C.DEPRECATED).forEach(key => {
       if (newConfigSub[key] != null) {
@@ -261,6 +283,8 @@ export class EnhancedShutterCardNew extends LitElement{
       }
     });
 
+    // check removed
+    // TODO: combine:
     Object.keys(C.REMOVED).forEach(key => {
       if (newConfigSub[key] != null) {
         let oldKey = C.REMOVED[key];
@@ -1580,13 +1604,15 @@ class cfg{
     supportedFeatures: C.CONFIG_SUPPORTED_FEATURES,
     stacked:           C.CONFIG_STACKED,
     title:             C.CONFIG_TITLE,
-    showName:          C.CONFIG_SHOW_NAME,
-    showOpening:       C.CONFIG_SHOW_OPENING,
-    showTiltButtonBlock: C.CONFIG_SHOW_TILT_BUTTONS,
-    showStandardButtons: C.CONFIG_SHOW_STANDARD_BUTTONS,
-    showTiltSliderBlock: C.CONFIG_SHOW_TILT_SLIDER,
+
+    showName:                 C.CONFIG_SHOW_NAME,
+    showOpening:              C.CONFIG_SHOW_OPENING,
+    showTiltButtonBlock:      C.CONFIG_SHOW_TILT_BUTTONS,
+    showStandardButtons:      C.CONFIG_SHOW_STANDARD_BUTTONS,
+    showTiltSliderBlock:      C.CONFIG_SHOW_TILT_SLIDER,
     showOpenCloseSliderBlock: C.CONFIG_SHOW_OPEN_CLOSE_SLIDER,
-    showWindow:        C.CONFIG_SHOW_WINDOW,
+    showWindow:               C.CONFIG_SHOW_WINDOW,
+
     disableEndButtons: C.CONFIG_DISABLE_END_BUTTONS,
     entityId:          C.CONFIG_ENTITY_ID,
     batteryEntityId:   C.CONFIG_BATTERY_ENTITY_ID,
@@ -1601,18 +1627,19 @@ class cfg{
     debug:             C.CONFIG_DEBUG,
     type:              C.CONFIG_TYPE,
     cardMod:           C.CONFIG_CARD_MOD,
-    invertPercentageUi: C.CONFIG_INVERT_PCT_UI,
-    invertPercentageCover: C.CONFIG_INVERT_PCT_COVER,
-    invertPercentageTiltUi: C.CONFIG_INVERT_PCT_TILT_UI,
+
+    invertPercentageUi:        C.CONFIG_INVERT_PCT_UI,
+    invertPercentageCover:     C.CONFIG_INVERT_PCT_COVER,
+    invertPercentageTiltUi:    C.CONFIG_INVERT_PCT_TILT_UI,
     invertPercentageTiltCover: C.CONFIG_INVERT_PCT_TILT_COVER,
-    invertOpenCloseUi: C.CONFIG_INVERT_OPEN_CLOSE_UI,
-    invertOpenCloseCover: C.CONFIG_INVERT_OPEN_CLOSE_COVER,
+    invertOpenCloseUi:         C.CONFIG_INVERT_OPEN_CLOSE_UI,
+    invertOpenCloseCover:      C.CONFIG_INVERT_OPEN_CLOSE_COVER,
 
     baseHeightPx:      C.CONFIG_BASE_HEIGHT_PX,
     baseWidthPx:       C.CONFIG_BASE_WIDTH_PX,
     resizeHeightPct:   C.CONFIG_RESIZE_HEIGHT_PCT,
     resizeWidthPct:    C.CONFIG_RESIZE_WIDTH_PCT,
-    windowHeightPx:    C.CONFIG_HEIGHT_PX,
+    windowHeightPx:    C.CONFIG_HEIGHT_PX,  // will never be calles from fillCfg();
     windowWidthPx:     C.CONFIG_WIDTH_PX,
 
     rotateSlatsImage:  C.CONFIG_ROTATE_SLATS_SHUTTER_IMAGE,
@@ -1624,15 +1651,16 @@ class cfg{
     offsetClosedPct:   C.CONFIG_OFFSET_CLOSED_PCT,
     tiltAngleMin:      C.CONFIG_TILT_ANGLE_MIN,
     tiltAngleMax:      C.CONFIG_TILT_ANGLE_MAX,
-    unrollUnfoldDirection: C.CONFIG_CLOSING_DIRECTION,
-    buttonStopHideStates: C.CONFIG_BUTTON_STOP_HIDE_STATES,
-    buttonOpenHideStates: C.CONFIG_BUTTON_OPENED_HIDE_STATES,
-    buttonCloseHideStates: C.CONFIG_BUTTON_CLOSED_HIDE_STATES,
-    namePosition:        C.CONFIG_NAME_POSITION,
-    inlineHeader:      C.CONFIG_INLINE_HEADER,
-    iconsPosition:      C.CONFIG_ICONS_POSITION,
-    alwaysPercentage:      C.CONFIG_ALWAYS_PERCENTAGE,
-    pickerOverlapPx:      C.CONFIG_PICKER_OVERLAP_PX,
+
+    unrollUnfoldDirection:  C.CONFIG_CLOSING_DIRECTION,
+    buttonStopHideStates:   C.CONFIG_BUTTON_STOP_HIDE_STATES,
+    buttonOpenHideStates:   C.CONFIG_BUTTON_OPENED_HIDE_STATES,
+    buttonCloseHideStates:  C.CONFIG_BUTTON_CLOSED_HIDE_STATES,
+    namePosition:           C.CONFIG_NAME_POSITION,
+    inlineHeader:           C.CONFIG_INLINE_HEADER,
+    iconsPosition:          C.CONFIG_ICONS_POSITION,
+    alwaysPercentage:       C.CONFIG_ALWAYS_PERCENTAGE,
+    pickerOverlapPx:        C.CONFIG_PICKER_OVERLAP_PX,
     showPartialOpenButtons: C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,
     passiveMode:            C.CONFIG_PASSIVE_MODE,
   };
@@ -1645,6 +1673,15 @@ class cfg{
         this[key]  = (value = null) => this.getCfg(key, value);
       }
     }
+  }
+  fillCfg(escConfig){
+    Object.entries(escConfig).forEach( ([key, value]) => {
+      if (typeof this[key] !== 'function') {
+        return;
+      }
+      let test= this[key](value);
+      let test2 =1;
+    });
   }
   getCfg(key,value= null){
     if (value!== null && this.cfg[key]!=value){
@@ -2105,7 +2142,7 @@ class cfg{
     setting = this.applyInvertPercentageCover(setting,debug);
     return setting;
   }
-applyInvertForShowButtonUpDownLabel(setting,debug=false){
+  applyInvertForShowButtonUpDownLabel(setting,debug=false){
     setting = this.applyInvertOpenCloseUi(setting,debug);
     setting = this.applyInvertDirection(setting,debug);
     return setting;
@@ -2548,15 +2585,6 @@ applyInvertForShowButtonUpDownLabel(setting,debug=false){
     }
     return icon;
   }
-  fillCfg(escConfig){
-    Object.entries(escConfig).forEach( ([key, value]) => {
-      if (typeof this[key] !== 'function') {
-        return;
-      }
-      let test= this[key](value);
-      let test2 =1;
-    });
-  }
 }
 
 
@@ -2597,7 +2625,7 @@ export class windowCfgNew extends cfg{
 
   }
 }
-export class shutterCfgNew extends cfg{
+export class coverCfgNew extends cfg{
   constructor(hass,escConfig)
   {
     super();
