@@ -746,7 +746,7 @@ export const ESC_PRESET = {
     [CONFIG_SHUTTER_BOTTOM_IMAGE]: '', // covers
     [CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]: false, // covers
     [CONFIG_NAME]: 'Curtain', // windows
-    [CONFIG_OFFSET_CLOSED_PCT]: 50,  // 100-50 for the other one ...
+    [CONFIG_OFFSET_CLOSED_PCT]: 50,  // covers // 100-50 for the other one ...
 
     [CONFIG_NUMBER_DEVICES]: 2,
     [CONFIG_CENTER_CLOSING]: true,

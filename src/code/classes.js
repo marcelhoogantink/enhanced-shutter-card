@@ -100,34 +100,45 @@ export class EnhancedShutterCardNew extends LitElement{
       const cardConfigNew = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card,this.config);
       this.cardCfg = new cardCfgNew(cardConfigNew);
 
+      let testCfg=[];
+      testCfg[C.CARD_CONFIG]=this.cardCfg.cfg;
       let config;
       if (this.config.windows){
         config= this.config.windows;
+        testCfg[C.WINDOWS_CONFIG]=[];
         config.map((subConfig) => {
           let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
           let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.windows,newSubConfig);
           let cfgWindow = new windowCfgNew(this.hass,shutterConfig);
+          testCfg[C.WINDOWS_CONFIG].push(cfgWindow.cfg);
+
           let test=1;
           if (subConfig.covers){
             let config2= subConfig.covers;
+            testCfg[C.COVERS_CONFIG]=[];
             config2.map((subConfig) => {
               let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
               let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.covers,newSubConfig);
               let cfgCover = new coverCfgNew(this.hass,shutterConfig);
+              testCfg[C.COVERS_CONFIG].push(cfgCover.cfg);
               let test=1;
               if (subConfig.entities){
+                let tempCfg= [];
                 let config3= subConfig.entities;
                 config3.map((subConfig) => {
                   let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
                   let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.entities,newSubConfig);
                   let cfgEntity = new entityCfgNew(this.hass,shutterConfig);
-                let test=1;
+                  tempCfg.push(cfgEntity.cfg);
+                  let test=1;
                 });
+                testCfg[C.ENTITIES_CONFIG]=tempCfg;
               }
             });
           }
 
         });
+        let test=1;
       }else if (this.config.covers){
         config= this.config.covers;
         config.map((subConfig) => {
