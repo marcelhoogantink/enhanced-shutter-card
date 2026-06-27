@@ -73,6 +73,7 @@ export class EnhancedShutterCardNew extends LitElement{
       await this.escImages.processImages();
     } catch (err) {
       console.warn('ESC: Error during initialization:', err);
+      //debugger;
     } finally {
       this.initializeReady = true;
         console_log('initialize Is Ready');
@@ -121,6 +122,7 @@ export class EnhancedShutterCardNew extends LitElement{
 
     return rawItems.map((rawItem) => {
       // 1. Merge this raw item with its defaults and a fresh id.
+      //const mergedConfig = { ...rawItem};
       const mergedConfig = { ...rawItem, [C.CONFIG_ID]: idRef.id++ };
       const config = this.#buildConfigNew(baseConfig, mergedConfig);
       const fullCfg = new Class(this.hass, config).cfg;
@@ -238,7 +240,9 @@ export class EnhancedShutterCardNew extends LitElement{
 
         let baseEntity = subConfig.entity ? new haEntity(this.hass,subConfig.entity) : null;
         let counter =1;
-        if (baseEntity?.isGroup() && cfg.showGroupMembers()){
+        let test1 = baseEntity?.isGroup();
+        let test2 = this.cardCfg.showGroupMembers();
+        if (baseEntity?.isGroup() && this.cardCfg.showGroupMembers()){
           // get the entityId's from the group
           const groupEntityIds = baseEntity.getAttributes().entity_id || [];
           // get the full entities from the id's
@@ -338,6 +342,7 @@ export class EnhancedShutterCardNew extends LitElement{
           idMessage
         );
       });
+      //debugger;
     };
     // handle PRESET TYPE
     //
@@ -1665,8 +1670,8 @@ class cfg{
   coverEntity=null;
   localize={};
   subEntity={};
-  _group=null;
-  _id=null;
+  group=null;
+  //id=null;
   enhancedShutter=null;
 
 
@@ -1742,6 +1747,8 @@ class cfg{
     pickerOverlapPx:        C.CONFIG_PICKER_OVERLAP_PX,
     showPartialOpenButtons: C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,
     passiveMode:            C.CONFIG_PASSIVE_MODE,
+    id:                     C.CONFIG_ID,
+    group:                  C.CONFIG_GROUP,
   };
 
   constructor()
@@ -2093,12 +2100,12 @@ class cfg{
     }
     return image;
   }
-  group(){
-    return this[C.CONFIG_GROUP];
-  }
-  id(){
-    return this[C.CONFIG_ID];
-  }
+  //group(){
+  //  return this[C.CONFIG_GROUP];
+ // }
+ // id(){
+ //   return this[C.CONFIG_ID];
+ // }
 
   partial(value = null){
     let partial = this.getCfg(C.CONFIG_PARTIAL_CLOSE_PCT,value);
@@ -2724,8 +2731,8 @@ export class shutterCfg extends cfg{
 
     this.hass = hass;
 
-    this[C.CONFIG_GROUP]=escConfig[C.CONFIG_GROUP];
-    this[C.CONFIG_ID]=escConfig[C.CONFIG_ID];
+    this.group(escConfig[C.CONFIG_GROUP]);
+    this.id(escConfig[C.CONFIG_ID]);
 
     this.setLocalize(hass.localize);
     this.setCoverEntity(hass,entityId);
@@ -2735,6 +2742,7 @@ export class shutterCfg extends cfg{
       let test= this[key](value);
       let test2 =1;
     });
+
     this.showGroupMembers(escConfig[C.CONFIG_SHOW_GROUP_MEMBERS]);
     this.imageMap(escConfig[C.CONFIG_IMAGE_MAP]);
     this.windowImage(escConfig[C.CONFIG_WINDOW_IMAGE]);
@@ -2910,6 +2918,8 @@ export class MessageManager {
       console.warn(`Enhanced Shutter Card (${subject}): "${message.text}"`);
 //    }else{
 //      console.info(`Enhanced Shutter Card (${subject}): "${message.text}"`);
+//    }
+      //debugger;
     }
   }
 

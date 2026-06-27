@@ -254,6 +254,7 @@ export const CONFIG_SHOW_WINDOW = 'show_window'; // SHOW 7 new
 //======
 
 export const CONFIG_COVERS = 'covers';
+export const CONFIG_COVER = 'cover';
 
 export const CONFIG_PASSIVE_MODE = 'passive_mode';
 
@@ -279,13 +280,12 @@ export const CONFIG_BUTTON_STOP_HIDE_STATES = 'button_stop_hide_states';
 export const CONFIG_BUTTON_OPENED_HIDE_STATES = 'button_up_hide_states';  // TODO rename up->opened
 export const CONFIG_BUTTON_CLOSED_HIDE_STATES = 'button_down_hide_states'; // TODO rename down->closed
 
-
-
-export const CONFIG_COVER = 'cover';
-
 export const CONFIG_SHUTTER_PRESET = 'shutter_preset';
 export const CONFIG_ENTITIES = 'entities';
+//export const CONFIG_ENTITY= 'entity';
+export const CONFIG_ENTITY_ID = 'entity';
 export const CONFIG_WINDOWS = 'windows';
+export const CONFIG_WINDOW = 'window';
 export const CONFIG_SUPPORTED_FEATURES = 'supported_features';
 export const CONFIG_CENTER_CLOSING = 'center_closing';
 export const CONFIG_OFFSET_OPENED_PCT = 'top_offset_pct'; // TODO  rename: top->opened
@@ -319,7 +319,6 @@ export const CONFIG_ALWAYS_PCT = 'always_percentage';
 export const CONFIG_PICKER_OVERLAP_PX = 'picker_overlap_px'; // not a real config; it is a system setting
 
 
-export const CONFIG_ENTITY_ID = 'entity';
 export const CONFIG_CLOSING_DIRECTION = 'closing_direction';
 export const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
 export const CONFIG_CURRENT_POSITION = 'current_position';  // not a real config; it is a device/entity setting
@@ -329,8 +328,8 @@ export const CONFIG_NUMBER_DEVICES = 'number_devices'; // to be removed: this sh
 
 
 // for cover-group support
-export const CONFIG_ID = "_id";
-export const CONFIG_GROUP = "_group";
+export const CONFIG_ID = "id";
+export const CONFIG_GROUP = "group";
 export const CONFIG_SHOW_GROUP_MEMBERS = 'show_group_members';
 
 export const CONFIG_IMAGE_MAP = 'image_map';
@@ -621,6 +620,9 @@ export const CONFIG_DEFAULT_NEW ={
   [WINDOWS_CONFIG]: {
     // (not active yet; for multiple covers in a window-frame  (eq: awning, roller-shutter, blind and curtain))
     // Handled as COVER LEVEL now
+    [CONFIG_ID]:0,
+    [CONFIG_WINDOW]: "",
+
     [CONFIG_COVERS]: "",
     [CONFIG_PASSIVE_MODE]: ESC_PASSIVE_MODE,
     [CONFIG_WINDOW_IMAGE]: ESC_IMAGE_WINDOW,
@@ -638,7 +640,10 @@ export const CONFIG_DEFAULT_NEW ={
 
   },
   [COVERS_CONFIG]: {
+    [CONFIG_ID]:0,
+    [CONFIG_COVER]: "",
     [CONFIG_ENTITIES]: "",
+    //[CONFIG_ENTITY]: "",
 
     [CONFIG_BUTTON_CLOSED_HIDE_STATES]: ESC_BUTTON_CLOSED_HIDE_STATES,
     [CONFIG_BUTTON_STOP_HIDE_STATES]: ESC_BUTTON_STOP_HIDE_STATES,
@@ -684,6 +689,7 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_ALWAYS_PCT]: ESC_ALWAYS_PCT,
   },
   [ENTITIES_CONFIG]: {
+    [CONFIG_ID]:0,
     [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
     [CONFIG_CLOSING_DIRECTION]: ESC_CLOSING_DIRECTION,
     [CONFIG_OFFSET_IS_CLOSED_PCT]: ESC_OFFSET_CLOSED_PCT,
