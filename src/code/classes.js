@@ -86,57 +86,125 @@ export class EnhancedShutterCardNew extends LitElement{
       }
     }
   }
+  // ===================================
+
+  /**
+   * Recursively builds the config tree starting at `levelIndex`.
+   *
+   * rawParentConfig - the raw (user-supplied) config object that may contain
+   *                    a list of raw items under LEVELS[levelIndex].key
+   * idRef           - { id: number }, shared across the whole tree so every
+   *                    item gets a unique, ever-increasing id
+   *
+   * Returns an array of "full" config objects for this level,
+   * or undefined if there's nothing to build (no items, or no more levels).
+   */
+  #buildLevel(levelIndex, rawParentConfig, idRef) {
+    /**
+     * One entry per nesting level.
+     * key   = the property name under which raw items live, and under which
+     *         the built result gets attached to its parent's full config.
+     * Class = the wrapper class used to turn a merged config into a "full" config.
+     */
+    const LEVELS = [
+      { key: C.WINDOWS_CONFIG,   Class: windowCfgNew  },
+      { key: C.COVERS_CONFIG,    Class: coverCfgNew   },
+      { key: C.ENTITIES_CONFIG,  Class: entityCfgNew  },
+    ];
+    if (levelIndex >= LEVELS.length) return undefined;
+
+    const { key, Class } = LEVELS[levelIndex];
+    const baseConfig = C.CONFIG_DEFAULT_NEW[key];
+    const rawItems = rawParentConfig[key];
+
+    if (!rawItems) return undefined;
+
+    return rawItems.map((rawItem) => {
+      // 1. Merge this raw item with its defaults and a fresh id.
+      const mergedConfig = { ...rawItem, [C.CONFIG_ID]: idRef.id++ };
+      const config = this.#buildConfigNew(baseConfig, mergedConfig);
+      const fullCfg = new Class(this.hass, config).cfg;
+
+      // 2. Recurse: try to build the next level using THIS raw item as parent.
+      const childKey = LEVELS[levelIndex + 1]?.key;
+      const children = this.#buildLevel(levelIndex + 1, rawItem, idRef);
+      if (children) {
+        fullCfg[childKey] = children;
+      }
+
+      return fullCfg;
+    });
+  }
+// ===================================
   #defAllShutterConfig()
   {
-    //const coversConfig;
+    // OOPS: this.cardCfg shoulde exist for now!!!!!!
 
+    const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
+    this.cardCfg = new cardCfg(cardConfig);
 
-    let id =0;
+    // OOPS END
 
     if (this.config.windows  || this.config.covers)
     {
-      // New config with tree
+          // New config with tree
 
+      let idRef = { id: 0 };
+      let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card, this.config);
+      let cfgCard = new cardCfgNew(config).cfg;
+
+      const windows = this.#buildLevel(0, this.config, idRef);
+      if (windows) {
+        cfgCard[C.WINDOWS_CONFIG] = windows;
+      }
+/*
+      let id =0;
       let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card,this.config);
       let cfgCard = new cardCfgNew(config).cfg;
 
-      if (this.config.windows){
-        let tempWindowsCfg= [];
-        let windows= this.config.windows;
-        windows.map((windowCfg) => {
-          let newSubConfig = {...windowCfg,  [C.CONFIG_ID]: id++};
-          let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.windows,newSubConfig);
-          let cfgWindow = new windowCfgNew(this.hass,config).cfg;
+      let part= C.WINDOWS_CONFIG;
+      let baseConfig=C.CONFIG_DEFAULT_NEW[part];
+      let items= this.config[part];
+      if (items){
+        let tempCfg= [];
+        items.map((itemCfg) => {
+          let newSubConfig = {...itemCfg,  [C.CONFIG_ID]: id++};
+          let config = this.#buildConfigNew(baseConfig,newSubConfig);
+          let fullCfg = new windowCfgNew(this.hass,config).cfg;
 
-          if (windowCfg.covers){
-            let tempCoverCfg= [];
-            let covers= windowCfg.covers;
-            covers.map((coverCfg) => {
-              let newSubConfig = {...coverCfg,  [C.CONFIG_ID]: id++};
-              let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.covers,newSubConfig);
-              let cfgCover = new coverCfgNew(this.hass,config).cfg;
+          let part= C.COVERS_CONFIG; // tricky
+          let baseConfig=C.CONFIG_DEFAULT_NEW[part];
+          let items= itemCfg[part];
+          if (items){
+            let tempCfg= [];
+            items.map((itemCfg) => {
+              let newSubConfig = {...itemCfg,  [C.CONFIG_ID]: id++};
+              let config = this.#buildConfigNew(baseConfig,newSubConfig);
+              let fullCfg = new coverCfgNew(this.hass,config).cfg;
 
-              if (coverCfg.entities){
-                let tempEntityCfg= [];
-                let entities= coverCfg.entities;
-                entities.map((entityCfg) => {
-                  let newSubConfig = {...entityCfg,  [C.CONFIG_ID]: id++};
-                  let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.entities,newSubConfig);
-                  let cfgEntity = new entityCfgNew(this.hass,config).cfg;
+              let part= C.ENTITIES_CONFIG;
+              let baseConfig=C.CONFIG_DEFAULT_NEW[part];
+              let items= itemCfg[part];
+              if (items){
+                let tempCfg= [];
+                items.map((itemCfg) => {
+                  let newSubConfig = {...itemCfg,  [C.CONFIG_ID]: id++};
+                  let config = this.#buildConfigNew(baseConfig,newSubConfig);
+                  let fullCfg = new entityCfgNew(this.hass,config).cfg;
 
-                  tempEntityCfg.push(cfgEntity);
+                  tempCfg.push(fullCfg);
                 });
-                cfgCover[C.ENTITIES_CONFIG]=tempEntityCfg;
+                fullCfg[C.ENTITIES_CONFIG]=tempCfg;
               }
-              tempCoverCfg.push(cfgCover);
+              tempCfg.push(fullCfg);
             });
-            cfgWindow[C.COVERS_CONFIG]=tempCoverCfg;
+            fullCfg[C.COVERS_CONFIG]=tempCfg;
           }
-          tempWindowsCfg.push(cfgWindow);
+          tempCfg.push(fullCfg);
         });
-        cfgCard[C.WINDOWS_CONFIG]=tempWindowsCfg;
+        cfgCard[C.WINDOWS_CONFIG]=tempCfg;
 
-        let test=1;
+
       }else if (this.config.covers){
         config= this.config.covers;
         config.map((subConfig) => {
@@ -156,9 +224,12 @@ export class EnhancedShutterCardNew extends LitElement{
       }else{
         config=null;
       }
+*/
+      let breakPoint;
 
     } else {
       // classic config
+      let id =0;
       const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
       const windowsConfig =1;
       this.cardCfg = new cardCfg(cardConfig);
@@ -173,8 +244,7 @@ export class EnhancedShutterCardNew extends LitElement{
           // get the full entities from the id's
           const entitiesInGroup = groupEntityIds.filter(entityId => this.hass.states[entityId]);
           entitiesInGroup.forEach(entityId => {
-            //let newSubConfig = {...subConfig, [C.CONFIG_ENTITY_ID]: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
-            let newSubConfig = {...subConfig, entity: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
+            let newSubConfig = {...subConfig, [C.CONFIG_ENTITY_ID]: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
             let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
             // when a name is defined, check for '@'and fill in the countnumber.
             if (shutterConfig.name) {
