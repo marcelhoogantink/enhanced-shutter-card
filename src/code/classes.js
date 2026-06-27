@@ -239,10 +239,13 @@ export class EnhancedShutterCardNew extends LitElement{
       this.config.entities.map((subConfig) => {
 
         let baseEntity = subConfig.entity ? new haEntity(this.hass,subConfig.entity) : null;
+        let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+        let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
+        let cfg = new shutterCfg(this.hass,shutterConfig)
         let counter =1;
         let test1 = baseEntity?.isGroup();
-        let test2 = this.cardCfg.showGroupMembers();
-        if (baseEntity?.isGroup() && this.cardCfg.showGroupMembers()){
+        let test2 = cfg.showGroupMembers();
+        if (baseEntity?.isGroup() && cfg.showGroupMembers()){
           // get the entityId's from the group
           const groupEntityIds = baseEntity.getAttributes().entity_id || [];
           // get the full entities from the id's
@@ -258,9 +261,6 @@ export class EnhancedShutterCardNew extends LitElement{
             this.shutterCfgs.push(cfg);
           });
         }else{
-          let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
-          let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
-          let cfg = new shutterCfg(this.hass,shutterConfig)
           this.shutterCfgs.push(cfg);
         }
       });
