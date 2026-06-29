@@ -73,7 +73,7 @@ export class EnhancedShutterCardNew extends LitElement{
       await this.escImages.processImages();
     } catch (err) {
       console.warn('ESC: Error during initialization:', err);
-      //debugger;
+      debugger;
     } finally {
       this.initializeReady = true;
         console_log('initialize Is Ready');
@@ -143,7 +143,7 @@ export class EnhancedShutterCardNew extends LitElement{
     // OOPS: this.cardCfg shoulde exist for now!!!!!!
 
     const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
-    this.cardCfg = new cardCfg(cardConfig);
+    this.cardCfgTest = new cardCfg(cardConfig);
 
     // OOPS END
 
@@ -153,80 +153,16 @@ export class EnhancedShutterCardNew extends LitElement{
 
       let idRef = { id: 0 };
       let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card, this.config);
-      let cfgCard = new cardCfgNew(config).cfg;
+      let cfgCardAll = new cardCfgNew(config);
+      let cfgCard =cfgCardAll.cfg;
 
-      const windows = this.#buildLevel(0, this.config, idRef);
-      if (windows) {
-        cfgCard[C.WINDOWS_CONFIG] = windows;
+      const windowsCfg = this.#buildLevel(0, this.config, idRef);
+      if (windowsCfg) {
+        cfgCard[C.WINDOWS_CONFIG] = windowsCfg;
       }
-/*
-      let id =0;
-      let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card,this.config);
-      let cfgCard = new cardCfgNew(config).cfg;
 
-      let part= C.WINDOWS_CONFIG;
-      let baseConfig=C.CONFIG_DEFAULT_NEW[part];
-      let items= this.config[part];
-      if (items){
-        let tempCfg= [];
-        items.map((itemCfg) => {
-          let newSubConfig = {...itemCfg,  [C.CONFIG_ID]: id++};
-          let config = this.#buildConfigNew(baseConfig,newSubConfig);
-          let fullCfg = new windowCfgNew(this.hass,config).cfg;
+      this.cardCfg = cfgCardAll;
 
-          let part= C.COVERS_CONFIG; // tricky
-          let baseConfig=C.CONFIG_DEFAULT_NEW[part];
-          let items= itemCfg[part];
-          if (items){
-            let tempCfg= [];
-            items.map((itemCfg) => {
-              let newSubConfig = {...itemCfg,  [C.CONFIG_ID]: id++};
-              let config = this.#buildConfigNew(baseConfig,newSubConfig);
-              let fullCfg = new coverCfgNew(this.hass,config).cfg;
-
-              let part= C.ENTITIES_CONFIG;
-              let baseConfig=C.CONFIG_DEFAULT_NEW[part];
-              let items= itemCfg[part];
-              if (items){
-                let tempCfg= [];
-                items.map((itemCfg) => {
-                  let newSubConfig = {...itemCfg,  [C.CONFIG_ID]: id++};
-                  let config = this.#buildConfigNew(baseConfig,newSubConfig);
-                  let fullCfg = new entityCfgNew(this.hass,config).cfg;
-
-                  tempCfg.push(fullCfg);
-                });
-                fullCfg[C.ENTITIES_CONFIG]=tempCfg;
-              }
-              tempCfg.push(fullCfg);
-            });
-            fullCfg[C.COVERS_CONFIG]=tempCfg;
-          }
-          tempCfg.push(fullCfg);
-        });
-        cfgCard[C.WINDOWS_CONFIG]=tempCfg;
-
-
-      }else if (this.config.covers){
-        config= this.config.covers;
-        config.map((subConfig) => {
-          let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
-          let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.covers,newSubConfig);
-          let cfg = new shutterCfgNew(this.hass,shutterConfig)
-        });
-
-      }else if (this.config.entities){
-        config= this.config.entities;
-        config.map((subConfig) => {
-          let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
-          let shutterConfig = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.entities,newSubConfig);
-          let cfg = new entityCfgNew(this.hass,shutterConfig)
-        });
-
-      }else{
-        config=null;
-      }
-*/
       let breakPoint;
 
     } else {
@@ -342,7 +278,7 @@ export class EnhancedShutterCardNew extends LitElement{
           idMessage
         );
       });
-      //debugger;
+      debugger;
     };
     // handle PRESET TYPE
     //
@@ -1749,6 +1685,12 @@ class cfg{
     passiveMode:            C.CONFIG_PASSIVE_MODE,
     id:                     C.CONFIG_ID,
     group:                  C.CONFIG_GROUP,
+
+    mirrorX:                C.CONFIG_MIRROR_X,
+    mirrorY:                C.CONFIG_MIRROR_Y,
+
+    ppartial:                C.CONFIG_PARTIAL_CLOSE_PCT,
+    ooffset:                 C.CONFIG_OFFSET_IS_CLOSED_PCT,
   };
 
   constructor()
@@ -2114,6 +2056,9 @@ class cfg{
     // only when cover can set position
     return this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION) ? partial : 0;
   }
+
+
+
   offset(value = null){
     let offset = this.getCfg(C.CONFIG_OFFSET_IS_CLOSED_PCT,value);
     if (offset == C.SHUTTER_OPEN_PCT ||  offset == C.SHUTTER_CLOSED_PCT) offset = 0;
@@ -2121,6 +2066,7 @@ class cfg{
     // only when cover can set position
     return this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION) ? offset : 0;
   }
+
   partialActive(){
     return this.partial() !=C.SHUTTER_OPEN_PCT && this.partial() != C.SHUTTER_CLOSED_PCT;
   }
