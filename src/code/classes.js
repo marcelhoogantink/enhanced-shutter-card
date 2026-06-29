@@ -1499,21 +1499,21 @@ export class EnhancedShutter extends LitElement
     this.screenPosition = this.getScreenPosFromPickPoint(event); //old
     this.react_ShutterPosition = this.getShutterOnScreenPosition(event);
     const tiltPosition = this.cfg.currentDeviceTiltPosition();
-    this.positionText = this.cfg.computePositionText(this.react_ShutterPosition,tiltPosition);
+    this.positionText = this.cfg.createPositionText(this.react_ShutterPosition,tiltPosition);
     //console.log('mouseMoveOpenClosePicker:',this.react_ShutterPosition,tiltPosition,this.positionText);
   };
   mouseMoveTiltSlider = (event) => { // mouseMoveTilt
     this.action='user-drag-tilt';
     this.react_TiltPosition = this.getTiltOnScreenPosition(event);
     const shutterPosition = this.cfg.currentDevicePosition();
-    this.positionText = this.cfg.computePositionText(shutterPosition,this.react_TiltPosition);
+    this.positionText = this.cfg.createPositionText(shutterPosition,this.react_TiltPosition);
     //console.log('mouseMoveTiltSlider:',shutterPosition,this.react_TiltPosition,this.positionText);
   }
   mouseMoveOpenCloseSlider = (event) => { // mouseMoveTilt
     this.action='user-drag-slider';
     this.react_ShutterPosition = this.getOpenCloseOnScreenPosition(event); // TODO
     const tiltPosition = this.cfg.currentDeviceTiltPosition();
-    this.positionText = this.cfg.computePositionText(this.react_ShutterPosition,tiltPosition);
+    this.positionText = this.cfg.createPositionText(this.react_ShutterPosition,tiltPosition);
     //console.log('mouseMoveOpenCloseSlider:',this.react_ShutterPosition,tiltPosition,this.positionText);
   }
 /**
@@ -1659,8 +1659,8 @@ class cfg{
     baseWidthPx:       C.CONFIG_BASE_WIDTH_PX,
     resizeHeightPct:   C.CONFIG_RESIZE_HEIGHT_PCT,
     resizeWidthPct:    C.CONFIG_RESIZE_WIDTH_PCT,
-    windowHeightPx:    C.CONFIG_HEIGHT_PX,  // will never be calles from fillCfg();
-    windowWidthPx:     C.CONFIG_WIDTH_PX,
+    windowHeightPx:    C.CONFIG_HEIGHT_PX,  // will never be called from fillCfg();
+    windowWidthPx:     C.CONFIG_WIDTH_PX,   // will never be calle from fillCfg();
 
     rotateSlatsImage:  C.CONFIG_ROTATE_SLATS_SHUTTER_IMAGE,
     stretchEdgeImage:  C.CONFIG_STRETCH_EDGE_SHUTTER_IMAGE,
@@ -2051,8 +2051,8 @@ class cfg{
 
   partial(value = null){
     let partial = this.getCfg(C.CONFIG_PARTIAL_CLOSE_PCT,value);
-    if (partial == C.SHUTTER_OPEN_PCT ||  partial == C.SHUTTER_CLOSED_PCT) partial = 0;
-    partial = this.invertPosition(partial);
+    if (partial == C.SHUTTER_OPEN_PCT ||  partial == C.SHUTTER_CLOSED_PCT) partial = 100;
+    //partial = this.invertPosition(partial);
     // only when cover can set position
     return this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION) ? partial : 0;
   }
@@ -2061,15 +2061,12 @@ class cfg{
 
   offset(value = null){
     let offset = this.getCfg(C.CONFIG_OFFSET_IS_CLOSED_PCT,value);
-    if (offset == C.SHUTTER_OPEN_PCT ||  offset == C.SHUTTER_CLOSED_PCT) offset = 0;
-    offset = this.invertPosition(offset);
+    if (offset == C.SHUTTER_OPEN_PCT ||  offset == C.SHUTTER_CLOSED_PCT) offset = 100;
+    //offset = this.invertPosition(offset);
     // only when cover can set position
     return this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION) ? offset : 0;
   }
 
-  partialActive(){
-    return this.partial() !=C.SHUTTER_OPEN_PCT && this.partial() != C.SHUTTER_CLOSED_PCT;
-  }
   offsetActive(){
     return this.offset() !=C.SHUTTER_OPEN_PCT && this.offset() != C.SHUTTER_CLOSED_PCT;
   }
@@ -2274,13 +2271,6 @@ class cfg{
     return escState;
   }
 
-  buttonsLeftActive(){
-    if (this.showStandardButtons() || this.partialActive())
-      return true;
-    else
-      return false;
-  }
-
   buttonGroupInRow(){
     return this.getButtonsPosition() == C.LEFT || this.getButtonsPosition() == C.RIGHT;
   }
@@ -2377,7 +2367,7 @@ class cfg{
     }
     return text;
   }
-  computePositionText(position,tiltPosition){
+  createPositionText(position,tiltPosition){
     let positionText;
     if (C.NOT_KNOWN.includes(this.getCoverEntity().getState())){
       positionText = this.getLocalize(C.LOCALIZE_TEXT[C.UNAVAILABLE]);
@@ -2733,8 +2723,8 @@ export class shutterCfg extends cfg{
     this.scaleIcons(escConfig[C.CONFIG_SCALE_ICONS]);
     this.scaleTexts(escConfig[C.CONFIG_SCALE_TEXTS]);
 
-    this.partial(boundary(escConfig[C.CONFIG_PARTIAL_CLOSE_PCT]));
-    this.offset(boundary(escConfig[C.CONFIG_OFFSET_IS_CLOSED_PCT]));
+    this.partial(boundary(this.invertPosition(escConfig[C.CONFIG_PARTIAL_CLOSE_PCT])));
+    this.offset(boundary(this.invertPosition(escConfig[C.CONFIG_OFFSET_IS_CLOSED_PCT])));
 
     this.offsetOpenedPct(boundary(escConfig[C.CONFIG_OFFSET_OPENED_PCT]));
     this.offsetClosedPct(boundary(escConfig[C.CONFIG_OFFSET_CLOSED_PCT]));

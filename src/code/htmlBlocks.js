@@ -75,6 +75,15 @@ export class htmlBlock
     // only when cover can set position
     return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION) ? offset : 0;
   }
+  buttonsLeftActive(){
+    if (this.cfg.showStandardButtons() || this.partialActive())
+      return true;
+    else
+      return false;
+  }
+  partialActive(){
+    return this.cfg.partial() !=C.SHUTTER_OPEN_PCT && this.cfg.partial() != C.SHUTTER_CLOSED_PCT;
+  }
 
   showTopBottomDiv(position){
     const batteryIconBlock = new htmlBlockBatteryIcon(this.shutter);
@@ -340,7 +349,7 @@ export class htmlBlockName extends htmlBlock{
 }
 export class htmlBlockState extends htmlBlock{
   defineHtml(){
-    const positionText =this.cfg.computePositionText(this.actualShutterPosition,this.actualTiltPosition);
+    const positionText =this.cfg.createPositionText(this.actualShutterPosition,this.actualTiltPosition);
 
     this.setHtmlString(html`
       ${this.cfg.showOpening()
@@ -408,7 +417,7 @@ export class htmlBlockMiddle extends htmlBlock{
 
     this.setHtmlString(html`
       <div class="${C.ESC_CLASS_MIDDLE}">
-        ${this.cfg.buttonsLeftActive() ? leftButtonsBlock.show() : nothing}
+        ${this.buttonsLeftActive() ? leftButtonsBlock.show() : nothing}
         ${this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.show() : nothing}
         ${centralWindowBlock.show()}
         ${this.cfg.showPartialOpenButtons() || this.cfg.canTilt()
@@ -469,7 +478,7 @@ export class htmlBlockLeftButtons extends htmlBlock{
     const buttonStopBlock = new htmlBlockButtonStop(this.shutter);
     const buttonPartialBlock = new htmlBlockButtonPartial(this.shutter);
     this.setHtmlString(html`
-      ${this.cfg.buttonsLeftActive()
+      ${this.buttonsLeftActive()
       ? html`
         <div class="${C.ESC_CLASS_BUTTONS}">
           ${buttonUpBlock.show()}
@@ -491,7 +500,7 @@ export class htmlBlockLeftButtons extends htmlBlock{
     let xyButtonUpBlock = buttonUpBlock.size();
     let xyButtonStopBlock = buttonStopBlock.size();
     let xyButtonDownBlock = buttonDownBlock.size();
-    let xyButtonPartialBlock = this.cfg.partialActive() ? buttonPartialBlock.size() : new xyPair();
+    let xyButtonPartialBlock = this.partialActive() ? buttonPartialBlock.size() : new xyPair();
 
     let xy = this.gridAddVertical(xyButtonUpBlock,xyButtonStopBlock);
     xy = this.gridAddVertical(xy,xyButtonDownBlock);
@@ -573,7 +582,7 @@ export class htmlBlockButtonDown extends htmlBlockLeftButtons{
 export class htmlBlockButtonPartial extends htmlBlockLeftButtons{
   defineHtml(){
     this.setHtmlString(html`
-      ${this.cfg.partialActive() && this.cfg.showStandardButtons() /* TODO localize texts */
+      ${this.partialActive() && this.cfg.showStandardButtons() /* TODO localize texts */
         ? html`
           <ha-icon-button
             label="Partially ${this.cfg.applyInvertOpenCloseUi(C.SHUTTER_STATE_CLOSED)} (${C.SHUTTER_OPEN_PCT- this.cfg.partial()}%)"
@@ -789,7 +798,7 @@ export class htmlBlockCentralWindow extends htmlBlock{
       : nothing;
   }
   showPartial(){
-    return this.cfg.partialActive()
+    return this.partialActive()
       ? html`<div class="${C.ESC_CLASS_SELECTOR_PARTIAL}"></div>`
       : nothing;
   }

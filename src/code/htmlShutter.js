@@ -8,7 +8,7 @@ export class htmlShutter{
     this.actualScreenPosition = enhancedShutter.actualScreenPosition;
     this.actualTiltPosition = enhancedShutter.actualTiltPosition;
     this.actualShutterPosition = enhancedShutter.actualShutterPosition;
-    this.positionText =this.cfg.computePositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
+    //this.positionText =this.cfg.createPositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
     this.escImages= enhancedShutter.escImages;
   }
 
