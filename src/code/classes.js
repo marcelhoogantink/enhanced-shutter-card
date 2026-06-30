@@ -443,30 +443,33 @@ export class EnhancedShutterCardNew extends LitElement{
     let htmlParts = new htmlCard(this);
     let htmlout;
 
-    if (!this.shutterCfgs.length){
-      htmlout = this.htmlOutNew();
-    }
-    else{
-      htmlout = html`
-        ${this.showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
-        ${this.showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
-        <ha-card .header=${this.config.title}>
-          <div
-            class="${C.ESC_CLASS_SHUTTERS}"
-            style = "${htmlParts.defStyleVarsCard()}"
-          >
-            ${this.shutterCfgs.length ? this.htmlOutOld() : this.htmlOutNew()}
-          </div>
-        </ha-card>
-      `;
-    }
-    return htmlout;
+    htmlout = html`
+      ${this.showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
+      ${this.showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
+      <ha-card .header=${this.config.title}>
+        <div
+          class="${C.ESC_CLASS_SHUTTERS}"
+          style = "${htmlParts.defStyleVarsCard()}"
+        >
+          ${this.shutterCfgs.length ? this.htmlOutOld() : this.htmlOutNew()}
+        </div>
+      </ha-card>
+    `;
+  return htmlout;
   }
   htmlOutNew(){
 
       const htmlOut = html`
-          New Card system to initialize ...!!!!
-      `;
+          <h1>New Card system to initialize ...!!!!</h1>
+          ${Object.entries(this.cardCfg.cfg).map(([key,value]) => {
+            switch (key) {
+              case 'windows':
+                  return html`<h2>${key}</h2>`;
+              default:
+                  return html`<div>${key}: ${value}</div>`;
+            }
+          }
+        )}`;
     return htmlOut;
   }
   htmlOutOld(){
