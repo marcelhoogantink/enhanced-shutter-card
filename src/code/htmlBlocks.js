@@ -60,16 +60,16 @@ export class htmlBlock
     return show && this.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION);
   }
 
-  ppartial(value = null){
-    let partial = this.cfg.partial(); // wil never set the value, only return the value
+  partial(value = null){
+    let partial = this.partial(); // wil never set the value, only return the value
     if (partial == C.SHUTTER_OPEN_PCT ||  partial == C.SHUTTER_CLOSED_PCT) partial = 0;
     partial = this.cfg.invertPosition(partial);
     // only when cover can set position
     return this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION) ? partial : 0;
   }
 
-  ooffset(value = null){
-    let offset = this.cfg.offset(); // wil never set the value, only return the value
+  offset(value = null){
+    let offset = this.offset(); // wil never set the value, only return the value
     if (offset == C.SHUTTER_OPEN_PCT ||  offset == C.SHUTTER_CLOSED_PCT) offset = 0;
     offset = this.cfg.invertPosition(offset);
     // only when cover can set position

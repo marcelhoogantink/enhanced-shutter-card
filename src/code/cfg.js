@@ -100,8 +100,8 @@ class cfg{
     mirrorX:                C.CONFIG_MIRROR_X,
     mirrorY:                C.CONFIG_MIRROR_Y,
 
-    ppartial:                C.CONFIG_PARTIAL_CLOSE_PCT,
-    ooffset:                 C.CONFIG_OFFSET_IS_CLOSED_PCT,
+    partial:                C.CONFIG_PARTIAL_CLOSE_PCT,
+    offset:                 C.CONFIG_OFFSET_IS_CLOSED_PCT,
   };
 
   constructor()
@@ -460,7 +460,7 @@ class cfg{
  //   return this[C.CONFIG_ID];
  // }
 
-  partial(value = null){
+  ppartial(value = null){
     let partial = this.getCfg(C.CONFIG_PARTIAL_CLOSE_PCT,value);
     if (partial == C.SHUTTER_OPEN_PCT ||  partial == C.SHUTTER_CLOSED_PCT) partial = 100;
     //partial = this.invertPosition(partial);
@@ -470,7 +470,7 @@ class cfg{
 
 
 
-  offset(value = null){
+  ooffset(value = null){
     let offset = this.getCfg(C.CONFIG_OFFSET_IS_CLOSED_PCT,value);
     if (offset == C.SHUTTER_OPEN_PCT ||  offset == C.SHUTTER_CLOSED_PCT) offset = 100;
     //offset = this.invertPosition(offset);
