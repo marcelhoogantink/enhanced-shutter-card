@@ -58,6 +58,8 @@ class cfg{
     debug:             C.CONFIG_DEBUG,
     type:              C.CONFIG_TYPE,
     cardMod:           C.CONFIG_CARD_MOD,
+    viewLayout:        'view_layout',
+    gridOptions:       'grid_options',
 
     invertPercentageUi:        C.CONFIG_INVERT_PCT_UI,
     invertPercentageCover:     C.CONFIG_INVERT_PCT_COVER,
@@ -88,6 +90,7 @@ class cfg{
     buttonOpenHideStates:   C.CONFIG_BUTTON_OPENED_HIDE_STATES,
     buttonCloseHideStates:  C.CONFIG_BUTTON_CLOSED_HIDE_STATES,
     namePosition:           C.CONFIG_NAME_POSITION,
+    openingPosition:        C.CONFIG_OPENING_POSITION,
     inlineHeader:           C.CONFIG_INLINE_HEADER,
     iconsPosition:          C.CONFIG_ICONS_POSITION,
     alwaysPercentage:       C.CONFIG_ALWAYS_PERCENTAGE,
@@ -102,6 +105,7 @@ class cfg{
 
     partial:                C.CONFIG_PARTIAL_CLOSE_PCT,
     offset:                 C.CONFIG_OFFSET_IS_CLOSED_PCT,
+    alwaysPercentage:       C.CONFIG_ALWAYS_PCT,
   };
 
   constructor()
@@ -128,169 +132,7 @@ class cfg{
     }
     return this.cfg[key];
   }
-  /*
-   ** getters/setters
-   */
 
-   /*
-   stacked(value = null){
-    return this.getCfg(C.CONFIG_STACKED,value);
-  }
-  title(value = null){
-    return this.getCfg(C.CONFIG_TITLE,value);
-  }
-  showName(value = null){
-    return this.getCfg(C.CONFIG_SHOW_NAME,value);
-  }
-  showOpening(value = null){
-    return this.getCfg(C.CONFIG_SHOW_OPENING,value);
-   }
-  showTiltButtonBlock(value = null){
-    return this.getCfg(C.CONFIG_SHOW_TILT_BUTTONS,value);
-  }
-  showStandardButtons(value = null){
-    return this.getCfg(C.CONFIG_SHOW_STANDARD_BUTTONS,value);
-  }
-  showTiltSliderBlock(value = null){
-    return this.getCfg(C.CONFIG_SHOW_TILT_SLIDER,value);
-  }
-  showOpenCloseSliderBlock(value = null){
-    return this.getCfg(C.CONFIG_SHOW_OPEN_CLOSE_SLIDER,value);
-  }
-  showWindow(value = null){
-    return this.getCfg(C.CONFIG_SHOW_WINDOW,value);
-  }
- // buttonsPosition(value = null){
- //  return this.getCfg(C.CONFIG_BUTTONS_POSITION,value);
- // }
- // supportedFeatures(value = null){
- //   return this.getCfg(C.CONFIG_SUPPORTED_FEATURES,value);
- // }
-  disableEndButtons(value = null){
-    return this.getCfg(C.CONFIG_DISABLE_END_BUTTONS,value);
-  }
-  entityId(value = null){
-    return this.getCfg(C.CONFIG_ENTITY_ID,value);
-  }
-  batteryEntityId(value = null){
-    return this.getCfg(C.CONFIG_BATTERY_ENTITY_ID,value);
-  }
-  signalEntityId(value = null){
-    return this.getCfg(C.CONFIG_SIGNAL_ENTITY_ID,value);
-  }
-  showGroupMembers(value = null){
-    return this.getCfg(C.CONFIG_SHOW_GROUP_MEMBERS,value);
-  }
-  imageMap(value = null){
-    return this.getCfg(C.CONFIG_IMAGE_MAP,value);
-  }
-  windowImage(value = null){
-    return this.getCfg(C.CONFIG_WINDOW_IMAGE,value);
-  }
-  viewImage(value = null){
-    return this.getCfg(C.CONFIG_VIEW_IMAGE,value);
-  }
-  shutterSlatImage(value = null){
-    return this.getCfg(C.CONFIG_SHUTTER_SLAT_IMAGE,value);
-  }
-  shutterBottomImage(value = null){
-    return this.getCfg(C.CONFIG_SHUTTER_BOTTOM_IMAGE,value);
-  }
-  friendlyName(value = null){
-    return this.getCfg(C.CONFIG_NAME,value);
-  }
-  debug(value = null){
-    return this.getCfg(C.CONFIG_DEBUG,value);
-  }
-  invertPercentageUi(value = null){
-    return this.getCfg(C.CONFIG_INVERT_PCT_UI,value);
-  }
-  invertPercentageCover(value = null){
-    return this.getCfg(C.CONFIG_INVERT_PCT_COVER,value);
-  }
-  invertPercentageTiltUi(value = null){
-    return this.getCfg(C.CONFIG_INVERT_PCT_TILT_UI,value);
-  }
-  invertPercentageTiltCover(value = null){
-    return this.getCfg(C.CONFIG_INVERT_PCT_TILT_COVER,value);
-  }
-  invertOpenCloseUi(value = null){
-    return this.getCfg(C.CONFIG_INVERT_OPEN_CLOSE_UI,value);
-  }
-  invertOpenCloseCover(value = null){
-    return this.getCfg(C.CONFIG_INVERT_OPEN_CLOSE_COVER,value);
-  }
-  windowHeightPx(value = null){
-    return this.getCfg(C.CONFIG_HEIGHT_PX,value);
-  }
-  windowWidthPx(value = null){
-    return this.getCfg(C.CONFIG_WIDTH_PX,value);
-  }
-  rotateSlatsImage(value = null){
-    return this.getCfg(C.CONFIG_ROTATE_SLATS_SHUTTER_IMAGE,value);
-  }
-  stretchEdgeImage(value = null){
-    return this.getCfg(C.CONFIG_STRETCH_EDGE_SHUTTER_IMAGE,value);
-  }
-  scaleButtons(value = null){
-    return this.getCfg(C.CONFIG_SCALE_BUTTONS,value);
-  }
-  scaleIcons(value = null){
-    return this.getCfg(C.CONFIG_SCALE_ICONS,value);
-  }
-  scaleTexts(value = null){
-    return this.getCfg(C.CONFIG_SCALE_TEXTS,value);
-  }
-  offsetOpenedPct(value = null){
-    return this.getCfg(C.CONFIG_OFFSET_OPENED_PCT,value);
-  }
-  offsetClosedPct(value = null){
-    return this.getCfg(C.CONFIG_OFFSET_CLOSED_PCT,value);
-  }
-//showTilt(value=null){
-//  return (this.getCfg(C.CONFIG_SHOW_TILT,value)) && this.canTilt()
-// }
-  tiltAngleMin(value = null){
-    return this.getCfg(C.CONFIG_TILT_ANGLE_MIN,value );
-  }
-  tiltAngleMax(value = null){
-    return this.getCfg(C.CONFIG_TILT_ANGLE_MAX,value );
-  }
-  unrollUnfoldDirection(value = null){
-    return this.getCfg(C.CONFIG_CLOSING_DIRECTION,value);
-  }
-  buttonStopHideStates(value = null){
-    return this.getCfg(C.CONFIG_BUTTON_STOP_HIDE_STATES,value);
-  }
-  buttonOpenHideStates(value = null){
-    return this.getCfg(C.CONFIG_BUTTON_OPENED_HIDE_STATES,value);
-  }
-  buttonCloseHideStates(value = null){
-    return this.getCfg(C.CONFIG_BUTTON_CLOSED_HIDE_STATES,value);
-  }
-  namePosition(value = null){
-    return this.getCfg(C.CONFIG_NAME_POSITION,value);
-  }
-  inlineHeader(value = null){
-    return this.getCfg(C.CONFIG_INLINE_HEADER,value);
-  }
-  iconsPosition(value = null){
-    return this.getCfg(C.CONFIG_ICONS_POSITION,value);
-  }
-  alwaysPercentage(value = null){
-    return this.getCfg(C.CONFIG_ALWAYS_PCT,value);
-  }
-  pickerOverlapPx(value = null){
-    return this.getCfg(C.CONFIG_PICKER_OVERLAP_PX,value);
-  }
-  showPartialOpenButtons(value = null){
-    return this.getCfg(C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,value);
-  }
-  passiveMode(value = null){
-    return this.getCfg(C.CONFIG_PASSIVE_MODE,value)
-  }
-
-*/
 
   isCoverFeatureActive(feature=C.ESC_FEATURE_ALL){
     const features =(this.getCoverEntity()?.getSupportedFeatures() ?? C.ESC_FEATURE_NO_TILT) & feature & this.supportedFeatures();
@@ -453,12 +295,6 @@ class cfg{
     }
     return image;
   }
-  //group(){
-  //  return this[C.CONFIG_GROUP];
- // }
- // id(){
- //   return this[C.CONFIG_ID];
- // }
 
   ppartial(value = null){
     let partial = this.getCfg(C.CONFIG_PARTIAL_CLOSE_PCT,value);
@@ -494,9 +330,10 @@ class cfg{
 
 
 
-  openingPosition(value = null){
+  oopeningPosition(value = null){
     if (value !== null  && this.getCfg(C.CONFIG_OPENING_POSITION,value) === null)
     {
+      // Not definined ?? then take NamePosition setting
       value = this.getCfg(C.CONFIG_NAME_POSITION);
     }
     return this.getCfg(C.CONFIG_OPENING_POSITION,value);

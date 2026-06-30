@@ -381,8 +381,8 @@ export const Z_INDEX_OVERLAY =-1;
 
 export const ESC_ENTITY_ID = null;
 
-export const ESC_BATTERY_ENTITY_ID = null;
-export const ESC_SIGNAL_ENTITY_ID = null;
+export const ESC_BATTERY_ENTITY_ID = "";
+export const ESC_SIGNAL_ENTITY_ID = "";
 
 export const ESC_SHOW_GROUP_MEMBERS = false;
 
@@ -582,9 +582,9 @@ export const CONFIG_DEFAULT ={
   [CONFIG_BUTTON_STOP_HIDE_STATES]: ESC_BUTTON_STOP_HIDE_STATES,
   [CONFIG_BUTTON_OPENED_HIDE_STATES]: ESC_BUTTON_OPENED_HIDE_STATES,
   [CONFIG_BUTTON_CLOSED_HIDE_STATES]: ESC_BUTTON_CLOSED_HIDE_STATES,
-// Home assistant key words, not used but to prevent warnings
-  ['view_layout']: null,
-  ['grid_options']: null,
+  // Home assistant keywords, not used but to prevent warnings
+  ['view_layout']: "",
+  ['grid_options']: "",
 
 
 
@@ -621,27 +621,40 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_SHOW_TILT_SLIDER]: ESC_SHOW_TILT_SLIDER, // new
     [CONFIG_SHOW_OPEN_CLOSE_SLIDER]: ESC_SHOW_OPEN_CLOSE_SLIDER, // new
 
+    [CONFIG_SHOW_GROUP_MEMBERS]: ESC_SHOW_GROUP_MEMBERS, // here in Card-config or in Window config ??
+
+    // Home assistant keywords, not used but to prevent warnings
+    ['view_layout']: "",
+    ['grid_options']: "",
+
   },
   [WINDOWS_CONFIG]: {
     // (not active yet; for multiple covers in a window-frame  (eq: awning, roller-shutter, blind and curtain))
     // Handled as COVER LEVEL now
     [CONFIG_ID]:0,
     [CONFIG_WINDOW]: "", // not (yet?) in cfg-system
+    [CONFIG_GROUP]: "", // entity of the cover-groupl holding the member entity_id's
     [CONFIG_COVERS]: [],
     [CONFIG_PASSIVE_MODE]: ESC_PASSIVE_MODE,
     [CONFIG_WINDOW_IMAGE]: ESC_IMAGE_WINDOW,
     [CONFIG_VIEW_IMAGE]: ESC_IMAGE_VIEW,
     [CONFIG_NAME]: ESC_NAME,
     [CONFIG_NAME_POSITION]: ESC_NAME_POSITION,
+    [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION, // place where the opening info will be showed in the card
     [CONFIG_BASE_HEIGHT_PX]: ESC_BASE_HEIGHT_PX,
     [CONFIG_BASE_WIDTH_PX]: ESC_BASE_WIDTH_PX,
     [CONFIG_RESIZE_HEIGHT_PCT]: ESC_RESIZE_HEIGHT_PCT,
     [CONFIG_RESIZE_WIDTH_PCT]: ESC_RESIZE_WIDTH_PCT,
     [CONFIG_INLINE_HEADER]: ESC_INLINE_HEADER,
+    [CONFIG_ALWAYS_PCT]: ESC_ALWAYS_PCT,
+    [CONFIG_DISABLE_END_BUTTONS]: ESC_DISABLE_END_BUTTONS,
   },
   [COVERS_CONFIG]: {
     [CONFIG_ID]:0,
     [CONFIG_SHUTTER_PRESET]: ESC_SHUTTER_PRESET, // not in cfg (yet?) in code applied
+    [CONFIG_SUPPORTED_FEATURES]: ESC_SUPPORTED_FEATURES,
+    [CONFIG_CENTER_CLOSING]: ESC_CENTER_CLOSING, /// ????? keep this one??
+    [CONFIG_NUMBER_DEVICES]: ESC_NUMBER_DEVICES, // mandatory number of entities, normally set default 1 or via CONFIG_SHUTTER_PRESET
     [CONFIG_COVER]: "", // not (yet?) in cfg-system
     [CONFIG_ENTITIES]: [],
     [CONFIG_BUTTON_CLOSED_HIDE_STATES]: ESC_BUTTON_CLOSED_HIDE_STATES,
@@ -661,6 +674,9 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: ESC_STRETCH_EDGE_SHUTTER_IMAGE,
     [CONFIG_TILT_ANGLE_MIN]: ESC_TILT_ANGLE_MIN,
     [CONFIG_TILT_ANGLE_MAX]: ESC_TILT_ANGLE_MAX,
+    // to test
+    [CONFIG_BATTERY_ENTITY_ID]: ESC_BATTERY_ENTITY_ID,  // for now: per cover, not per entity
+    [CONFIG_SIGNAL_ENTITY_ID]: ESC_SIGNAL_ENTITY_ID,    // for now: per cover, not per entity
   },
   [ENTITIES_CONFIG]: {
     [CONFIG_ID]:0,
@@ -676,22 +692,6 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_MIRROR_Y]: ESC_MIRROR_Y,
   },
   [_NO_GROUP_CONFIG]: {
-    [CONFIG_BATTERY_ENTITY_ID]: ESC_BATTERY_ENTITY_ID,
-    [CONFIG_SIGNAL_ENTITY_ID]: ESC_SIGNAL_ENTITY_ID,
-    [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION, // is current setting ??
-    [CONFIG_ALWAYS_PCT]: ESC_ALWAYS_PCT,
-
-    [CONFIG_SUPPORTED_FEATURES]: ESC_SUPPORTED_FEATURES,
-    [CONFIG_ID]:"",
-    [CONFIG_GROUP]: "",
-    [CONFIG_CENTER_CLOSING]: ESC_CENTER_CLOSING,
-    [CONFIG_SHOW_GROUP_MEMBERS]: ESC_SHOW_GROUP_MEMBERS,
-    [CONFIG_NUMBER_DEVICES]: ESC_NUMBER_DEVICES,
-    [CONFIG_DISABLE_END_BUTTONS]: ESC_DISABLE_END_BUTTONS,
-
-// Home assistant key words, not used but to prevent warnings
-    ['view_layout']: null,
-    ['grid_options']: null,
   },
 
 // ========

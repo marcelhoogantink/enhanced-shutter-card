@@ -54,6 +54,14 @@ export class htmlBlock
     if (value!== null && mode) console.warn('Passive mode, no action');
     return mode;
   }
+  openingPosition(value = null){
+    if (value !== null  && this.cfg.openingPosition(value) === null)
+    {
+      // Not definined ?? then take namePosition setting
+      value = this.cfg.namePosition();
+    }
+    return this.cfg.openingPosition(value);
+  }
 
   showPartialOpenButtons(){
     const show = this.cfg.showPartialOpenButtons();
@@ -285,7 +293,7 @@ export class htmlBlockNameAndState extends htmlBlock{
     return html`
       <div class = "${escClassName}">
         ${this.cfg.namePosition() === blockPosition ? nameBlock.show() : nothing}
-        ${this.cfg.openingPosition() === blockPosition ? stateBlock.show() : nothing}
+        ${this.openingPosition() === blockPosition ? stateBlock.show() : nothing}
       </div>
     `;
   }
@@ -295,7 +303,7 @@ export class htmlBlockNameAndState extends htmlBlock{
     const nameBlock = new htmlBlockName(this.shutter);
 
     let xyName = this.cfg.namePosition() === blockPosition ? nameBlock.size() : new xyPair();
-    let xyState = this.cfg.openingPosition() === blockPosition ? stateBlock.size() : new xyPair();
+    let xyState = this.openingPosition() === blockPosition ? stateBlock.size() : new xyPair();
     let xy;
     if (this.cfg.inlineHeader()){
        xy = this.gridAddHorizontal(xyName,xyState);

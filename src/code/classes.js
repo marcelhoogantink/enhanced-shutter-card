@@ -184,7 +184,10 @@ export class EnhancedShutterCardNew extends LitElement{
       this.config.entities.map((subConfig) => {
 
         let baseEntity = subConfig.entity ? new haEntity(this.hass,subConfig.entity) : null;
-        let newSubConfig = {...subConfig,  [C.CONFIG_ID]: id++};
+        let newSubConfig = {
+          ...subConfig,
+          [C.CONFIG_ID]: id++
+        };
         let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
         let cfg = new shutterCfg(this.hass,shutterConfig)
         let counter =1;
@@ -196,7 +199,12 @@ export class EnhancedShutterCardNew extends LitElement{
           // get the full entities from the id's
           const entitiesInGroup = groupEntityIds.filter(entityId => this.hass.states[entityId]);
           entitiesInGroup.forEach(entityId => {
-            let newSubConfig = {...subConfig, [C.CONFIG_ENTITY_ID]: entityId, [C.CONFIG_GROUP]: subConfig.entity, [C.CONFIG_ID]: id++};
+            let newSubConfig = {
+              ...subConfig,
+              [C.CONFIG_ENTITY_ID]: entityId,
+              [C.CONFIG_GROUP]: subConfig.entity,
+              [C.CONFIG_ID]: id++
+            };
             let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
             // when a name is defined, check for '@'and fill in the countnumber.
             if (shutterConfig.name) {
@@ -430,18 +438,39 @@ export class EnhancedShutterCardNew extends LitElement{
        </ha-card>
       `;
     }
-    let showMessages = this.messageManager.countMessages() && this.inEditor();
+    this.showMessages = this.messageManager.countMessages() && this.inEditor();
+    this.shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
     let htmlParts = new htmlCard(this);
-    let shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
+    let htmlout;
 
-    let htmlout = html`
-        ${showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
-        ${showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
+    if (!this.shutterCfgs.length){
+      htmlout = this.htmlOutNew();
+    }
+    else{
+      htmlout = html`
+        ${this.showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
+        ${this.showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
         <ha-card .header=${this.config.title}>
           <div
             class="${C.ESC_CLASS_SHUTTERS}"
             style = "${htmlParts.defStyleVarsCard()}"
           >
+            ${this.shutterCfgs.length ? this.htmlOutOld() : this.htmlOutNew()}
+          </div>
+        </ha-card>
+      `;
+    }
+    return htmlout;
+  }
+  htmlOutNew(){
+
+      const htmlOut = html`
+          New Card system to initialize ...!!!!
+      `;
+    return htmlOut;
+  }
+  htmlOutOld(){
+      const htmlOut = html`
             ${this.shutterCfgs.map(cfg => {
                 // update the live states and attributes
                 return html`
@@ -458,17 +487,17 @@ export class EnhancedShutterCardNew extends LitElement{
                       .escImages=${this.escImages}
                     >
                     </enhanced-shutter>
-                    ${showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
+                    ${this.showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
                   </div>
-                  ${shutterSeparateBlock.show()}
+                  ${this.shutterSeparateBlock.show()}
                 `;
               }
-            )}
-          </div>
-        </ha-card>
-      `;
-    return htmlout;
+            )}`;
+    return htmlOut;
   }
+
+
+
   firstUpdated() {
   }
   updated(changedProperties) {
