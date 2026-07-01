@@ -463,6 +463,8 @@ export class EnhancedShutterCardNew extends LitElement{
 
       const htmlOut = html`
           <h1>New Card system to initialize ...!!!!</h1>
+          ${this.buildTestCfg()}
+          ${this.test_function_1()}
           ${Object.entries(this.cardCfg.cfg).map(([key,value]) => {
             switch (key) {
               case 'windows':
@@ -500,8 +502,109 @@ export class EnhancedShutterCardNew extends LitElement{
             )}`;
     return htmlOut;
   }
+  //=====================
+  // test_functionX() memebers ptimized by Claude to recursive funtion, but not (yet) keeping account with Card creation levels (windows-> covers-> entities)
+  static #LEVELS = ['windows', 'covers', 'entities'];
+
+  buildTestCfg() {
+    this.testCfg = [];
+    this.#buildLevel2(this.cardCfg.cfg, 0);
+  }
+
+  #buildLevel2(obj, depth) {
+    const childKey = EnhancedShutterCardNew.#LEVELS[depth];
+
+    Object.entries(obj).forEach(([key, value]) => {
+      if (key === childKey) return;
+      this.testCfg[key] = value;
+    });
+
+    if (childKey) {
+      if (Array.isArray(obj[childKey])) {
+        obj[childKey].forEach(child => this.#buildLevel2(child, depth + 1));
+      } else {
+        console.warn(`Enhanced Shutter Card: expected "${childKey}" array at depth ${depth}, got`, obj[childKey]);
+        debugger;
+      }
+    }else{
+      debugger;
+    }
+  }
+  //=====================
 
 
+  test_function1(){
+    let test=1;
+    this.testCfg=[];
+    let windows = false;
+    Object.entries(this.cardCfg.cfg).forEach(([key,value]) => {
+      switch (key) {
+        case 'windows':
+          windows= key;
+          break;
+        default:
+          this.testCfg[key] = value;
+      }
+    })
+    if (windows){
+      this.test_function2(this.cardCfg.cfg[windows]);
+    }else{
+      let no_object_test=1;
+      debugger;
+    }
+  }
+  test_function2(windows){
+    let test=1;
+    windows.forEach(window => {
+      let covers = false;
+      Object.entries(window).forEach(([key,value]) => {
+        switch (key) {
+          case 'covers':
+            covers= key;
+            break;
+          default:
+            this.testCfg[key] = value;
+        }
+      })
+      if (covers){
+        this.test_function3(window[covers]);
+      }else{
+        let no_object_test=1;
+        debugger;
+      }
+    })
+  }
+
+  test_function3(covers){
+    covers.forEach(cover => {
+      let entities = false;
+      Object.entries(cover).forEach(([key,value]) => {
+        switch (key) {
+          case 'entities':
+            entities= key;
+            break;
+          default:
+            this.testCfg[key] = value;
+        }
+      })
+      if (entities){
+        this.test_function4(cover[entities]);
+      }else{
+        let no_object_test=1;
+        debugger;
+      }
+    })
+  }
+  test_function4(entities){
+    let test=1;
+    entities.forEach(entity => {
+      Object.entries(entity).forEach(([key,value]) => {
+         this.testCfg[key] = value;
+      })
+      let test=1;
+    })
+  }
+  //=====================
 
   firstUpdated() {
   }
@@ -1649,9 +1752,10 @@ export class htmlCard{
     this.enhancedShutterCard=enhancedShutterCard;
   }
   defStyleVarsCard(){
-    return `
+    const card_vars = `
       --esc-card-flex-direction: ${this.enhancedShutterCard.getCardFlexDirection()};
     `;
+    return card_vars;
   }
 }
 
