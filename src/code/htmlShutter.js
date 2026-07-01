@@ -20,6 +20,8 @@ export class htmlShutter{
     const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.id());
     const shutterBottomImage=this.escImages.getShutterBottomImageSrc(this.cfg.id());
 
+    const card_vars = ``;
+
     const windows_vars = `
       --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${C.UNITY};
       --ha-icon-button-size: ${this.cfg.iconButtonSize()}${C.UNITY};
@@ -69,7 +71,7 @@ export class htmlShutter{
 
     `;
 
-    const shutter_vars = `
+    const cover_vars = `
       ${/* this is a working comment example */ ``}
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};                                                 ${/* ESC_CLASS_SELECTOR_PARTIAL */ ``}
 
@@ -113,6 +115,9 @@ export class htmlShutter{
 
 
     `;
-    return windows_vars+shutter_vars;
+
+    const entity_vars = ``;
+
+    return card_vars+windows_vars+cover_vars+entity_vars;
   }
 }

@@ -451,7 +451,9 @@ export class EnhancedShutterCardNew extends LitElement{
           class="${C.ESC_CLASS_SHUTTERS}"
           style = "${htmlParts.defStyleVarsCard()}"
         >
-          ${this.shutterCfgs.length ? this.htmlOutOld() : this.htmlOutNew()}
+          ${this.shutterCfgs.length
+              ? this.htmlOutOld()
+              : this.htmlOutNew()}
         </div>
       </ha-card>
     `;
