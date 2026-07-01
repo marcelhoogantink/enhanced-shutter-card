@@ -503,7 +503,9 @@ export class EnhancedShutterCardNew extends LitElement{
     return htmlOut;
   }
   //=====================
-  // test_functionX() memebers ptimized by Claude to recursive funtion, but not (yet) keeping account with Card creation levels (windows-> covers-> entities)
+  // test_functionX() members optimized by Claude to recursive funtion, but not (yet) keeping account with Card creation levels (windows-> covers-> entities)
+  //=====================
+
   static #LEVELS = ['windows', 'covers', 'entities'];
 
   buildTestCfg() {
@@ -531,6 +533,9 @@ export class EnhancedShutterCardNew extends LitElement{
     }
   }
   //=====================
+  // end Claude code
+  //=====================
+
 
 
   test_function1(){
