@@ -1,6 +1,6 @@
 import * as C from './constants.js';
 //import {EscImages} from './escImages.js';
-import {LitElement, html, css, unsafeCSS } from './lit/lit-core.min.js';
+import {LitElement, html, css, unsafeCSS,nothing } from './lit/lit-core.min.js';
 import {
   cardCfg,
   cardCfgNew,
@@ -464,13 +464,13 @@ export class EnhancedShutterCardNew extends LitElement{
       const htmlOut = html`
           <h1>New Card system to initialize ...!!!!</h1>
           ${this.buildTestCfg()}
-          ${this.test_function_1()}
+          <div>==================</div>
           ${Object.entries(this.cardCfg.cfg).map(([key,value]) => {
             switch (key) {
               case 'windows':
-                  return html`<h2>${key}</h2>`;
+                return html`<h2>${key}</h2>`;
               default:
-                  return html`<div>${key}: ${value}</div>`;
+                return html`<div>${key}: ${value}</div>`;
             }
           }
         )}`;
@@ -502,41 +502,65 @@ export class EnhancedShutterCardNew extends LitElement{
             )}`;
     return htmlOut;
   }
-  //=====================
-  // test_functionX() members optimized by Claude to recursive funtion, but not (yet) keeping account with Card creation levels (windows-> covers-> entities)
-  //=====================
-
-  static #LEVELS = ['windows', 'covers', 'entities'];
 
   buildTestCfg() {
     this.testCfg = [];
-    this.#buildLevel2(this.cardCfg.cfg, 0);
+    const htmlOut = html`${this.#buildLevel2(this.cardCfg.cfg, 0)}`;
+    return htmlOut;
   }
 
   #buildLevel2(obj, depth) {
-    const childKey = EnhancedShutterCardNew.#LEVELS[depth];
-
+    console.log(`buildLevel2: depth ${depth}, obj:`, obj);
+    const LEVELS = [
+      { childKey: C.CARD_CONFIG,      func: "cardHtml"  },
+      { childKey: C.WINDOWS_CONFIG,   func: "windowHtml"  },
+      { childKey: C.COVERS_CONFIG,    func: "coverHtml"   },
+      { childKey: C.ENTITIES_CONFIG,  func: "entityHtml"  },
+    ];
     Object.entries(obj).forEach(([key, value]) => {
-      if (key === childKey) return;
+      if (depth < LEVELS.length && key === LEVELS[depth].childKey) return; // skip this
       this.testCfg[key] = value;
     });
 
-    if (childKey) {
+    let htmlOuts = nothing;
+    if (depth < LEVELS.length) {
+      const {childKey,func} = LEVELS[depth];
+
+      if (depth==3) debugger;
+
       if (Array.isArray(obj[childKey])) {
-        obj[childKey].forEach(child => this.#buildLevel2(child, depth + 1));
+        htmlOuts = html`${
+          obj[childKey].map((child) => {
+            return this.#buildLevel2(child, depth + 1);
+          })
+        }`;
+        htmlOuts = html`${this[func]()} ${htmlOuts}`;
       } else {
         console.warn(`Enhanced Shutter Card: expected "${childKey}" array at depth ${depth}, got`, obj[childKey]);
         debugger;
       }
     }else{
       debugger;
+      htmlOuts = html`<div>Reached depth ${depth} with no further levels.</div>`;
     }
+    return htmlOuts;
   }
   //=====================
   // end Claude code
   //=====================
 
-
+  cardHtml(){
+    return html`<u>Card</u><br>`;
+  }
+  windowHtml(){
+    return html`<u>Windows</u><br>`;
+  }
+  coverHtml(){
+    return html`<u>Covers</u><br>`;
+  }
+  entityHtml(){
+    return html`<u>Entities</u><br>`;
+  }
 
   test_function1(){
     let test=1;
