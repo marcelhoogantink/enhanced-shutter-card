@@ -504,44 +504,40 @@ export class EnhancedShutterCardNew extends LitElement{
   }
 
   buildTestCfg() {
-    this.testCfg = [];
-    const htmlOut = html`${this.#buildLevel2(this.cardCfg.cfg, 0)}`;
+    this.testCfg = {};
+    const htmlOut = html`${this.#buildLevel2(this.cardCfg.cfg,0, 0)}`;
     return htmlOut;
   }
 
-  #buildLevel2(obj, depth) {
-    console.log(`buildLevel2: depth ${depth}, obj:`, obj);
+  #buildLevel2(obj, index, depth) {
+    //console.log(`buildLevel2: depth ${depth}, obj:`, obj);
     const LEVELS = [
-      { childKey: C.CARD_CONFIG,      func: "cardHtml"  },
-      { childKey: C.WINDOWS_CONFIG,   func: "windowHtml"  },
-      { childKey: C.COVERS_CONFIG,    func: "coverHtml"   },
-      { childKey: C.ENTITIES_CONFIG,  func: "entityHtml"  },
+      { childKey: C.WINDOWS_CONFIG,     func: "cardHtml"  },
+      { childKey: C.COVERS_CONFIG,      func: "windowHtml"  },
+      { childKey: C.ENTITIES_CONFIG,    func: "coverHtml"   },
+      { childKey: "",                   func: "entityHtml"  },
     ];
+    // loop through the cfg settingsand store
     Object.entries(obj).forEach(([key, value]) => {
-      if (depth < LEVELS.length && key === LEVELS[depth].childKey) return; // skip this
+      // sla object over
+      if (value.constructor === Array) return;
+      // save cfg-item
       this.testCfg[key] = value;
     });
+    console.log(`buildLevel2: depth ${depth}, testcfg:`, {...this.testCfg});
 
     let htmlOuts = nothing;
     if (depth < LEVELS.length) {
       const {childKey,func} = LEVELS[depth];
 
-      if (depth==3) debugger;
-
-      if (Array.isArray(obj[childKey])) {
-        htmlOuts = html`${
-          obj[childKey].map((child) => {
-            return this.#buildLevel2(child, depth + 1);
+      if (childKey && obj[childKey].constructor === Array) {
+        htmlOuts = html`<ul>${
+          obj[childKey].map((childObj,index) => {
+            return this.#buildLevel2(childObj, index, depth + 1);
           })
         }`;
-        htmlOuts = html`${this[func]()} ${htmlOuts}`;
-      } else {
-        console.warn(`Enhanced Shutter Card: expected "${childKey}" array at depth ${depth}, got`, obj[childKey]);
-        debugger;
       }
-    }else{
-      debugger;
-      htmlOuts = html`<div>Reached depth ${depth} with no further levels.</div>`;
+      htmlOuts = html`${this[func](index)} ${htmlOuts}`;
     }
     return htmlOuts;
   }
@@ -549,17 +545,17 @@ export class EnhancedShutterCardNew extends LitElement{
   // end Claude code
   //=====================
 
-  cardHtml(){
-    return html`<u>Card</u><br>`;
+  cardHtml(index){
+    return html`<u>Card:</u>`;
   }
-  windowHtml(){
-    return html`<u>Windows</u><br>`;
+  windowHtml(index){
+    return html`<li><u>Window (${index})</u><br></li>`;
   }
-  coverHtml(){
-    return html`<u>Covers</u><br>`;
+  coverHtml(index){
+    return html`<li><u>Cover (${index})</u><br></li>`;
   }
-  entityHtml(){
-    return html`<u>Entities</u><br>`;
+  entityHtml(index){
+    return html`<li><u>Entity (${index})</u><br></li>`;
   }
 
   test_function1(){
