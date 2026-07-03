@@ -510,7 +510,7 @@ export class EnhancedShutterCardNew extends LitElement{
   }
 
   #buildLevel2(obj, index, depth) {
-    //console.log(`buildLevel2: depth ${depth}, obj:`, obj);
+    let testCfg2={};
     const LEVELS = [
       { childKey: C.WINDOWS_CONFIG,     func: "cardHtml"  },
       { childKey: C.COVERS_CONFIG,      func: "windowHtml"  },
@@ -524,7 +524,8 @@ export class EnhancedShutterCardNew extends LitElement{
       // save cfg-item
       this.testCfg[key] = value;
     });
-    console.log(`buildLevel2: depth ${depth}, testcfg:`, {...this.testCfg});
+    testCfg2 = structuredClone(this.testCfg);
+    console.log(`buildLevel2(1): depth ${depth}, testcfg:`, testCfg2);
 
     let htmlOuts = nothing;
     if (depth < LEVELS.length) {
@@ -533,12 +534,15 @@ export class EnhancedShutterCardNew extends LitElement{
       if (childKey && obj[childKey].constructor === Array) {
         htmlOuts = html`<ul>${
           obj[childKey].map((childObj,index) => {
-            return this.#buildLevel2(childObj, index, depth + 1);
+            const htmlOut = this.#buildLevel2(childObj, index, depth + 1);
+            return htmlOut;
           })
         }`;
       }
       htmlOuts = html`${this[func](index)} ${htmlOuts}`;
     }
+    //console.log(`buildLevel2(2): depth ${depth}, testcfg:`, testCfg2);
+    this.testCfg = structuredClone(testCfg2);
     return htmlOuts;
   }
   //=====================
