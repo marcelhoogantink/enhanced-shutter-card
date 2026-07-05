@@ -7,7 +7,8 @@ import {
   windowCfgNew,
   coverCfgNew,
   entityCfgNew,
-  shutterCfg
+  shutterCfg,
+  cfgNew,
 } from './cfg.js';
 
 import {
@@ -16,7 +17,7 @@ import {
   findElement,
   console_log,
   getDebug,
-  resizeDebugger
+  resizeDebugger,
 } from './functions.js';
 
 import * as HtmlBlocks from './htmlBlocks.js';
@@ -149,10 +150,10 @@ export class EnhancedShutterCardNew extends LitElement{
 // ===================================
   #defAllShutterConfig()
   {
-    // OOPS: this.cardCfg shoulde exist for now!!!!!!
+    // OOPS: this.cardCfg should exist for now!!!!!!
 
     const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
-    this.cardCfgTest = new cardCfg(cardConfig);
+    this.cardCfgTest = new cardCfg(this.hass,cardConfig);
 
     // OOPS END
 
@@ -162,7 +163,7 @@ export class EnhancedShutterCardNew extends LitElement{
 
       let idRef = { id: 0 };
       let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card, this.config);
-      let cfgCardAll = new cardCfgNew(config);
+      let cfgCardAll = new cardCfgNew(this.hass,config);
       let cfgCard =cfgCardAll.cfg;
 
       const windowsCfg = this.#buildLevel(0, this.config, idRef);
@@ -179,7 +180,7 @@ export class EnhancedShutterCardNew extends LitElement{
       let id =0;
       const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
       const windowsConfig =1;
-      this.cardCfg = new cardCfg(cardConfig);
+      this.cardCfg = new cardCfg(this.hass,cardConfig);
 
       this.config.entities.map((subConfig) => {
 
@@ -505,11 +506,14 @@ export class EnhancedShutterCardNew extends LitElement{
 
   buildTestCfg() {
     this.testCfg = {};
-    const htmlOut = html`${this.#buildLevel2(this.cardCfg.cfg,0, 0)}`;
+    const htmlOut = html`${this.#buildLevel2(this.cardCfg,0, 0)}`;
     return htmlOut;
   }
 
   #buildLevel2(obj, index, depth) {
+
+    let cfg=obj.cfg;
+
     let testCfg2={};
     const LEVELS = [
       { childKey: C.WINDOWS_CONFIG,     func: "cardHtml"  },
@@ -518,7 +522,7 @@ export class EnhancedShutterCardNew extends LitElement{
       { childKey: "",                   func: "entityHtml"  },
     ];
     // loop through the cfg settingsand store
-    Object.entries(obj).forEach(([key, value]) => {
+    Object.entries(cfg).forEach(([key, value]) => {
       // sla object over
       if (value.constructor === Array) return;
       // save cfg-item
@@ -530,16 +534,18 @@ export class EnhancedShutterCardNew extends LitElement{
     let htmlOuts = nothing;
     if (depth < LEVELS.length) {
       const {childKey,func} = LEVELS[depth];
-
-      if (childKey && obj[childKey].constructor === Array) {
+      let childObj = {};
+      if (childKey && cfg[childKey].constructor === Array) {
         htmlOuts = html`<ul>${
-          obj[childKey].map((childObj,index) => {
-            const htmlOut = this.#buildLevel2(childObj, index, depth + 1);
+          cfg[childKey].map((childCfg,index) => {
+            childObj = new cfgNew(this.hass,childCfg);
+            let htmlOut = this.#buildLevel2(childObj, index, depth + 1);
             return htmlOut;
           })
         }`;
       }
-      htmlOuts = html`${this[func](index)} ${htmlOuts}`;
+      let testObj = new cfgNew(this.hass,this.testCfg);
+      htmlOuts = html`${this[func](index,testObj)} ${htmlOuts}`;
     }
     //console.log(`buildLevel2(2): depth ${depth}, testcfg:`, testCfg2);
     this.testCfg = structuredClone(testCfg2);
@@ -549,91 +555,37 @@ export class EnhancedShutterCardNew extends LitElement{
   // end Claude code
   //=====================
 
-  cardHtml(index){
+  cardHtml(index,childObj){
     return html`<u>Card:</u>`;
   }
-  windowHtml(index){
+  windowHtml(index,childObj){
     return html`<li><u>Window (${index})</u><br></li>`;
   }
-  coverHtml(index){
+  coverHtml(index,childObj){
     return html`<li><u>Cover (${index})</u><br></li>`;
   }
-  entityHtml(index){
+  entityHtml(index,childObj){
+    const cfg=childObj;
+    return html`
+      <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
+        <enhanced-shutter
+          .react_ShutterState=${cfg.getCoverState()}
+          .react_BatteryState=${cfg.getState(cfg.getBatteryEntity())}
+          .react_SignalState=${cfg.getState(cfg.getSignalEntity())}
+          .react_ScreenOrientation=${this.screenOrientation}
+          .react_InitializeReady=${this.initializeReady}
+
+          .hass=${this.hass}
+          .cfg=${cfg}
+          .escImages=${this.escImages}
+        >
+        </enhanced-shutter>
+        ${this.showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
+      </div>
+      ${this.shutterSeparateBlock.show()}
+    `;
     return html`<li><u>Entity (${index})</u><br></li>`;
   }
-
-  test_function1(){
-    let test=1;
-    this.testCfg=[];
-    let windows = false;
-    Object.entries(this.cardCfg.cfg).forEach(([key,value]) => {
-      switch (key) {
-        case 'windows':
-          windows= key;
-          break;
-        default:
-          this.testCfg[key] = value;
-      }
-    })
-    if (windows){
-      this.test_function2(this.cardCfg.cfg[windows]);
-    }else{
-      let no_object_test=1;
-      debugger;
-    }
-  }
-  test_function2(windows){
-    let test=1;
-    windows.forEach(window => {
-      let covers = false;
-      Object.entries(window).forEach(([key,value]) => {
-        switch (key) {
-          case 'covers':
-            covers= key;
-            break;
-          default:
-            this.testCfg[key] = value;
-        }
-      })
-      if (covers){
-        this.test_function3(window[covers]);
-      }else{
-        let no_object_test=1;
-        debugger;
-      }
-    })
-  }
-
-  test_function3(covers){
-    covers.forEach(cover => {
-      let entities = false;
-      Object.entries(cover).forEach(([key,value]) => {
-        switch (key) {
-          case 'entities':
-            entities= key;
-            break;
-          default:
-            this.testCfg[key] = value;
-        }
-      })
-      if (entities){
-        this.test_function4(cover[entities]);
-      }else{
-        let no_object_test=1;
-        debugger;
-      }
-    })
-  }
-  test_function4(entities){
-    let test=1;
-    entities.forEach(entity => {
-      Object.entries(entity).forEach(([key,value]) => {
-         this.testCfg[key] = value;
-      })
-      let test=1;
-    })
-  }
-  //=====================
 
   firstUpdated() {
   }
@@ -664,7 +616,7 @@ export class EnhancedShutterCardNew extends LitElement{
   connectedCallback() {
     super.connectedCallback();
 
-    //this.defGridContainer();
+   //this.defGridContainer();
     //this.getGridOptionsInternal();
     /* get element of hui-view to detect resizing */
     C.Globals.huiView = findElementInBody(C.HA_HUI_VIEW);
@@ -1006,9 +958,12 @@ export class EnhancedShutter extends LitElement
   // - escImages
 
   //reactive properties
-    static properties = {
+  static properties = {
     // reactive variables from parent card
-    react_ShutterState: {type: String},        // for detecting state of shutter (open close etc)
+    react_ShutterState: {
+      //state: true,
+      type: String
+    },        // for detecting state of shutter (open close etc)
     react_BatteryState: {type: String},        // for detecting battery state change
     react_SignalState: {type: String},         // for detecting signal state change
     react_ScreenOrientation: {type: Object},   // for change in screen orientation  by resize window or rotate device
@@ -1017,10 +972,11 @@ export class EnhancedShutter extends LitElement
     // local reactive variables
     react_ShutterPosition: {state: true},      // for dragging shutter onscreen
     react_TiltPosition: {state: true},         // for dragging tilt-shutter onscreen
-    react_ResizeDivShutterSelector: {state: true,type: Boolean}, // for detecting resize of shutter div by responsive design
+    react_ResizeDivShutterSelector: {state: true, type: Boolean}, // for detecting resize of shutter div by responsive design
   };
   constructor(){
     super(); //  mandetory by Lit-element
+
 
     this.screenPosition=-1;
     this.actualScreenPosition=-1; // position on the computerscreen

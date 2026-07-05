@@ -108,8 +108,9 @@ class cfg{
     alwaysPercentage:       C.CONFIG_ALWAYS_PCT,
   };
 
-  constructor()
+  constructor(hass)
   {
+    this.hass = hass;
     for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
       this[method] = (value = null) => this.getCfg(key, value);
       if (method != key){
@@ -119,11 +120,23 @@ class cfg{
   }
   fillCfg(escConfig){
     Object.entries(escConfig).forEach( ([key, value]) => {
+      if (key === C.CONFIG_ENTITY_ID) {
+        this.setCoverEntity(this.hass,value);
+      }
+      if (key === C.CONFIG_BATTERY_ENTITY_ID) {
+        this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
+      }
+      if (key === C.CONFIG_SIGNAL_ENTITY_ID) {
+        this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
+      }
+
       if (typeof this[key] !== 'function') {
         return;
       }
       let test= this[key](value);
       let test2 =1;
+
+
     });
   }
   getCfg(key,value= null){
@@ -154,6 +167,9 @@ class cfg{
     return this.coverEntity;
   }
   getCoverState(haEntity=this.getCoverEntity()){
+    if (!haEntity) debugger;
+
+
      let coverState = `${haEntity.getState()}-${haEntity.getCurrentPosition()}-${haEntity.getCurrentTiltPosition()}`;
      return coverState;
   }
@@ -859,9 +875,9 @@ class cfg{
 
 export class cardCfg extends cfg{
 
-  constructor(escConfig)
+  constructor(hass,escConfig)
   {
-    super();
+    super(hass);
 
     this.stacked(escConfig[C.CONFIG_STACKED]);
     this.title(escConfig[C.CONFIG_TITLE]);
@@ -872,9 +888,9 @@ export class cardCfg extends cfg{
 }
 export class cardCfgNew extends cfg{
 
-  constructor(escConfig)
+  constructor(hass,escConfig)
   {
-    super();
+    super(hass);
     this.fillCfg(escConfig);
   }
 }
@@ -882,7 +898,7 @@ export class cardCfgNew extends cfg{
 export class windowCfgNew extends cfg{
   constructor(hass,escConfig)
   {
-    super();
+    super(hass);
     this.fillCfg(escConfig);
 
   }
@@ -890,7 +906,7 @@ export class windowCfgNew extends cfg{
 export class coverCfgNew extends cfg{
   constructor(hass,escConfig)
   {
-    super();
+    super(hass);
     this.fillCfg(escConfig);
 
   }
@@ -898,9 +914,27 @@ export class coverCfgNew extends cfg{
 export class entityCfgNew extends cfg{
   constructor(hass,escConfig)
   {
-    super();
+    super(hass);
     this.fillCfg(escConfig);
 
+  }
+}
+export class cfgNew extends cfg{
+  constructor(hass,cfg)
+  {
+    super(hass);
+    this.cfg = cfg;
+    Object.entries(cfg).forEach( ([key, value]) => {
+      if (key === C.CONFIG_ENTITY_ID) {
+        this.setCoverEntity(this.hass,value);
+      }
+      if (key === C.CONFIG_BATTERY_ENTITY_ID) {
+        this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
+      }
+      if (key === C.CONFIG_SIGNAL_ENTITY_ID) {
+        this.subEntity[C.DEVICE_CLASS_SIGNAL] = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
+      }
+    });
   }
 }
 export class shutterCfg extends cfg{
@@ -908,11 +942,9 @@ export class shutterCfg extends cfg{
 
   constructor(hass,escConfig)
   {
-    super();
+    super(hass);
 
     let entityId = this.entityId(escConfig[C.CONFIG_ENTITY_ID] ? escConfig[C.CONFIG_ENTITY_ID] : escConfig);
-
-    this.hass = hass;
 
     this.group(escConfig[C.CONFIG_GROUP]);
     this.id(escConfig[C.CONFIG_ID]);
