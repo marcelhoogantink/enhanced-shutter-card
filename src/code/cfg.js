@@ -113,10 +113,14 @@ class cfg{
     this.hass = hass;
     for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
       this[method] = (value = null) => this.getCfg(key, value);
+//      if (key === C.CONFIG_BUTTON_OPENED_HIDE_STATES) debugger;
+//      if (method === "buttonOpenHideStates") debugger;
       if (method != key){
         this[key]  = (value = null) => this.getCfg(key, value);
       }
     }
+    this.setLocalize(hass.localize);
+
   }
   fillCfg(escConfig){
     Object.entries(escConfig).forEach( ([key, value]) => {
@@ -138,8 +142,11 @@ class cfg{
 
 
     });
+
+
   }
   getCfg(key,value= null){
+    //if (key === C.CONFIG_BUTTON_OPENED_HIDE_STATES) debugger;
     if (value!== null && this.cfg[key]!=value){
       this.cfg[key]= value;
     }
@@ -264,6 +271,7 @@ class cfg{
     let transform = this.transformRotate(r);
     return transform;
   }
+  // TODO: remove the actualGlobalWidthPx and actualGlobalHeightPx parameters, as they are not used in the function (x and y are defined)
   transformScalePicker(x = this.actualGlobalWidthPx(),y = this.actualGlobalHeightPx()){
     let transform =`${this.verticalMovement() ? '': `scale(${y/x},1)`}`;
     return transform;
@@ -901,6 +909,14 @@ export class windowCfgNew extends cfg{
     super(hass);
     this.fillCfg(escConfig);
 
+    let base_height_px = this.baseHeightPx();
+    let resize_height_pct = this.resizeHeightPct();
+    this.windowHeightPx(Math.round(boundary(resize_height_pct,C.ESC_MIN_RESIZE_HEIGHT_PCT,C.ESC_MAX_RESIZE_HEIGHT_PCT) / 100 * base_height_px));
+
+    let base_width_px  = this.baseWidthPx();
+    let resize_width_pct  = this.resizeWidthPct();
+    this.windowWidthPx(Math.round(boundary(resize_width_pct, C.ESC_MIN_RESIZE_WIDTH_PCT ,C.ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
+
   }
 }
 export class coverCfgNew extends cfg{
@@ -949,7 +965,6 @@ export class shutterCfg extends cfg{
     this.group(escConfig[C.CONFIG_GROUP]);
     this.id(escConfig[C.CONFIG_ID]);
 
-    this.setLocalize(hass.localize);
     this.setCoverEntity(hass,entityId);
 
     Object.entries(escConfig).forEach( ([key, value]) => {

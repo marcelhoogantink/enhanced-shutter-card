@@ -521,10 +521,12 @@ export class EnhancedShutterCardNew extends LitElement{
       { childKey: C.ENTITIES_CONFIG,    func: "coverHtml"   },
       { childKey: "",                   func: "entityHtml"  },
     ];
+    const {childKey,func} = LEVELS[depth];
     // loop through the cfg settingsand store
     Object.entries(cfg).forEach(([key, value]) => {
       // sla object over
-      if (value.constructor === Array) return;
+      if (key === childKey) return;
+      //if (value.constructor === Array) return;
       // save cfg-item
       this.testCfg[key] = value;
     });
@@ -533,7 +535,6 @@ export class EnhancedShutterCardNew extends LitElement{
 
     let htmlOuts = nothing;
     if (depth < LEVELS.length) {
-      const {childKey,func} = LEVELS[depth];
       let childObj = {};
       if (childKey && cfg[childKey].constructor === Array) {
         htmlOuts = html`<ul>${
