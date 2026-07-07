@@ -1,5 +1,4 @@
 import * as C from './constants.js';
-//import {EscImages} from './escImages.js';
 import {LitElement, html, css, unsafeCSS,nothing } from './lit/lit-core.min.js';
 import {
   cardCfg,
@@ -64,6 +63,12 @@ export class EnhancedShutterCardNew extends LitElement{
     const oldHass = this._hass;
     this._hass = hass;
     if (!this.initializeStarted) {
+      if (this.config.windows  || this.config.covers)
+      {
+        this.newConfig= true;
+      }else{
+        this.newConfig= false;
+      }
       this.initializeStarted = true;
       this.cardInitialize(); // run once
     }
@@ -77,7 +82,7 @@ export class EnhancedShutterCardNew extends LitElement{
     try {
       this.#defAllShutterConfig();
       //this.isShutterConfigLoaded = this.#defAllShutterConfig();
-      this.escImages = new EscImages(this.shutterCfgs);
+      this.escImages = new EscImages(this);
 
       await this.resolveSubEntities();
       await this.escImages.processImages();
@@ -99,18 +104,7 @@ export class EnhancedShutterCardNew extends LitElement{
   }
   // ===================================
 
-  /**
-   * Recursively builds the config tree starting at `levelIndex`.
-   *
-   * rawParentConfig - the raw (user-supplied) config object that may contain
-   *                    a list of raw items under LEVELS[levelIndex].key
-   * idRef           - { id: number }, shared across the whole tree so every
-   *                    item gets a unique, ever-increasing id
-   *
-   * Returns an array of "full" config objects for this level,
-   * or undefined if there's nothing to build (no items, or no more levels).
-   */
-  #buildLevel(levelIndex, rawParentConfig, idRef) {
+  #buildLevel(levelIndex, rawParentConfig, id) {
     /**
      * One entry per nesting level.
      * key   = the property name under which raw items live, and under which
@@ -133,13 +127,13 @@ export class EnhancedShutterCardNew extends LitElement{
     return rawItems.map((rawItem) => {
       // 1. Merge this raw item with its defaults and a fresh id.
       //const mergedConfig = { ...rawItem};
-      const mergedConfig = { ...rawItem, [C.CONFIG_ID]: idRef.id++ };
+      const mergedConfig = { ...rawItem, [C.CONFIG_ID]: id++ };
       const config = this.#buildConfigNew(baseConfig, mergedConfig);
       const fullCfg = new Class(this.hass, config).cfg;
 
       // 2. Recurse: try to build the next level using THIS raw item as parent.
       const childKey = LEVELS[levelIndex + 1]?.key;
-      const children = this.#buildLevel(levelIndex + 1, rawItem, idRef);
+      const children = this.#buildLevel(levelIndex + 1, rawItem, 0);
       if (children) {
         fullCfg[childKey] = children;
       }
@@ -157,16 +151,15 @@ export class EnhancedShutterCardNew extends LitElement{
 
     // OOPS END
 
-    if (this.config.windows  || this.config.covers)
+    if (this.newConfig)
     {
           // New config with tree
 
-      let idRef = { id: 0 };
+      // fill cfg Tree info with stanard setting ovverruled with defintions.
       let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card, this.config);
       let cfgCardAll = new cardCfgNew(this.hass,config);
       let cfgCard =cfgCardAll.cfg;
-
-      const windowsCfg = this.#buildLevel(0, this.config, idRef);
+      const windowsCfg = this.#buildLevel(0, this.config, 0);
       if (windowsCfg) {
         cfgCard[C.WINDOWS_CONFIG] = windowsCfg;
       }
@@ -463,18 +456,8 @@ export class EnhancedShutterCardNew extends LitElement{
   htmlOutNew(){
 
       const htmlOut = html`
-          <h1>New Card system to initialize ...!!!!</h1>
           ${this.buildTestCfg()}
-          <div>==================</div>
-          ${Object.entries(this.cardCfg.cfg).map(([key,value]) => {
-            switch (key) {
-              case 'windows':
-                return html`<h2>${key}</h2>`;
-              default:
-                return html`<div>${key}: ${value}</div>`;
-            }
-          }
-        )}`;
+        `;
     return htmlOut;
   }
   htmlOutOld(){
@@ -505,7 +488,7 @@ export class EnhancedShutterCardNew extends LitElement{
   }
 
   buildTestCfg() {
-    this.testCfg = {};
+    this.flatCfg = {};
     const htmlOut = html`${this.#buildLevel2(this.cardCfg,0, 0)}`;
     return htmlOut;
   }
@@ -514,7 +497,7 @@ export class EnhancedShutterCardNew extends LitElement{
 
     let cfg=obj.cfg;
 
-    let testCfg2={};
+    let flatCfgBackup={};
     const LEVELS = [
       { childKey: C.WINDOWS_CONFIG,     func: "cardHtml"  },
       { childKey: C.COVERS_CONFIG,      func: "windowHtml"  },
@@ -528,28 +511,28 @@ export class EnhancedShutterCardNew extends LitElement{
       if (key === childKey) return;
       //if (value.constructor === Array) return;
       // save cfg-item
-      this.testCfg[key] = value;
+      this.flatCfg[key] = value;
     });
-    testCfg2 = structuredClone(this.testCfg);
-    console.log(`buildLevel2(1): depth ${depth}, testcfg:`, testCfg2);
+    flatCfgBackup = structuredClone(this.flatCfg);
+    console.log(`buildLevel2(1): depth ${depth}, flatCfg:`, flatCfgBackup);
 
     let htmlOuts = nothing;
     if (depth < LEVELS.length) {
-      let childObj = {};
       if (childKey && cfg[childKey].constructor === Array) {
+        //let childObj = {};
         htmlOuts = html`<ul>${
           cfg[childKey].map((childCfg,index) => {
-            childObj = new cfgNew(this.hass,childCfg);
+            const childObj = new cfgNew(this.hass,childCfg);
             let htmlOut = this.#buildLevel2(childObj, index, depth + 1);
             return htmlOut;
           })
         }`;
       }
-      let testObj = new cfgNew(this.hass,this.testCfg);
+      let testObj = new cfgNew(this.hass,this.flatCfg);
       htmlOuts = html`${this[func](index,testObj)} ${htmlOuts}`;
     }
-    //console.log(`buildLevel2(2): depth ${depth}, testcfg:`, testCfg2);
-    this.testCfg = structuredClone(testCfg2);
+    //console.log(`buildLevel2(2): depth ${depth}, flatCfg:`, flatCfg);
+    this.flatCfg = structuredClone(flatCfgBackup);
     return htmlOuts;
   }
   //=====================
@@ -585,7 +568,7 @@ export class EnhancedShutterCardNew extends LitElement{
       </div>
       ${this.shutterSeparateBlock.show()}
     `;
-    return html`<li><u>Entity (${index})</u><br></li>`;
+    // return html`<li><u>Entity (${index})</u><br></li>`;
   }
 
   firstUpdated() {
@@ -617,7 +600,8 @@ export class EnhancedShutterCardNew extends LitElement{
   connectedCallback() {
     super.connectedCallback();
 
-   //this.defGridContainer();
+
+     //this.defGridContainer();
     //this.getGridOptionsInternal();
     /* get element of hui-view to detect resizing */
     C.Globals.huiView = findElementInBody(C.HA_HUI_VIEW);

@@ -2,8 +2,12 @@ import * as C from './constants.js';
 import {xyPair} from './xyPair.js';
 import {
   defImagePathOrColor,
+  console_log,
   isUrl
 } from './functions.js';
+import {
+  cfgNew,
+} from './cfg.js';
 
 export class EscImages {
     #escImageInfo = {};
@@ -11,36 +15,92 @@ export class EscImages {
     #dimensions = new Map();     // src → xyPair(width, height)
     #srcImageType = new Map();   // src → image_type, needed for fallback lookup on load error
     #resolvedSrc = new Map();    // original src → actual src to use
-    constructor(shutterCfgs) {
+    constructor(shutterCard) {
 
-        for (const imageType of C.IMAGE_TYPES) {
-            let imageRefs = {};
-
-            for (const shutterCfg of shutterCfgs) {
-
-                let map = shutterCfg.imageMap();
-                let image = shutterCfg.getImage(imageType);
-                image = defImagePathOrColor(map, image);
-
-
-                if (image) {
-                    let src = image.replace(/([^:]\/)\/+/g, "/").trim();
-                    // Set.add is a no-op for duplicates — no if/else needed
-                    this.#uniqueImages.add(src);
-                    // Only record the first image_type seen for this src (used for fallback)
-                    if (!this.#srcImageType.has(src)) {
-                        this.#srcImageType.set(src, imageType);
+        if (shutterCard.newConfig) {
+            // new (tree) config
+            const cardObj = shutterCard.cardCfg;
+            for (const imageType of C.IMAGE_TYPES) {
+                let map = cardObj.imageMap();
+                let imageRefs = {};
+                for (const window of cardObj.cfg.windows) {
+                    const windowObj = new cfgNew(shutterCard._hass,window);
+                    let image = windowObj.getImage(imageType);
+                    this.storeImage(image, map, imageRefs, C.WINDOWS_CONFIG,windowObj.id());
+                    for (const cover of window.covers) {
+                        const coverObj = new cfgNew(shutterCard._hass,cover);
+                        let image = coverObj.getImage(imageType);
+                        this.storeImage(image, map, imageRefs,C.COVERS_CONFIG, coverObj.id());
+                        for (const entity of cover.entities) {
+                            const entityObj = new cfgNew(shutterCard._hass,entity);
+                            let image = entityObj.getImage(imageType);
+                            this.storeImage(image, map, imageRefs, C.ENTITIES_CONFIG, entityObj.id());
+                        }
                     }
-                    imageRefs[shutterCfg.id()] = { src };
-                } else {
-                    imageRefs[shutterCfg.id()] = { src: '' };
                 }
+                this.#escImageInfo[imageType] = imageRefs;
             }
+            debugger; // new
+        }else {
+            // old just-entities config
+            const shutterCfgs = shutterCard.shutterCfgs;
+            for (const imageType of C.IMAGE_TYPES) {
+                let imageRefs = {};
 
-            this.#escImageInfo[imageType] = imageRefs;
+                for (const shutterCfg of shutterCfgs) {
+
+                    let map = shutterCfg.imageMap();
+                    let image = shutterCfg.getImage(imageType);
+                    let configType;
+
+                    if (imageType === C.CONFIG_WINDOW_IMAGE || imageType === C.CONFIG_VIEW_IMAGE) {
+                        configType = C.WINDOWS_CONFIG;
+                    } else if (imageType === C.CONFIG_SHUTTER_SLAT_IMAGE || imageType === C.CONFIG_SHUTTER_BOTTOM_IMAGE) {
+                        configType = C.COVERS_CONFIG;
+                    } else {
+                        configType = C._NO_GROUP_CONFIG;
+                    }
+                    this.storeImage(image, map, imageRefs, configType,shutterCfg.id());
+/*
+                    image = defImagePathOrColor(map, image);
+                    if (image) {
+                        let src = image.replace(/([^:]\/)\/+/g, "/").trim();
+                        // Set.add is a no-op for duplicates — no if/else needed
+                        this.#uniqueImages.add(src);
+                        // Only record the first image_type seen for this src (used for fallback)
+                        if (!this.#srcImageType.has(src)) {
+                            this.#srcImageType.set(src, imageType);
+                        }
+                        imageRefs[shutterCfg.id()] = { src };
+                    } else {
+                        imageRefs[shutterCfg.id()] = { src: '' };
+                    }
+*/
+                }
+
+                this.#escImageInfo[imageType] = imageRefs;
+            }
+            debugger; // old
         }
     }
 
+    storeImage(image, map,imageRefs,imageType,id){
+        imageRefs[imageType] ??= {};
+        image = defImagePathOrColor(map, image);
+        if (image) {
+            let src = image.replace(/([^:]\/)\/+/g, "/").trim();
+            // Set.add is a no-op for duplicates — no if/else needed
+            this.#uniqueImages.add(src);
+            // Only record the first image_type seen for this src (used for fallback)
+            if (!this.#srcImageType.has(src)) {
+                this.#srcImageType.set(src, imageType);
+            }
+            imageRefs[imageType][id] = { src };
+        } else {
+            imageRefs[imageType][id] = { src: '' };
+        }
+
+    }
     // --- src getters ---
 
     getWindowImageSrc(id) {
@@ -55,8 +115,16 @@ export class EscImages {
     getShutterBottomImageSrc(id) {
         return this.#getImageSrc(C.CONFIG_SHUTTER_BOTTOM_IMAGE, id);
     }
-    #getImageSrc(image_type, id) {
-        let src = this.#escImageInfo[image_type][id]?.src ?? '';
+    #getImageSrc(imageType, id) {
+        let configType;
+        if (imageType === C.CONFIG_WINDOW_IMAGE || imageType === C.CONFIG_VIEW_IMAGE) {
+            configType = C.WINDOWS_CONFIG;
+        } else if (imageType === C.CONFIG_SHUTTER_SLAT_IMAGE || imageType === C.CONFIG_SHUTTER_BOTTOM_IMAGE) {
+            configType = C.COVERS_CONFIG;
+        } else {
+            configType = C._NO_GROUP_CONFIG;
+        }
+        let src = this.#escImageInfo[imageType][configType]?.[id]?.src ?? '';
         src = this.#resolvedSrc.get(src) ?? src;
         return src;
     }
@@ -75,8 +143,16 @@ export class EscImages {
     getShutterBottomImageSize(id) {
         return this.#getImageSize(C.CONFIG_SHUTTER_BOTTOM_IMAGE, id);
     }
-    #getImageSize(image_type, id) {
-        const src = this.#escImageInfo[image_type][id]?.src;
+    #getImageSize(imageType, id) {
+        let configType;
+        if (imageType === C.CONFIG_WINDOW_IMAGE || imageType === C.CONFIG_VIEW_IMAGE) {
+            configType = C.WINDOWS_CONFIG;
+        } else if (imageType === C.CONFIG_SHUTTER_SLAT_IMAGE || imageType === C.CONFIG_SHUTTER_BOTTOM_IMAGE) {
+            configType = C.COVERS_CONFIG;
+        } else {
+            configType = C._NO_GROUP_CONFIG;
+        }
+        const src = this.#escImageInfo[imageType][configType]?.[id]?.src;
         if (!src) return new xyPair(0, 0);
         return this.#dimensions.get(src) ?? new xyPair(0, 0);
     }
@@ -89,6 +165,7 @@ export class EscImages {
         } catch (error) {
             console.error('Failed to load image dimensions:', error);
         }
+        console_log(`EscImages: Loaded ${this.#dimensions.size} unique images with dimensions.`);
     }
 
     async #readImageDimensions() {

@@ -1,6 +1,6 @@
 //import * as C from './constants.js';
 //import {EscImages} from './escImages.js';
-let DEBUG = false;
+let DEBUG = true;
 export function setDebug(flag) { DEBUG = flag; }
 export function getDebug() { return DEBUG; }
 
