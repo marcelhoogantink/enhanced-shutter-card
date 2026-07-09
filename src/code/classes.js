@@ -128,7 +128,7 @@ export class EnhancedShutterCardNew extends LitElement{
       // 1. Merge this raw item with its defaults and a fresh id.
       //const mergedConfig = { ...rawItem};
       const mergedConfig = { ...rawItem, [C.CONFIG_ID]: id++ };
-      const config = this.#buildConfigNew(baseConfig, mergedConfig);
+      const config = this.#buildConfig(baseConfig, mergedConfig);
       const fullCfg = new Class(this.hass, config).cfg;
 
       // 2. Recurse: try to build the next level using THIS raw item as parent.
@@ -144,19 +144,13 @@ export class EnhancedShutterCardNew extends LitElement{
 // ===================================
   #defAllShutterConfig()
   {
-    // OOPS: this.cardCfg should exist for now!!!!!!
-
-    const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
-    this.cardCfgTest = new cardCfg(this.hass,cardConfig);
-
-    // OOPS END
 
     if (this.newConfig)
     {
           // New config with tree
 
       // fill cfg Tree info with stanard setting ovverruled with defintions.
-      let config = this.#buildConfigNew(C.CONFIG_DEFAULT_NEW.card, this.config);
+      let config = this.#buildConfig(C.CONFIG_DEFAULT_NEW.card, this.config);
       let cfgCardAll = new cardCfgNew(this.hass,config);
       let cfgCard =cfgCardAll.cfg;
       const windowsCfg = this.#buildLevel(0, this.config, 0);
@@ -166,7 +160,8 @@ export class EnhancedShutterCardNew extends LitElement{
 
       this.cardCfg = cfgCardAll;
 
-      let breakPoint;
+      let test = this.cardCfg.cfg;
+      let breakPoint; //new
 
     } else {
       // classic config
@@ -211,6 +206,9 @@ export class EnhancedShutterCardNew extends LitElement{
           this.shutterCfgs.push(cfg);
         }
       });
+
+      let test = this.shutterCfgs;
+      let breakPoint; //old
     }
     return true;
   }
@@ -218,11 +216,28 @@ export class EnhancedShutterCardNew extends LitElement{
   #buildConfig(configBase,configSub)
   {
     const idMessage = configSub.id === undefined ? 'General' : configSub.id;
+    this.#checkUnknownKeys(configBase,configSub, idMessage);
+    // handle PRESET TYPE
+    //
+    let shutterPreset = (configSub[C.CONFIG_SHUTTER_PRESET] || '').toLowerCase();
+    let configPreset = { ...(C.ESC_PRESET[shutterPreset] || {}) };
 
+    let newConfigSub = { ...configSub };
+
+    this.#replaceKeys(newConfigSub, C.DEPRECATED, C.HA_ALERT_WARNING, idMessage);
+    this.#replaceKeys(newConfigSub, C.REMOVED, C.HA_ALERT_ERROR, idMessage);
+
+    let config = { ...configBase, ...configPreset, ...newConfigSub};
+
+    return config;
+  }
+
+  #checkUnknownKeys(configBase,configSub, idMessage)
+  {
     if (typeof configSub !== 'object' || configSub === null){
       configSub={[C.CONFIG_ENTITY_ID]: configSub};
     }
-    let unknownKeys = this.getUniqueKeysFromObjects(configSub,configBase);
+    let unknownKeys = this.#getUniqueKeysFromObjects(configSub,configBase);
     // handle unknown keywords
     if (unknownKeys.length > 0){
       unknownKeys.forEach((key) =>
@@ -234,115 +249,33 @@ export class EnhancedShutterCardNew extends LitElement{
         );
       });
     };
-    // handle PRESET TYPE
-    //
-    let shutterPreset = (configSub[C.CONFIG_SHUTTER_PRESET] || '').toLowerCase();
-    let configPreset = { ...(C.ESC_PRESET[shutterPreset] || {}) };
 
-    let newConfigSub = { ...configSub };
-
-    // check deprecated and removed
-    // TODO: combine:
-    Object.keys(C.DEPRECATED).forEach(key => {
-      if (newConfigSub[key] != null) {
-        let oldKey = C.DEPRECATED[key];
-        this.messageManager.addMessage(
-          `Deprecated: [${key}], use '${oldKey.new}'!`,
-          C.HA_ALERT_WARNING,
-          idMessage
-        );
-        this.replaceKey(newConfigSub, key,oldKey);
-      }
-    });
-
-    Object.keys(C.REMOVED).forEach(key => {
-      if (newConfigSub[key] != null) {
-        let oldKey = C.REMOVED[key];
-        this.messageManager.addMessage(
-          `Removed: [${key}], use '${oldKey.new}'!`,
-          C.HA_ALERT_ERROR,
-          idMessage
-        );
-        this.replaceKey(newConfigSub, key,oldKey);
-      }
-    });
-
-    let config = { ...configBase, ...configPreset, ...newConfigSub};
-
-    return config;
   }
-  #buildConfigNew(configBase,configSub)
+  #replaceKeys(newConfigSub, keys, alertType, idMessage)
   {
-    const idMessage = configSub.id === undefined ? 'General' : configSub.id;
-
-    if (typeof configSub !== 'object' || configSub === null){
-      configSub={[C.CONFIG_ENTITY_ID]: configSub};
-    }
-    let unknownKeys = this.getUniqueKeysFromObjects(configSub,configBase);
-    // handle unknown keywords
-    if (unknownKeys.length > 0){
-      unknownKeys.forEach((key) =>
-      {
-        this.messageManager.addMessage(
-          `buildConfigNew: Unknown keyword: [${key}], check your input!`,
-          C.HA_ALERT_WARNING,
-          idMessage
-        );
-      });
-      debugger;
-    };
-    // handle PRESET TYPE
-    //
-    let shutterPreset = (configSub[C.CONFIG_SHUTTER_PRESET] || '').toLowerCase();
-    let configPreset = { ...(C.ESC_PRESET[shutterPreset] || {}) };
-
-    // replace deprecated and removed input  settings
-
-    let newConfigSub = { ...configSub };
-
-    // check deprecated
-    // TODO: combine:
-    Object.keys(C.DEPRECATED).forEach(key => {
+    Object.keys(keys).forEach(key => {
       if (newConfigSub[key] != null) {
-        let oldKey = C.DEPRECATED[key];
+        let oldKey = keys[key];
         this.messageManager.addMessage(
           `Deprecated: [${key}], use '${oldKey.new}'!`,
-          C.HA_ALERT_WARNING,
+          alertType,
           idMessage
         );
-        this.replaceKey(newConfigSub, key,oldKey);
+        this.#replaceKey(newConfigSub, key,oldKey);
       }
     });
-
-    // check removed
-    // TODO: combine:
-    Object.keys(C.REMOVED).forEach(key => {
-      if (newConfigSub[key] != null) {
-        let oldKey = C.REMOVED[key];
-        this.messageManager.addMessage(
-          `Removed: [${key}], use '${oldKey.new}'!`,
-          C.HA_ALERT_ERROR,
-          idMessage
-        );
-        this.replaceKey(newConfigSub, key,oldKey);
-      }
-    });
-
-    let config = { ...configBase, ...configPreset, ...newConfigSub};
-
-    return config;
   }
-  replaceKey(newConfigSub, key,oldKey){
-        if (oldKey.value){
-          // correct value with function
-          newConfigSub[oldKey.new] = oldKey.value(newConfigSub[key]);
-        }else{
-          // take same value
-          newConfigSub[oldKey.new] = newConfigSub[key];
-        }
-        delete newConfigSub[key];
+  #replaceKey(newConfigSub, key,oldKey) {
+    if (oldKey.value){
+      // correct value with function
+      newConfigSub[oldKey.new] = oldKey.value(newConfigSub[key]);
+    }else{
+      // take same value
+      newConfigSub[oldKey.new] = newConfigSub[key];
+    }
+    delete newConfigSub[key];
   }
-  getUniqueKeysFromObjects(obj1, obj2) {
+  #getUniqueKeysFromObjects(obj1, obj2) {
     // Get all keys from both objects
     const keysObj1 = Object.keys(obj1);
     const keysObj2 = Object.keys(obj2);
@@ -375,34 +308,45 @@ export class EnhancedShutterCardNew extends LitElement{
           }
           break;
         case 'hass':
-        /* On hass update, check if there is a cover change */
-          this.shutterCfgs.forEach(cfg =>{
-            const coverEntityId = cfg.entityId();
-            const currentShutterEntity =cfg.getCoverEntity();
-            if (currentShutterEntity) {
-              const liveCoverEntity = new haEntity(this.hass,coverEntityId);
-              let shutterStateOld= cfg.getCoverState();
-              let shutterStateNew= cfg.getCoverState(liveCoverEntity);
+          /* On hass update, check if there is a cover change */
+          if (this.newConfig){
+            debugger;
+            // TODO TO SIMPLE !!!!!!
+            // look at escImages.js lines 26-40 (triple nested loops)
+            doUpdate =true;
+          }else{
+            this.shutterCfgs.forEach(cfg =>{
+              const coverEntityId = cfg.entityId();
+              const currentShutterEntity =cfg.getCoverEntity();
+              if (currentShutterEntity) {
+                // get previous state
+                let shutterStateOld= cfg.getCoverState();
+                // get new state
+                const liveCoverEntity = new haEntity(this.hass,coverEntityId);
+                let shutterStateNew= cfg.getCoverState(liveCoverEntity);
+                console.log(`Card shouldUpdate: Cover [${coverEntityId}] state changed. oldValue: ${shutterStateOld} newValue: ${shutterStateNew}`);
+                if (shutterStateNew != shutterStateOld){
+                  doUpdate =true;
+                  cfg.updateCoverEntity(liveCoverEntity);
+                }
 
-              if (shutterStateNew != shutterStateOld){
-                doUpdate =true;
-                cfg.updateCoverEntity(liveCoverEntity);
-              }
-
-              for (let type of C.DEVICES_CLASSES_SUB_ENTITIES) {
-                const subEntity = cfg.subEntity[type];
-                const currentEntity = subEntity?.entity;
-                if (currentEntity) {
-                  const entityId = subEntity?.entityId;
-                  const liveEntity = new haEntity(this.hass,entityId);
-                  if (liveEntity && liveEntity.getState() !== currentEntity.getState() ){
-                    doUpdate =true;
-                    subEntity.update(liveEntity);
+                for (let type of C.DEVICES_CLASSES_SUB_ENTITIES) {
+                  const subEntity = cfg.subEntity[type];
+                  const currentEntity = subEntity?.entity;
+                  if (currentEntity) {
+                    const entityId = subEntity?.entityId;
+                    const liveEntity = new haEntity(this.hass,entityId);
+                    if (liveEntity && liveEntity.getState() !== currentEntity.getState() ){
+                      doUpdate =true;
+                      subEntity.update(liveEntity);
+                    }
                   }
                 }
               }
-            }
-          });
+            });
+
+          }
+
 
           break;
         default:
@@ -1027,7 +971,7 @@ export class EnhancedShutter extends LitElement
       this.actualShutterPosition = this.react_ShutterPosition;
       this.actualTiltPosition = this.cfg.currentBaseTiltPosition();
     }else if (this.action=='user-drag-slider'){
-      // position from screen-dragging shown
+      // position from screen-dragging of the shown slider
       this.actualScreenPosition =  this.defScreenPositionFromCurrentPosition(this.react_ShutterPosition);
       this.actualShutterPosition = this.react_ShutterPosition;
       this.actualTiltPosition = this.cfg.currentBaseTiltPosition();
@@ -1537,7 +1481,9 @@ export class EnhancedShutter extends LitElement
 
   getShutterOnScreenPosition(event){
     const screenPosition = this.getScreenPosFromPickPoint(event);
+    console.log('    ==> getShutterOnScreenPosition: screenPosition:',screenPosition);
     const shutterPosition = this.getShutterPosFromScreenPos(screenPosition);
+    console.log('    ==> getShutterOnScreenPosition: shutterPosition:',shutterPosition);
     return shutterPosition; // between 0-100
   }
   getTiltOnScreenPosition(){
@@ -1553,18 +1499,26 @@ export class EnhancedShutter extends LitElement
 
   getShutterPosFromScreenPos(screenPosition){
     let shutterPosition = C.SHUTTER_OPEN_PCT - Math.round((screenPosition - this.offsetOpenedPx()) * (this.cfg.offset()) / this.coverSizeMovingDirectionPx());
+    console.log('this.offsetOpenedPx() ',this.offsetOpenedPx());
+    console.log('this.cfg.offset() ',this.cfg.offset());
+    console.log('this.coverSizeMovingDirectionPx() ',this.coverSizeMovingDirectionPx());
+
     return shutterPosition;
   }
 
   getScreenPosFromPickPoint(event){
     const pickPoint = this.getPoint(event);
+    console.log('   =====>>> getScreenPosFromPickPoint: pickPoint:',pickPoint);
+    console.log('   =====>>> getScreenPosFromPickPoint: this.basePickPoint:',this.basePickPoint);
     let delta = new xyPair(pickPoint.coord.x() - this.basePickPoint.coord.x() ,
                            pickPoint.coord.y() - this.basePickPoint.coord.y());
     let delta_local = this.cfg.rotateBackOrtho(delta);
+    console.log('   =====>>> getScreenPosFromPickPoint: delta:',delta);
+    console.log('   =====>>> getScreenPosFromPickPoint: delta_local:',delta_local);
 
     let newScreenPosition =
       Math.round(boundary(
-        this.basePickPoint.shutterScreenPos+delta_local.y(),
+        this.basePickPoint.shutterScreenPos + delta_local.y(),
         this.coverOpenedPx(),
         this.coverClosedPx()
       ));
@@ -1594,6 +1548,7 @@ export class EnhancedShutter extends LitElement
     this.getBasePickPoint(event);
     this.manageEvents(C.ADD_EVENT, C.MOUSEMOVE, this, this.mouseMoveOpenClosePicker);
     this.manageEvents(C.ADD_EVENT, C.MOUSEUP, window, this.mouseUpOpenClosePicker);
+    //console.log('mouseDownOpenClosePicker:',this.react_ShutterPosition,this.positionText);
   };
   mouseDownTiltSlider = () => {
     this.action='user-drag-tilt';
@@ -1613,10 +1568,11 @@ export class EnhancedShutter extends LitElement
     if (event.pageY === undefined) return;
     this.action='user-drag-picker';
     this.screenPosition = this.getScreenPosFromPickPoint(event); //old
-    this.react_ShutterPosition = this.getShutterOnScreenPosition(event);
     const tiltPosition = this.cfg.currentDeviceTiltPosition();
+    console.log('mouseMoveOpenClosePicker1:',this.react_ShutterPosition,tiltPosition,this.positionText);
+    this.react_ShutterPosition = this.getShutterOnScreenPosition(event);
     this.positionText = this.cfg.createPositionText(this.react_ShutterPosition,tiltPosition);
-    //console.log('mouseMoveOpenClosePicker:',this.react_ShutterPosition,tiltPosition,this.positionText);
+    console.log('mouseMoveOpenClosePicker2:',this.react_ShutterPosition,tiltPosition,this.positionText);
   };
   mouseMoveTiltSlider = (event) => { // mouseMoveTilt
     this.action='user-drag-tilt';
@@ -1655,8 +1611,11 @@ export class EnhancedShutter extends LitElement
     this.action='user-drag-picker';
     this.manageEvents(C.REMOVE_EVENT, C.MOUSEMOVE, this, this.mouseMoveOpenClosePicker);
     this.manageEvents(C.REMOVE_EVENT, C.MOUSEUP, window, this.mouseUpOpenClosePicker);
+    //console.log('mouseUpOpenClosePicker1:',this.react_ShutterPosition,this.positionText);
     this.react_ShutterPosition = this.getShutterOnScreenPosition(event);
     this.sendOpenClose(this.react_ShutterPosition);
+    //console.log('mouseUpOpenClosePicker2:',this.react_ShutterPosition,this.positionText);
+    console.log("=================");
   };
   sendOpenClose(shutterPosition){
     if (this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)){

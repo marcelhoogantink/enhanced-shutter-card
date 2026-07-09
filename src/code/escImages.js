@@ -40,7 +40,7 @@ export class EscImages {
                 }
                 this.#escImageInfo[imageType] = imageRefs;
             }
-            debugger; // new
+            //debugger; // new
         }else {
             // old just-entities config
             const shutterCfgs = shutterCard.shutterCfgs;
@@ -61,26 +61,10 @@ export class EscImages {
                         configType = C._NO_GROUP_CONFIG;
                     }
                     this.storeImage(image, map, imageRefs, configType,shutterCfg.id());
-/*
-                    image = defImagePathOrColor(map, image);
-                    if (image) {
-                        let src = image.replace(/([^:]\/)\/+/g, "/").trim();
-                        // Set.add is a no-op for duplicates — no if/else needed
-                        this.#uniqueImages.add(src);
-                        // Only record the first image_type seen for this src (used for fallback)
-                        if (!this.#srcImageType.has(src)) {
-                            this.#srcImageType.set(src, imageType);
-                        }
-                        imageRefs[shutterCfg.id()] = { src };
-                    } else {
-                        imageRefs[shutterCfg.id()] = { src: '' };
-                    }
-*/
                 }
-
                 this.#escImageInfo[imageType] = imageRefs;
             }
-            debugger; // old
+            //debugger; // old
         }
     }
 

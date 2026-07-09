@@ -168,6 +168,7 @@ class cfg{
     this.coverEntity = entityId ? new haEntity(hass,entityId) : null;
   }
   updateCoverEntity(haEntity){
+    console.log('cfg: updateCoverEntity: coverEntity updated from:', this.coverEntity, 'to:', haEntity);
     this.coverEntity = haEntity;
   }
   getCoverEntity(){
@@ -374,6 +375,7 @@ class cfg{
   currentDevicePosition(){
     let position = this.currentBasePosition();
     position = this.applyInvertToPosition(position);
+    console.log('currentDevicePosition: position=',position);
     return position;
   }
   currentBasePosition(){
@@ -932,6 +934,9 @@ export class entityCfgNew extends cfg{
   {
     super(hass);
     this.fillCfg(escConfig);
+
+    this.partial(boundary(this.invertPosition(escConfig[C.CONFIG_PARTIAL_CLOSE_PCT])));
+    this.offset(boundary(this.invertPosition(escConfig[C.CONFIG_OFFSET_IS_CLOSED_PCT])));
 
   }
 }
