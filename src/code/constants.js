@@ -297,7 +297,8 @@ export const CONFIG_BUTTONS_POSITION = 'buttons_position';
 export const CONFIG_OPENING_POSITION = 'opening_position';
 
 export const CONFIG_ICONS_POSITION = 'icons_position'; // for battery and signal icons
-// TODO: what whwn cover has two entities with both a battery or so ??
+// TODO: what when cover has two entities with both a battery or so ??
+
 export const CONFIG_BATTERY_ENTITY_ID = 'battery_entity';
 export const CONFIG_SIGNAL_ENTITY_ID = 'signal_entity';
 

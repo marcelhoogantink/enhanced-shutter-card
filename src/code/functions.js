@@ -235,7 +235,7 @@ export function findElementInBody(selector) {
   return findElement(document.body,selector);
 }
 
-// TODO: merge FinElement and findElements into one
+// TODO: merge funcions FindElement and findElements into one
 export function findElement(base,selector) {
   // Search in the regular DOM
   let foundInDom = base.querySelector(selector);

@@ -19,22 +19,19 @@ export class EscImages {
 
         if (shutterCard.newConfig) {
             // new (tree) config
-            const cardObj = shutterCard.cardCfg;
+            const card = shutterCard.cardCfg;
+            let map = card.imageMap();
             for (const imageType of C.IMAGE_TYPES) {
-                let map = cardObj.imageMap();
                 let imageRefs = {};
-                for (const window of cardObj.cfg.windows) {
-                    const windowObj = new cfgNew(shutterCard._hass,window);
-                    let image = windowObj.getImage(imageType);
-                    this.storeImage(image, map, imageRefs, C.WINDOWS_CONFIG,windowObj.id());
-                    for (const cover of window.covers) {
-                        const coverObj = new cfgNew(shutterCard._hass,cover);
-                        let image = coverObj.getImage(imageType);
-                        this.storeImage(image, map, imageRefs,C.COVERS_CONFIG, coverObj.id());
-                        for (const entity of cover.entities) {
-                            const entityObj = new cfgNew(shutterCard._hass,entity);
-                            let image = entityObj.getImage(imageType);
-                            this.storeImage(image, map, imageRefs, C.ENTITIES_CONFIG, entityObj.id());
+                for (const window of card.cfg.windows) {
+                    let image = window.getImage(imageType);
+                    this.storeImage(image, map, imageRefs, C.WINDOWS_CONFIG,window.id());
+                    for (const cover of window.cfg.covers) {
+                        let image = cover.getImage(imageType);
+                        this.storeImage(image, map, imageRefs,C.COVERS_CONFIG, cover.id());
+                        for (const entity of cover.cfg.entities) {
+                            let image = entity.getImage(imageType);
+                            this.storeImage(image, map, imageRefs, C.ENTITIES_CONFIG, entity.id());
                         }
                     }
                 }

@@ -84,20 +84,20 @@ export class EnhancedShutterCardNew extends LitElement{
       //this.isShutterConfigLoaded = this.#defAllShutterConfig();
       this.escImages = new EscImages(this);
 
-      await this.resolveSubEntities();
+      await this.resolveSubEntities();  // TODO:
       await this.escImages.processImages();
     } catch (err) {
       console.warn('ESC: Error during initialization:', err);
       debugger;
     } finally {
       this.initializeReady = true;
-        console_log('initialize Is Ready');
+        console_log(`getGridOptions initialize Is Ready (${this.cardCfg?.title()}), Force?`);
 
       if (this.isConnected) {
         // HA will re-call these methods on your card in response of this event:
         // getGridOptions()   ← recalculates layout
         // getCardSize()      ← recalculates legacy size (if defined)
-        console_log('Force getGridOptions()');
+        console_log(`Force getGridOptions(); Title: ${this.config.title} `);
         this.dispatchEvent(new CustomEvent('card-updated', { bubbles: true }));
       }
     }
@@ -124,22 +124,22 @@ export class EnhancedShutterCardNew extends LitElement{
 
     if (!rawItems) return undefined;
 
-    return rawItems.map((rawItem) => {
+    const cfg = rawItems.map((rawItem) => {
       // 1. Merge this raw item with its defaults and a fresh id.
       //const mergedConfig = { ...rawItem};
       const mergedConfig = { ...rawItem, [C.CONFIG_ID]: id++ };
       const config = this.#buildConfig(baseConfig, mergedConfig);
-      const fullCfg = new Class(this.hass, config).cfg;
+      const fullCfg = new Class(this.hass, config);
 
       // 2. Recurse: try to build the next level using THIS raw item as parent.
       const childKey = LEVELS[levelIndex + 1]?.key;
       const children = this.#buildLevel(levelIndex + 1, rawItem, 0);
       if (children) {
-        fullCfg[childKey] = children;
+        fullCfg.cfg[childKey] = children;
       }
-
       return fullCfg;
     });
+    return cfg;
   }
 // ===================================
   #defAllShutterConfig()
@@ -155,6 +155,7 @@ export class EnhancedShutterCardNew extends LitElement{
       let cfgCard =cfgCardAll.cfg;
       const windowsCfg = this.#buildLevel(0, this.config, 0);
       if (windowsCfg) {
+        //cfgCard[C.WINDOWS_CONFIG] = windowsCfg;
         cfgCard[C.WINDOWS_CONFIG] = windowsCfg;
       }
 
@@ -289,6 +290,7 @@ export class EnhancedShutterCardNew extends LitElement{
     return this.cardCfg.stacked() == C.VERTICAL ? 'column' : 'row';
   }
   getCoverEntities(){
+    // TODO newConfig
     let keys = this.shutterCfgs.map(cfg=>cfg.entityId());
     return keys;
   }
@@ -300,7 +302,7 @@ export class EnhancedShutterCardNew extends LitElement{
     let doUpdate =false;
 
     changedProperties.forEach((oldValue, propName) => {
-      // console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
+      console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}, title: ${this.cardCfg?.title()}`);
       switch (propName){
         case ("initializeReady"):
           if (this.initializeReady){
@@ -310,44 +312,39 @@ export class EnhancedShutterCardNew extends LitElement{
         case 'hass':
           /* On hass update, check if there is a cover change */
           if (this.newConfig){
-            debugger;
-            // TODO TO SIMPLE !!!!!!
-            // look at escImages.js lines 26-40 (triple nested loops)
-            doUpdate =true;
-          }else{
-            this.shutterCfgs.forEach(cfg =>{
-              const coverEntityId = cfg.entityId();
-              const currentShutterEntity =cfg.getCoverEntity();
-              if (currentShutterEntity) {
-                // get previous state
-                let shutterStateOld= cfg.getCoverState();
-                // get new state
-                const liveCoverEntity = new haEntity(this.hass,coverEntityId);
-                let shutterStateNew= cfg.getCoverState(liveCoverEntity);
-                console.log(`Card shouldUpdate: Cover [${coverEntityId}] state changed. oldValue: ${shutterStateOld} newValue: ${shutterStateNew}`);
-                if (shutterStateNew != shutterStateOld){
-                  doUpdate =true;
-                  cfg.updateCoverEntity(liveCoverEntity);
-                }
+            const card = this.cardCfg;
 
-                for (let type of C.DEVICES_CLASSES_SUB_ENTITIES) {
-                  const subEntity = cfg.subEntity[type];
-                  const currentEntity = subEntity?.entity;
-                  if (currentEntity) {
-                    const entityId = subEntity?.entityId;
-                    const liveEntity = new haEntity(this.hass,entityId);
-                    if (liveEntity && liveEntity.getState() !== currentEntity.getState() ){
-                      doUpdate =true;
-                      subEntity.update(liveEntity);
+            outer:
+            for (const window of card.cfg.windows) {
+              if (window.entityId()) {
+                debugger;
+              }
+              for (const cover of window.cfg.covers) {
+                if (cover.entityId()) {
+                  debugger;
+                }
+                for (const entity of cover.cfg.entities) {
+                  const coverEntityId = entity.entityId();
+                  if (entity.entityId()) {
+                    debugger;
+                    doUpdate = this.checkShutterState(entity);
+                    //doUpdate = this.checkSubEntttyStates(cfg,doUpdate);
+                    if (doUpdate){
+                      break outer;
                     }
                   }
                 }
               }
+            }
+          }else{
+            this.shutterCfgs.forEach(cfg =>{
+              if (cfg.entityId()) {
+                // get previous state
+                doUpdate = this.checkShutterState(cfg);
+                doUpdate = this.checkSubEntityStates(cfg,doUpdate);
+              }
             });
-
           }
-
-
           break;
         default:
           /* On any other property change, do the update */
@@ -356,6 +353,40 @@ export class EnhancedShutterCardNew extends LitElement{
     });
     return doUpdate;
   }
+  checkShutterState(cfg)
+  {
+    let doUpdate=false;
+    const coverEntityId = cfg.entityId();
+    const currentShutterEntity =cfg.getCoverEntity();
+    let shutterStateOld= cfg.getCoverState();
+    // get new state
+    const liveCoverEntity = new haEntity(this.hass,coverEntityId);
+    let shutterStateNew= cfg.getCoverState(liveCoverEntity);
+    if (shutterStateNew != shutterStateOld){
+      doUpdate =true;
+      cfg.updateCoverEntity(liveCoverEntity);
+    }
+    return doUpdate;
+  }
+  checkSubEntityStates(cfg,doUpdate)
+  {
+    for (let type of C.DEVICES_CLASSES_SUB_ENTITIES) {
+      const subEntity = cfg.subEntity[type];
+      const currentEntity = subEntity?.entity;
+      if (currentEntity) {
+        const entityId = subEntity?.entityId;
+        const liveEntity = new haEntity(this.hass,entityId);
+        if (liveEntity && liveEntity.getState() !== currentEntity.getState() ){
+          doUpdate =true;
+          subEntity.update(liveEntity);
+        }
+      }
+    }
+    return doUpdate;
+  }
+
+
+
   willUpdate(changedProperties){
     super.willUpdate(changedProperties);
   }
@@ -389,9 +420,9 @@ export class EnhancedShutterCardNew extends LitElement{
           class="${C.ESC_CLASS_SHUTTERS}"
           style = "${htmlParts.defStyleVarsCard()}"
         >
-          ${this.shutterCfgs.length
-              ? this.htmlOutOld()
-              : this.htmlOutNew()}
+          ${this.newConfig
+              ? this.htmlOutNew()
+              : this.htmlOutOld()}
         </div>
       </ha-card>
     `;
@@ -458,15 +489,14 @@ export class EnhancedShutterCardNew extends LitElement{
       this.flatCfg[key] = value;
     });
     flatCfgBackup = structuredClone(this.flatCfg);
-    console.log(`buildLevel2(1): depth ${depth}, flatCfg:`, flatCfgBackup);
 
     let htmlOuts = nothing;
     if (depth < LEVELS.length) {
       if (childKey && cfg[childKey].constructor === Array) {
         //let childObj = {};
-        htmlOuts = html`<ul>${
+        htmlOuts = html`${
           cfg[childKey].map((childCfg,index) => {
-            const childObj = new cfgNew(this.hass,childCfg);
+            const childObj = childCfg;
             let htmlOut = this.#buildLevel2(childObj, index, depth + 1);
             return htmlOut;
           })
@@ -484,12 +514,15 @@ export class EnhancedShutterCardNew extends LitElement{
   //=====================
 
   cardHtml(index,childObj){
+    return nothing;
     return html`<u>Card:</u>`;
   }
   windowHtml(index,childObj){
+    return nothing;
     return html`<li><u>Window (${index})</u><br></li>`;
   }
   coverHtml(index,childObj){
+    return nothing;
     return html`<li><u>Cover (${index})</u><br></li>`;
   }
   entityHtml(index,childObj){
@@ -645,6 +678,9 @@ export class EnhancedShutterCardNew extends LitElement{
     `;
     return css`${unsafeCSS(CSS)}`;
   }
+  /**
+   * Fetches the entity registry and returns all entities that belong to the same device as the provided entity IDs.
+   */
   async getDeviceEntities(entityIds) {
     let deviceEntities = null;
     try {
@@ -667,34 +703,51 @@ export class EnhancedShutterCardNew extends LitElement{
 
   async resolveSubEntities() {
 
-    const entityIds = this.getCoverEntities();
-    // helper
-    const hasDeviceClass = (entry, targetClass) =>
-      this.hass.states[entry.entity_id]?.attributes?.device_class === targetClass;
 
-    for (const cfg of this.shutterCfgs) {
-      const entityId = cfg.entityId();
-      let siblings =null;
+    if (this.newConfig){
+      debugger;
+      // TODO newConfig
+    }else{
+      const entityIds = this.getCoverEntities();
 
-      for (const type of C.DEVICES_CLASSES_SUB_ENTITIES) {
-        const subEntity = cfg.subEntity[type];
-        if (subEntity.entityId === C.AUTO){
-          if (!this.deviceEntities) {
-            this.deviceEntities = await this.getDeviceEntities(entityIds);
+      // helper
+      /**
+       *  Checks if the given entry has the specified device class.
+       * @param {*} entry
+       * @param {*} targetClass
+       * @returns
+       */
+      const hasDeviceClass = (entry, targetClass) =>
+        this.hass.states[entry.entity_id]?.attributes?.device_class === targetClass;
+
+
+      for (const cfg of this.shutterCfgs) {
+        const entityId = cfg.entityId();
+        let siblings =null;
+
+        for (const type of C.DEVICES_CLASSES_SUB_ENTITIES) {
+          const subEntity = cfg.subEntity[type];
+          if (subEntity.entityId === C.AUTO){
+            if (!this.deviceEntities) {
+              this.deviceEntities = await this.getDeviceEntities(entityIds);
+            }
+            if (!siblings){
+              const primary = this.deviceEntities.find(e => e.entity_id === entityId);
+              // siblings: all entities of the device of the primary entity
+              siblings = this.deviceEntities.filter(
+                e => e.device_id === primary?.device_id && e.entity_id !== entityId
+              );
+            }
+            const subId = siblings.find(e => hasDeviceClass(e, type))?.entity_id ?? null;
+            subEntity.set(subId);
+
           }
-          if (!siblings){
-            const primary = this.deviceEntities.find(e => e.entity_id === entityId);
-            // siblings: all entities of the device of the primary entity
-            siblings = this.deviceEntities.filter(
-              e => e.device_id === primary?.device_id && e.entity_id !== entityId
-            );
-          }
-          const subId = siblings.find(e => hasDeviceClass(e, type))?.entity_id ?? null;
-          subEntity.set(subId);
-
         }
-     }
-   }
+      }
+
+    }
+
+
    return true;
   }
 /*
@@ -744,7 +797,7 @@ export class EnhancedShutterCardNew extends LitElement{
     if (this.initializeReady &&
         this.gridContainer &&
         this.config &&
-        this.config.entities
+        (this.config.entities || this.config.covers || this.config.windows)
       ){
       this.previousGridWidth = this.gridPixelWidth;
       const style = getComputedStyle(this.gridContainer);
@@ -758,31 +811,38 @@ export class EnhancedShutterCardNew extends LitElement{
         let cardTitleSize = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
         let sizeTitle = cardTitleSize.size();
 
-        let separate=false;
-        this.shutterCfgs.forEach(cfg =>{
 
-          let block = {cfg: cfg,escImages: this.escImages};
-          console_log(`${cfg.friendlyName()} HtmLblock for Size`);
-          let shutterBlock = new HtmlBlocks.htmlBlockShutter(block);
+        if (configNew){
+          // TODO newConfig
+        }else{
+          let separate=false;
+          this.shutterCfgs.forEach(cfg =>{
 
-          if (separate){
-            if (this.cardCfg.stacked() == C.VERTICAL){
-              sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeparate);
+            let block = {cfg: cfg,escImages: this.escImages};
+            console_log(`${cfg.friendlyName()} HtmLblock for Size`);
+            let shutterBlock = new HtmlBlocks.htmlBlockShutter(block);
+
+            if (separate){
+              if (this.cardCfg.stacked() == C.VERTICAL){
+                sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeparate);
+              }else{
+                sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeparate);
+              }
             }else{
-              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeparate);
+              sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
             }
-          }else{
-            sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
-          }
 
-          if (this.cardCfg.stacked() == C.VERTICAL){
-            sizeCard = shutterBlock.gridAddVertical(sizeCard,shutterBlock.size());
-          }else{
-            sizeCard = shutterBlock.gridAddHorizontal(sizeCard,shutterBlock.size());
-          }
-          separate=true;
+            if (this.cardCfg.stacked() == C.VERTICAL){
+              sizeCard = shutterBlock.gridAddVertical(sizeCard,shutterBlock.size());
+            }else{
+              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,shutterBlock.size());
+            }
+            separate=true;
 
-        });
+          });
+
+        }
+
         sizeCard = cardTitleSize.gridAddBoth(sizeCard,new xyPair(2*C.CARD_PADDING,2*C.CARD_PADDING)); // padding Card
 
 
@@ -793,9 +853,9 @@ export class EnhancedShutterCardNew extends LitElement{
         console_log('Message 2:', message);
         this.messageManager.addMessage(message, C.HA_ALERT_SUCCESS, 'GridSize');
 
-        console_log('Calc rows and cols',this.nbRows,this.nbCols);
+        console_log('getGridOptionsInternal Calc rows and cols',this.nbRows,this.nbCols);
       }else{
-        console_log('No recalc rows and cols');
+        console_log('getGridOptionsInternalNo recalc rows and cols');
       }
 // version v1.6.1b0: (temporary) removed due to issue #168
 /*
@@ -919,7 +979,7 @@ export class EnhancedShutter extends LitElement
   {
     // console.log('  Cover shouldUpdate Start: ',this.cfg.friendlyName());
     changedProperties.forEach((oldValue, propName) => { // eslint-disable-line no-unused-vars
-        // console.log(`  Cover shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}`);
+        console.log(`  Cover shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}, name: ${this.cfg.friendlyName()}`);
     });
     let doUpdate =(this.react_InitializeReady) ? true : false;
     return doUpdate;
@@ -1481,9 +1541,9 @@ export class EnhancedShutter extends LitElement
 
   getShutterOnScreenPosition(event){
     const screenPosition = this.getScreenPosFromPickPoint(event);
-    console.log('    ==> getShutterOnScreenPosition: screenPosition:',screenPosition);
+    //console.log('    ==> getShutterOnScreenPosition: screenPosition:',screenPosition);
     const shutterPosition = this.getShutterPosFromScreenPos(screenPosition);
-    console.log('    ==> getShutterOnScreenPosition: shutterPosition:',shutterPosition);
+    //console.log('    ==> getShutterOnScreenPosition: shutterPosition:',shutterPosition);
     return shutterPosition; // between 0-100
   }
   getTiltOnScreenPosition(){
@@ -1499,22 +1559,22 @@ export class EnhancedShutter extends LitElement
 
   getShutterPosFromScreenPos(screenPosition){
     let shutterPosition = C.SHUTTER_OPEN_PCT - Math.round((screenPosition - this.offsetOpenedPx()) * (this.cfg.offset()) / this.coverSizeMovingDirectionPx());
-    console.log('this.offsetOpenedPx() ',this.offsetOpenedPx());
-    console.log('this.cfg.offset() ',this.cfg.offset());
-    console.log('this.coverSizeMovingDirectionPx() ',this.coverSizeMovingDirectionPx());
+    //console.log('this.offsetOpenedPx() ',this.offsetOpenedPx());
+    //console.log('this.cfg.offset() ',this.cfg.offset());
+    //console.log('this.coverSizeMovingDirectionPx() ',this.coverSizeMovingDirectionPx());
 
     return shutterPosition;
   }
 
   getScreenPosFromPickPoint(event){
     const pickPoint = this.getPoint(event);
-    console.log('   =====>>> getScreenPosFromPickPoint: pickPoint:',pickPoint);
-    console.log('   =====>>> getScreenPosFromPickPoint: this.basePickPoint:',this.basePickPoint);
+    //console.log('   =====>>> getScreenPosFromPickPoint: pickPoint:',pickPoint);
+    //console.log('   =====>>> getScreenPosFromPickPoint: this.basePickPoint:',this.basePickPoint);
     let delta = new xyPair(pickPoint.coord.x() - this.basePickPoint.coord.x() ,
                            pickPoint.coord.y() - this.basePickPoint.coord.y());
     let delta_local = this.cfg.rotateBackOrtho(delta);
-    console.log('   =====>>> getScreenPosFromPickPoint: delta:',delta);
-    console.log('   =====>>> getScreenPosFromPickPoint: delta_local:',delta_local);
+    //console.log('   =====>>> getScreenPosFromPickPoint: delta:',delta);
+    //console.log('   =====>>> getScreenPosFromPickPoint: delta_local:',delta_local);
 
     let newScreenPosition =
       Math.round(boundary(
@@ -1569,10 +1629,10 @@ export class EnhancedShutter extends LitElement
     this.action='user-drag-picker';
     this.screenPosition = this.getScreenPosFromPickPoint(event); //old
     const tiltPosition = this.cfg.currentDeviceTiltPosition();
-    console.log('mouseMoveOpenClosePicker1:',this.react_ShutterPosition,tiltPosition,this.positionText);
+    //console.log('mouseMoveOpenClosePicker1:',this.react_ShutterPosition,tiltPosition,this.positionText);
     this.react_ShutterPosition = this.getShutterOnScreenPosition(event);
     this.positionText = this.cfg.createPositionText(this.react_ShutterPosition,tiltPosition);
-    console.log('mouseMoveOpenClosePicker2:',this.react_ShutterPosition,tiltPosition,this.positionText);
+    //console.log('mouseMoveOpenClosePicker2:',this.react_ShutterPosition,tiltPosition,this.positionText);
   };
   mouseMoveTiltSlider = (event) => { // mouseMoveTilt
     this.action='user-drag-tilt';

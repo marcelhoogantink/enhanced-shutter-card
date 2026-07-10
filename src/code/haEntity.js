@@ -24,7 +24,7 @@ export class haEntity{
       //this.#lastUpdated = C.UNAVAILABLE;
       //this.#context = C.UNAVAILABLE;
     }
-    console.log('New haEntity: Entity [', entityId, '] state:', this.#state, 'attributes:', this.#attributes);
+    //console.log('New haEntity: Entity [', entityId, '] state:', this.#state, 'attributes:', this.#attributes);
   };
 
   getState(){

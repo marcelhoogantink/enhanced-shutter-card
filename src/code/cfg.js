@@ -17,7 +17,7 @@ class cfg{
   coverEntity=null;
   localize={};
   subEntity={};
-  group=null;
+  //group=null;
   //id=null;
   enhancedShutter=null;
 
@@ -93,7 +93,6 @@ class cfg{
     openingPosition:            C.CONFIG_OPENING_POSITION,
     inlineHeader:               C.CONFIG_INLINE_HEADER,
     iconsPosition:              C.CONFIG_ICONS_POSITION,
-    alwaysPercentage:           C.CONFIG_ALWAYS_PERCENTAGE,
     pickerOverlapPx:            C.CONFIG_PICKER_OVERLAP_PX,
     showPartialOpenButtons:     C.CONFIG_SHOW_PARTIAL_OPEN_BUTTONS,
     passiveMode:                C.CONFIG_PASSIVE_MODE,
@@ -108,17 +107,28 @@ class cfg{
     alwaysPercentage:           C.CONFIG_ALWAYS_PCT,
   };
 
+  static {
+    for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
+      cfg.prototype[method] = function (value = null) {
+        return this.getCfg(key, value);
+      };
+      if (method !== key) {
+        cfg.prototype[key] = function (value = null) {
+          return this.getCfg(key, value);
+        };
+      }
+    }
+  }
   constructor(hass)
   {
     this.hass = hass;
-    for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
+/*    for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
       this[method] = (value = null) => this.getCfg(key, value);
-//      if (key === C.CONFIG_BUTTON_OPENED_HIDE_STATES) debugger;
-//      if (method === "buttonOpenHideStates") debugger;
       if (method != key){
         this[key]  = (value = null) => this.getCfg(key, value);
       }
     }
+*/
     this.setLocalize(hass.localize);
 
   }
@@ -375,7 +385,7 @@ class cfg{
   currentDevicePosition(){
     let position = this.currentBasePosition();
     position = this.applyInvertToPosition(position);
-    console.log('currentDevicePosition: position=',position);
+    //console.log('currentDevicePosition: position=',position);
     return position;
   }
   currentBasePosition(){
