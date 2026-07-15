@@ -111,18 +111,23 @@ export class EnhancedShutterCardNew extends LitElement{
      *         the built result gets attached to its parent's full config.
      * Class = the wrapper class used to turn a merged config into a "full" config.
      */
+
     const LEVELS = [
-      { key: C.WINDOWS_CONFIG,   Class: windowCfgNew  },
-      { key: C.COVERS_CONFIG,    Class: coverCfgNew   },
-      { key: C.ENTITIES_CONFIG,  Class: entityCfgNew  },
+      { key: C.CARD_CONFIG,        Class: cardCfgNew    },
+      { key: C.WINDOWS_CONFIG,     Class: windowCfgNew  },
+      { key: C.COVERS_CONFIG,      Class: coverCfgNew   },
+      { key: C.ENTITIES_CONFIG,    Class: entityCfgNew  },
     ];
     if (levelIndex >= LEVELS.length) return undefined;
 
     const { key, Class } = LEVELS[levelIndex];
     const baseConfig = C.CONFIG_DEFAULT_NEW[key];
+    // rawItems is the array of the different windows/covers/entities at this level, as defined in the raw config.
     const rawItems = rawParentConfig[key];
 
     if (!rawItems) return undefined;
+
+    const flatCfgBackup = structuredClone(this.flatCfg);
 
     const cfg = rawItems.map((rawItem) => {
       // 1. Merge this raw item with its defaults and a fresh id.
@@ -130,7 +135,8 @@ export class EnhancedShutterCardNew extends LitElement{
       const mergedConfig = { ...rawItem, [C.CONFIG_ID]: id++ };
       const config = this.#buildConfig(baseConfig, mergedConfig);
       const fullCfg = new Class(this.hass, config);
-
+      this.flatCfg = { ...this.flatCfg, ...fullCfg.cfg };
+      fullCfg.flatCfg = this.flatCfg;
       // 2. Recurse: try to build the next level using THIS raw item as parent.
       const childKey = LEVELS[levelIndex + 1]?.key;
       const children = this.#buildLevel(levelIndex + 1, rawItem, 0);
@@ -139,6 +145,7 @@ export class EnhancedShutterCardNew extends LitElement{
       }
       return fullCfg;
     });
+    this.flatCfg = structuredClone(flatCfgBackup);
     return cfg;
   }
 // ===================================
@@ -148,20 +155,26 @@ export class EnhancedShutterCardNew extends LitElement{
     if (this.newConfig)
     {
           // New config with tree
-
+      this.flatCfg = {};
+/*
       // fill cfg Tree info with stanard setting ovverruled with defintions.
       let config = this.#buildConfig(C.CONFIG_DEFAULT_NEW.card, this.config);
       let cfgCardAll = new cardCfgNew(this.hass,config);
       let cfgCard =cfgCardAll.cfg;
-      const windowsCfg = this.#buildLevel(0, this.config, 0);
+      this.flatCfg= { ...this.flatCfg, ...cfgCardAll.cfg};
+      cfgCardAll.flatCfg = this.flatCfg;
+      const windowsCfg = this.#buildLevel(1, this.config, 0);
       if (windowsCfg) {
         //cfgCard[C.WINDOWS_CONFIG] = windowsCfg;
         cfgCard[C.WINDOWS_CONFIG] = windowsCfg;
       }
 
       this.cardCfg = cfgCardAll;
+  */
+      // startValue is for starting the recursive #buildLevel() with a correct initial value.
+      const startValue = { [C.CARD_CONFIG]: [this.config] };
+      this.cardCfg = this.#buildLevel(0, startValue, 0)[0];
 
-      let test = this.cardCfg.cfg;
       let breakPoint; //new
 
     } else {
@@ -201,9 +214,11 @@ export class EnhancedShutterCardNew extends LitElement{
               shutterConfig.name = shutterConfig.name.replace("@", counter++);
             }
             let cfg = new shutterCfg(this.hass,shutterConfig)
+            cfg.flatCfg = cfg.cfg;
             this.shutterCfgs.push(cfg);
           });
         }else{
+          cfg.flatCfg = cfg.cfg;
           this.shutterCfgs.push(cfg);
         }
       });
@@ -290,8 +305,13 @@ export class EnhancedShutterCardNew extends LitElement{
     return this.cardCfg.stacked() == C.VERTICAL ? 'column' : 'row';
   }
   getCoverEntities(){
-    // TODO newConfig
-    let keys = this.shutterCfgs.map(cfg=>cfg.entityId());
+    let keys;
+    if (this.newConfig){
+      // TODO newConfig
+      debugger;
+    }else{
+      keys = this.shutterCfgs.map(cfg=>cfg.entityId());
+    }
     return keys;
   }
 
@@ -326,7 +346,7 @@ export class EnhancedShutterCardNew extends LitElement{
                 for (const entity of cover.cfg.entities) {
                   const coverEntityId = entity.entityId();
                   if (entity.entityId()) {
-                    debugger;
+                    //debugger;
                     doUpdate = this.checkShutterState(entity);
                     //doUpdate = this.checkSubEntttyStates(cfg,doUpdate);
                     if (doUpdate){
@@ -472,7 +492,6 @@ export class EnhancedShutterCardNew extends LitElement{
 
     let cfg=obj.cfg;
 
-    let flatCfgBackup={};
     const LEVELS = [
       { childKey: C.WINDOWS_CONFIG,     func: "cardHtml"  },
       { childKey: C.COVERS_CONFIG,      func: "windowHtml"  },
@@ -488,7 +507,7 @@ export class EnhancedShutterCardNew extends LitElement{
       // save cfg-item
       this.flatCfg[key] = value;
     });
-    flatCfgBackup = structuredClone(this.flatCfg);
+    let flatCfgBackup = structuredClone(this.flatCfg);
 
     let htmlOuts = nothing;
     if (depth < LEVELS.length) {
@@ -502,8 +521,8 @@ export class EnhancedShutterCardNew extends LitElement{
           })
         }`;
       }
-      let testObj = new cfgNew(this.hass,this.flatCfg);
-      htmlOuts = html`${this[func](index,testObj)} ${htmlOuts}`;
+      let flatObj = new cfgNew(this.hass,this.flatCfg);
+      htmlOuts = html`${this[func](index,flatObj)} ${htmlOuts}`;
     }
     //console.log(`buildLevel2(2): depth ${depth}, flatCfg:`, flatCfg);
     this.flatCfg = structuredClone(flatCfgBackup);
@@ -513,20 +532,20 @@ export class EnhancedShutterCardNew extends LitElement{
   // end Claude code
   //=====================
 
-  cardHtml(index,childObj){
+  cardHtml(index,flatObj){
     return nothing;
     return html`<u>Card:</u>`;
   }
-  windowHtml(index,childObj){
+  windowHtml(index,flatObj){
     return nothing;
     return html`<li><u>Window (${index})</u><br></li>`;
   }
-  coverHtml(index,childObj){
+  coverHtml(index,flatObj){
     return nothing;
     return html`<li><u>Cover (${index})</u><br></li>`;
   }
-  entityHtml(index,childObj){
-    const cfg=childObj;
+  entityHtml(index,flatObj){
+    const cfg=flatObj;
     return html`
       <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
         <enhanced-shutter
@@ -705,8 +724,8 @@ export class EnhancedShutterCardNew extends LitElement{
 
 
     if (this.newConfig){
-      debugger;
       // TODO newConfig
+      //debugger;
     }else{
       const entityIds = this.getCoverEntities();
 
@@ -808,13 +827,49 @@ export class EnhancedShutterCardNew extends LitElement{
 
         let shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
         let sizeSeparate = shutterSeparateBlock.size();
-        let cardTitleSize = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
-        let sizeTitle = cardTitleSize.size();
+        let cardTitle = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
+        let sizeTitle = cardTitle.size();
 
 
-        if (configNew){
-          // TODO newConfig
+        if (this.newConfig){
+          // newConfig
+          debugger;
+          const card = this.cardCfg;
+          let separate=false;
+          for (const window of card.cfg.windows) {
+            let block = {cfg: window,escImages: this.escImages};
+
+            // TODO: what here ?? needs cover info (supported_features)
+            for (const cover of window.cfg.covers) {
+              let block2 = {cfg: cover,escImages: this.escImages};
+              debugger;
+            let shutterBlock2 = new HtmlBlocks.htmlBlockShutter(block2);
+            }
+            let shutterBlock = new HtmlBlocks.htmlBlockShutter(block);
+            //for (const cover of window.cfg.covers) {
+            //  for (const entity of cover.cfg.entities) {
+            //    debugger;
+            //  }
+            //}
+            if (separate){
+              if (this.cardCfg.stacked() == C.VERTICAL){
+                sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeparate);
+              }else{
+                sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeparate);
+              }
+            }else{
+              sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
+            }
+            let size = shutterBlock.size();
+            if (this.cardCfg.stacked() == C.VERTICAL){
+              sizeCard = shutterBlock.gridAddVertical(sizeCard,size);
+            }else{
+              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,size);
+            }
+            separate=true;
+          }
         }else{
+          // oldConfig
           let separate=false;
           this.shutterCfgs.forEach(cfg =>{
 
@@ -832,10 +887,11 @@ export class EnhancedShutterCardNew extends LitElement{
               sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
             }
 
+            let size = shutterBlock.size();
             if (this.cardCfg.stacked() == C.VERTICAL){
-              sizeCard = shutterBlock.gridAddVertical(sizeCard,shutterBlock.size());
+              sizeCard = shutterBlock.gridAddVertical(sizeCard,size);
             }else{
-              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,shutterBlock.size());
+              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,size);
             }
             separate=true;
 
@@ -843,7 +899,7 @@ export class EnhancedShutterCardNew extends LitElement{
 
         }
 
-        sizeCard = cardTitleSize.gridAddBoth(sizeCard,new xyPair(2*C.CARD_PADDING,2*C.CARD_PADDING)); // padding Card
+        sizeCard = cardTitle.gridAddBoth(sizeCard,new xyPair(2*C.CARD_PADDING,2*C.CARD_PADDING)); // padding of the Card
 
 
         this.nbRows= Math.ceil((sizeCard.y()+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));

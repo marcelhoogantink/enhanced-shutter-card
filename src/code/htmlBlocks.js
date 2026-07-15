@@ -6,6 +6,10 @@ import {
   getTextSize,
   console_log
 } from './functions.js';
+import {
+  shutterCfg,
+  windowCfgNew,
+} from './cfg.js';
 
 
 export class htmlBlock
@@ -16,6 +20,8 @@ export class htmlBlock
   constructor(shutter){
     //this.enhancedShutter=enhancedShutter;
     this.shutter =shutter;
+
+
     this.cfg=shutter.cfg;
     this.escImages= shutter.escImages ?? {};
     this.actualScreenPosition = shutter.actualScreenPosition;
@@ -38,7 +44,8 @@ export class htmlBlock
     console_log (this.constructor.name,xy.x(),xy.y());
   }
   defineSize(){
-    this.setXySize(new xyPair(-1,-1));
+    debugger;
+    this.setXySize(new xyPair(-1,-1)); // this defineSize() should not be used direct from htmlBlock
   }
   setXySize(xy){
     this.#xySize = xy;
@@ -120,8 +127,8 @@ export class htmlBlock
     return xy;
   }
   gridAddVertical(size1,size2){ //  xyPair's
-    return new xyPair (Math.max(size1.x(),size2.x()),size1.y()+size2.y())
-  };
+    return new xyPair (Math.max(size1.x(),size2.x()),size1.y()+size2.y());
+  }
   gridAddHorizontal(size1,size2){ //  xyPair's
     return new xyPair(size1.x()+size2.x(),Math.max(size1.y(),size2.y()));
   }
@@ -147,13 +154,27 @@ export class htmlBlock
   }
 }
 export class htmlBlockShutter extends htmlBlock{
-  entityId = this.cfg.entityId();
+  //entityId = this.cfg.entityId();
   htmlParts = new htmlShutter(this.shutter);
+
   topBlock = new htmlBlockTop(this.shutter);
-  middleBlock = new htmlBlockMiddle(this.shutter);
+  middleBlock = new htmlBlockMiddle(this.shutter); // TODO: does not work in the tree-cfg ...
   bottomBlock = new htmlBlockBottom(this.shutter);
 
   defineHtml(){
+    this.setHtmlString(html`
+      <div
+        class=${C.ESC_CLASS_SHUTTER}
+        style = "${this.htmlParts.defStyleVarsShutter()}"
+      >
+      ${this.topBlock.show()}
+      ${this.middleBlock.show()}
+      ${this.bottomBlock.show()}
+      </div>
+    `);
+  }
+  // removed data-shutter since it is not needed anywhere and a problem with the new config (tree) since the entityId is not unique anymore
+  defineHtmlOld(){
     this.setHtmlString(html`
       <div
         class=${C.ESC_CLASS_SHUTTER}
@@ -252,7 +273,6 @@ export class htmlBlockBatteryIcon extends htmlBlock{
 export class htmlBlockSignalIcon extends htmlBlock{
 
   defineHtml(){
-    // dummy code, done by HA
     this.setHtmlString(html`
       ${this.cfg.getIconsActive() ? html`
         ${this.cfg.getSignalEntity() ? html`
@@ -319,7 +339,6 @@ export class htmlBlockNameAndState extends htmlBlock{
 }
 export class htmlBlockName extends htmlBlock{
   defineHtml(){
-    // dummy code, done by HA
     this.setHtmlString(html`
       ${this.cfg.showName()
         ? html`
@@ -402,7 +421,6 @@ export class htmlBlockState extends htmlBlock{
 }
 export class htmlBlockTop extends htmlBlock{
   defineHtml(){
-    // dummy code, done by HA
     this.setHtmlString(this.showTopBottomDiv(C.TOP));
   }
   defineSize(){
@@ -412,10 +430,21 @@ export class htmlBlockTop extends htmlBlock{
 }
 export class htmlBlockMiddle extends htmlBlock{
 
-  featurePosition = this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION);
+
+  constructor(shutter){
+    super(shutter);
+    //debugger;
+    if (this.cfg instanceof windowCfgNew){
+       debugger;
+       //this.cfg =
+    }else{
+
+    }
+  }
+
+
 
   defineHtml(){
-    // dummy code, done by HA
 
     const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter);
     const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter);
@@ -426,7 +455,9 @@ export class htmlBlockMiddle extends htmlBlock{
     this.setHtmlString(html`
       <div class="${C.ESC_CLASS_MIDDLE}">
         ${this.buttonsLeftActive() ? leftButtonsBlock.show() : nothing}
-        ${this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.show() : nothing}
+        ${this.cfg.showOpenCloseSliderBlock() && this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)
+           ? openCloseSliderBlock.show()
+           : nothing}
         ${centralWindowBlock.show()}
         ${this.cfg.showPartialOpenButtons() || this.cfg.canTilt()
           ? html`
@@ -446,9 +477,12 @@ export class htmlBlockMiddle extends htmlBlock{
     const rightButtonsBlock = new htmlBlockRightButtons(this.shutter);
 
     let xyLeftButtons = leftButtonsBlock.size();
-    let xyOpenCloseSlider = this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.size() : new xyPair();
+    // this.featurePosition = this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION);
+    //let xyOpenCloseSlider = this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.size() : new xyPair();
+    let xyOpenCloseSlider = this.cfg.showOpenCloseSliderBlock() ? openCloseSliderBlock.size() : new xyPair();
     let xyCentralWindow = centralWindowBlock.size();
-    let xyTiltSection = this.cfg.canTilt() ? tiltSectionBlock.size(): new xyPair();
+    //let xyTiltSection = this.cfg.canTilt() ? tiltSectionBlock.size(): new xyPair();
+    let xyTiltSection = tiltSectionBlock.size();
     let xyRightButtons = this.showPartialOpenButtons() ? rightButtonsBlock.size() : new xyPair();
 
     let xyRight = this.gridAddBoth(xyTiltSection,xyRightButtons);
@@ -469,7 +503,6 @@ export class htmlBlockMiddle extends htmlBlock{
 }
 export class htmlBlockBottom extends htmlBlock{
   defineHtml(){
-    // dummy code, done by HA
     this.setHtmlString(this.showTopBottomDiv(C.BOTTOM));
   }
   defineSize(){
@@ -479,7 +512,6 @@ export class htmlBlockBottom extends htmlBlock{
 }
 export class htmlBlockLeftButtons extends htmlBlock{
   defineHtml(){
-    // dummy code, done by HA
 
     const buttonUpBlock = new htmlBlockButtonUp(this.shutter);
     const buttonDownBlock = new htmlBlockButtonDown(this.shutter);
@@ -633,7 +665,7 @@ export class htmlBlockTiltButtons extends htmlBlock{
     const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.shutter);
     const tiltPositionBlock = new htmlBlockTiltPosition(this.shutter);
     const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.shutter);
-  let xyButtonTiltUp = buttonTiltUpBlock.size();
+    let xyButtonTiltUp = buttonTiltUpBlock.size();
     let xyTiltPosition = tiltPositionBlock.size();
     let xyButtonTiltDown = buttonTiltDownBlock.size();
     let xy;
@@ -715,12 +747,32 @@ export class htmlBlockTiltSlider extends htmlBlock{
   }
 }
 export class htmlBlockOpenCloseSlider extends htmlBlock{
+  constructor(shutter){
+    super(shutter);
+    debugger;
+    if (this.cfg instanceof windowCfgNew){
+       debugger;
+       this.cfg = shutter.cfg.cfg.covers;
+    }else{
+      this.cfg = [shutter.cfg];
+    }
+  }
+
   defineHtml(){
+/*
     this.setHtmlString(html`
       <div class="${C.ESC_CLASS_SLIDER_WRAP}">
         <input type="range" class ="${C.ESC_CLASS_SLIDER_CLASS} openclose" min="0" max="100" value="${this.actualScreenPosition}">
       </div>
     `);
+*/
+    this.setHtmlString(html`
+      ${this.cfg.map(cfg => html`
+      <div class="${C.ESC_CLASS_SLIDER_WRAP}">
+        <input type="range" class ="${C.ESC_CLASS_SLIDER_CLASS} openclose" min="0" max="100" value="${this.actualScreenPosition}">
+      </div>
+      `)}
+    `)
   }
   defineSize(){
     /**
@@ -728,24 +780,62 @@ export class htmlBlockOpenCloseSlider extends htmlBlock{
      */
     let width= 20; //default of chrome WATCH OUT POSSIBLE WRONG FOR ROTATING
     let height = 129; // default
+/*
     let zoom = this.cfg.buttonScaleFactor();
 
     let xy = new xyPair(zoom*width,zoom*height);
     if (!this.cfg.buttonGroupInRow()) xy.switch();
     this.setXySize(xy);
+*/
+    let xy = new xyPair();
+    this.cfg.map(cfg => {
+      if (cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION)){
+        let zoom = cfg.buttonScaleFactor();
+        if (cfg.buttonGroupInRow()){
+          let xy2 = new xyPair(zoom*width,zoom*height);
+          xy = this.gridAddHorizontal(xy,xy2);
+        }else{
+          let xy2 = new xyPair(zoom*height,zoom*width);
+          xy = this.gridAddVertical(xy,xy2);
+        }
+      }
+    });
+    this.setXySize(xy);
+
   }
 }
 export class htmlBlockTiltSection extends htmlBlock{
 
-  tilt_position = this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_TILT_POSITION)
+  constructor(shutter){
+    super(shutter);
+    debugger;
+    if (this.cfg instanceof windowCfgNew){
+       debugger;
+       this.cfg = shutter.cfg.cfg.covers;
+    }else{
+      this.cfg = [shutter.cfg];
+    }
+  }
+
   defineHtml(){
     const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter);
     const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter);
+/*
     this.setHtmlString(html`
         ${this.cfg.showTiltButtonBlock() ? tiltButtonsBlock.show() : nothing}
         ${this.cfg.showTiltSliderBlock() && this.tilt_position ? tiltSliderBlock.show() :nothing}
     `);
-  }
+*/
+    this.setHtmlString(html`
+      ${this.cfg.map(cfg => html`
+            ${cfg.showTiltButtonBlock() ? tiltButtonsBlock.show() : nothing}
+            ${cfg.showTiltSliderBlock() && cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_TILT_POSITION)
+              ? tiltSliderBlock.show()
+              :nothing}
+      `)}
+    `)
+  };
+
   defineSize(){
     let xy = new xyPair();
     const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter);
@@ -753,14 +843,28 @@ export class htmlBlockTiltSection extends htmlBlock{
     let xyTiltSlider = tiltSliderBlock.size();
     let xyTiltButtons = tiltButtonsBlock.size();
 
+    this.cfg.map(cfg => {
+      if (cfg.canTilt()){
+        //let tilt_active = cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_TILT_POSITION); // this.
+        let tilt_active = true;
+        if (cfg.buttonGroupInRow()){
+          xy = cfg.showTiltButtonBlock() ? this.gridAddHorizontal(xy,xyTiltButtons) : xy;
+          xy = cfg.showTiltSliderBlock() && tilt_active ? this.gridAddHorizontal(xy,xyTiltSlider) :xy;
+        }else{
+          xy = cfg.showTiltButtonBlock() ? this.gridAddVertical(xy,xyTiltButtons) : xy;
+          xy = cfg.showTiltSliderBlock() && tilt_active ? this.gridAddVertical(xy,xyTiltSlider) : xy;
+        }
+      }
+    });
+/*
     if (this.cfg.buttonGroupInRow()){
       xy = this.cfg.showTiltButtonBlock() ? this.gridAddHorizontal(xy,xyTiltButtons) : xy;
       xy = this.cfg.showTiltSliderBlock() && this.tilt_position ? this.gridAddHorizontal(xy,xyTiltSlider) :xy;
     }else{
       xy = this.cfg.showTiltButtonBlock() ? this.gridAddVertical(xy,xyTiltButtons) : xy;
       xy = this.cfg.showTiltSliderBlock() && this.tilt_position ? this.gridAddVertical(xy,xyTiltSlider) : xy;
-
     }
+*/
     this.setXySize(xy);
   }
 }
@@ -776,9 +880,11 @@ export class htmlBlockCentralWindow extends htmlBlock{
           <div class="${C.ESC_CLASS_SELECTOR_PICTURE}">
             ${this.showWindowImage()}
             ${this.showPartial()}
+
             ${this.showSlide()}
             ${this.showPicker()}
             ${this.showOverlay()}
+
             ${this.cfg.centerClosing()
               ? html`
                 ${this.showSlide_2()}

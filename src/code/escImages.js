@@ -134,8 +134,8 @@ export class EscImages {
             configType = C._NO_GROUP_CONFIG;
         }
         const src = this.#escImageInfo[imageType][configType]?.[id]?.src;
-        if (!src) return new xyPair(0, 0);
-        return this.#dimensions.get(src) ?? new xyPair(0, 0);
+        if (!src) return new xyPair();
+        return this.#dimensions.get(src) ?? new xyPair();
     }
 
     // --- loading ---
@@ -182,7 +182,7 @@ export class EscImages {
                     fallbackImg.onerror = () => {
                         // Fallback also failed — store zero size and move on
                         // Never reject: we want Promise.all to load as much as possible
-                        this.#dimensions.set(src, new xyPair(0, 0));
+                        this.#dimensions.set(src, new xyPair());
                         this.#resolvedSrc.set(src, fallbackSrc); // ← remap src
                     };
                     fallbackImg.src = fallbackSrc;

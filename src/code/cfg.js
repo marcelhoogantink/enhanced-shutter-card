@@ -138,16 +138,21 @@ class cfg{
         this.setCoverEntity(this.hass,value);
       }
       if (key === C.CONFIG_BATTERY_ENTITY_ID) {
-        this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
+        // this.batteryEntityId() is being defined ....
+        //this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
+        this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,value);
       }
       if (key === C.CONFIG_SIGNAL_ENTITY_ID) {
-        this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
+        // this.batteryEntityId() is being defined ....
+        // this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
+        this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,value);
       }
 
       if (typeof this[key] !== 'function') {
-        return;
+        return; // this is the forEach loop, so continue to next iteration, so arrays windows[], cobers[] and entities[] are not processed here, but in the next level of the config.
       }
-      let test= this[key](value);
+      this[key](value); // fill the cfg with the value,
+      let test= this[key](); //  and return for test.
       let test2 =1;
 
 
@@ -156,9 +161,17 @@ class cfg{
 
   }
   getCfg(key,value= null){
+
     //if (key === C.CONFIG_BUTTON_OPENED_HIDE_STATES) debugger;
     if (value!== null && this.cfg[key]!=value){
       this.cfg[key]= value;
+      if (this.flatCfg && this.flatCfg[key]){
+        this.flatCfg[key]=value;
+        return this.flatCfg[key];
+      }
+    }
+    if (this.cfg[key] === undefined) {
+        return this.flatCfg[key];
     }
     return this.cfg[key];
   }
@@ -196,12 +209,12 @@ class cfg{
      return state;
   }
   getBatteryEntity(){
-    const entity = this.subEntity[C.DEVICE_CLASS_BATTERY].entity;
+    const entity = this.subEntity[C.DEVICE_CLASS_BATTERY]?.entity;
     return entity;
   }
   // Get SignalInfo
   getSignalEntity(){
-    const entity = this.subEntity[C.DEVICE_CLASS_SIGNAL].entity;
+    const entity = this.subEntity[C.DEVICE_CLASS_SIGNAL]?.entity;
     return entity;
   }
   getIconsActive(){
@@ -556,10 +569,10 @@ class cfg{
   }
 
   buttonGroupInRow(){
-    return this.getButtonsPosition() == C.LEFT || this.getButtonsPosition() == C.RIGHT;
+    return [C.LEFT, C.RIGHT].includes(this.getButtonsPosition());
   }
   buttonsContainerReversed(){
-    return this.getButtonsPosition() == C.BOTTOM || this.getButtonsPosition() == C.RIGHT;
+    return [C.BOTTOM, C.RIGHT].includes(this.getButtonsPosition());
   }
   disabledGlobaly() {
     return false;
@@ -604,6 +617,10 @@ class cfg{
 
   getButtonsPosition() {
     let position = this.buttonsPosition();
+    if (!position){
+      debugger;
+      let test = this.buttonsPosition();
+    }
     if (position.startsWith(C.AUTO)) {
       const isLandscape = this.getOrientation() === C.LANDSCAPE ;
       const isTopOrLeft = position === C.AUTO || position === C.AUTO_TL || position === C.AUTO_BL;
@@ -938,6 +955,13 @@ export class coverCfgNew extends cfg{
     this.fillCfg(escConfig);
 
   }
+  canTilt(){
+    let canTilt =false;
+    this.cfg.entities.forEach(cfg => {
+      canTilt = canTilt || cfg.isCoverFeatureActive(C.ESC_FEATURE_OPEN_TILT | C.ESC_FEATURE_CLOSE_TILT | C.ESC_FEATURE_SET_TILT_POSITION ) ;
+    });
+  return canTilt;
+}
 }
 export class entityCfgNew extends cfg{
   constructor(hass,escConfig)
@@ -1077,6 +1101,6 @@ export class shutterCfg extends cfg{
       ? escConfig[C.CONFIG_BUTTON_CLOSED_HIDE_STATES]
       : C.ESC_BUTTON_CLOSED_HIDE_STATES);
 
-    Object.preventExtensions(this);
+    //Object.preventExtensions(this);
   }
 }

@@ -404,7 +404,7 @@ export const ESC_TYPES =
 
 export const ESC_SHUTTER_PRESET = ESC_ROLLER_SHUTTER;
 export const ESC_STACKED = VERTICAL;
-export const ESC_NAME = null;
+export const ESC_NAME = ""
 export const ESC_PASSIVE_MODE = false;
 // export const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}/images`;
 export const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}`;
@@ -630,12 +630,13 @@ export const CONFIG_DEFAULT_NEW ={
 
   },
   [WINDOWS_CONFIG]: {
+    [CONFIG_COVERS]: [],
     // (not active yet; for multiple covers in a window-frame  (eq: awning, roller-shutter, blind and curtain))
     // Handled as COVER LEVEL now
+
     [CONFIG_ID]:0,
     [CONFIG_WINDOW]: "", // not (yet?) in cfg-system
     [CONFIG_GROUP]: "", // entity of the cover-groupl holding the member entity_id's
-    [CONFIG_COVERS]: [],
     [CONFIG_PASSIVE_MODE]: ESC_PASSIVE_MODE,
     [CONFIG_WINDOW_IMAGE]: ESC_IMAGE_WINDOW,
     [CONFIG_VIEW_IMAGE]: ESC_IMAGE_VIEW,
@@ -649,19 +650,23 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_INLINE_HEADER]: ESC_INLINE_HEADER,
     [CONFIG_ALWAYS_PCT]: ESC_ALWAYS_PCT,
     [CONFIG_DISABLE_END_BUTTONS]: ESC_DISABLE_END_BUTTONS,
+
+    [CONFIG_BUTTON_CLOSED_HIDE_STATES]: ESC_BUTTON_CLOSED_HIDE_STATES,
+    [CONFIG_BUTTON_STOP_HIDE_STATES]: ESC_BUTTON_STOP_HIDE_STATES,
+    [CONFIG_BUTTON_OPENED_HIDE_STATES]: ESC_BUTTON_OPENED_HIDE_STATES,
+    [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
+
   },
   [COVERS_CONFIG]: {
+    [CONFIG_ENTITIES]: [],
+
     [CONFIG_ID]:0,
     [CONFIG_SHUTTER_PRESET]: ESC_SHUTTER_PRESET, // not in cfg (yet?) in code applied
     [CONFIG_SUPPORTED_FEATURES]: ESC_SUPPORTED_FEATURES,
     [CONFIG_CENTER_CLOSING]: ESC_CENTER_CLOSING, /// ????? keep this one??
     [CONFIG_NUMBER_DEVICES]: ESC_NUMBER_DEVICES, // mandatory number of entities, normally set default 1 or via CONFIG_SHUTTER_PRESET
     [CONFIG_COVER]: "", // not (yet?) in cfg-system
-    [CONFIG_ENTITIES]: [],
-    [CONFIG_BUTTON_CLOSED_HIDE_STATES]: ESC_BUTTON_CLOSED_HIDE_STATES,
-    [CONFIG_BUTTON_STOP_HIDE_STATES]: ESC_BUTTON_STOP_HIDE_STATES,
-    [CONFIG_BUTTON_OPENED_HIDE_STATES]: ESC_BUTTON_OPENED_HIDE_STATES,
-    [CONFIG_BUTTONS_POSITION]: ESC_BUTTONS_POSITION,
+
     [CONFIG_ICONS_POSITION]: ESC_ICONS_POSITION,
     [CONFIG_INVERT_OPEN_CLOSE_COVER]: ESC_INVERT_OPEN_CLOSE_COVER,
     [CONFIG_INVERT_OPEN_CLOSE_UI]   : ESC_INVERT_OPEN_CLOSE_UI,
