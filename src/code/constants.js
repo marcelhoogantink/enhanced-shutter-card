@@ -404,7 +404,7 @@ export const ESC_TYPES =
 
 export const ESC_SHUTTER_PRESET = ESC_ROLLER_SHUTTER;
 export const ESC_STACKED = VERTICAL;
-export const ESC_NAME = ""
+export const ESC_NAME = "";
 export const ESC_PASSIVE_MODE = false;
 // export const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}/images`;
 export const ESC_IMAGE_MAP = `/local/community/${HA_CARD_NAME}`;
@@ -640,7 +640,6 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_PASSIVE_MODE]: ESC_PASSIVE_MODE,
     [CONFIG_WINDOW_IMAGE]: ESC_IMAGE_WINDOW,
     [CONFIG_VIEW_IMAGE]: ESC_IMAGE_VIEW,
-    [CONFIG_NAME]: ESC_NAME,
     [CONFIG_NAME_POSITION]: ESC_NAME_POSITION,
     [CONFIG_OPENING_POSITION]: ESC_OPENING_POSITION, // place where the opening info will be showed in the card
     [CONFIG_BASE_HEIGHT_PX]: ESC_BASE_HEIGHT_PX,
@@ -680,12 +679,10 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]: ESC_STRETCH_EDGE_SHUTTER_IMAGE,
     [CONFIG_TILT_ANGLE_MIN]: ESC_TILT_ANGLE_MIN,
     [CONFIG_TILT_ANGLE_MAX]: ESC_TILT_ANGLE_MAX,
-    // to test
-    [CONFIG_BATTERY_ENTITY_ID]: ESC_BATTERY_ENTITY_ID,  // for now: per cover, not per entity
-    [CONFIG_SIGNAL_ENTITY_ID]: ESC_SIGNAL_ENTITY_ID,    // for now: per cover, not per entity
   },
   [ENTITIES_CONFIG]: {
     [CONFIG_ID]:0,
+    [CONFIG_NAME]: ESC_NAME,
     [CONFIG_ENTITY_ID]: ESC_ENTITY_ID,
     [CONFIG_CLOSING_DIRECTION]: ESC_CLOSING_DIRECTION,
     [CONFIG_OFFSET_IS_CLOSED_PCT]: ESC_OFFSET_CLOSED_PCT,
@@ -696,6 +693,9 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_OFFSET_OPENED_PCT]: ESC_OPENED_OFFSET_PCT,
     [CONFIG_MIRROR_X]: ESC_MIRROR_X,
     [CONFIG_MIRROR_Y]: ESC_MIRROR_Y,
+    // to test
+    [CONFIG_BATTERY_ENTITY_ID]: ESC_BATTERY_ENTITY_ID,  // for now: per entity, not per cover (can only search devices per entity)
+    [CONFIG_SIGNAL_ENTITY_ID]: ESC_SIGNAL_ENTITY_ID,    // for now: per entity, not per cover
   },
   [_NO_GROUP_CONFIG]: {
   },

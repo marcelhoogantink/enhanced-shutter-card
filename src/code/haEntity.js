@@ -1,3 +1,4 @@
+import * as C from './constants.js';
 export class haEntity{
   #state;
   #attributes;
@@ -61,17 +62,17 @@ export class haSubEntity{
     this.hass= hass;
     this.type=type;
     this.entityId = entityId;
-    //this.entity = this.set(entityId);
     this.set(entityId);
   }
   set(entityId){
     if (entityId && entityId !==C.AUTO){
       this.entity = new haEntity(this.hass,entityId);
-      this.entityId=entityId;
+    }else{
+      this.entity = null;
     }
   }
   get(){
-    return this.entity
+    return this.entity;
   }
   update(haEntity){
     this.entity=haEntity;

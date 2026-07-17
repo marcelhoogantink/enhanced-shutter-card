@@ -122,25 +122,40 @@ export class EnhancedShutterCardNew extends LitElement{
 
     const { key, Class } = LEVELS[levelIndex];
     const baseConfig = C.CONFIG_DEFAULT_NEW[key];
-    // rawItems is the array of the different windows/covers/entities at this level, as defined in the raw config.
-    const rawItems = rawParentConfig[key];
+    // rawItems is the array of the different card/windows/covers/entities at this level, as defined in the raw config.
+    const configItems = rawParentConfig[key];
 
-    if (!rawItems) return undefined;
+    if (!configItems) return undefined;
 
     const flatCfgBackup = structuredClone(this.flatCfg);
 
-    const cfg = rawItems.map((rawItem) => {
+    const cfg = configItems.map((configItem) => {
       // 1. Merge this raw item with its defaults and a fresh id.
       //const mergedConfig = { ...rawItem};
-      const mergedConfig = { ...rawItem, [C.CONFIG_ID]: id++ };
+      const mergedConfig = { ...configItem, [C.CONFIG_ID]: id++ };
       const config = this.#buildConfig(baseConfig, mergedConfig);
       const fullCfg = new Class(this.hass, config);
+
       this.flatCfg = { ...this.flatCfg, ...fullCfg.cfg };
       fullCfg.flatCfg = this.flatCfg;
+
+      if ( fullCfg.showGroupMembers()){
+        debugger;
+        if (fullCfg instanceof entityCfgNew){
+          debugger;
+          let baseEntity = fullCfg.entityId() ? new haEntity(this.hass,fullCfg.entityId()) : null;
+          if (baseEntity?.isGroup()){
+            const groupEntityIds = baseEntity.getAttributes().entity_id || [];
+            const entitiesInGroup = groupEntityIds.filter(entityId => this.hass.states[entityId]);
+            debugger;
+          }
+
+        }
+      }
       // 2. Recurse: try to build the next level using THIS raw item as parent.
-      const childKey = LEVELS[levelIndex + 1]?.key;
-      const children = this.#buildLevel(levelIndex + 1, rawItem, 0);
+      const children = this.#buildLevel(levelIndex + 1, configItem, 0);
       if (children) {
+        const childKey = LEVELS[levelIndex + 1]?.key;
         fullCfg.cfg[childKey] = children;
       }
       return fullCfg;
@@ -155,25 +170,15 @@ export class EnhancedShutterCardNew extends LitElement{
     if (this.newConfig)
     {
           // New config with tree
-      this.flatCfg = {};
-/*
-      // fill cfg Tree info with stanard setting ovverruled with defintions.
-      let config = this.#buildConfig(C.CONFIG_DEFAULT_NEW.card, this.config);
-      let cfgCardAll = new cardCfgNew(this.hass,config);
-      let cfgCard =cfgCardAll.cfg;
-      this.flatCfg= { ...this.flatCfg, ...cfgCardAll.cfg};
-      cfgCardAll.flatCfg = this.flatCfg;
-      const windowsCfg = this.#buildLevel(1, this.config, 0);
-      if (windowsCfg) {
-        //cfgCard[C.WINDOWS_CONFIG] = windowsCfg;
-        cfgCard[C.WINDOWS_CONFIG] = windowsCfg;
-      }
+      // startConfig is for starting the recursive #buildLevel() with a correct initial value:
+      //  The only-one CardConfig in an array[0],
 
-      this.cardCfg = cfgCardAll;
-  */
-      // startValue is for starting the recursive #buildLevel() with a correct initial value.
-      const startValue = { [C.CARD_CONFIG]: [this.config] };
-      this.cardCfg = this.#buildLevel(0, startValue, 0)[0];
+      const startConfig = { [C.CARD_CONFIG]: [this.config] };
+      this.cardCfg = this.#buildLevel(0, startConfig, 0)[0];
+
+      if ( this.cardCfg.showGroupMembers()){
+        debugger;
+      }
 
       let breakPoint; //new
 
@@ -194,12 +199,11 @@ export class EnhancedShutterCardNew extends LitElement{
         let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
         let cfg = new shutterCfg(this.hass,shutterConfig)
         let counter =1;
-        let test1 = baseEntity?.isGroup();
-        let test2 = cfg.showGroupMembers();
-        if (baseEntity?.isGroup() && cfg.showGroupMembers()){
+        if (cfg.showGroupMembers() && baseEntity?.isGroup())
+        {
           // get the entityId's from the group
           const groupEntityIds = baseEntity.getAttributes().entity_id || [];
-          // get the full entities from the id's
+          // filter (for security) the entity id's that exists
           const entitiesInGroup = groupEntityIds.filter(entityId => this.hass.states[entityId]);
           entitiesInGroup.forEach(entityId => {
             let newSubConfig = {
@@ -308,7 +312,14 @@ export class EnhancedShutterCardNew extends LitElement{
     let keys;
     if (this.newConfig){
       // TODO newConfig
-      debugger;
+      //debugger;
+      const card = this.cardCfg;
+      for (const window of card.cfg.windows) {
+        for (const cover of window.cfg.covers) {
+            //debugger;
+            keys = cover.cfg.entities.map(cfg=>cfg.entityId()); // TODO: just the last found keys
+        }
+      }
     }else{
       keys = this.shutterCfgs.map(cfg=>cfg.entityId());
     }
@@ -322,7 +333,7 @@ export class EnhancedShutterCardNew extends LitElement{
     let doUpdate =false;
 
     changedProperties.forEach((oldValue, propName) => {
-      console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}, title: ${this.cardCfg?.title()}`);
+      console_log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}, title: ${this.cardCfg?.title()}`);
       switch (propName){
         case ("initializeReady"):
           if (this.initializeReady){
@@ -334,7 +345,7 @@ export class EnhancedShutterCardNew extends LitElement{
           if (this.newConfig){
             const card = this.cardCfg;
 
-            outer:
+            outer: // label for break outer, see below:
             for (const window of card.cfg.windows) {
               if (window.entityId()) {
                 debugger;
@@ -348,7 +359,7 @@ export class EnhancedShutterCardNew extends LitElement{
                   if (entity.entityId()) {
                     //debugger;
                     doUpdate = this.checkShutterState(entity);
-                    //doUpdate = this.checkSubEntttyStates(cfg,doUpdate);
+                    //doUpdate = this.checkSubEntityStates(cfg,doUpdate);
                     if (doUpdate){
                       break outer;
                     }
@@ -483,7 +494,6 @@ export class EnhancedShutterCardNew extends LitElement{
   }
 
   buildTestCfg() {
-    this.flatCfg = {};
     const htmlOut = html`${this.#buildLevel2(this.cardCfg,0, 0)}`;
     return htmlOut;
   }
@@ -499,20 +509,10 @@ export class EnhancedShutterCardNew extends LitElement{
       { childKey: "",                   func: "entityHtml"  },
     ];
     const {childKey,func} = LEVELS[depth];
-    // loop through the cfg settingsand store
-    Object.entries(cfg).forEach(([key, value]) => {
-      // sla object over
-      if (key === childKey) return;
-      //if (value.constructor === Array) return;
-      // save cfg-item
-      this.flatCfg[key] = value;
-    });
-    let flatCfgBackup = structuredClone(this.flatCfg);
 
     let htmlOuts = nothing;
     if (depth < LEVELS.length) {
       if (childKey && cfg[childKey].constructor === Array) {
-        //let childObj = {};
         htmlOuts = html`${
           cfg[childKey].map((childCfg,index) => {
             const childObj = childCfg;
@@ -521,11 +521,9 @@ export class EnhancedShutterCardNew extends LitElement{
           })
         }`;
       }
-      let flatObj = new cfgNew(this.hass,this.flatCfg);
-      htmlOuts = html`${this[func](index,flatObj)} ${htmlOuts}`;
+      htmlOuts = html`${this[func](index,obj)} ${htmlOuts}`;
     }
     //console.log(`buildLevel2(2): depth ${depth}, flatCfg:`, flatCfg);
-    this.flatCfg = structuredClone(flatCfgBackup);
     return htmlOuts;
   }
   //=====================
@@ -722,22 +720,55 @@ export class EnhancedShutterCardNew extends LitElement{
 
   async resolveSubEntities() {
 
+    // helper
+    /**
+     *  Checks if the given entry has the specified device class.
+     * @param {*} entry
+     * @param {*} targetClass
+     * @returns
+     */
+    const hasDeviceClass = (entry, targetClass) =>
+      this.hass.states[entry.entity_id]?.attributes?.device_class === targetClass;
+
+
 
     if (this.newConfig){
       // TODO newConfig
       //debugger;
+      const entityIds = this.getCoverEntities();
+      const card = this.cardCfg;
+
+      outer: // label for break outer, see below:
+      for (const window of card.cfg.windows) {
+        for (const cover of window.cfg.covers) {
+          for (const entity of cover.cfg.entities) {
+            //debugger;
+            // do something
+            const entityId = entity.entityId();
+            let siblings =null;
+
+            for (const type of C.DEVICES_CLASSES_SUB_ENTITIES) {
+              const subEntity = entity.subEntity[type];
+              if (subEntity.entityId === C.AUTO){
+                if (!this.deviceEntities) {
+                  this.deviceEntities = await this.getDeviceEntities(entityIds);
+                }
+                if (!siblings){
+                  const primary = this.deviceEntities.find(e => e.entity_id === entityId);
+                  // siblings: all entities of the device of the primary entity
+                  siblings = this.deviceEntities.filter(
+                    e => e.device_id === primary?.device_id && e.entity_id !== entityId
+                  );
+                }
+                const subId = siblings.find(e => hasDeviceClass(e, type))?.entity_id ?? null;
+                subEntity.set(subId);
+              }
+            }
+          }
+        }
+      }
     }else{
       const entityIds = this.getCoverEntities();
-
-      // helper
-      /**
-       *  Checks if the given entry has the specified device class.
-       * @param {*} entry
-       * @param {*} targetClass
-       * @returns
-       */
-      const hasDeviceClass = (entry, targetClass) =>
-        this.hass.states[entry.entity_id]?.attributes?.device_class === targetClass;
 
 
       for (const cfg of this.shutterCfgs) {
@@ -759,14 +790,10 @@ export class EnhancedShutterCardNew extends LitElement{
             }
             const subId = siblings.find(e => hasDeviceClass(e, type))?.entity_id ?? null;
             subEntity.set(subId);
-
           }
         }
       }
-
     }
-
-
    return true;
   }
 /*
@@ -833,18 +860,12 @@ export class EnhancedShutterCardNew extends LitElement{
 
         if (this.newConfig){
           // newConfig
-          debugger;
+          //debugger;
           const card = this.cardCfg;
           let separate=false;
           for (const window of card.cfg.windows) {
             let block = {cfg: window,escImages: this.escImages};
 
-            // TODO: what here ?? needs cover info (supported_features)
-            for (const cover of window.cfg.covers) {
-              let block2 = {cfg: cover,escImages: this.escImages};
-              debugger;
-            let shutterBlock2 = new HtmlBlocks.htmlBlockShutter(block2);
-            }
             let shutterBlock = new HtmlBlocks.htmlBlockShutter(block);
             //for (const cover of window.cfg.covers) {
             //  for (const entity of cover.cfg.entities) {
@@ -904,6 +925,8 @@ export class EnhancedShutterCardNew extends LitElement{
 
         this.nbRows= Math.ceil((sizeCard.y()+this.gridPixelGap)/(this.gridPixelHeight+this.gridPixelGap));
         this.nbCols= Math.ceil((sizeCard.x()+this.gridPixelGap)/(this.gridPixelWidth+this.gridPixelGap));
+
+        console_log(`GridSize: sizeCard: ${sizeCard} pixelGap: ${this.gridPixelGap} PixelHeight: ${this.gridPixelHeight} PixelWidth: ${this.gridPixelWidth}`);
 
         let message = `GridSize: rows: ${this.nbRows}, columns: ${this.nbCols}`;
         console_log('Message 2:', message);

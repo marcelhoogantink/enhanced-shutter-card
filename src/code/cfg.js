@@ -132,30 +132,36 @@ class cfg{
     this.setLocalize(hass.localize);
 
   }
+  /**
+   * Fill all items in escConfig with (default) values..
+   * @param {*} escConfig
+   */
   fillCfg(escConfig){
-    Object.entries(escConfig).forEach( ([key, value]) => {
+    Object.entries(escConfig).forEach( ([key, value]) =>
+    {
+      //if ([C.CONFIG_NAME].includes(key)){
+      //  debugger;
+      // }
+
+      if (typeof this[key] !== 'function') {
+      //if ([C.WINDOWS_CONFIG,C.COVERS_CONFIG,C.ENTITIES_CONFIG].includes(key)) {
+        return; // this is the forEach loop, so continue to next iteration, so arrays windows[], covers[] and entities[] are not processed here, but in the next level of the config.
+      }
       if (key === C.CONFIG_ENTITY_ID) {
         this.setCoverEntity(this.hass,value);
       }
       if (key === C.CONFIG_BATTERY_ENTITY_ID) {
         // this.batteryEntityId() is being defined ....
-        //this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
         this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,value);
       }
       if (key === C.CONFIG_SIGNAL_ENTITY_ID) {
         // this.batteryEntityId() is being defined ....
-        // this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
         this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,value);
       }
 
-      if (typeof this[key] !== 'function') {
-        return; // this is the forEach loop, so continue to next iteration, so arrays windows[], cobers[] and entities[] are not processed here, but in the next level of the config.
-      }
       this[key](value); // fill the cfg with the value,
-      let test= this[key](); //  and return for test.
+      let test= this[key](); //  and get it for test.
       let test2 =1;
-
-
     });
 
 
@@ -222,21 +228,21 @@ class cfg{
   }
 
   batteryLevel(){
-    let state = this.subEntity[C.DEVICE_CLASS_BATTERY].entity?.getState() ?? C.UNAVAILABLE;
+    let state = this.getBatteryEntity()?.getState() ?? C.UNAVAILABLE;
     state = parseFloat(state).toFixed(C.DISPLAY_DECIMALS);
     return C.NOT_KNOWN.includes (state) ? '?' : state ;
   }
   signalLevel(){
-    let state = this.subEntity[C.DEVICE_CLASS_SIGNAL].entity?.getState() ?? C.UNAVAILABLE;
+    let state = this.getSignalEntity()?.getState() ?? C.UNAVAILABLE;
     state = parseFloat(state).toFixed(C.DISPLAY_DECIMALS);
     return  C.  NOT_KNOWN.includes (state) ? '?' : state ;
   }
   batteryUnit(){
-    let unit = this.subEntity[C.DEVICE_CLASS_BATTERY].entity?.getUnitOfMeasurement() ?? C.UNAVAILABLE;
+    let unit = this.getBatteryEntity()?.getUnitOfMeasurement() ?? C.UNAVAILABLE;
     return C.NOT_KNOWN.includes (unit) ? '?' : unit ;
   }
   signalUnit(){
-    let unit = this.subEntity[C.DEVICE_CLASS_SIGNAL].entity?.getUnitOfMeasurement() ?? C.UNAVAILABLE;
+    let unit = this.getSignalEntity()?.getUnitOfMeasurement() ?? C.UNAVAILABLE;
     return C.NOT_KNOWN.includes (unit) ? '?' : unit ;
   }
 
@@ -972,6 +978,7 @@ export class entityCfgNew extends cfg{
     this.partial(boundary(this.invertPosition(escConfig[C.CONFIG_PARTIAL_CLOSE_PCT])));
     this.offset(boundary(this.invertPosition(escConfig[C.CONFIG_OFFSET_IS_CLOSED_PCT])));
 
+    this.friendlyName(escConfig[C.CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || C.UNKNOWN);
   }
 }
 export class cfgNew extends cfg{
@@ -1006,12 +1013,13 @@ export class shutterCfg extends cfg{
 
     this.setCoverEntity(hass,entityId);
 
+    // TODO: this is like fillCfg(), replace by it after checking the if's in fillCfg()
     Object.entries(escConfig).forEach( ([key, value]) => {
-      if (typeof this[key] !== 'function') return;
+      if (typeof this[key] !== 'function') return; // internal return
       let test= this[key](value);
       let test2 =1;
     });
-
+/*
     this.showGroupMembers(escConfig[C.CONFIG_SHOW_GROUP_MEMBERS]);
     this.imageMap(escConfig[C.CONFIG_IMAGE_MAP]);
     this.windowImage(escConfig[C.CONFIG_WINDOW_IMAGE]);
@@ -1022,11 +1030,7 @@ export class shutterCfg extends cfg{
     this.batteryEntityId(escConfig[C.CONFIG_BATTERY_ENTITY_ID]);
     this.signalEntityId(escConfig[C.CONFIG_SIGNAL_ENTITY_ID]);
 
-    this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
-    this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
     this.debug(!!escConfig[C.CONFIG_DEBUG]);
-
-    this.friendlyName(escConfig[C.CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || C.UNKNOWN);
 
     this.supportedFeatures(escConfig[C.CONFIG_SUPPORTED_FEATURES]);
     this.invertPercentageCover(escConfig[C.CONFIG_INVERT_PCT_COVER]);
@@ -1039,14 +1043,6 @@ export class shutterCfg extends cfg{
 
     this.unrollUnfoldDirection(escConfig[C.CONFIG_CLOSING_DIRECTION]);
 
-    let base_height_px = escConfig[C.CONFIG_BASE_HEIGHT_PX];
-    let resize_height_pct = escConfig[C.CONFIG_RESIZE_HEIGHT_PCT];
-    this.windowHeightPx(Math.round(boundary(resize_height_pct,C.ESC_MIN_RESIZE_HEIGHT_PCT,C.ESC_MAX_RESIZE_HEIGHT_PCT) / 100 * base_height_px));
-
-    let base_width_px  = escConfig[C.CONFIG_BASE_WIDTH_PX];
-    let resize_width_pct  = escConfig[C.CONFIG_RESIZE_WIDTH_PCT];
-    this.windowWidthPx(Math.round(boundary(resize_width_pct, C.ESC_MIN_RESIZE_WIDTH_PCT ,C.ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
-
     this.rotateSlatsImage(escConfig[C.CONFIG_ROTATE_SLATS_SHUTTER_IMAGE]);
     this.stretchEdgeImage(escConfig[C.CONFIG_STRETCH_EDGE_SHUTTER_IMAGE]);
 
@@ -1056,18 +1052,8 @@ export class shutterCfg extends cfg{
     this.scaleIcons(escConfig[C.CONFIG_SCALE_ICONS]);
     this.scaleTexts(escConfig[C.CONFIG_SCALE_TEXTS]);
 
-    this.partial(boundary(this.invertPosition(escConfig[C.CONFIG_PARTIAL_CLOSE_PCT])));
-    this.offset(boundary(this.invertPosition(escConfig[C.CONFIG_OFFSET_IS_CLOSED_PCT])));
-
-    this.offsetOpenedPct(boundary(escConfig[C.CONFIG_OFFSET_OPENED_PCT]));
-    this.offsetClosedPct(boundary(escConfig[C.CONFIG_OFFSET_CLOSED_PCT]));
-
-    //this.showTilt(!!escConfig[C.CONFIG_SHOW_TILT]);
-
     this.tiltAngleMin(escConfig[C.CONFIG_TILT_ANGLE_MIN]);
     this.tiltAngleMax(escConfig[C.CONFIG_TILT_ANGLE_MAX]);
-
-    this.defButtonsPosition(escConfig);
 
     this.namePosition(escConfig[C.CONFIG_NAME_POSITION]);
 
@@ -1076,10 +1062,6 @@ export class shutterCfg extends cfg{
     this.openingPosition(escConfig[C.CONFIG_OPENING_POSITION]);
 
     this.inlineHeader(escConfig[C.CONFIG_INLINE_HEADER]);
-
-    this.alwaysPercentage(!!escConfig[C.CONFIG_ALWAYS_PCT]);
-    this.disableEndButtons(!!escConfig[C.CONFIG_DISABLE_END_BUTTONS]);
-    this.pickerOverlapPx(C.ESC_PICKER_OVERLAP_PX);
 
     this.showName(escConfig[C.CONFIG_SHOW_NAME]);
     this.showOpening(escConfig[C.CONFIG_SHOW_OPENING]);
@@ -1090,6 +1072,37 @@ export class shutterCfg extends cfg{
     this.showTiltSliderBlock(escConfig[C.CONFIG_SHOW_TILT_SLIDER]);
     this.showOpenCloseSliderBlock(escConfig[C.CONFIG_SHOW_OPEN_CLOSE_SLIDER]);
     this.showWindow(escConfig[C.CONFIG_SHOW_WINDOW]);
+*/
+// =====================================================
+
+    this.friendlyName(escConfig[C.CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || C.UNKNOWN);
+
+    this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
+    this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
+
+    let base_height_px = escConfig[C.CONFIG_BASE_HEIGHT_PX];
+    let resize_height_pct = escConfig[C.CONFIG_RESIZE_HEIGHT_PCT];
+    this.windowHeightPx(Math.round(boundary(resize_height_pct,C.ESC_MIN_RESIZE_HEIGHT_PCT,C.ESC_MAX_RESIZE_HEIGHT_PCT) / 100 * base_height_px));
+
+    let base_width_px  = escConfig[C.CONFIG_BASE_WIDTH_PX];
+    let resize_width_pct  = escConfig[C.CONFIG_RESIZE_WIDTH_PCT];
+    this.windowWidthPx(Math.round(boundary(resize_width_pct, C.ESC_MIN_RESIZE_WIDTH_PCT ,C.ESC_MAX_RESIZE_WIDTH_PCT)  / 100 * base_width_px));
+
+
+    this.partial(boundary(this.invertPosition(escConfig[C.CONFIG_PARTIAL_CLOSE_PCT])));
+    this.offset(boundary(this.invertPosition(escConfig[C.CONFIG_OFFSET_IS_CLOSED_PCT])));
+
+    this.offsetOpenedPct(boundary(escConfig[C.CONFIG_OFFSET_OPENED_PCT]));
+    this.offsetClosedPct(boundary(escConfig[C.CONFIG_OFFSET_CLOSED_PCT]));
+
+
+    this.defButtonsPosition(escConfig);
+
+    this.alwaysPercentage(!!escConfig[C.CONFIG_ALWAYS_PCT]);
+    this.disableEndButtons(!!escConfig[C.CONFIG_DISABLE_END_BUTTONS]);
+
+    this.pickerOverlapPx(C.ESC_PICKER_OVERLAP_PX);
+
 
     this.buttonStopHideStates(escConfig[C.CONFIG_BUTTON_STOP_HIDE_STATES]
       ? escConfig[C.CONFIG_BUTTON_STOP_HIDE_STATES]

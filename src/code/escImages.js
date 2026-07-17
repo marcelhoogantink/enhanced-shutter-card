@@ -12,9 +12,9 @@ import {
 export class EscImages {
     #escImageInfo = {};
     #uniqueImages = new Set();   // unique srcs to load — Set handles deduplication automatically
-    #dimensions = new Map();     // src → xyPair(width, height)
+    #dimensions   = new Map();   // src → xyPair(width, height)
     #srcImageType = new Map();   // src → image_type, needed for fallback lookup on load error
-    #resolvedSrc = new Map();    // original src → actual src to use
+    #resolvedSrc  = new Map();   // original src → actual src to use
     constructor(shutterCard) {
 
         if (shutterCard.newConfig) {

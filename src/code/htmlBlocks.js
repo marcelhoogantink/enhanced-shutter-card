@@ -237,6 +237,10 @@ export class htmlBlockShutterSeparate extends htmlBlock{
 }
 export class htmlBlockBatteryIcon extends htmlBlock{
 
+  constructor(shutter){
+    super(shutter);
+    //debugger;
+  }
   defineHtml(){
     this.setHtmlString(html`
         ${this.cfg.getIconsActive() ? html`
@@ -428,24 +432,22 @@ export class htmlBlockTop extends htmlBlock{
     this.setXySize(xy);
   }
 }
-export class htmlBlockMiddle extends htmlBlock{
-
-
-  constructor(shutter){
+export class htmlBlockMiddle extends htmlBlock
+{
+  constructor(shutter)
+  {
     super(shutter);
     //debugger;
     if (this.cfg instanceof windowCfgNew){
-       debugger;
+       //debugger;
        //this.cfg =
     }else{
 
     }
   }
 
-
-
-  defineHtml(){
-
+  defineHtml()
+  {
     const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter);
     const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter);
     const centralWindowBlock = new htmlBlockCentralWindow(this.shutter);
@@ -469,7 +471,9 @@ export class htmlBlockMiddle extends htmlBlock{
       </div>
     `);
   }
-  defineSize(){
+
+  defineSize()
+  {
     const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter);
     const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter);
     const centralWindowBlock = new htmlBlockCentralWindow(this.shutter);
@@ -491,14 +495,13 @@ export class htmlBlockMiddle extends htmlBlock{
       xy = this.gridAddHorizontal(xyLeftButtons,xyOpenCloseSlider);
       xy = this.gridAddHorizontal(xy,xyCentralWindow);
       xy = this.gridAddHorizontal(xy,xyRight);
+      //xy = this.gridAddHorizontal(xy,new xyPair(1,0));
     }else{
       xy = this.gridAddVertical(xyLeftButtons,xyOpenCloseSlider);
       xy = this.gridAddVertical(xy,xyCentralWindow);
       xy = this.gridAddVertical(xy,xyRight);
-
     }
     this.setXySize(xy);
-
   }
 }
 export class htmlBlockBottom extends htmlBlock{
@@ -749,9 +752,9 @@ export class htmlBlockTiltSlider extends htmlBlock{
 export class htmlBlockOpenCloseSlider extends htmlBlock{
   constructor(shutter){
     super(shutter);
-    debugger;
+    //debugger;
     if (this.cfg instanceof windowCfgNew){
-       debugger;
+       //debugger;
        this.cfg = shutter.cfg.cfg.covers;
     }else{
       this.cfg = [shutter.cfg];
@@ -808,9 +811,9 @@ export class htmlBlockTiltSection extends htmlBlock{
 
   constructor(shutter){
     super(shutter);
-    debugger;
+    //debugger;
     if (this.cfg instanceof windowCfgNew){
-       debugger;
+       //debugger;
        this.cfg = shutter.cfg.cfg.covers;
     }else{
       this.cfg = [shutter.cfg];
