@@ -6,7 +6,7 @@ import {
   boundary,
 //  findElementInBody,
 //  findElement,
-//  console_log,
+  console_log,
 //  getDebug,
 //  resizeDebugger
 } from './functions.js';
@@ -21,7 +21,15 @@ class cfg{
   //id=null;
   enhancedShutter=null;
 
+  static hass =null;
 
+  static setHass(hass) {
+    cfg.hass = hass;
+  }
+
+  get hass() {
+    return cfg.hass; // always cfg.hass, even from subclasses — see note below
+  }
   static CFG_METHODS_TEST = {
     buttonsPosition:   { key: C.CONFIG_BUTTONS_POSITION, default: C.ESC_BUTTONS_POSITION },
     centerClosing:     { key: 'center_closing',   default: false},
@@ -121,7 +129,8 @@ class cfg{
   }
   constructor(hass)
   {
-    this.hass = hass;
+    //this.hass = hass;
+    cfg.setHass(hass);      // was: this.hass = hass;
 /*    for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
       this[method] = (value = null) => this.getCfg(key, value);
       if (method != key){
@@ -171,17 +180,33 @@ class cfg{
     //if (key === C.CONFIG_BUTTON_OPENED_HIDE_STATES) debugger;
     if (value!== null && this.cfg[key]!=value){
       this.cfg[key]= value;
-      if (this.flatCfg && this.flatCfg[key]){
-        this.flatCfg[key]=value;
-        return this.flatCfg[key];
+      if (this.getFlatCfg(key)) {
+        this.setFlatCfg(key,value);
+        return this.getFlatCfg(key);
       }
     }
     if (this.cfg[key] === undefined) {
-        return this.flatCfg[key];
+        return this.getFlatCfg(key);
     }
     return this.cfg[key];
   }
-
+  /**
+   * return key-value of flatCfg
+   * @param {*} key
+   * @returns
+   */
+  getFlatCfg(key){
+    return this.flatCfg?.[key];
+  }
+  /**
+   * set and return key-value of flatCfg
+   * @param {*} key
+   * @param {*} value
+   * @returns
+   */
+  setFlatCfg(key,value){
+    return (this.flatCfg[key]=value);
+  }
 
   isCoverFeatureActive(feature=C.ESC_FEATURE_ALL){
     const features =(this.getCoverEntity()?.getSupportedFeatures() ?? C.ESC_FEATURE_NO_TILT) & feature & this.supportedFeatures();
@@ -216,6 +241,10 @@ class cfg{
   }
   getBatteryEntity(){
     const entity = this.subEntity[C.DEVICE_CLASS_BATTERY]?.entity;
+    console_log('battery entity: ',entity);
+    //if (!entity || entity.getState() =="unavailable"){
+    //  debugger;
+    //}
     return entity;
   }
   // Get SignalInfo
@@ -506,7 +535,7 @@ class cfg{
   }
 
   applyInvertDirection(setting){
-    if (this.#invertDirection()) setting = Object.keys(C.INVERT_OPEN_CLOSE_SETTING).includes(setting) ? C.INVERT_OPEN_CLOSE_SETTING[setting] : setting;
+    if (this.invertDirection()) setting = Object.keys(C.INVERT_OPEN_CLOSE_SETTING).includes(setting) ? C.INVERT_OPEN_CLOSE_SETTING[setting] : setting;
     return setting;
   }
 
@@ -527,7 +556,7 @@ class cfg{
     return setting;
   }
 
-  #invertDirection(){
+  invertDirection(){
     return this.unrollUnfoldDirection() == C.RIGHT || this.unrollUnfoldDirection() == C.UP;
   }
 
@@ -609,7 +638,7 @@ class cfg{
   coverButtonDisabled(upDown) {
     const isUp = upDown === C.UP;
     const isDown = upDown === C.DOWN;
-    const inverted = this.#invertDirection();
+    const inverted = this.invertDirection();
 
     if (isUp) {
       return inverted ? this.coverButtonDownDisabled() : this.coverButtonUpDisabled();

@@ -1,6 +1,6 @@
 import {html,nothing} from './lit/lit-core.min.js';
 import * as C from './constants.js';
-import {htmlShutter} from './htmlShutter.js';
+import {htmlStyleVars} from './htmlStyleVars.js';
 import {xyPair} from './xyPair.js';
 import {
   getTextSize,
@@ -155,7 +155,7 @@ export class htmlBlock
 }
 export class htmlBlockShutter extends htmlBlock{
   //entityId = this.cfg.entityId();
-  htmlParts = new htmlShutter(this.shutter);
+  htmlParts = new htmlStyleVars(this.shutter);
 
   topBlock = new htmlBlockTop(this.shutter);
   middleBlock = new htmlBlockMiddle(this.shutter); // TODO: does not work in the tree-cfg ...
@@ -342,6 +342,19 @@ export class htmlBlockNameAndState extends htmlBlock{
   }
 }
 export class htmlBlockName extends htmlBlock{
+
+  constructor(shutter)
+  {
+    super(shutter);
+    //debugger;
+    if (this.cfg instanceof windowCfgNew){
+       //debugger;
+      // this.cfg = shutter.cfg.cfg.covers;
+    }else{
+      //this.cfg = [shutter.cfg];
+    }
+  }
+
   defineHtml(){
     this.setHtmlString(html`
       ${this.cfg.showName()

@@ -1,6 +1,15 @@
 import * as C from './constants.js';
+import {
+  cardCfg,
+  cardCfgNew,
+  windowCfgNew,
+  coverCfgNew,
+  entityCfgNew,
+  shutterCfg,
+  cfgNew,
+} from './cfg.js';
 
-export class htmlShutter{
+export class htmlStyleVars{
 
   constructor(enhancedShutter){
     this.enhancedShutter=enhancedShutter;
@@ -13,36 +22,53 @@ export class htmlShutter{
   }
 
   defStyleVarsShutter(){
-    let stateForOverlay = this.cfg.getCoverEntity().getState() || C.UNAVAILABLE;
-    const viewImage=this.escImages.getViewImageSrc(this.cfg.id());
+    let cfg = this.cfg;
+
+    if (this.cfg instanceof windowCfgNew){
+      debugger;
+      // cfg = this.cfg.debugger;
+    }
+    const styleVars= this.defStyleCardVars()+this.defStyleWindowVars()+this.defStyleCoverVars()+this.defStyleEntityVars();
+    return styleVars;
+  }
+  defStyleCardVars(){
+    const card_vars = ``;
+    return card_vars;
+  }
+  defStyleWindowVars(){
+    let cfg = this.cfg;
+    let stateForOverlay = cfg.getCoverEntity().getState() || C.UNAVAILABLE;
+    const viewImage=this.escImages.getViewImageSrc(cfg.id());
 
     // solves #103 see other lines with shutterSlatImage
-    const shutterSlatImage=this.escImages.getShutterSlatImageSrc(this.cfg.id());
-    const shutterBottomImage=this.escImages.getShutterBottomImageSrc(this.cfg.id());
+    const shutterSlatImage=this.escImages.getShutterSlatImageSrc(cfg.id());
+    const shutterBottomImage=this.escImages.getShutterBottomImageSrc(cfg.id());
 
-    const card_vars = ``;
-
-    const windows_vars = `
-      --mdc-icon-button-size: ${this.cfg.iconButtonSize()}${C.UNITY};
-      --ha-icon-button-size: ${this.cfg.iconButtonSize()}${C.UNITY};
-      --mdc-icon-size: ${this.cfg.iconSize()}${C.UNITY};
-      --esc-icon-size-wifi-battery: ${this.cfg.iconSizeWifiBattery()}${C.UNITY};
-      --esc-icon-div-size: ${C.ICON_DIV_SIZE/C.ICON_SIZE*this.cfg.iconSizeWifiBattery()}${C.UNITY};
-      --esc-icons-margins: ${this.cfg.iconsPosition()==C.TOP
+    const window_vars = `
+      --mdc-icon-button-size: ${cfg.iconButtonSize()}${C.UNITY};
+      --ha-icon-button-size: ${cfg.iconButtonSize()}${C.UNITY};
+      --mdc-icon-size: ${cfg.iconSize()}${C.UNITY};
+      --esc-icon-size-wifi-battery: ${cfg.iconSizeWifiBattery()}${C.UNITY};
+      --esc-icon-div-size: ${C.ICON_DIV_SIZE/C.ICON_SIZE*cfg.iconSizeWifiBattery()}${C.UNITY};
+      --esc-icons-margins: ${cfg.iconsPosition()==C.TOP
           ?      `${C.ICON_MARGIN_TB}${C.UNITY} ${C.ICON_MARGIN_LR}${C.UNITY} auto ${C.ICON_MARGIN_LR}${C.UNITY}`
           : `auto ${C.ICON_MARGIN_LR}${C.UNITY} ${C.ICON_MARGIN_TB}${C.UNITY}      ${C.ICON_MARGIN_LR}${C.UNITY}`};
 
       --esc-overflow: ${this.enhancedShutter.getOverflow()};
 
-      --esc-flex-name_opening-flow: ${this.cfg.inlineHeader() ? 'row' : 'column'} nowrap;
-      --esc-flex-flow-middle: ${!this.cfg.buttonGroupInRow() ? 'column': 'row'}${this.cfg.buttonsContainerReversed() ? '-reverse' : ''} nowrap;
-      --esc-window-height: ${this.cfg.windowHeightPx()+C.UNITY};
-      --esc-window-width1: ${this.cfg.buttonGroupInRow() ? '100%': this.cfg.windowWidthPx()+C.UNITY};
-      --esc-window-width: ${this.cfg.windowWidthPx()+C.UNITY};
+      --esc-flex-name_opening-flow: ${cfg.inlineHeader() ? 'row' : 'column'} nowrap;
+      --esc-flex-flow-middle: ${!cfg.buttonGroupInRow()
+        ? 'column'
+        : 'row'}${cfg.buttonsContainerReversed()
+          ? '-reverse'
+          : ''} nowrap;
+      --esc-window-height: ${cfg.windowHeightPx()+C.UNITY};
+      --esc-window-width1: ${cfg.buttonGroupInRow() ? '100%': this.cfg.windowWidthPx()+C.UNITY};
+      --esc-window-width: ${cfg.windowWidthPx()+C.UNITY};
       --esc-window-background-image: ${viewImage.includes('.') ?  `url(${viewImage})` : ''};
       --esc-window-background-color: ${viewImage.includes('.') ? '' : `${viewImage}`};
-      --esc-window-rotate: ${this.cfg.viewImageRotate()};
-      --esc-button-rotate: ${this.cfg.buttonRotate()};
+      --esc-window-rotate: ${cfg.viewImageRotate()};
+      --esc-button-rotate: ${cfg.buttonRotate()};
 
       --esc-slide-background-main-image: ${shutterSlatImage.includes('.') ?  `url(${shutterSlatImage})` : ''};
       --esc-slide-background-edge-image: ${shutterBottomImage.includes('.') ?  `url(${shutterBottomImage})` : ''};
@@ -51,26 +77,28 @@ export class htmlShutter{
       --esc-slide-background-edge-color: ${shutterBottomImage.includes('.') ? '' : `${shutterBottomImage}`};
 
 
-      --esc-top-right-color: ${this.cfg.signalIconColor()};
-      --esc-top-left-color: ${this.cfg.batteryIconColor()};
+      --esc-top-right-color: ${cfg.signalIconColor()};
+      --esc-top-left-color: ${cfg.batteryIconColor()};
 
-      --esc-top-icon-text-line-height: ${this.cfg.iconScalePercent()};
-      --esc-top-icon-text-font-size: ${this.cfg.iconScalePercent()};
-      --esc-text-scale: ${this.cfg.textScaleFactor()};
-      --esc-button-scale: ${this.cfg.buttonScaleFactor()};
+      --esc-top-icon-text-line-height: ${cfg.iconScalePercent()};
+      --esc-top-icon-text-font-size: ${cfg.iconScalePercent()};
+      --esc-text-scale: ${cfg.textScaleFactor()};
+      --esc-button-scale: ${cfg.buttonScaleFactor()};
 
-      --esc-picker-top: -${this.cfg.pickerOverlapPx()+C.UNITY};
-      --esc-picker-height: ${this.cfg.pickerOverlapPx()*2+C.UNITY};
+      --esc-picker-top: -${cfg.pickerOverlapPx()+C.UNITY};
+      --esc-picker-height: ${cfg.pickerOverlapPx()*2+C.UNITY};
 
-      --esc-buttons-flex-flow:      ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
-      --esc-buttons-flex-flow-tilt: ${!this.cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
+      --esc-buttons-flex-flow:      ${!cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
+      --esc-buttons-flex-flow-tilt: ${!cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
 
       --esc-movement-overlay-display: ${(stateForOverlay == C.SHUTTER_STATE_OPENING || stateForOverlay == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
-      --esc-movement-overlay-up-display: ${stateForOverlay == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
-      --esc-movement-overlay-down-display: ${stateForOverlay == this.cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+      --esc-movement-overlay-up-display: ${stateForOverlay == cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
+      --esc-movement-overlay-down-display: ${stateForOverlay == cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
 
     `;
-
+    return window_vars;
+  }
+  defStyleCoverVars(){
     const cover_vars = `
       ${/* this is a working comment example */ ``}
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};                                                 ${/* ESC_CLASS_SELECTOR_PARTIAL */ ``}
@@ -99,9 +127,6 @@ export class htmlShutter{
       --esc-transform-picker:   ${this.enhancedShutter.transformPicker(this.actualScreenPosition)};                        ${/* ESC_CLASS_SELECTOR_PICKER */ ``}
       --esc-transform-picker_2: ${this.enhancedShutter.transformPicker(this.actualScreenPosition,true)};                   ${/* ESC_CLASS_SELECTOR_PICKER_2 */ ``}
 
-
-
-
       --esc-tilt-angle-deg-graph: ${this.enhancedShutter.getTiltAngleDegGraph(this.enhancedShutter.react_TiltPosition)};   ${/* ESC_CLASS_TILT_CLASS */ ``}
 
       --esc-transform-movement: ${this.enhancedShutter.transformMovement()};                                               ${/* ESC_CLASS_MOVEMENT_UP / ESC_CLASS_MOVEMENT_DOWN */ ``}
@@ -109,15 +134,12 @@ export class htmlShutter{
 
       --esc-slider-writing-mode: ${this.enhancedShutter.sliderWritingMode()};                                              ${/* ESC_CLASS_SLIDER_CLASS */ ``}
       --esc-slider-direction: ${this.enhancedShutter.sliderDirection()};                                                   ${/* ESC_CLASS_SLIDER_CLASS */ ``}
-
-
-
-
-
     `;
-
-    const entity_vars = ``;
-
-    return card_vars+windows_vars+cover_vars+entity_vars;
+    return cover_vars;
   }
+  defStyleEntityVars(){
+    const entity_vars = ``;
+    return entity_vars;
+  }
+
 }
