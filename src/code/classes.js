@@ -1,13 +1,13 @@
 import * as C from './constants.js';
 import {LitElement, html, css, unsafeCSS,nothing } from './lit/lit-core.min.js';
 import {
+  cfg,
   cardCfg,
   cardCfgNew,
   windowCfgNew,
   coverCfgNew,
   entityCfgNew,
   shutterCfg,
-  cfgNew,
 } from './cfg.js';
 
 import {
@@ -62,6 +62,7 @@ export class EnhancedShutterCardNew extends LitElement{
 
     const oldHass = this._hass;
     this._hass = hass;
+    cfg.setHass(hass);
     if (!this.initializeStarted) {
       if (this.config.windows  || this.config.covers)
       {
@@ -86,6 +87,8 @@ export class EnhancedShutterCardNew extends LitElement{
 
       await this.resolveSubEntities();
       await this.escImages.processImages();
+
+      HtmlBlocks.htmlBlock.setImages(this.escImages);
     } catch (err) {
       console.warn('ESC: Error during initialization:', err);
       debugger;
@@ -138,7 +141,7 @@ export class EnhancedShutterCardNew extends LitElement{
       //const mergedConfig = { ...rawItem};
       const mergedConfig = { ...configItem, [C.CONFIG_ID]: id++ };
       const config = this.#buildConfig(baseConfig, mergedConfig);
-      const fullCfg = new Class(this.hass, config);
+      const fullCfg = new Class(config);
 
       this.flatCfg = { ...this.flatCfg, ...fullCfg.cfg };
       fullCfg.flatCfg = this.flatCfg;
@@ -176,7 +179,7 @@ export class EnhancedShutterCardNew extends LitElement{
       let id =0;
       const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
       const windowsConfig =1;
-      this.cardCfg = new cardCfg(this.hass,cardConfig);
+      this.cardCfg = new cardCfg(cardConfig);
 
       this.config.entities.map((subConfig) => {
 
@@ -186,7 +189,7 @@ export class EnhancedShutterCardNew extends LitElement{
           [C.CONFIG_ID]: id++
         };
         let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
-        let cfg = new shutterCfg(this.hass,shutterConfig)
+        let cfg = new shutterCfg(shutterConfig)
         let counter =1;
         if (cfg.showGroupMembers() && baseEntity?.isGroup())
         {
@@ -206,7 +209,7 @@ export class EnhancedShutterCardNew extends LitElement{
             if (shutterConfig.name) {
               shutterConfig.name = shutterConfig.name.replace("@", counter++);
             }
-            let cfg = new shutterCfg(this.hass,shutterConfig)
+            let cfg = new shutterCfg(shutterConfig)
             cfg.flatCfg = cfg.cfg;
             this.shutterCfgs.push(cfg);
           });
@@ -520,7 +523,8 @@ export class EnhancedShutterCardNew extends LitElement{
       `;
     }
     this.showMessages = this.messageManager.countMessages() && this.inEditor();
-    this.shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
+    //this.shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg,this.cardCfg.cfg);
+    this.shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this,this.cardCfg);
     let htmlParts = new htmlCard(this);
     let htmlout;
 
@@ -592,7 +596,6 @@ export class EnhancedShutterCardNew extends LitElement{
     const {childKey,func} = EnhancedShutterCardNew.#LEVELS[depth];
     const cfg=config.cfg;
 
-
     const children = childKey && Array.isArray(cfg[childKey])
       ? cfg[childKey].map((childCfg, i) => this.#buildLevel2(childCfg, i, depth + 1))
       : nothing;
@@ -601,7 +604,7 @@ export class EnhancedShutterCardNew extends LitElement{
   }
   cardHtml(index,flatObj,children){
     //return nothing;
-    return html`<u>Card: (${children}) card</u>`;
+    return html`${children}`;
   }
   windowHtml(index,flatObj,children){
     //return nothing;
@@ -633,7 +636,7 @@ export class EnhancedShutterCardNew extends LitElement{
   entityHtml(index,flatObj,children){
     const cfg=flatObj;
     return html`<li><u>Entity (${children}) entity</u><br></li>`;
-
+/*
     return html`
       <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
         <enhanced-shutter
@@ -653,6 +656,7 @@ export class EnhancedShutterCardNew extends LitElement{
       ${this.shutterSeparateBlock.show()}
     `;
     // return html`<li><u>Entity (${index})</u><br></li>`;
+  */
   }
 
   firstUpdated() {
@@ -943,9 +947,9 @@ export class EnhancedShutterCardNew extends LitElement{
 
       if (!this.nbCols || !this.nbRows || this.previousGridWidth !== this.gridPixelWidth){
 
-        let shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg);
+        let shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this,this.cardCfg);
         let sizeSeparate = shutterSeparateBlock.size();
-        let cardTitle = new HtmlBlocks.htmlBlockCardTitle(this.cardCfg);
+        let cardTitle = new HtmlBlocks.htmlBlockCardTitle(this,this.cardCfg);
         let sizeTitle = cardTitle.size();
 
 
@@ -955,12 +959,13 @@ export class EnhancedShutterCardNew extends LitElement{
           const card = this.cardCfg;
           let separate=false;
           for (const window of card.cfg.windows) {
+            let cfg = window.cfg.covers[0].cfg.entities[0]; // TODO: toosimple here .....
             let block = {
-              cfg: window.cfg.covers[0].cfg.entities[0], // TODO: toosimple here .....
+              cfg: cfg, // TODO: too simple here .....??
               //cfg: window,
               escImages: this.escImages};
 
-            let shutterBlock = new HtmlBlocks.htmlBlockShutter(block);
+            let windowBlock = new HtmlBlocks.htmlBlockWindow(block,cfg,C.UNKNOWN);
             //for (const cover of window.cfg.covers) {
             //  for (const entity of cover.cfg.entities) {
             //    debugger;
@@ -968,18 +973,18 @@ export class EnhancedShutterCardNew extends LitElement{
             //}
             if (separate){
               if (this.cardCfg.stacked() == C.VERTICAL){
-                sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeparate);
+                sizeCard = windowBlock.gridAddVertical(sizeCard,sizeSeparate);
               }else{
-                sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeparate);
+                sizeCard = windowBlock.gridAddHorizontal(sizeCard,sizeSeparate);
               }
             }else{
-              sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
+              sizeCard = windowBlock.gridAddVertical(sizeCard,sizeTitle);
             }
-            let size = shutterBlock.size();
+            let size = windowBlock.size();
             if (this.cardCfg.stacked() == C.VERTICAL){
-              sizeCard = shutterBlock.gridAddVertical(sizeCard,size);
+              sizeCard = windowBlock.gridAddVertical(sizeCard,size);
             }else{
-              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,size);
+              sizeCard = windowBlock.gridAddHorizontal(sizeCard,size);
             }
             separate=true;
           }
@@ -990,23 +995,23 @@ export class EnhancedShutterCardNew extends LitElement{
 
             let block = {cfg: cfg,escImages: this.escImages};
             console_log(`${cfg.friendlyName()} HtmLblock for Size`);
-            let shutterBlock = new HtmlBlocks.htmlBlockShutter(block);
+            let windowBlock = new HtmlBlocks.htmlBlockWindow(block,cfg,C.UNKNOWN);
 
             if (separate){
               if (this.cardCfg.stacked() == C.VERTICAL){
-                sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeSeparate);
+                sizeCard = windowBlock.gridAddVertical(sizeCard,sizeSeparate);
               }else{
-                sizeCard = shutterBlock.gridAddHorizontal(sizeCard,sizeSeparate);
+                sizeCard = windowBlock.gridAddHorizontal(sizeCard,sizeSeparate);
               }
             }else{
-              sizeCard = shutterBlock.gridAddVertical(sizeCard,sizeTitle);
+              sizeCard = windowBlock.gridAddVertical(sizeCard,sizeTitle);
             }
 
-            let size = shutterBlock.size();
+            let size = windowBlock.size();
             if (this.cardCfg.stacked() == C.VERTICAL){
-              sizeCard = shutterBlock.gridAddVertical(sizeCard,size);
+              sizeCard = windowBlock.gridAddVertical(sizeCard,size);
             }else{
-              sizeCard = shutterBlock.gridAddHorizontal(sizeCard,size);
+              sizeCard = windowBlock.gridAddHorizontal(sizeCard,size);
             }
             separate=true;
 
@@ -1279,20 +1284,16 @@ export class EnhancedShutter extends LitElement
     //console_log(`Render Cover ${this.cfg.friendlyName()}, action: ${this.action}, actualScreenPosition: ${this.actualScreenPosition}, actualShutterPosition: ${this.actualShutterPosition}, actualTiltPosition: ${this.actualTiltPosition}`);
     //console_log(`${this.cfg.friendlyName()} HtmLblock for Show`);
 
-    debugger;
-    // TODO: here some  loops for cover / shutter are needed ( for the --esc vars)
 
-    const shutterBlock = new HtmlBlocks.htmlBlockShutter(this);
+    const windowBlock = new HtmlBlocks.htmlBlockWindow(this,this.cfg,this.action);
 
-    return shutterBlock.show(this);
-
+    return windowBlock.show();
   }
   firstUpdated() {
     // openClosePicker
     const openClosePicker = findElement(this, `.${C.ESC_CLASS_SELECTOR_PICKER}`);
     if (openClosePicker) {
       this.manageEvents(C.ADD_EVENT, C.MOUSEDOWN, openClosePicker, this.mouseDownOpenClosePicker);
-
     }
 /*
     // possible picker2 detection, not sure yet (MHA)

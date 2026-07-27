@@ -1,12 +1,13 @@
+import {html,nothing} from './lit/lit-core.min.js';
 import * as C from './constants.js';
 import {
+  cfg,
   cardCfg,
   cardCfgNew,
   windowCfgNew,
   coverCfgNew,
   entityCfgNew,
   shutterCfg,
-  cfgNew,
 } from './cfg.js';
 
 export class htmlStyleVars{
@@ -15,31 +16,30 @@ export class htmlStyleVars{
     this.enhancedShutter=enhancedShutter;
     this.cfg =enhancedShutter.cfg;
     this.actualScreenPosition = enhancedShutter.actualScreenPosition;
-    this.actualTiltPosition = enhancedShutter.actualTiltPosition;
     this.actualShutterPosition = enhancedShutter.actualShutterPosition;
+    this.actualTiltPosition = enhancedShutter.actualTiltPosition;
     //this.positionText =this.cfg.createPositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
     this.escImages= enhancedShutter.escImages;
   }
 
-  defStyleVarsShutter(){
+  defStyleVarsAll(){
     let cfg = this.cfg;
 
     if (this.cfg instanceof windowCfgNew){
       debugger;
       // cfg = this.cfg.debugger;
     }
-    const styleVars= this.defStyleCardVars()+this.defStyleWindowVars()+this.defStyleCoverVars()+this.defStyleEntityVars();
+    const styleVars= this.defStyleVarsCard(cfg)+this.defStyleVarsWindow(cfg)+this.defStyleVarsCover(cfg)+this.defStyleVarsEntity(cfg);
     return styleVars;
   }
-  defStyleCardVars(){
+  defStyleVarsCard(cfg){
     const card_vars = ``;
     return card_vars;
   }
-  defStyleWindowVars(){
-    let cfg = this.cfg;
-    let stateForOverlay = cfg.getCoverEntity().getState() || C.UNAVAILABLE;
-    const viewImage=this.escImages.getViewImageSrc(cfg.id());
+  defStyleVarsWindow(cfg){
+    let cfg2 = this.cfg;
 
+    const viewImage=this.escImages.getViewImageSrc(cfg.id());
     // solves #103 see other lines with shutterSlatImage
     const shutterSlatImage=this.escImages.getShutterSlatImageSrc(cfg.id());
     const shutterBottomImage=this.escImages.getShutterBottomImageSrc(cfg.id());
@@ -91,14 +91,12 @@ export class htmlStyleVars{
       --esc-buttons-flex-flow:      ${!cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
       --esc-buttons-flex-flow-tilt: ${!cfg.buttonGroupInRow() ? 'row-reverse' : 'column'} nowrap;
 
-      --esc-movement-overlay-display: ${(stateForOverlay == C.SHUTTER_STATE_OPENING || stateForOverlay == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
-      --esc-movement-overlay-up-display: ${stateForOverlay == cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
-      --esc-movement-overlay-down-display: ${stateForOverlay == cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
-
     `;
     return window_vars;
   }
-  defStyleCoverVars(){
+  defStyleVarsCover(cfg){
+    let cfg2 = this.cfg;
+
     const cover_vars = `
       ${/* this is a working comment example */ ``}
       --esc-transform-partial: ${this.enhancedShutter.transformPartial()};                                                 ${/* ESC_CLASS_SELECTOR_PARTIAL */ ``}
@@ -134,11 +132,19 @@ export class htmlStyleVars{
 
       --esc-slider-writing-mode: ${this.enhancedShutter.sliderWritingMode()};                                              ${/* ESC_CLASS_SLIDER_CLASS */ ``}
       --esc-slider-direction: ${this.enhancedShutter.sliderDirection()};                                                   ${/* ESC_CLASS_SLIDER_CLASS */ ``}
+
     `;
     return cover_vars;
   }
-  defStyleEntityVars(){
-    const entity_vars = ``;
+  defStyleVarsEntity(cfg){
+    let cfg2 = this.cfg;
+    let stateForOverlay = cfg.getCoverEntity().getState() || C.UNAVAILABLE;
+
+    const entity_vars = `
+      --esc-movement-overlay-display: ${(stateForOverlay == C.SHUTTER_STATE_OPENING || stateForOverlay == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+      --esc-movement-overlay-up-display: ${stateForOverlay == cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
+      --esc-movement-overlay-down-display: ${stateForOverlay == cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+    `;
     return entity_vars;
   }
 

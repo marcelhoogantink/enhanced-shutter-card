@@ -5,9 +5,6 @@ import {
   console_log,
   isUrl
 } from './functions.js';
-import {
-  cfgNew,
-} from './cfg.js';
 
 export class EscImages {
     #escImageInfo = {};

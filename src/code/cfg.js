@@ -12,7 +12,7 @@ import {
 } from './functions.js';
 
 
-class cfg{
+export class cfg{
   cfg={};
   coverEntity=null;
   localize={};
@@ -127,19 +127,9 @@ class cfg{
       }
     }
   }
-  constructor(hass)
+  constructor()
   {
-    //this.hass = hass;
-    cfg.setHass(hass);      // was: this.hass = hass;
-/*    for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
-      this[method] = (value = null) => this.getCfg(key, value);
-      if (method != key){
-        this[key]  = (value = null) => this.getCfg(key, value);
-      }
-    }
-*/
-    this.setLocalize(hass.localize);
-
+    this.setLocalize(cfg.hass.localize);
   }
   /**
    * Fill all items in escConfig with (default) values..
@@ -404,6 +394,14 @@ class cfg{
   canTilt(){
     return this.isCoverFeatureActive(C.ESC_FEATURE_OPEN_TILT | C.ESC_FEATURE_CLOSE_TILT | C.ESC_FEATURE_SET_TILT_POSITION ) ;
 
+  }
+  // TODO: add this to createPositionText(), replace canTilt() for this and test this!!. (issue #178)
+  showTiltValue(){
+    let showTilt;
+    if (showTilt=this.canTilt()){
+      showTilt =(!this.cfg.showTiltButtonBlock() && !this.cfg.showTiltSliderBlock());
+    }
+    return showTilt;
   }
   buttonOpenCloseHideStates(upDown){
     upDown = this.applyInvertForButtonOpenCloseHideStates(upDown);
@@ -705,7 +703,7 @@ class cfg{
   }
   createPositionText(position,tiltPosition){
     let positionText;
-    if (C.NOT_KNOWN.includes(this.getCoverEntity().getState())){
+    if (C.NOT_KNOWN.includes(this.getCoverEntity()?.getState())){
       positionText = this.getLocalize(C.LOCALIZE_TEXT[C.UNAVAILABLE]);
     }else{
       let displayPosition = this.visiblePosition(position);
@@ -947,9 +945,9 @@ class cfg{
 
 export class cardCfg extends cfg{
 
-  constructor(hass,escConfig)
+  constructor(escConfig)
   {
-    super(hass);
+    super();
 
     this.stacked(escConfig[C.CONFIG_STACKED]);
     this.title(escConfig[C.CONFIG_TITLE]);
@@ -960,17 +958,17 @@ export class cardCfg extends cfg{
 }
 export class cardCfgNew extends cfg{
 
-  constructor(hass,escConfig)
+  constructor(escConfig)
   {
-    super(hass);
+    super();
     this.fillCfg(escConfig);
   }
 }
 
 export class windowCfgNew extends cfg{
-  constructor(hass,escConfig)
+  constructor(escConfig)
   {
-    super(hass);
+    super();
     this.fillCfg(escConfig);
 
     let base_height_px = this.baseHeightPx();
@@ -984,9 +982,9 @@ export class windowCfgNew extends cfg{
   }
 }
 export class coverCfgNew extends cfg{
-  constructor(hass,escConfig)
+  constructor(escConfig)
   {
-    super(hass);
+    super();
     this.fillCfg(escConfig);
 
   }
@@ -999,9 +997,9 @@ export class coverCfgNew extends cfg{
 }
 }
 export class entityCfgNew extends cfg{
-  constructor(hass,escConfig)
+  constructor(escConfig)
   {
-    super(hass);
+    super();
     this.fillCfg(escConfig);
 
     this.partial(boundary(this.invertPosition(escConfig[C.CONFIG_PARTIAL_CLOSE_PCT])));
@@ -1010,37 +1008,19 @@ export class entityCfgNew extends cfg{
     this.friendlyName(escConfig[C.CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || C.UNKNOWN);
   }
 }
-export class cfgNew extends cfg{
-  constructor(hass,cfg)
-  {
-    super(hass);
-    this.cfg = cfg;
-    Object.entries(cfg).forEach( ([key, value]) => {
-      if (key === C.CONFIG_ENTITY_ID) {
-        this.setCoverEntity(this.hass,value);
-      }
-      if (key === C.CONFIG_BATTERY_ENTITY_ID) {
-        this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
-      }
-      if (key === C.CONFIG_SIGNAL_ENTITY_ID) {
-        this.subEntity[C.DEVICE_CLASS_SIGNAL] = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
-      }
-    });
-  }
-}
 export class shutterCfg extends cfg{
 
 
-  constructor(hass,escConfig)
+  constructor(escConfig)
   {
-    super(hass);
+    super();
 
     let entityId = this.entityId(escConfig[C.CONFIG_ENTITY_ID] ? escConfig[C.CONFIG_ENTITY_ID] : escConfig);
 
     this.group(escConfig[C.CONFIG_GROUP]);
     this.id(escConfig[C.CONFIG_ID]);
 
-    this.setCoverEntity(hass,entityId);
+    this.setCoverEntity(cfg.hass,entityId);
 
     // TODO: this is like fillCfg(), replace by it after checking the if's in fillCfg()
     Object.entries(escConfig).forEach( ([key, value]) => {
@@ -1106,8 +1086,8 @@ export class shutterCfg extends cfg{
 
     this.friendlyName(escConfig[C.CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || C.UNKNOWN);
 
-    this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
-    this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
+    this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(cfg.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
+    this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(cfg.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
 
     let base_height_px = escConfig[C.CONFIG_BASE_HEIGHT_PX];
     let resize_height_pct = escConfig[C.CONFIG_RESIZE_HEIGHT_PCT];

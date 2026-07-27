@@ -17,17 +17,27 @@ export class htmlBlock
   #xySize = new xyPair();
   #htmlString = ''
 
-  constructor(shutter){
+  static escImages =null;
+
+  static setImages(escImages) {
+    htmlBlock.escImages = escImages;
+  }
+
+  constructor(shutter,cfg){
     //this.enhancedShutter=enhancedShutter;
     this.shutter =shutter;
 
 
-    this.cfg=shutter.cfg;
-    this.escImages= shutter.escImages ?? {};
+    //this.cfg=shutter.cfg;
+    this.cfg=cfg;
+    //this.escImages= shutter.escImages ?? {};
     this.actualScreenPosition = shutter.actualScreenPosition;
     this.actualTiltPosition = shutter.actualTiltPosition;
     this.actualShutterPosition = shutter.actualShutterPosition;
     //console_log("====>>>",shutter.actualScreenPosition,shutter.actualTiltPosition,shutter.actualShutterPosition);
+  }
+  get escImages(){
+    return htmlBlock.escImages;
   }
   show(){
     if (!this.#htmlString) this.defineHtml();
@@ -101,26 +111,32 @@ export class htmlBlock
   }
 
   showTopBottomDiv(position){
-    const batteryIconBlock = new htmlBlockBatteryIcon(this.shutter);
-    const signalIconBlock = new htmlBlockSignalIcon(this.shutter);
-    const nameAndStateBlock = new htmlBlockNameAndState(this.shutter);
+    const shutter = this.shutter;
+    const cfg = this.cfg;
+
+    const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg);
+    const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg);
+    const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg);
 
     return html`
         <div class="${C.ESC_CLASS_TOP_BOTTOM}">
-          ${position == this.cfg.iconsPosition() ? batteryIconBlock.show() : ''}
+          ${position == this.cfg.iconsPosition() ? batteryIconBlock.show() : nothing}
           ${nameAndStateBlock.show(position)}
-          ${position == this.cfg.iconsPosition() ? signalIconBlock.show() : ''}
+          ${position == this.cfg.iconsPosition() ? signalIconBlock.show() : nothing}
         </div>
     `;
   }
   sizeTopBottomDiv(position){
-    const batteryIconBlock = new htmlBlockBatteryIcon(this.shutter);
-    const signalIconBlock = new htmlBlockSignalIcon(this.shutter);
-    const nameAndStateBlock = new htmlBlockNameAndState(this.shutter);
+    const shutter = this.shutter;
+    const cfg = this.cfg;
+
+    const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg);
+    const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg);
+    const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg);
 
     let xyBattery = this.cfg.getIconsActive() && this.cfg.iconsPosition() === position ? batteryIconBlock.size() : new xyPair();
-    let xySignal  = this.cfg.getIconsActive() && this.cfg.iconsPosition() === position ? signalIconBlock.size() : new xyPair();
     let xyNameAndState = nameAndStateBlock.size(position);
+    let xySignal  = this.cfg.getIconsActive() && this.cfg.iconsPosition() === position ? signalIconBlock.size() : new xyPair();
 
     let xy = this.gridAddHorizontal(xyBattery,xyNameAndState);
     xy = this.gridAddHorizontal(xy,xySignal);
@@ -153,54 +169,129 @@ export class htmlBlock
     return xy;
   }
 }
-export class htmlBlockShutter extends htmlBlock{
+export class htmlBlockWindow extends htmlBlock{
   //entityId = this.cfg.entityId();
-  htmlParts = new htmlStyleVars(this.shutter);
+  htmlStyle = new htmlStyleVars(this.shutter,this.cfg);
 
-  topBlock = new htmlBlockTop(this.shutter);
-  middleBlock = new htmlBlockMiddle(this.shutter); // TODO: does not work in the tree-cfg ...
-  bottomBlock = new htmlBlockBottom(this.shutter);
+
+  constructor(shutter,cfg,action){
+    super(shutter,cfg);
+  }
 
   defineHtml(){
-    this.setHtmlString(html`
-      <div
-        class=${C.ESC_CLASS_SHUTTER}
-        style = "${this.htmlParts.defStyleVarsShutter()}"
-      >
-      ${this.topBlock.show()}
-      ${this.middleBlock.show()}
-      ${this.bottomBlock.show()}
-      </div>
-    `);
-  }
-  // removed data-shutter since it is not needed anywhere and a problem with the new config (tree) since the entityId is not unique anymore
-  defineHtmlOld(){
-    this.setHtmlString(html`
-      <div
-        class=${C.ESC_CLASS_SHUTTER}
-        data-shutter="${this.entityId}"
-        style = "${this.htmlParts.defStyleVarsShutter()}"
-      >
-      ${this.topBlock.show()}
-      ${this.middleBlock.show()}
-      ${this.bottomBlock.show()}
-      </div>
-    `);
-  }
-  defineSize(){
-    let xyTopDiv = this.topBlock.size();
-    let xyMiddleDiv = this.middleBlock.size();
-    let xyBottomDiv = this.bottomBlock.size();
 
-    let xy = this.gridAddVertical(xyTopDiv,xyMiddleDiv);
-    this.setXySize(this.gridAddVertical(xy,xyBottomDiv));
+    if (this.cfg instanceof shutterCfg){
+      // Old cfg
+      this.topBlock = new htmlBlockTop(this.shutter,this.cfg);
+      this.middleBlock = new htmlBlockMiddle(this.shutter,this.cfg);
+      this.bottomBlock = new htmlBlockBottom(this.shutter,this.cfg);
+      this.setHtmlString(html`
+        <div
+          class=${C.ESC_CLASS_SHUTTER}
+          style = "${this.htmlStyle.defStyleVarsAll()}"
+        >
+        ${this.topBlock.show()}
+        ${this.middleBlock.show()}
+        ${this.bottomBlock.show()}
+        </div>
+      `);
+    }else{
+      // New cfg with tree: card-windows[]-covers[]-entities[]
+      const htmlOut = html`
+          ${this.buildRender()}
+        `;
+      this.setHtmlString(htmlOut);
+    }
   }
+    defineSize(){
+    if (this.cfg instanceof shutterCfg){
+      this.topBlock = new htmlBlockTop(this.shutter,this.cfg);
+      this.middleBlock = new htmlBlockMiddle(this.shutter,this.cfg);
+      this.bottomBlock = new htmlBlockBottom(this.shutter,this.cfg);
+      let xyTopDiv = this.topBlock.size();
+      let xyMiddleDiv = this.middleBlock.size();
+      let xyBottomDiv = this.bottomBlock.size();
+
+      let xy = this.gridAddVertical(xyTopDiv,xyMiddleDiv);
+      this.setXySize(this.gridAddVertical(xy,xyBottomDiv));
+    }else{
+      debugger;
+    }
+  }
+// ============================================================
+  buildRender() {
+    const htmlOut = html`${this.#buildLevel2(this.cfg,0,0)}`;
+    return htmlOut;
+  }
+  static #LEVELS = [
+      { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow"  },
+      { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover" },
+      { childKey: "",                   func: "defineHtmlEntity"  },
+    ];
+  #buildLevel2(config, index, depth) {
+
+    if (depth >= htmlBlockWindow.#LEVELS.length) return nothing;
+
+    const {childKey,func} = htmlBlockWindow.#LEVELS[depth];
+    const cfg=config.cfg;
+
+
+    const children = childKey && Array.isArray(cfg[childKey])
+      ? cfg[childKey].map((childCfg, i) => this.#buildLevel2(childCfg, i, depth + 1))
+      : nothing;
+
+    return this[func](index, config,children);
+  }
+  defineHtmlWindow(index,flatObj,children){
+    const cfg=flatObj;
+    this.topBlock = new htmlBlockTop(this.shutter,cfg);
+    this.middleBlock = new htmlBlockMiddle(this.shutter,cfg); // TODO: does not work in the tree-cfg; cfg[] is array here ...
+    this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
+    return html`
+      <div
+        class=${C.ESC_CLASS_WINDOW}
+        style = "${this.htmlStyle.defStyleVarsWindow(cfg)}"
+      >
+        ${this.topBlock.show()}
+        ${children}
+      </div>
+    `;
+  }
+  defineHtmlCover(index,flatObj,children){
+    const cfg=flatObj;
+    this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
+    return html`
+        <div
+          class = ${C.ESC_CLASS_COVER}
+          style = "${this.htmlStyle.defStyleVarsCover(cfg)}"
+        >
+          ${children}
+          ${this.bottomBlock.show()}
+        </div>
+    `;
+  }
+  defineHtmlEntity(index,flatObj,children){
+    // TODO: somewhwre here also this.htmlStyle.defStyleVarsEntity() ??
+    const cfg=flatObj;
+    this.topBlock = new htmlBlockTop(this.shutter,cfg);
+    this.middleBlock = new htmlBlockMiddle(this.shutter,cfg); // TODO: does not work in the tree-cfg; cfg[] is array here ...
+    return html`
+        <div
+          class = ${C.ESC_CLASS_ENTITY}
+          style = "${this.htmlStyle.defStyleVarsEntity(cfg)}"
+        >
+          ${this.middleBlock.show()}
+        </div>
+    `;
+  }
+
+  // ============================================================
 }
 export class htmlBlockCardTitle extends htmlBlock{
-  constructor(cfg){
+  constructor(shutter,cfg){
     //this.enhancedShutter=enhancedShutter;
-    let block = {cfg: cfg};
-    super(block);
+    let block = {cfg: shutter};
+    super(block,cfg);
   }
   defineSize(){
 
@@ -218,10 +309,10 @@ export class htmlBlockCardTitle extends htmlBlock{
 
 }
 export class htmlBlockShutterSeparate extends htmlBlock{
-  constructor(cfg){
+  constructor(shutter,cfg){
     //this.enhancedShutter=enhancedShutter;
-    let block = {cfg: cfg};
-    super(block);
+    let block = {cfg: shutter};
+    super(block,cfg);
   }
   defineHtml(){
     this.setHtmlString (html`
@@ -237,8 +328,8 @@ export class htmlBlockShutterSeparate extends htmlBlock{
 }
 export class htmlBlockBatteryIcon extends htmlBlock{
 
-  constructor(shutter){
-    super(shutter);
+  constructor(shutter,cfg){
+    super(shutter,cfg);
     //debugger;
   }
   defineHtml(){
@@ -276,6 +367,9 @@ export class htmlBlockBatteryIcon extends htmlBlock{
 }
 export class htmlBlockSignalIcon extends htmlBlock{
 
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     this.setHtmlString(html`
       ${this.cfg.getIconsActive() ? html`
@@ -299,7 +393,7 @@ export class htmlBlockSignalIcon extends htmlBlock{
             </ha-icon>
           </div>`
         }
-        ` : ''
+        ` : nothing
       }
     `);
   }
@@ -310,10 +404,14 @@ export class htmlBlockSignalIcon extends htmlBlock{
 }
 export class htmlBlockNameAndState extends htmlBlock{
 
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   show(blockPosition=C.TOP){
+    const cfg = this.cfg;
     const escClassName = blockPosition === C.TOP ? C.ESC_CLASS_TOP : C.ESC_CLASS_BOTTOM;
-    const stateBlock= new htmlBlockState(this.shutter);
-    const nameBlock = new htmlBlockName(this.shutter);
+    const stateBlock= new htmlBlockState(this.shutter,cfg);
+    const nameBlock = new htmlBlockName(this.shutter,cfg);
     return html`
       <div class = "${escClassName}">
         ${this.cfg.namePosition() === blockPosition ? nameBlock.show() : nothing}
@@ -323,8 +421,9 @@ export class htmlBlockNameAndState extends htmlBlock{
   }
   size(blockPosition=C.TOP){
 
-    const stateBlock= new htmlBlockState(this.shutter);
-    const nameBlock = new htmlBlockName(this.shutter);
+    const cfg = this.cfg;
+    const stateBlock= new htmlBlockState(this.shutter,cfg);
+    const nameBlock = new htmlBlockName(this.shutter,cfg);
 
     let xyName = this.cfg.namePosition() === blockPosition ? nameBlock.size() : new xyPair();
     let xyState = this.openingPosition() === blockPosition ? stateBlock.size() : new xyPair();
@@ -343,9 +442,9 @@ export class htmlBlockNameAndState extends htmlBlock{
 }
 export class htmlBlockName extends htmlBlock{
 
-  constructor(shutter)
+  constructor(shutter,cfg)
   {
-    super(shutter);
+    super(shutter,cfg);
     //debugger;
     if (this.cfg instanceof windowCfgNew){
        //debugger;
@@ -361,14 +460,14 @@ export class htmlBlockName extends htmlBlock{
         ? html`
           <div class="${C.ESC_CLASS_LABEL} ${this.cfg.disabledGlobaly() ? `${C.ESC_CLASS_LABEL_DISABLED}` : ''}"
             @click="${() => this.shutter.doHassMoreInfoOpen(this.cfg.entityId())}"
-            title="${this.cfg.getCoverEntity().getFriendlyName()}"
+            title="${this.cfg.getCoverEntity()?.getFriendlyName() || C.UNAVAILABLE}"
           >
             ${this.cfg.friendlyName()}
             ${this.passiveMode() ? html`
               <span class="${C.ESC_CLASS_HA_ICON_LOCK}">
                 <ha-icon icon="mdi:lock"></ha-icon>
               </span>
-            `:''}
+            `:nothing}
           </div>
           `
         : nothing
@@ -392,6 +491,9 @@ export class htmlBlockName extends htmlBlock{
   }
 }
 export class htmlBlockState extends htmlBlock{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     const positionText =this.cfg.createPositionText(this.actualShutterPosition,this.actualTiltPosition);
 
@@ -437,6 +539,9 @@ export class htmlBlockState extends htmlBlock{
   }
 }
 export class htmlBlockTop extends htmlBlock{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     this.setHtmlString(this.showTopBottomDiv(C.TOP));
   }
@@ -447,9 +552,9 @@ export class htmlBlockTop extends htmlBlock{
 }
 export class htmlBlockMiddle extends htmlBlock
 {
-  constructor(shutter)
+  constructor(shutter,cfg)
   {
-    super(shutter);
+    super(shutter,cfg);
     //debugger;
     if (this.cfg instanceof windowCfgNew){
        //debugger;
@@ -461,11 +566,13 @@ export class htmlBlockMiddle extends htmlBlock
 
   defineHtml()
   {
-    const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter);
-    const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter);
-    const centralWindowBlock = new htmlBlockCentralWindow(this.shutter);
-    const tiltSectionBlock = new htmlBlockTiltSection(this.shutter);
-    const rightButtonsBlock = new htmlBlockRightButtons(this.shutter);
+    const cfg = this.cfg;
+
+    const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter,cfg);
+    const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter,cfg);
+    const centralWindowBlock = new htmlBlockCentralWindow(this.shutter,cfg);
+    const tiltSectionBlock = new htmlBlockTiltSection(this.shutter,cfg);
+    const rightButtonsBlock = new htmlBlockRightButtons(this.shutter,cfg);
 
     this.setHtmlString(html`
       <div class="${C.ESC_CLASS_MIDDLE}">
@@ -476,8 +583,8 @@ export class htmlBlockMiddle extends htmlBlock
         ${centralWindowBlock.show()}
         ${this.cfg.showPartialOpenButtons() || this.cfg.canTilt()
           ? html`
-            ${(this.cfg.canTilt()) ? tiltSectionBlock.show():''}
-            ${this.showPartialOpenButtons() ? rightButtonsBlock.show():''}
+            ${(this.cfg.canTilt()) ? tiltSectionBlock.show():nothing}
+            ${this.showPartialOpenButtons() ? rightButtonsBlock.show():nothing}
           `
           : nothing //`<div class='blankDiv'></div>`
         }
@@ -487,18 +594,16 @@ export class htmlBlockMiddle extends htmlBlock
 
   defineSize()
   {
-    const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter);
-    const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter);
-    const centralWindowBlock = new htmlBlockCentralWindow(this.shutter);
-    const tiltSectionBlock = new htmlBlockTiltSection(this.shutter);
-    const rightButtonsBlock = new htmlBlockRightButtons(this.shutter);
+    const cfg = this.cfg;
+    const leftButtonsBlock = new htmlBlockLeftButtons(this.shutter,cfg);
+    const openCloseSliderBlock = new htmlBlockOpenCloseSlider(this.shutter,cfg);
+    const centralWindowBlock = new htmlBlockCentralWindow(this.shutter,cfg);
+    const tiltSectionBlock = new htmlBlockTiltSection(this.shutter,cfg);
+    const rightButtonsBlock = new htmlBlockRightButtons(this.shutter,cfg);
 
     let xyLeftButtons = leftButtonsBlock.size();
-    // this.featurePosition = this.cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_POSITION);
-    //let xyOpenCloseSlider = this.cfg.showOpenCloseSliderBlock() && this.featurePosition ? openCloseSliderBlock.size() : new xyPair();
     let xyOpenCloseSlider = this.cfg.showOpenCloseSliderBlock() ? openCloseSliderBlock.size() : new xyPair();
     let xyCentralWindow = centralWindowBlock.size();
-    //let xyTiltSection = this.cfg.canTilt() ? tiltSectionBlock.size(): new xyPair();
     let xyTiltSection = tiltSectionBlock.size();
     let xyRightButtons = this.showPartialOpenButtons() ? rightButtonsBlock.size() : new xyPair();
 
@@ -518,6 +623,9 @@ export class htmlBlockMiddle extends htmlBlock
   }
 }
 export class htmlBlockBottom extends htmlBlock{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     this.setHtmlString(this.showTopBottomDiv(C.BOTTOM));
   }
@@ -527,12 +635,16 @@ export class htmlBlockBottom extends htmlBlock{
   }
 }
 export class htmlBlockLeftButtons extends htmlBlock{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
 
-    const buttonUpBlock = new htmlBlockButtonUp(this.shutter);
-    const buttonDownBlock = new htmlBlockButtonDown(this.shutter);
-    const buttonStopBlock = new htmlBlockButtonStop(this.shutter);
-    const buttonPartialBlock = new htmlBlockButtonPartial(this.shutter);
+    const cfg = this.cfg;
+    const buttonUpBlock = new htmlBlockButtonUp(this.shutter,cfg);
+    const buttonDownBlock = new htmlBlockButtonDown(this.shutter,cfg);
+    const buttonStopBlock = new htmlBlockButtonStop(this.shutter,cfg);
+    const buttonPartialBlock = new htmlBlockButtonPartial(this.shutter,cfg);
     this.setHtmlString(html`
       ${this.buttonsLeftActive()
       ? html`
@@ -548,10 +660,11 @@ export class htmlBlockLeftButtons extends htmlBlock{
     `);
   }
   defineSize(){
-    const buttonUpBlock = new htmlBlockButtonUp(this.shutter);
-    const buttonStopBlock = new htmlBlockButtonStop(this.shutter);
-    const buttonDownBlock = new htmlBlockButtonDown(this.shutter);
-    const buttonPartialBlock = new htmlBlockButtonPartial(this.shutter);
+    const cfg = this.cfg;
+    const buttonUpBlock = new htmlBlockButtonUp(this.shutter,cfg);
+    const buttonStopBlock = new htmlBlockButtonStop(this.shutter,cfg);
+    const buttonDownBlock = new htmlBlockButtonDown(this.shutter,cfg);
+    const buttonPartialBlock = new htmlBlockButtonPartial(this.shutter,cfg);
 
     let xyButtonUpBlock = buttonUpBlock.size();
     let xyButtonStopBlock = buttonStopBlock.size();
@@ -583,11 +696,14 @@ export class htmlBlockLeftButtons extends htmlBlock{
           </ha-icon>
         </ha-icon-button>
       `
-      : ''}
+      : nothing}
     `;
   }
 }
 export class htmlBlockButtonUp extends htmlBlockLeftButtons{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     this.setHtmlString(this.showButtonUpDown(C.ESC_FEATURE_OPEN,C.ACTION_SHUTTER_OPEN,C.UP,'mdi:arrow-up'));
   }
@@ -597,6 +713,9 @@ export class htmlBlockButtonUp extends htmlBlockLeftButtons{
   }
 }
 export class htmlBlockButtonStop extends htmlBlockLeftButtons{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     const action = C.ACTION_SHUTTER_STOP;
     const feature = C.ESC_FEATURE_STOP;
@@ -617,7 +736,7 @@ export class htmlBlockButtonStop extends htmlBlockLeftButtons{
           </ha-icon>
         </ha-icon-button>
       `
-      : ''
+      : nothing
     }`);
   }
   defineSize(){
@@ -627,6 +746,9 @@ export class htmlBlockButtonStop extends htmlBlockLeftButtons{
 
 }
 export class htmlBlockButtonDown extends htmlBlockLeftButtons{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     this.setHtmlString(this.showButtonUpDown(C.ESC_FEATURE_CLOSE,C.ACTION_SHUTTER_CLOSE,C.DOWN,'mdi:arrow-down'))
   }
@@ -636,6 +758,9 @@ export class htmlBlockButtonDown extends htmlBlockLeftButtons{
   }
 }
 export class htmlBlockButtonPartial extends htmlBlockLeftButtons{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     this.setHtmlString(html`
       ${this.partialActive() && this.cfg.showStandardButtons() /* TODO localize texts */
@@ -646,7 +771,7 @@ export class htmlBlockButtonPartial extends htmlBlockLeftButtons{
             @click="${()=> this.shutter.doOnclick(`${C.ACTION_SHUTTER_SET_POS}`, this.cfg.calcOffset(this.cfg.partial()))}" >
             <ha-icon class="${C.ESC_CLASS_HA_ICON}" icon="mdi:arrow-expand-vertical"></ha-icon>
           </ha-icon-button>
-        ` : ''}
+        ` : nothing}
     `);
   }
   defineSize(){
@@ -655,10 +780,15 @@ export class htmlBlockButtonPartial extends htmlBlockLeftButtons{
   }
 }
 export class htmlBlockTiltButtons extends htmlBlock{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
-    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.shutter);
-    const tiltPositionBlock = new htmlBlockTiltPosition(this.shutter);
-    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.shutter);
+    const cfg = this.cfg;
+
+    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.shutter,cfg);
+    const tiltPositionBlock = new htmlBlockTiltPosition(this.shutter,cfg);
+    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.shutter,cfg);
     this.setHtmlString(html`
       <div class="${C.ESC_CLASS_TILT_BUTTONS}">
         ${buttonTiltUpBlock.show()}
@@ -678,9 +808,11 @@ export class htmlBlockTiltButtons extends htmlBlock{
     `;
   }
   defineSize(){
-    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.shutter);
-    const tiltPositionBlock = new htmlBlockTiltPosition(this.shutter);
-    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.shutter);
+    const cfg = this.cfg;
+
+    const buttonTiltUpBlock = new htmlBlockButtonTiltUp(this.shutter,cfg);
+    const tiltPositionBlock = new htmlBlockTiltPosition(this.shutter,cfg);
+    const buttonTiltDownBlock = new htmlBlockButtonTiltDown(this.shutter,cfg);
     let xyButtonTiltUp = buttonTiltUpBlock.size();
     let xyTiltPosition = tiltPositionBlock.size();
     let xyButtonTiltDown = buttonTiltDownBlock.size();
@@ -698,6 +830,9 @@ export class htmlBlockTiltButtons extends htmlBlock{
 
 }
 export class htmlBlockButtonTiltDown extends htmlBlockTiltButtons{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     const icon = this.cfg.buttonGroupInRow() ? "mdi:arrow-bottom-right":"mdi:arrow-bottom-left" ;
     this.setHtmlString(this.showButtonTilt(C.ACTION_SHUTTER_CLOSE_TILT,icon));
@@ -708,6 +843,9 @@ export class htmlBlockButtonTiltDown extends htmlBlockTiltButtons{
   }
 }
 export class htmlBlockButtonTiltUp extends htmlBlockTiltButtons{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     const icon = this.cfg.buttonGroupInRow() ? "mdi:arrow-top-right":"mdi:arrow-bottom-right" ;
     this.setHtmlString(this.showButtonTilt(C.ACTION_SHUTTER_OPEN_TILT,icon));
@@ -718,6 +856,9 @@ export class htmlBlockButtonTiltUp extends htmlBlockTiltButtons{
   }
 }
 export class htmlBlockTiltPosition extends htmlBlockTiltButtons{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     this.setHtmlString(html`
       <div class="${C.ESC_CLASS_TILT_CONTAINER}">
@@ -742,6 +883,9 @@ export class htmlBlockTiltPosition extends htmlBlockTiltButtons{
   }
 }
 export class htmlBlockTiltSlider extends htmlBlock{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     this.setHtmlString(html`
       <div class="${C.ESC_CLASS_SLIDER_WRAP}">
@@ -763,8 +907,8 @@ export class htmlBlockTiltSlider extends htmlBlock{
   }
 }
 export class htmlBlockOpenCloseSlider extends htmlBlock{
-  constructor(shutter){
-    super(shutter);
+  constructor(shutter,cfg){
+    super(shutter,cfg);
     //debugger;
     if (this.cfg instanceof windowCfgNew){
        //debugger;
@@ -822,8 +966,8 @@ export class htmlBlockOpenCloseSlider extends htmlBlock{
 }
 export class htmlBlockTiltSection extends htmlBlock{
 
-  constructor(shutter){
-    super(shutter);
+  constructor(shutter,cfg){
+    super(shutter,cfg);
     //debugger;
     if (this.cfg instanceof windowCfgNew){
        //debugger;
@@ -834,8 +978,8 @@ export class htmlBlockTiltSection extends htmlBlock{
   }
 
   defineHtml(){
-    const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter);
-    const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter);
+    const cfg = this.cfg;
+
 /*
     this.setHtmlString(html`
         ${this.cfg.showTiltButtonBlock() ? tiltButtonsBlock.show() : nothing}
@@ -843,24 +987,30 @@ export class htmlBlockTiltSection extends htmlBlock{
     `);
 */
     this.setHtmlString(html`
-      ${this.cfg.map(cfg => html`
+      ${this.cfg.map((cfg) => {
+        const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter,cfg);
+        const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter,cfg);
+        return html`
             ${cfg.showTiltButtonBlock() ? tiltButtonsBlock.show() : nothing}
             ${cfg.showTiltSliderBlock() && cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_TILT_POSITION)
               ? tiltSliderBlock.show()
               :nothing}
-      `)}
+          `;
+      }
+    )}
     `)
   };
 
   defineSize(){
+    const cfg = this.cfg;
     let xy = new xyPair();
-    const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter);
-    const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter);
-    let xyTiltSlider = tiltSliderBlock.size();
-    let xyTiltButtons = tiltButtonsBlock.size();
 
     this.cfg.map(cfg => {
       if (cfg.canTilt()){
+        const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter,cfg);
+        const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter,cfg);
+        let xyTiltSlider = tiltSliderBlock.size();
+        let xyTiltButtons = tiltButtonsBlock.size();
         //let tilt_active = cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_TILT_POSITION); // this.
         let tilt_active = true;
         if (cfg.buttonGroupInRow()){
@@ -872,19 +1022,13 @@ export class htmlBlockTiltSection extends htmlBlock{
         }
       }
     });
-/*
-    if (this.cfg.buttonGroupInRow()){
-      xy = this.cfg.showTiltButtonBlock() ? this.gridAddHorizontal(xy,xyTiltButtons) : xy;
-      xy = this.cfg.showTiltSliderBlock() && this.tilt_position ? this.gridAddHorizontal(xy,xyTiltSlider) :xy;
-    }else{
-      xy = this.cfg.showTiltButtonBlock() ? this.gridAddVertical(xy,xyTiltButtons) : xy;
-      xy = this.cfg.showTiltSliderBlock() && this.tilt_position ? this.gridAddVertical(xy,xyTiltSlider) : xy;
-    }
-*/
     this.setXySize(xy);
   }
 }
 export class htmlBlockCentralWindow extends htmlBlock{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
    /*
       Here a loop with possible 1 or more picker/cover situations should be created
@@ -959,6 +1103,10 @@ export class htmlBlockCentralWindow extends htmlBlock{
         </div>
       `;
   }
+  /**
+   * Shows the up/down arrows while opening/closing the cover
+   * @returns
+   */
   showOverlay(){
     return html`
       <div class="${C.ESC_CLASS_MOVEMENT_OVERLAY}">
@@ -1008,6 +1156,9 @@ export class htmlBlockCentralWindow extends htmlBlock{
   }
 }
 export class htmlBlockRightButtons extends htmlBlock{
+  constructor(shutter,cfg){
+    super(shutter,cfg);
+  }
   defineHtml(){
     const icons= {
       0: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4Z",

@@ -18,7 +18,7 @@ export const RIGHT = 'right';
 export const HA_TITLE_FONT = 'Roboto, Noto, sans-serif';
 export const DISPLAY_DECIMALS = 0;
 
-export const ESC_CLASS_BASE_NAME = 'esc-shutter'; // esc-shutter
+export const ESC_CLASS_BASE_NAME = 'esc'; // esc-shutter
 export const ESC_CLASS_SHUTTER_SEPARATE = `${ESC_CLASS_BASE_NAME}-separate`; // esc-shutter-separate
 export const ESC_CLASS_TOP = `${ESC_CLASS_BASE_NAME}-${TOP}`; // esc-shutter-top
 export const ESC_CLASS_MIDDLE = `${ESC_CLASS_BASE_NAME}-middle`; // esc-shutter-middle
@@ -28,7 +28,11 @@ export const ESC_CLASS_LABEL = `${ESC_CLASS_BASE_NAME}-label`; // esc-shutter-la
 export const ESC_CLASS_POSITION = `${ESC_CLASS_BASE_NAME}-position`; // esc-shutter-position
 export const ESC_CLASS_LABEL_DISABLED = `${ESC_CLASS_LABEL}-disabled`; // esc-shutter-label-disabled
 export const ESC_CLASS_BUTTONS = `${ESC_CLASS_BASE_NAME}-buttons`; // esc-shutter-buttons
-export const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}`; // esc-shutter
+export const ESC_CLASS_SHUTTER = `${ESC_CLASS_BASE_NAME}-shutter`; // esc-shutter
+export const ESC_CLASS_CARD = `${ESC_CLASS_BASE_NAME}-card`; // esc-shutter
+export const ESC_CLASS_WINDOW = `${ESC_CLASS_BASE_NAME}-window`; // esc-shutter
+export const ESC_CLASS_COVER = `${ESC_CLASS_BASE_NAME}-cover`; // esc-shutter
+export const ESC_CLASS_ENTITY = `${ESC_CLASS_BASE_NAME}-entity`; // esc-shutter
 
 export const ESC_CLASS_HA_ICON = `${ESC_CLASS_BASE_NAME}-ha-icon`; // esc-shutter-ha-icon
 export const ESC_CLASS_HA_ICON_LOCK = `${ESC_CLASS_HA_ICON}-lock`; // esc-shutter-ha-icon-lock
@@ -786,6 +790,7 @@ export const Globals={
 
 export const SHUTTER_CSS =`
 
+      .${ESC_CLASS_WINDOW},
       .${ESC_CLASS_SHUTTER} {
         overflow: visible;
         position: relative;
