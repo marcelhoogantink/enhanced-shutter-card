@@ -9,6 +9,8 @@ import {
 import {
   shutterCfg,
   windowCfgNew,
+  coverCfgNew,
+  entityCfgNew
 } from './cfg.js';
 
 
@@ -112,19 +114,37 @@ export class htmlBlock
 
   showTopBottomDiv(position){
     const shutter = this.shutter;
-    const cfg = this.cfg;
+    let cfg = this.cfg;
+    if (cfg instanceof windowCfgNew){
+       //debugger;
+       cfg = cfg.cfg.covers[0].cfg.entities; // TODO: works for now, but for just 1 cover... not for two or more defined coverd
+    }
+    else if (cfg instanceof coverCfgNew){
+       //debugger;
+       cfg = cfg.cfg.entities;
+    }
+    else if (cfg instanceof entityCfgNew){
+       //debugger;
+       cfg = [cfg]; // OK .....
+    }else{
+       cfg = [cfg]; // classic flat shutterCfg
+    }
 
-    const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg);
-    const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg);
-    const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg);
-
-    return html`
-        <div class="${C.ESC_CLASS_TOP_BOTTOM}">
-          ${position == this.cfg.iconsPosition() ? batteryIconBlock.show() : nothing}
-          ${nameAndStateBlock.show(position)}
-          ${position == this.cfg.iconsPosition() ? signalIconBlock.show() : nothing}
-        </div>
+    const htmlOut = html`
+      ${cfg.map(cfg => {
+        const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg);
+        const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg);
+        const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg);
+        return html`
+          <div class="${C.ESC_CLASS_TOP_BOTTOM}">
+            ${position == this.cfg.iconsPosition() ? batteryIconBlock.show() : nothing}
+            ${nameAndStateBlock.show(position)}
+            ${position == this.cfg.iconsPosition() ? signalIconBlock.show() : nothing}
+          </div>
+       `;
+      })}
     `;
+    return htmlOut;
   }
   sizeTopBottomDiv(position){
     const shutter = this.shutter;
@@ -244,44 +264,41 @@ export class htmlBlockWindow extends htmlBlock{
   }
   defineHtmlWindow(index,flatObj,children){
     const cfg=flatObj;
-    this.topBlock = new htmlBlockTop(this.shutter,cfg);
-    this.middleBlock = new htmlBlockMiddle(this.shutter,cfg); // TODO: does not work in the tree-cfg; cfg[] is array here ...
-    this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
     return html`
       <div
         class=${C.ESC_CLASS_WINDOW}
         style = "${this.htmlStyle.defStyleVarsWindow(cfg)}"
       >
-        ${this.topBlock.show()}
         ${children}
       </div>
     `;
   }
   defineHtmlCover(index,flatObj,children){
     const cfg=flatObj;
-    this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
     return html`
-        <div
-          class = ${C.ESC_CLASS_COVER}
-          style = "${this.htmlStyle.defStyleVarsCover(cfg)}"
-        >
-          ${children}
-          ${this.bottomBlock.show()}
-        </div>
+      <div
+        class = ${C.ESC_CLASS_COVER}
+        style = "${this.htmlStyle.defStyleVarsCover(cfg)}"
+      >
+        ${children}
+      </div>
     `;
   }
   defineHtmlEntity(index,flatObj,children){
     // TODO: somewhwre here also this.htmlStyle.defStyleVarsEntity() ??
     const cfg=flatObj;
     this.topBlock = new htmlBlockTop(this.shutter,cfg);
+    this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
     this.middleBlock = new htmlBlockMiddle(this.shutter,cfg); // TODO: does not work in the tree-cfg; cfg[] is array here ...
     return html`
-        <div
-          class = ${C.ESC_CLASS_ENTITY}
-          style = "${this.htmlStyle.defStyleVarsEntity(cfg)}"
-        >
-          ${this.middleBlock.show()}
-        </div>
+      <div
+        class = ${C.ESC_CLASS_ENTITY}
+        style = "${this.htmlStyle.defStyleVarsEntity(cfg)}"
+      >
+        ${this.topBlock.show()}
+        ${this.middleBlock.show()}
+        ${this.bottomBlock.show()}
+      </div>
     `;
   }
 
@@ -987,7 +1004,7 @@ export class htmlBlockTiltSection extends htmlBlock{
     `);
 */
     this.setHtmlString(html`
-      ${this.cfg.map((cfg) => {
+      ${this.cfg.map(cfg => {
         const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter,cfg);
         const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter,cfg);
         return html`
@@ -996,8 +1013,7 @@ export class htmlBlockTiltSection extends htmlBlock{
               ? tiltSliderBlock.show()
               :nothing}
           `;
-      }
-    )}
+      })}
     `)
   };
 
