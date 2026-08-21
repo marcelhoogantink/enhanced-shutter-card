@@ -1,0 +1,47 @@
+Start Docker
+
+Goto https://developers.home-assistant.io/docs/development_environment/
+  and start vscode with git link
+
+Wait ....... (too long) .....
+
+In VScode: Run Task: Run Home Assistanr core
+
+In browser: localhost:8123
+
+HACS install: https://www.hacs.xyz/docs/use/download/download/#to-download-hacs-container
+
+Install 'Enhanced Shutter Card'  before adding the Mount !!!!!
+
+============
+Docker:
+============
+	resources:
+		File Sharing: C:\Github
+
+copy configurations/packages/virtual_cover.yaml
+
+====================
+configuration.yaml:
+====================
+ include :
+ -------
+homeassistant:
+  packages: !include_dir_named configuration/packages/
+--------
+
+
+==============
+devcontainer:
+==============
+"mounts" : [
+    "source=C:/Users/Marce/OneDrive/Github/enhanced-shutter-card/src,target=/workspaces/core/config/www/community/enhanced-shutter-card,type=bind"
+  ]
+
+
+
+Setting:
+
+Add Hacs
+Add online Enhanced shutter Card
+Mount map
