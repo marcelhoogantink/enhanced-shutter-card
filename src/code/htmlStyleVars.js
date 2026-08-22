@@ -29,7 +29,11 @@ export class htmlStyleVars{
       debugger;
       // cfg = this.cfg.debugger;
     }
-    const styleVars= this.defStyleVarsCard(cfg)+this.defStyleVarsWindow(cfg)+this.defStyleVarsCover(cfg)+this.defStyleVarsEntity(cfg);
+    const styleVars= 
+     this.defStyleVarsCard(cfg)+
+     this.defStyleVarsWindow(cfg)+
+     this.defStyleVarsCover(cfg)+
+     this.defStyleVarsEntity(cfg);
     return styleVars;
   }
   defStyleVarsCard(cfg){

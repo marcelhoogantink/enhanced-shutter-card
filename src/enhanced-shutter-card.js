@@ -12,10 +12,8 @@ const VERSION = 'v1.7.0b';
 import {LitElement, html, css, unsafeCSS } from './code/lit/lit-core.min.js';
 import * as C from './code/constants.js';
 
-import {
-  EnhancedShutterCardNew,
-  EnhancedShutter,
-} from './code/classes.js';
+import {EnhancedShutter} from './code/enhancedShutter.js';
+import {EnhancedShutterCardNew} from './code/enhancedShutterCard.js';
 
 import {
   setDebug,
