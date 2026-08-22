@@ -224,7 +224,9 @@ export class htmlBlockWindow extends htmlBlock{
     }
   }
     defineSize(){
-    if (this.cfg instanceof shutterCfg){
+    //if (this.cfg instanceof shutterCfg)
+    //{
+      // old cfg
       this.topBlock = new htmlBlockTop(this.shutter,this.cfg);
       this.middleBlock = new htmlBlockMiddle(this.shutter,this.cfg);
       this.bottomBlock = new htmlBlockBottom(this.shutter,this.cfg);
@@ -234,9 +236,10 @@ export class htmlBlockWindow extends htmlBlock{
 
       let xy = this.gridAddVertical(xyTopDiv,xyMiddleDiv);
       this.setXySize(this.gridAddVertical(xy,xyBottomDiv));
-    }else{
-      debugger;
-    }
+    //}else{
+      // New cfg with tree: card-windows[]-covers[]-entities[]
+      //debugger;
+    //}
   }
 // ============================================================
   buildRender() {

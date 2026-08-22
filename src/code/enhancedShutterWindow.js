@@ -16,7 +16,7 @@ import {xyPair} from './xyPair.js';
 import {haEntity} from './haEntity.js';
 
 
-export class EnhancedShutter extends LitElement
+export class EnhancedShutterWindow extends LitElement
 {
   // loaded from EnhancedShutterCardNew():
   // - react_ShutterState
@@ -652,6 +652,7 @@ export class EnhancedShutter extends LitElement
   doOnclick(command, position=null) {
 
     this.action='user-pick-on-click';
+    // for New cfg: multiple covers... 
     let entityId= this.cfg.entityId();
 
     if (position !==null) position = this.cfg.applyInvertToPosition(position);

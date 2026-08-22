@@ -138,8 +138,8 @@ export class EnhancedShutterCardNew extends LitElement{
 
     const cfg = configItems.map((configItem) => {
       // 1. Merge this raw item with its defaults and a fresh id.
-      //const mergedConfig = { ...rawItem};
-      const mergedConfig = { ...configItem, [C.CONFIG_ID]: id++ };
+      // const mergedConfig = { ...configItem, [C.CONFIG_ID]: id++ };
+      const mergedConfig = { ...configItem};
       const config = this.#buildConfig(baseConfig, mergedConfig);
       const fullCfg = new Class(config);
 
@@ -959,7 +959,7 @@ export class EnhancedShutterCardNew extends LitElement{
           const card = this.cardCfg;
           let separate=false;
           for (const window of card.cfg.windows) {
-            let cfg = window.cfg.covers[0].cfg.entities[0]; // TODO: toosimple here .....
+            let cfg = window.cfg.covers[0].cfg.entities[0]; // TODO: too simple here ..I think ...
             let block = {
               cfg: cfg, // TODO: too simple here .....??
               //cfg: window,

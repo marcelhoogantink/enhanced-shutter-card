@@ -12,7 +12,7 @@ const VERSION = 'v1.7.0b';
 import {LitElement, html, css, unsafeCSS } from './code/lit/lit-core.min.js';
 import * as C from './code/constants.js';
 
-import {EnhancedShutter} from './code/enhancedShutter.js';
+import {EnhancedShutterWindow} from './code/enhancedShutterWindow.js';
 import {EnhancedShutterCardNew} from './code/enhancedShutterCard.js';
 
 import {
@@ -29,7 +29,7 @@ import * as HtmlBlocks from './code/htmlBlocks.js';
 import {EscImages} from './code/escImages.js';
 
 customElements.define(C.HA_CARD_NAME , EnhancedShutterCardNew);
-customElements.define(C.HA_SHUTTER_NAME, EnhancedShutter);
+customElements.define(C.HA_SHUTTER_NAME, EnhancedShutterWindow);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
