@@ -190,7 +190,6 @@ export class EnhancedShutterWindow extends LitElement
 
 
     const windowBlock = new HtmlBlocks.htmlBlockWindow(this,this.cfg,this.action);
-
     return windowBlock.show();
   }
   firstUpdated() {

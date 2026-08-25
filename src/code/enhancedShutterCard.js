@@ -191,8 +191,7 @@ export class EnhancedShutterCardNew extends LitElement{
         let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
         let cfg = new shutterCfg(shutterConfig)
         let counter =1;
-        if (cfg.showGroupMembers() && baseEntity?.isGroup())
-        {
+        if (cfg.showGroupMembers() && baseEntity?.isGroup()){
           // get the entityId's from the group
           const groupEntityIds = baseEntity.getAttributes().entity_id || [];
           // filter (for security) the entity id's that exists
@@ -515,150 +514,11 @@ export class EnhancedShutterCardNew extends LitElement{
   }
   render()
   {
-    if (!this.config || !this.hass || !this.initializeReady){
-      return html`
-       <ha-card>
-          Waiting for Card to initialize...
-       </ha-card>
-      `;
-    }
-    this.showMessages = this.messageManager.countMessages() && this.inEditor();
-    //this.shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg,this.cardCfg.cfg);
-    this.shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this,this.cardCfg);
-    let htmlParts = new htmlCard(this);
-    let htmlout;
-
-    htmlout = html`
-      ${this.showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
-      ${this.showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
-      <ha-card .header=${this.config.title}>
-        <div
-          class="${C.ESC_CLASS_SHUTTERS}"
-          style = "${htmlParts.defStyleVarsCard()}"
-        >
-          ${this.newConfig
-              ? this.htmlOutNew()
-              : this.htmlOutOld()}
-        </div>
-      </ha-card>
-    `;
-  return htmlout;
+    const action='test';
+    const cardBlock = new HtmlBlocks.htmlBlockCard(this,this.config,action);
+    return cardBlock.show();  
   }
-  htmlOutNew(){
-
-      const htmlOut = html`
-          ${this.buildRender()}
-        `;
-    return htmlOut;
-  }
-  htmlOutOld(){
-      const htmlOut = html`
-            ${this.shutterCfgs.map(cfg => {
-                // update the live states and attributes
-                return html`
-                  <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
-                    <enhanced-shutter
-                      .react_ShutterState=${cfg.getCoverState()}
-                      .react_BatteryState=${cfg.getState(cfg.getBatteryEntity())}
-                      .react_SignalState=${cfg.getState(cfg.getSignalEntity())}
-                      .react_ScreenOrientation=${this.screenOrientation}
-                      .react_InitializeReady=${this.initializeReady}
-
-                      .hass=${this.hass}
-                      .cfg=${cfg}
-                      .escImages=${this.escImages}
-                    >
-                    </enhanced-shutter>
-                    ${this.showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
-                  </div>
-                  ${this.shutterSeparateBlock.show()}
-                `;
-              }
-            )}`;
-    return htmlOut;
-  }
-
-  buildRender() {
-    const htmlOut = html`${this.#buildLevel2(this.cardCfg,0, 0)}`;
-    return htmlOut;
-  }
-
-  static #LEVELS = [
-      { childKey: C.WINDOWS_CONFIG,     func: "cardHtml"  },
-      { childKey: C.COVERS_CONFIG,      func: "windowHtml"  },
-      { childKey: C.ENTITIES_CONFIG,    func: "coverHtml"   },
-      { childKey: "",                   func: "entityHtml"  },
-    ];
-  #buildLevel2(config, index, depth) {
-
-    if (depth >= EnhancedShutterCardNew.#LEVELS.length) return nothing;
-
-    const {childKey,func} = EnhancedShutterCardNew.#LEVELS[depth];
-    const cfg=config.cfg;
-
-    const children = childKey && Array.isArray(cfg[childKey])
-      ? cfg[childKey].map((childCfg, i) => this.#buildLevel2(childCfg, i, depth + 1))
-      : nothing;
-
-    return this[func](index, config,children);
-  }
-  cardHtml(index,flatObj,children){
-    //return nothing;
-    return html`${children}`;
-  }
-  windowHtml(index,flatObj,children){
-    //return nothing;
-    const cfg=flatObj;
-    return html`
-      <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
-        <enhanced-shutter
-          .react_ShutterState=null
-          .react_BatteryState=null
-          .react_SignalState=null
-          .react_ScreenOrientation=${this.screenOrientation}
-          .react_InitializeReady=${this.initializeReady}
-
-          .hass=${this.hass}
-          .cfg=${cfg}
-          .escImages=${this.escImages}
-        >
-        </enhanced-shutter>
-        ${this.showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
-      </div>
-      ${this.shutterSeparateBlock.show()}
-    `;
-    //return html`<li><u>Window (${children}) window</u><br></li>`;
-  }
-  coverHtml(index,flatObj,children){
-    //return nothing;
-    return html`<li><u>Cover (${children}) cover</u><br></li>`;
-  }
-  entityHtml(index,flatObj,children){
-    const cfg=flatObj;
-    return html`<li><u>Entity (${children}) entity</u><br></li>`;
-/*
-    return html`
-      <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
-        <enhanced-shutter
-          .react_ShutterState=${cfg.getCoverState()}
-          .react_BatteryState=${cfg.getState(cfg.getBatteryEntity())}
-          .react_SignalState=${cfg.getState(cfg.getSignalEntity())}
-          .react_ScreenOrientation=${this.screenOrientation}
-          .react_InitializeReady=${this.initializeReady}
-
-          .hass=${this.hass}
-          .cfg=${cfg}
-          .escImages=${this.escImages}
-        >
-        </enhanced-shutter>
-        ${this.showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
-      </div>
-      ${this.shutterSeparateBlock.show()}
-    `;
-    // return html`<li><u>Entity (${index})</u><br></li>`;
-  */
-  }
-
+  
   firstUpdated() {
   }
   updated(changedProperties) {

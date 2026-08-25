@@ -12,12 +12,20 @@ import {
   coverCfgNew,
   entityCfgNew
 } from './cfg.js';
+import {MessageManager, htmlCard} from './classes.js';
 
 
 export class htmlBlock
 {
   #xySize = new xyPair();
   #htmlString = ''
+
+  static LEVELS = [
+      { childKey: C.WINDOWS_CONFIG,     func: "defineHtmlCard"  },
+      { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow"  },
+      { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover" },
+      { childKey: "",                   func: "defineHtmlEntity"  },
+    ];
 
   static escImages =null;
 
@@ -27,7 +35,7 @@ export class htmlBlock
 
   constructor(shutter,cfg){
     //this.enhancedShutter=enhancedShutter;
-    this.shutter =shutter;
+    this.shutter = shutter;
 
 
     //this.cfg=shutter.cfg;
@@ -42,8 +50,8 @@ export class htmlBlock
     return htmlBlock.escImages;
   }
   show(){
-    if (!this.#htmlString) this.defineHtml();
-    return this.#htmlString;
+    if (!this.getHtmlString()) this.defineHtml();
+    return this.getHtmlString();
   }
   size(){
     if (!this.#xySize.size()) {
@@ -65,8 +73,27 @@ export class htmlBlock
   defineHtml(){
     this.setHtmlString(nothing);
   }
+  defineHtmlCard(index,flatObj,children){
+    debugger;
+    return nothing;
+  }
+  defineHtmlWindow(index,flatObj,children){
+    debugger;
+    return nothing;
+  }
+  defineHtmlCover(index,flatObj,children){
+    debugger;
+    return nothing;
+  }
+  defineHtmlEntity(index,flatObj,children){
+    debugger;
+    return nothing;
+  }
   setHtmlString(htmlString){
     this.#htmlString = htmlString;
+  }
+  getHtmlString(){
+    return this.#htmlString;
   }
   passiveMode(value = null){
     let mode = this.cfg.passiveMode();
@@ -189,13 +216,142 @@ export class htmlBlock
     return xy;
   }
 }
+export class htmlBlockCard extends htmlBlock{
+
+  constructor(shutter,cfg,action){
+    super(shutter,cfg);
+    this.htmlStyles = new htmlStyleVars(this.shutter,this.cfg);
+    this.messageManager= shutter.messageManager;
+
+  }
+  defineHtml(){
+    if (!this.cfg || !this.shutter.hass || !this.shutter.initializeReady){
+      return html`
+       <ha-card>
+          Waiting for Card to initialize...
+       </ha-card>
+      `;
+    }
+    this.showMessages = this.messageManager.countMessages() && this.shutter.inEditor();
+    //this.shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg,this.cardCfg.cfg);
+    this.shutterSeparateBlock= new htmlBlockShutterSeparate(this.shutter,this.shutter.cardCfg);
+    let htmlParts = new htmlCard(this.shutter);
+    let htmlout;
+
+    htmlout = html`
+      ${this.showMessages ? html`${this.messageManager.displayGroupMessages('GridSize')} ` : ''}
+      ${this.showMessages ? html`${this.messageManager.displayGroupMessages('General')} ` : ''}
+      <ha-card .header=${this.cfg.title}>
+        <div
+          class="${C.ESC_CLASS_SHUTTERS}"
+          style = "${htmlParts.defStyleVarsCard()}"
+        >
+          ${this.shutter.newConfig
+              ? this.htmlOutNew()
+              : this.htmlOutOld()}
+        </div>
+      </ha-card>
+    `;
+    this.setHtmlString(htmlout);
+  }
+  htmlOutNew(){
+    const htmlOut = html`
+      ${this.buildRender()}
+    `;
+    return htmlOut;
+  }
+  htmlOutOld(){
+    const htmlOut = html`
+      ${this.shutter.shutterCfgs.map(cfg => {
+        // update the live states and attributes
+        return html`
+          <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
+            <enhanced-shutter
+              .react_ShutterState=${cfg.getCoverState()}
+              .react_BatteryState=${cfg.getState(cfg.getBatteryEntity())}
+              .react_SignalState=${cfg.getState(cfg.getSignalEntity())}
+              .react_ScreenOrientation=${this.shutter.screenOrientation}
+              .react_InitializeReady=${this.shutter.initializeReady}
+
+              .hass=${this.shutter.hass}
+              .cfg=${cfg}
+              .escImages=${this.escImages}
+            >
+            </enhanced-shutter>
+            ${this.showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
+          </div>
+          ${this.shutterSeparateBlock.show()}
+        `;
+      })}`;
+    return htmlOut;
+  }
+  buildRender() {
+    const htmlOut = html`${this.#buildLevel2(this.shutter.cardCfg,0, 0)}`;
+    return htmlOut;
+  }
+  static #LEVELS = [
+      { childKey: C.WINDOWS_CONFIG,     func: "defineHtmlCard"  },
+      { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow"  },
+      { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover"   },
+      { childKey: "",                   func: "defineHtmlEntity"  },
+    ];
+  #buildLevel2(config, index, depth) {
+
+    if (depth >= htmlBlockCard.#LEVELS.length) return nothing;
+
+    const {childKey,func} = htmlBlockCard.#LEVELS[depth];
+    const cfg=config.cfg;
+
+    const children = childKey && Array.isArray(cfg[childKey])
+      ? cfg[childKey].map((childCfg, i) => this.#buildLevel2(childCfg, i, depth + 1))
+      : nothing;
+
+    return this[func](index, config,children);
+  }
+  defineHtmlCard(index,flatObj,children){
+    //return nothing;
+    return html`${children}`;
+  }
+  defineHtmlWindow(index,flatObj,children){
+    //return nothing;
+    const cfg=flatObj;
+    return html`
+      <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
+        <enhanced-shutter
+          .react_ShutterState=null
+          .react_BatteryState=null
+          .react_SignalState=null
+          .react_ScreenOrientation=${this.shutter.screenOrientation}
+          .react_InitializeReady=${this.shutter.initializeReady}
+
+          .hass=${this.shutter.hass}
+          .cfg=${cfg}
+          .escImages=${this.escImages}
+        >
+        </enhanced-shutter>
+        ${this.showMessages ? html`${this.messageManager.displayGroupMessages( cfg.id())} ` : ''}
+      </div>
+      ${this.shutterSeparateBlock.show()}
+    `;
+    //return html`<li><u>Window (${children}) window</u><br></li>`;
+  }
+  defineHtmlCover(index,flatObj,children){
+    //return nothing;
+    return html`<li><u>Cover (${children}) cover</u><br></li>`;
+  }
+  defineHtmlEntity(index,flatObj,children){
+    const cfg=flatObj;
+    return html`<li><u>Entity (${children}) entity</u><br></li>`;
+  }
+
+}
 export class htmlBlockWindow extends htmlBlock{
   //entityId = this.cfg.entityId();
-  htmlStyle = new htmlStyleVars(this.shutter,this.cfg);
 
 
   constructor(shutter,cfg,action){
     super(shutter,cfg);
+    this.htmlStyles = new htmlStyleVars(this.shutter,this.cfg);
   }
 
   defineHtml(){
@@ -208,7 +364,7 @@ export class htmlBlockWindow extends htmlBlock{
       this.setHtmlString(html`
         <div
           class=${C.ESC_CLASS_SHUTTER}
-          style = "${this.htmlStyle.defStyleVarsAll()}"
+          style = "${this.htmlStyles.defStyleVarsAll()}"
         >
         ${this.topBlock.show()}
         ${this.middleBlock.show()}
@@ -223,7 +379,7 @@ export class htmlBlockWindow extends htmlBlock{
       this.setHtmlString(htmlOut);
     }
   }
-    defineSize(){
+  defineSize(){
     //if (this.cfg instanceof shutterCfg)
     //{
       // old cfg
@@ -243,36 +399,37 @@ export class htmlBlockWindow extends htmlBlock{
   }
 // ============================================================
   buildRender() {
-    const htmlOut = html`${this.#buildLevel2(this.cfg,0,0)}`;
+    const startLevel = 1; // Start at level 1 to skip the card level
+    const htmlOut = html`${this.#buildRenderRecursive(this.cfg,0,startLevel)}`;
     return htmlOut;
   }
-  static #LEVELS = [
-      { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow"  },
-      { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover" },
-      { childKey: "",                   func: "defineHtmlEntity"  },
-    ];
-  #buildLevel2(config, index, depth) {
+  #buildRenderRecursive(config, index, depth) {
 
-    if (depth >= htmlBlockWindow.#LEVELS.length) return nothing;
+    if (depth >= htmlBlock.LEVELS.length) return nothing;
 
-    const {childKey,func} = htmlBlockWindow.#LEVELS[depth];
+    const {childKey,func} = htmlBlock.LEVELS[depth];
     const cfg=config.cfg;
 
 
     const children = childKey && Array.isArray(cfg[childKey])
-      ? cfg[childKey].map((childCfg, i) => this.#buildLevel2(childCfg, i, depth + 1))
+      ? cfg[childKey].map((childCfg, i) => this.#buildRenderRecursive(childCfg, i, depth + 1))
       : nothing;
 
     return this[func](index, config,children);
+  }
+  defineHtmlCard(index,flatObj,children){
+    return html`${children}`;
   }
   defineHtmlWindow(index,flatObj,children){
     const cfg=flatObj;
     return html`
       <div
         class=${C.ESC_CLASS_WINDOW}
-        style = "${this.htmlStyle.defStyleVarsWindow(cfg)}"
+        style = "${this.htmlStyles.defStyleVarsWindow(cfg)}"
       >
+        ${this.topBlock.show()}
         ${children}
+        ${this.bottomBlock.show()}
       </div>
     `;
   }
@@ -281,14 +438,14 @@ export class htmlBlockWindow extends htmlBlock{
     return html`
       <div
         class = ${C.ESC_CLASS_COVER}
-        style = "${this.htmlStyle.defStyleVarsCover(cfg)}"
+        style = "${this.htmlStyles.defStyleVarsCover(cfg)}"
       >
         ${children}
       </div>
     `;
   }
   defineHtmlEntity(index,flatObj,children){
-    // TODO: somewhwre here also this.htmlStyle.defStyleVarsEntity() ??
+    // TODO: somewhwre here also this.htmlStyles.defStyleVarsEntity() ??
     const cfg=flatObj;
     this.topBlock = new htmlBlockTop(this.shutter,cfg);
     this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
@@ -296,11 +453,9 @@ export class htmlBlockWindow extends htmlBlock{
     return html`
       <div
         class = ${C.ESC_CLASS_ENTITY}
-        style = "${this.htmlStyle.defStyleVarsEntity(cfg)}"
+        style = "${this.htmlStyles.defStyleVarsEntity(cfg)}"
       >
-        ${this.topBlock.show()}
         ${this.middleBlock.show()}
-        ${this.bottomBlock.show()}
       </div>
     `;
   }
