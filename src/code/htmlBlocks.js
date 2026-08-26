@@ -138,6 +138,20 @@ export class htmlBlock
   partialActive(){
     return this.cfg.partial() !=C.SHUTTER_OPEN_PCT && this.cfg.partial() != C.SHUTTER_CLOSED_PCT;
   }
+  buildRenderRecursive(config, index, depth) {
+
+    if (depth >= htmlBlock.LEVELS.length) return nothing;
+
+    const {childKey,func} = htmlBlock.LEVELS[depth];
+    const cfg=config.cfg;
+
+
+    const children = childKey && Array.isArray(cfg[childKey])
+      ? cfg[childKey].map((childCfg, i) => this.buildRenderRecursive(childCfg, i, depth + 1))
+      : nothing;
+
+    return this[func](index, config,children);
+  }
 
   showTopBottomDiv(position){
     const shutter = this.shutter;
@@ -226,11 +240,11 @@ export class htmlBlockCard extends htmlBlock{
   }
   defineHtml(){
     if (!this.cfg || !this.shutter.hass || !this.shutter.initializeReady){
-      return html`
+      return this.setHtmlString(html`
        <ha-card>
           Waiting for Card to initialize...
        </ha-card>
-      `;
+      `);
     }
     this.showMessages = this.messageManager.countMessages() && this.shutter.inEditor();
     //this.shutterSeparateBlock= new HtmlBlocks.htmlBlockShutterSeparate(this.cardCfg,this.cardCfg.cfg);
@@ -255,8 +269,9 @@ export class htmlBlockCard extends htmlBlock{
     this.setHtmlString(htmlout);
   }
   htmlOutNew(){
+    const startLevel= 0; // start with covers, not card
     const htmlOut = html`
-      ${this.buildRender()}
+      ${this.buildRender(startLevel)}
     `;
     return htmlOut;
   }
@@ -285,29 +300,11 @@ export class htmlBlockCard extends htmlBlock{
       })}`;
     return htmlOut;
   }
-  buildRender() {
-    const htmlOut = html`${this.#buildLevel2(this.shutter.cardCfg,0, 0)}`;
+  buildRender(startLevel) {
+    const htmlOut = html`${this.buildRenderRecursive(this.shutter.cardCfg,0, startLevel)}`;
     return htmlOut;
   }
-  static #LEVELS = [
-      { childKey: C.WINDOWS_CONFIG,     func: "defineHtmlCard"  },
-      { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow"  },
-      { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover"   },
-      { childKey: "",                   func: "defineHtmlEntity"  },
-    ];
-  #buildLevel2(config, index, depth) {
 
-    if (depth >= htmlBlockCard.#LEVELS.length) return nothing;
-
-    const {childKey,func} = htmlBlockCard.#LEVELS[depth];
-    const cfg=config.cfg;
-
-    const children = childKey && Array.isArray(cfg[childKey])
-      ? cfg[childKey].map((childCfg, i) => this.#buildLevel2(childCfg, i, depth + 1))
-      : nothing;
-
-    return this[func](index, config,children);
-  }
   defineHtmlCard(index,flatObj,children){
     //return nothing;
     return html`${children}`;
@@ -373,8 +370,9 @@ export class htmlBlockWindow extends htmlBlock{
       `);
     }else{
       // New cfg with tree: card-windows[]-covers[]-entities[]
+      const startLevel= 1; // start with covers, not card
       const htmlOut = html`
-          ${this.buildRender()}
+          ${this.buildRender(startLevel)}
         `;
       this.setHtmlString(htmlOut);
     }
@@ -398,25 +396,11 @@ export class htmlBlockWindow extends htmlBlock{
     //}
   }
 // ============================================================
-  buildRender() {
-    const startLevel = 1; // Start at level 1 to skip the card level
-    const htmlOut = html`${this.#buildRenderRecursive(this.cfg,0,startLevel)}`;
+  buildRender(startLevel) {
+    const htmlOut = html`${this.buildRenderRecursive(this.cfg,0,startLevel)}`;
     return htmlOut;
   }
-  #buildRenderRecursive(config, index, depth) {
 
-    if (depth >= htmlBlock.LEVELS.length) return nothing;
-
-    const {childKey,func} = htmlBlock.LEVELS[depth];
-    const cfg=config.cfg;
-
-
-    const children = childKey && Array.isArray(cfg[childKey])
-      ? cfg[childKey].map((childCfg, i) => this.#buildRenderRecursive(childCfg, i, depth + 1))
-      : nothing;
-
-    return this[func](index, config,children);
-  }
   defineHtmlCard(index,flatObj,children){
     return html`${children}`;
   }

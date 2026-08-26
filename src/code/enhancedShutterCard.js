@@ -107,7 +107,7 @@ export class EnhancedShutterCardNew extends LitElement{
   }
   // ===================================
 
-  #buildLevel(levelIndex, rawParentConfig, id) {
+  #buildCfgRecursive(levelIndex, rawParentConfig, id) {
     /**
      * One entry per nesting level.
      * key   = the property name under which raw items live, and under which
@@ -147,7 +147,7 @@ export class EnhancedShutterCardNew extends LitElement{
       fullCfg.flatCfg = this.flatCfg;
 
       // 2. Recurse: try to build the next level using THIS raw item as parent.
-      const children = this.#buildLevel(levelIndex + 1, configItem, 0);
+      const children = this.#buildCfgRecursive(levelIndex + 1, configItem, 0);
       if (children) {
         const childKey = LEVELS[levelIndex + 1]?.key;
         fullCfg.cfg[childKey] = children;
@@ -168,7 +168,7 @@ export class EnhancedShutterCardNew extends LitElement{
       //  The only-one CardConfig in an array[0],
 
       const startConfig = { [C.CARD_CONFIG]: [this.config] };
-      this.cardCfg = this.#buildLevel(0, startConfig, 0)[0];
+      this.cardCfg = this.#buildCfgRecursive(0, startConfig, 0)[0];
 
       this.#includeGroupMembers();
 
