@@ -14,12 +14,7 @@ import {
 
 export class cfg{
   cfg={};
-  coverEntity=null;
   localize={};
-  subEntity={};
-  //group=null;
-  //id=null;
-  enhancedShutter=null;
 
   static hass =null;
 
@@ -37,8 +32,8 @@ export class cfg{
 
 
   static CFG_METHODS = {
-    buttonsPosition:          C.CONFIG_BUTTONS_POSITION,
-    centerClosing:            C.CONFIG_CENTER_CLOSING,
+    buttonsPosition:            C.CONFIG_BUTTONS_POSITION,
+    centerClosing:              C.CONFIG_CENTER_CLOSING,
     nDevices:                   C.CONFIG_NUMBER_DEVICES,
     supportedFeatures:          C.CONFIG_SUPPORTED_FEATURES,
     stacked:                    C.CONFIG_STACKED,
@@ -147,15 +142,15 @@ export class cfg{
         return; // this is the forEach loop, so continue to next iteration, so arrays windows[], covers[] and entities[] are not processed here, but in the next level of the config.
       }
       if (key === C.CONFIG_ENTITY_ID) {
-        this.setCoverEntity(this.hass,value);
+        this.setCoverEntity(value);
       }
       if (key === C.CONFIG_BATTERY_ENTITY_ID) {
         // this.batteryEntityId() is being defined ....
-        this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(this.hass,C.DEVICE_CLASS_BATTERY,value);
+        this.setSubEntity(C.DEVICE_CLASS_BATTERY, value);
       }
       if (key === C.CONFIG_SIGNAL_ENTITY_ID) {
         // this.batteryEntityId() is being defined ....
-        this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(this.hass,C.DEVICE_CLASS_SIGNAL,value);
+        this.setSubEntity(C.DEVICE_CLASS_SIGNAL, value);
       }
 
       this[key](value); // fill the cfg with the value,
@@ -208,8 +203,12 @@ export class cfg{
   getLocalize(text){
     return this.localize(text);
   }
-  setCoverEntity(hass,entityId){
-    this.coverEntity = entityId ? new haEntity(hass,entityId) : null;
+  setCoverEntity(entityId){
+    this.coverEntity = entityId ? new haEntity(this.hass,entityId) : null;
+  }
+  setSubEntity(deviceClass,entityId){
+    if (!this.subEntity) this.subEntity={};
+    this.subEntity[deviceClass] = new haSubEntity(this.hass,deviceClass,entityId);
   }
   updateCoverEntity(haEntity){
     console.log('cfg: updateCoverEntity: coverEntity updated from:', this.coverEntity, 'to:', haEntity);
@@ -230,16 +229,15 @@ export class cfg{
      return state;
   }
   getBatteryEntity(){
-    const entity = this.subEntity[C.DEVICE_CLASS_BATTERY]?.entity;
-    console_log('battery entity: ',entity);
-    //if (!entity || entity.getState() =="unavailable"){
-    //  debugger;
-    //}
+    const entity = this.getSubEntity(C.DEVICE_CLASS_BATTERY);
     return entity;
   }
-  // Get SignalInfo
   getSignalEntity(){
-    const entity = this.subEntity[C.DEVICE_CLASS_SIGNAL]?.entity;
+    const entity = this.getSubEntity(C.DEVICE_CLASS_SIGNAL);
+    return entity;
+  }
+  getSubEntity(deviceClass){
+    const entity = this.subEntity ? this.subEntity[deviceClass]?.entity : null;
     return entity;
   }
   getIconsActive(){
@@ -1020,7 +1018,12 @@ export class shutterCfg extends cfg{
     this.group(escConfig[C.CONFIG_GROUP]);
     this.id(escConfig[C.CONFIG_ID]);
 
-    this.setCoverEntity(cfg.hass,entityId);
+    this.setCoverEntity(entityId);
+
+    this.setSubEntity(C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
+    this.setSubEntity(C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
+    //this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(cfg.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
+    // this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(cfg.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
 
     // TODO: this is like fillCfg(), replace by it after checking the if's in fillCfg()
     Object.entries(escConfig).forEach( ([key, value]) => {
@@ -1085,9 +1088,6 @@ export class shutterCfg extends cfg{
 // =====================================================
 
     this.friendlyName(escConfig[C.CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || C.UNKNOWN);
-
-    this.subEntity[C.DEVICE_CLASS_BATTERY] = new haSubEntity(cfg.hass,C.DEVICE_CLASS_BATTERY,this.batteryEntityId());
-    this.subEntity[C.DEVICE_CLASS_SIGNAL]  = new haSubEntity(cfg.hass,C.DEVICE_CLASS_SIGNAL,this.signalEntityId());
 
     let base_height_px = escConfig[C.CONFIG_BASE_HEIGHT_PX];
     let resize_height_pct = escConfig[C.CONFIG_RESIZE_HEIGHT_PCT];

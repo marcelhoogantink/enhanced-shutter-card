@@ -36,10 +36,9 @@ export class htmlBlock
   constructor(shutter,cfg){
     //this.enhancedShutter=enhancedShutter;
     this.shutter = shutter;
-
-
     //this.cfg=shutter.cfg;
     this.cfg=cfg;
+
     //this.escImages= shutter.escImages ?? {};
     this.actualScreenPosition = shutter.actualScreenPosition;
     this.actualTiltPosition = shutter.actualTiltPosition;

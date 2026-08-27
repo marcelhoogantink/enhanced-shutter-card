@@ -1,25 +1,17 @@
-import {html,nothing} from './lit/lit-core.min.js';
 import * as C from './constants.js';
 import {
-  cfg,
-  cardCfg,
-  cardCfgNew,
   windowCfgNew,
-  coverCfgNew,
-  entityCfgNew,
-  shutterCfg,
 } from './cfg.js';
 
 export class htmlStyleVars{
 
-  constructor(enhancedShutter){
-    this.enhancedShutter=enhancedShutter;
-    this.cfg =enhancedShutter.cfg;
-    this.actualScreenPosition = enhancedShutter.actualScreenPosition;
-    this.actualShutterPosition = enhancedShutter.actualShutterPosition;
-    this.actualTiltPosition = enhancedShutter.actualTiltPosition;
-    //this.positionText =this.cfg.createPositionText(enhancedShutter.actualShutterPosition,this.actualTiltPosition);
-    this.escImages= enhancedShutter.escImages;
+  constructor(shutter,cfg){
+    this.enhancedShutter=shutter;
+    this.cfg =shutter.cfg;
+    this.actualScreenPosition = shutter.actualScreenPosition;
+    this.actualShutterPosition = shutter.actualShutterPosition; // not used yet, but could be used in the future for some other features
+    this.actualTiltPosition = shutter.actualTiltPosition;       // not used yet, but could be used in the future for some other features
+    this.escImages= shutter.escImages;
   }
 
   defStyleVarsAll(){
@@ -30,18 +22,20 @@ export class htmlStyleVars{
       // cfg = this.cfg.debugger;
     }
     const styleVars= 
-     this.defStyleVarsCard(cfg)+
      this.defStyleVarsWindow(cfg)+
      this.defStyleVarsCover(cfg)+
      this.defStyleVarsEntity(cfg);
     return styleVars;
   }
   defStyleVarsCard(cfg){
-    const card_vars = ``;
+    // TODO: change this
+    
+    const card_vars = `
+      --esc-card-flex-direction: ${this.enhancedShutterCard.getCardFlexDirection()};
+    `;
     return card_vars;
   }
   defStyleVarsWindow(cfg){
-    let cfg2 = this.cfg;
 
     const viewImage=this.escImages.getViewImageSrc(cfg.id());
     // solves #103 see other lines with shutterSlatImage
@@ -80,10 +74,6 @@ export class htmlStyleVars{
       --esc-slide-background-main-color: ${shutterSlatImage.includes('.') ? '' : `${shutterSlatImage}`};
       --esc-slide-background-edge-color: ${shutterBottomImage.includes('.') ? '' : `${shutterBottomImage}`};
 
-
-      --esc-top-right-color: ${cfg.signalIconColor()};
-      --esc-top-left-color: ${cfg.batteryIconColor()};
-
       --esc-top-icon-text-line-height: ${cfg.iconScalePercent()};
       --esc-top-icon-text-font-size: ${cfg.iconScalePercent()};
       --esc-text-scale: ${cfg.textScaleFactor()};
@@ -99,7 +89,6 @@ export class htmlStyleVars{
     return window_vars;
   }
   defStyleVarsCover(cfg){
-    let cfg2 = this.cfg;
 
     const cover_vars = `
       ${/* this is a working comment example */ ``}
@@ -137,17 +126,25 @@ export class htmlStyleVars{
       --esc-slider-writing-mode: ${this.enhancedShutter.sliderWritingMode()};                                              ${/* ESC_CLASS_SLIDER_CLASS */ ``}
       --esc-slider-direction: ${this.enhancedShutter.sliderDirection()};                                                   ${/* ESC_CLASS_SLIDER_CLASS */ ``}
 
+      --esc-top-right-color: ${
+        // TODO: this is not in windowCfgNew but in defStyleVarsCover
+        cfg.signalIconColor()
+      };
+      --esc-top-left-color: ${
+        // TODO: this is not in windowCfgNew but in defStyleVarsCover
+        cfg.batteryIconColor()
+      };
     `;
     return cover_vars;
   }
   defStyleVarsEntity(cfg){
-    let cfg2 = this.cfg;
     let stateForOverlay = cfg.getCoverEntity().getState() || C.UNAVAILABLE;
 
     const entity_vars = `
       --esc-movement-overlay-display: ${(stateForOverlay == C.SHUTTER_STATE_OPENING || stateForOverlay == C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
       --esc-movement-overlay-up-display: ${stateForOverlay == cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_OPENING) ? 'block' : C.NONE};
       --esc-movement-overlay-down-display: ${stateForOverlay == cfg.applyInvertForOverlayDisplay(C.SHUTTER_STATE_CLOSING) ? 'block' : C.NONE};
+
     `;
     return entity_vars;
   }

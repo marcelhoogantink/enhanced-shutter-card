@@ -154,6 +154,7 @@ export class EnhancedShutterCardNew extends LitElement{
       }
       return fullCfg;
     });
+
     this.flatCfg = structuredClone(flatCfgBackup);
     return cfg;
   }
@@ -178,7 +179,8 @@ export class EnhancedShutterCardNew extends LitElement{
       // classic config
       let id =0;
       const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
-      const windowsConfig =1;
+      this.cardCfgTest = this.convertClassicToNewConfig();
+      
       this.cardCfg = new cardCfg(cardConfig);
 
       this.config.entities.map((subConfig) => {
@@ -190,8 +192,12 @@ export class EnhancedShutterCardNew extends LitElement{
         };
         let shutterConfig = this.#buildConfig(cardConfig,newSubConfig);
         let cfg = new shutterCfg(shutterConfig)
-        let counter =1;
+
+        
+
+        // explode a group into members if the config is set to showGroupMembers and the entity is a group.
         if (cfg.showGroupMembers() && baseEntity?.isGroup()){
+          let counter =1;
           // get the entityId's from the group
           const groupEntityIds = baseEntity.getAttributes().entity_id || [];
           // filter (for security) the entity id's that exists
@@ -222,6 +228,38 @@ export class EnhancedShutterCardNew extends LitElement{
       let breakPoint; //old
     }
     return true;
+  }
+  convertClassicToNewConfig(){
+    let newConfigCard = {};
+    let newConfigWindows = {};
+    let newConfigCovers = {};
+    let newConfigEntities = {};
+    const config = this.config;
+    const card = C.CONFIG_DEFAULT_NEW[C.CARD_CONFIG];
+    const windows = C.CONFIG_DEFAULT_NEW[C.WINDOWS_CONFIG];
+    const covers = C.CONFIG_DEFAULT_NEW[C.COVERS_CONFIG];
+    const entities = C.CONFIG_DEFAULT_NEW[C.ENTITIES_CONFIG];
+    debugger;
+    for (const [key, value] of Object.entries(card)) {
+      console.log(`${key}: ${value}`);
+      newConfigCard[key] = config[key] ? config[key] : value;
+    }
+    for (const [key, value] of Object.entries(windows)) {
+      console.log(`${key}: ${value}`);
+      newConfigWindows[key] = config[key] ? config[key] : value;
+    }
+    for (const [key, value] of Object.entries(covers)) {
+      console.log(`${key}: ${value}`);
+      newConfigCovers[key] = config[key] ? config[key] : value;
+    }
+    for (const [key, value] of Object.entries(entities)) {
+      console.log(`${key}: ${value}`);
+      newConfigEntities[key] = config[key] ? config[key] : value;
+    }
+    debugger;
+    // if (key in card) {}   
+    return newConfigCard;
+
   }
 
   #includeGroupMembers(){
@@ -514,7 +552,8 @@ export class EnhancedShutterCardNew extends LitElement{
   }
   render()
   {
-    const action='test';
+    const action='test???';
+    // this.config is the original config from the user, this.cardCfg is the processed config with defaults and ids.
     const cardBlock = new HtmlBlocks.htmlBlockCard(this,this.config,action);
     return cardBlock.show();  
   }
