@@ -215,6 +215,9 @@ export class cfg{
     this.coverEntity = haEntity;
   }
   getCoverEntity(){
+    if (!this.coverEntity) {
+      debugger;
+    }
     return this.coverEntity;
   }
   getCoverState(haEntity=this.getCoverEntity()){

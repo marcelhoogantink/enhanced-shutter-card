@@ -152,7 +152,7 @@ export class htmlBlock
     return this[func](index, config,children);
   }
 
-  showTopBottomDiv(position){
+  showTopOrBottomDiv(position){
     const shutter = this.shutter;
     let cfg = this.cfg;
     if (cfg instanceof windowCfgNew){
@@ -702,7 +702,7 @@ export class htmlBlockTop extends htmlBlock{
     super(shutter,cfg);
   }
   defineHtml(){
-    this.setHtmlString(this.showTopBottomDiv(C.TOP));
+    this.setHtmlString(this.showTopOrBottomDiv(C.TOP));
   }
   defineSize(){
     let xy = this.sizeTopBottomDiv(C.TOP);
@@ -786,7 +786,7 @@ export class htmlBlockBottom extends htmlBlock{
     super(shutter,cfg);
   }
   defineHtml(){
-    this.setHtmlString(this.showTopBottomDiv(C.BOTTOM));
+    this.setHtmlString(this.showTopOrBottomDiv(C.BOTTOM));
   }
   defineSize(){
     let xy = this.sizeTopBottomDiv(C.BOTTOM);
@@ -1150,7 +1150,9 @@ export class htmlBlockTiltSection extends htmlBlock{
         const tiltSliderBlock= new htmlBlockTiltSlider(this.shutter,cfg);
         const tiltButtonsBlock = new htmlBlockTiltButtons(this.shutter,cfg);
         return html`
-            ${cfg.showTiltButtonBlock() ? tiltButtonsBlock.show() : nothing}
+            ${cfg.showTiltButtonBlock() 
+              ? tiltButtonsBlock.show() 
+              : nothing}
             ${cfg.showTiltSliderBlock() && cfg.isCoverFeatureActive(C.ESC_FEATURE_SET_TILT_POSITION)
               ? tiltSliderBlock.show()
               :nothing}

@@ -164,11 +164,12 @@ export class EnhancedShutterCardNew extends LitElement{
 
     if (this.newConfig)
     {
-          // New config with tree
-      // startConfig is for starting the recursive #buildLevel() with a correct initial value:
-      //  The only-one CardConfig in an array[0],
+      // New config with tree
 
+      // startConfig is for starting the recursive #buildCfgRecursive() with a corrected initial value:
+      // The only-one CardConfig in an array[0],
       const startConfig = { [C.CARD_CONFIG]: [this.config] };
+
       this.cardCfg = this.#buildCfgRecursive(0, startConfig, 0)[0];
 
       this.#includeGroupMembers();
@@ -179,7 +180,7 @@ export class EnhancedShutterCardNew extends LitElement{
       // classic config
       let id =0;
       const cardConfig = this.#buildConfig(C.CONFIG_DEFAULT,this.config);
-      this.cardCfgTest = this.convertClassicToNewConfig();
+      // this.cardCfgTest = this.convertClassicToNewConfig();
       
       this.cardCfg = new cardCfg(cardConfig);
 
