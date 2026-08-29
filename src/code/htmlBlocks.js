@@ -278,6 +278,7 @@ export class htmlBlockCard extends htmlBlock{
     const htmlOut = html`
       ${this.shutter.shutterCfgs.map(cfg => {
         // update the live states and attributes
+        //console.log(`htmlOutOld:`,cfg.getCoverState());
         return html`
           <div class="${C.ESC_CLASS_SHUTTER_FLEX}">
             <enhanced-shutter
@@ -1224,6 +1225,7 @@ export class htmlBlockCentralWindow extends htmlBlock{
     this.setXySize(xy);
   }
   showWindowImage(){
+    // console.log("showWindowImage",this.escImages.getWindowImageSrc(this.cfg.id()), this.cfg.id());
     return this.escImages.getWindowImageSrc(this.cfg.id())
       ? html`<img src= "${this.escImages.getWindowImageSrc(this.cfg.id())}">`
       : nothing;

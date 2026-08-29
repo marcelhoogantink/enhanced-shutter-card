@@ -48,7 +48,6 @@ export class EnhancedShutterWindow extends LitElement
   constructor(){
     super(); //  mandetory by Lit-element
 
-
     this.screenPosition=-1;
     this.actualScreenPosition=-1; // position on the computerscreen
     this.actualTiltPosition=-1; // real tilt position
@@ -60,9 +59,10 @@ export class EnhancedShutterWindow extends LitElement
   shouldUpdate(changedProperties)
   {
     let doUpdate =false;
-    //debugger; // test cfg here...
+    //console.log(`Window->shouldUpdate: this.react_ShutterPosition: ${this.react_ShutterPosition}, this.cfg.friendlyName(): ${this.cfg.friendlyName()}`);
+//debugger; // test cfg here...
     changedProperties.forEach((oldValue, propName) => { // eslint-disable-line no-unused-vars
-      console.log(`  Cover shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}, name: ${this.cfg.friendlyName()}`);
+      //console.log(`  Window shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}, name: ${this.cfg.friendlyName()}`);
       const cfgWindow = this.cfg;
 
       if (cfgWindow instanceof windowCfgNew){
@@ -73,13 +73,12 @@ export class EnhancedShutterWindow extends LitElement
             debugger;
           }
           for (const cfgEntity of cfgCover.cfg.entities) {
-            const coverEntityId = cfgEntity.entityId();
             if (cfgEntity.entityId()) {
               //debugger;
-              doUpdate = this.checkShutterState(cfgEntity);
+              doUpdate = this.checkShutterState(cfgEntity,doUpdate);
               doUpdate = this.checkSubEntityStates(cfgEntity,doUpdate);
               if (doUpdate){
-                break outer;
+                break outer; // break out of the labeled outer: loop
               }
             }
           }
@@ -89,11 +88,11 @@ export class EnhancedShutterWindow extends LitElement
     doUpdate =(this.react_InitializeReady) ? true : doUpdate;
     return doUpdate;
   }
-  checkShutterState(cfg)
+  // TODO: double code in EnhancedShutterCardNew and EnhancedShutterWindow, should be refactored to one function  (in cfg.js ?)
+  checkShutterState(cfg,doUpdate)
   {
-    let doUpdate=false;
     const coverEntityId = cfg.entityId();
-    const currentShutterEntity =cfg.getCoverEntity();
+    //console.log(`checkShutterState from Window: this.react_ShutterPosition: ${this.react_ShutterPosition}, cfg.friendlyName(): ${cfg.friendlyName()}`);
     let shutterStateOld= cfg.getCoverState();
     // get new state
     const liveCoverEntity = new haEntity(this.hass,coverEntityId);
@@ -104,6 +103,7 @@ export class EnhancedShutterWindow extends LitElement
     }
     return doUpdate;
   }
+  // TODO: double code in EnhancedShutterCardNew and EnhancedShutterWindow, should be refactored to one function  (in cfg.js ?)
   checkSubEntityStates(cfg,doUpdate)
   {
     for (let type of C.DEVICES_CLASSES_SUB_ENTITIES) {

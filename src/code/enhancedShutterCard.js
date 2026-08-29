@@ -138,8 +138,8 @@ export class EnhancedShutterCardNew extends LitElement{
 
     const cfg = configItems.map((configItem) => {
       // 1. Merge this raw item with its defaults and a fresh id.
-      // const mergedConfig = { ...configItem, [C.CONFIG_ID]: id++ };
-      const mergedConfig = { ...configItem};
+      const mergedConfig = { ...configItem, [C.CONFIG_ID]: id++ };
+      // const mergedConfig = { ...configItem};
       const config = this.#buildConfig(baseConfig, mergedConfig);
       const fullCfg = new Class(config);
 
@@ -239,7 +239,7 @@ export class EnhancedShutterCardNew extends LitElement{
     const windows = C.CONFIG_DEFAULT_NEW[C.WINDOWS_CONFIG];
     const covers = C.CONFIG_DEFAULT_NEW[C.COVERS_CONFIG];
     const entities = C.CONFIG_DEFAULT_NEW[C.ENTITIES_CONFIG];
-    debugger;
+    //debugger;
     for (const [key, value] of Object.entries(card)) {
       console.log(`${key}: ${value}`);
       newConfigCard[key] = config[key] ? config[key] : value;
@@ -256,7 +256,7 @@ export class EnhancedShutterCardNew extends LitElement{
       console.log(`${key}: ${value}`);
       newConfigEntities[key] = config[key] ? config[key] : value;
     }
-    debugger;
+    //debugger;
     // if (key in card) {}   
     return newConfigCard;
 
@@ -453,7 +453,7 @@ export class EnhancedShutterCardNew extends LitElement{
     let doUpdate =false;
 
     changedProperties.forEach((oldValue, propName) => {
-      console_log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}, title: ${this.cardCfg?.title()}`);
+      //console.log(`Card shouldUpdate, Property [${propName}] changed. oldValue: ${oldValue} newValue: ${this[propName]}, title: ${this.cardCfg?.title()}`);
       switch (propName){
         case ("initializeReady"):
           if (this.initializeReady){
@@ -463,6 +463,7 @@ export class EnhancedShutterCardNew extends LitElement{
         case 'hass':
           /* On hass update, check if there is a cover change */
           if (this.newConfig){
+            // new
             const card = this.cardCfg;
 
             outer: // label for break outer, see below:
@@ -475,23 +476,23 @@ export class EnhancedShutterCardNew extends LitElement{
                   debugger;
                 }
                 for (const cfgEntity of cfgCover.cfg.entities) {
-                  const coverEntityId = cfgEntity.entityId();
                   if (cfgEntity.entityId()) {
                     //debugger;
-                    doUpdate = this.checkShutterState(cfgEntity);
+                    doUpdate = this.checkShutterState(cfgEntity,doUpdate);
                     doUpdate = this.checkSubEntityStates(cfgEntity,doUpdate);
                     if (doUpdate){
-                      break outer;
+                      break outer; // break out of the labeled outer: loop
                     }
                   }
                 }
               }
             }
           }else{
+            // old
             this.shutterCfgs.forEach(cfg =>{
               if (cfg.entityId()) {
                 // get previous state
-                doUpdate = this.checkShutterState(cfg);
+                doUpdate = this.checkShutterState(cfg,doUpdate);
                 doUpdate = this.checkSubEntityStates(cfg,doUpdate);
               }
             });
@@ -502,13 +503,15 @@ export class EnhancedShutterCardNew extends LitElement{
           if (oldValue !== undefined) doUpdate = true;
       }
     });
+    //console.log(`Card shouldUpdate End,doUpdate: ${doUpdate}, title: ${this.cardCfg?.title()}`);
     return doUpdate;
   }
-  checkShutterState(cfg)
+  // TODO: double code in EnhancedShutterCardNew and EnhancedShutterWindow, should be refactored to one function  (in cfg.js ?)
+  checkShutterState(cfg,doUpdate)
   {
-    let doUpdate=false;
     const coverEntityId = cfg.entityId();
     const currentShutterEntity =cfg.getCoverEntity();
+    //console.log(`checkShutterState form Card: this.react_ShutterPosition: ${this.react_ShutterPosition}, cfg.friendlyName(): ${cfg.friendlyName()}`);
     let shutterStateOld= cfg.getCoverState();
     // get new state
     const liveCoverEntity = new haEntity(this.hass,coverEntityId);
@@ -519,6 +522,7 @@ export class EnhancedShutterCardNew extends LitElement{
     }
     return doUpdate;
   }
+  // TODO: double code in EnhancedShutterCardNew and EnhancedShutterWindow, should be refactored to one function  (in cfg.js ?)
   checkSubEntityStates(cfg,doUpdate)
   {
     for (let type of C.DEVICES_CLASSES_SUB_ENTITIES) {

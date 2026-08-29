@@ -219,7 +219,7 @@ export class cfg{
   }
   getCoverState(haEntity=this.getCoverEntity()){
     if (!haEntity) debugger;
-
+    // console.log('cfg: getCoverState: haEntity:', haEntity, 'state:', haEntity?.getState(), 'position:', haEntity?.getCurrentPosition(), 'tilt:', haEntity?.getCurrentTiltPosition());
 
      let coverState = `${haEntity.getState()}-${haEntity.getCurrentPosition()}-${haEntity.getCurrentTiltPosition()}`;
      return coverState;
