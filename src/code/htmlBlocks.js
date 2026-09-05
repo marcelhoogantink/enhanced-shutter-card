@@ -20,13 +20,6 @@ export class htmlBlock
   #xySize = new xyPair();
   #htmlString = ''
 
-  static LEVELS = [
-      { childKey: C.WINDOWS_CONFIG,     func: "defineHtmlCard"  },
-      { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow"  },
-      { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover" },
-      { childKey: "",                   func: "defineHtmlEntity"  },
-    ];
-
   static escImages =null;
 
   static setImages(escImages) {
@@ -73,19 +66,19 @@ export class htmlBlock
     this.setHtmlString(nothing);
   }
   defineHtmlCard(index,flatObj,children){
-    debugger;
+    //debugger;
     return nothing;
   }
   defineHtmlWindow(index,flatObj,children){
-    debugger;
+    //debugger;
     return nothing;
   }
   defineHtmlCover(index,flatObj,children){
-    debugger;
+    //debugger;
     return nothing;
   }
   defineHtmlEntity(index,flatObj,children){
-    debugger;
+    //debugger;
     return nothing;
   }
   setHtmlString(htmlString){
@@ -137,6 +130,26 @@ export class htmlBlock
   partialActive(){
     return this.cfg.partial() !=C.SHUTTER_OPEN_PCT && this.cfg.partial() != C.SHUTTER_CLOSED_PCT;
   }
+  static LEVELS = [
+    { childKey: C.WINDOWS_CONFIG,     func: "defineHtmlCard"  },
+    { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow"  },
+    { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover" },
+    { childKey: "",                   func: "defineHtmlEntity"  },
+  ];
+
+  buildRender(startLevel) {
+    const htmlOut = html`${this.buildRenderRecursive(this.cfg,0,startLevel)}`;
+    return htmlOut;
+  }
+  buildRenderCard(startLevel) {
+    const htmlOut = html`${this.buildRenderRecursive(this.shutter.cardCfg,0, startLevel)}`;
+    return htmlOut;
+  }
+  buildRenderWindow(startLevel) {
+    const htmlOut = html`${this.buildRenderRecursive(this.cfg,0,startLevel)}`;
+    return htmlOut;
+  }
+
   buildRenderRecursive(config, index, depth) {
 
     if (depth >= htmlBlock.LEVELS.length) return nothing;
@@ -144,7 +157,7 @@ export class htmlBlock
     const {childKey,func} = htmlBlock.LEVELS[depth];
     const cfg=config.cfg;
 
-
+    // only recurse when there is a childKey and it is an array, otherwise return nothing
     const children = childKey && Array.isArray(cfg[childKey])
       ? cfg[childKey].map((childCfg, i) => this.buildRenderRecursive(childCfg, i, depth + 1))
       : nothing;
@@ -154,36 +167,25 @@ export class htmlBlock
 
   showTopOrBottomDiv(position){
     const shutter = this.shutter;
-    let cfg = this.cfg;
-    if (cfg instanceof windowCfgNew){
-       //debugger;
-       cfg = cfg.cfg.covers[0].cfg.entities; // TODO: works for now, but for just 1 cover... not for two or more defined coverd
-    }
-    else if (cfg instanceof coverCfgNew){
-       //debugger;
-       cfg = cfg.cfg.entities;
-    }
-    else if (cfg instanceof entityCfgNew){
-       //debugger;
-       cfg = [cfg]; // OK .....
+    let htmlOut;
+    if (this.cfg instanceof shutterCfg){
+      let cfg2 = this.cfg;
+      const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg2);
+      const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg2);
+      const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg2);
+      htmlOut = html`
+        <div class="${C.ESC_CLASS_TOP_BOTTOM}">
+          ${position == cfg2.iconsPosition() ? batteryIconBlock.show() : nothing}
+          ${nameAndStateBlock.show(position)}
+          ${position == cfg2.iconsPosition() ? signalIconBlock.show() : nothing}
+        </div>
+      `;
     }else{
-       cfg = [cfg]; // classic flat shutterCfg
+      let cfg = this.cfg;
+      const startLevel= 2; // start with covers, not card
+      htmlOut = nothing;
+      //htmlOut = this.buildRender(startLevel);
     }
-
-    const htmlOut = html`
-      ${cfg.map(cfg => {
-        const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg);
-        const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg);
-        const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg);
-        return html`
-          <div class="${C.ESC_CLASS_TOP_BOTTOM}">
-            ${position == this.cfg.iconsPosition() ? batteryIconBlock.show() : nothing}
-            ${nameAndStateBlock.show(position)}
-            ${position == this.cfg.iconsPosition() ? signalIconBlock.show() : nothing}
-          </div>
-       `;
-      })}
-    `;
     return htmlOut;
   }
   sizeTopBottomDiv(position){
@@ -270,7 +272,7 @@ export class htmlBlockCard extends htmlBlock{
   htmlOutNew(){
     const startLevel= 0; // start with covers, not card
     const htmlOut = html`
-      ${this.buildRender(startLevel)}
+      ${this.buildRenderCard(startLevel)}
     `;
     return htmlOut;
   }
@@ -298,10 +300,6 @@ export class htmlBlockCard extends htmlBlock{
           ${this.shutterSeparateBlock.show()}
         `;
       })}`;
-    return htmlOut;
-  }
-  buildRender(startLevel) {
-    const htmlOut = html`${this.buildRenderRecursive(this.shutter.cardCfg,0, startLevel)}`;
     return htmlOut;
   }
 
@@ -353,12 +351,14 @@ export class htmlBlockWindow extends htmlBlock{
 
   defineHtml(){
 
+    let htmlOut;
+
     if (this.cfg instanceof shutterCfg){
       // Old cfg
       this.topBlock = new htmlBlockTop(this.shutter,this.cfg);
       this.middleBlock = new htmlBlockMiddle(this.shutter,this.cfg);
       this.bottomBlock = new htmlBlockBottom(this.shutter,this.cfg);
-      this.setHtmlString(html`
+      htmlOut=html`
         <div
           class=${C.ESC_CLASS_SHUTTER}
           style = "${this.htmlStyles.defStyleVarsAll()}"
@@ -367,15 +367,15 @@ export class htmlBlockWindow extends htmlBlock{
         ${this.middleBlock.show()}
         ${this.bottomBlock.show()}
         </div>
-      `);
+      `;
     }else{
       // New cfg with tree: card-windows[]-covers[]-entities[]
-      const startLevel= 1; // start with covers, not card
-      const htmlOut = html`
-          ${this.buildRender(startLevel)}
-        `;
-      this.setHtmlString(htmlOut);
+      const startLevel= 1; // start with window, not card
+      htmlOut = html`
+          ${this.buildRenderWindow(startLevel)}
+      `;
     }
+    this.setHtmlString(htmlOut);
   }
   defineSize(){
     //if (this.cfg instanceof shutterCfg)
@@ -396,50 +396,49 @@ export class htmlBlockWindow extends htmlBlock{
     //}
   }
 // ============================================================
-  buildRender(startLevel) {
-    const htmlOut = html`${this.buildRenderRecursive(this.cfg,0,startLevel)}`;
-    return htmlOut;
-  }
 
-  defineHtmlCard(index,flatObj,children){
+  defineHtmlCard(index,config,children){
     return html`${children}`;
   }
-  defineHtmlWindow(index,flatObj,children){
-    const cfg=flatObj;
+  defineHtmlWindow(index,config,children){
+    const cfg=config;
+    this.topBlock = new htmlBlockTop(this.shutter,cfg);
+    this.middleBlock = new htmlBlockMiddle(this.shutter,cfg); // TODO: does not work in the tree-cfg; cfg[] is array here ...
+    this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
     return html`
       <div
         class=${C.ESC_CLASS_WINDOW}
         style = "${this.htmlStyles.defStyleVarsWindow(cfg)}"
       >
         ${this.topBlock.show()}
-        ${children}
+        ${this.middleBlock.show()}
         ${this.bottomBlock.show()}
       </div>
     `;
   }
-  defineHtmlCover(index,flatObj,children){
-    const cfg=flatObj;
+  defineHtmlCover2(index,config,children){
+    const cfg=config;
+    this.topBlock = new htmlBlockTop(this.shutter,cfg);
+    this.middleBlock = new htmlBlockMiddle(this.shutter,cfg); // TODO: does not work in the tree-cfg; cfg[] is array here ...
+    this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
     return html`
       <div
         class = ${C.ESC_CLASS_COVER}
         style = "${this.htmlStyles.defStyleVarsCover(cfg)}"
       >
+        ${this.middleBlock.show()}
         ${children}
       </div>
     `;
   }
-  defineHtmlEntity(index,flatObj,children){
-    // TODO: somewhwre here also this.htmlStyles.defStyleVarsEntity() ??
-    const cfg=flatObj;
-    this.topBlock = new htmlBlockTop(this.shutter,cfg);
-    this.bottomBlock = new htmlBlockBottom(this.shutter,cfg);
-    this.middleBlock = new htmlBlockMiddle(this.shutter,cfg); // TODO: does not work in the tree-cfg; cfg[] is array here ...
+  defineHtmlEntity2(index,config,children){
+    // TODO: somewhere here also this.htmlStyles.defStyleVarsEntity() ??
+    const cfg=config;
     return html`
       <div
         class = ${C.ESC_CLASS_ENTITY}
         style = "${this.htmlStyles.defStyleVarsEntity(cfg)}"
       >
-        ${this.middleBlock.show()}
       </div>
     `;
   }
@@ -699,6 +698,20 @@ export class htmlBlockState extends htmlBlock{
 }
 export class htmlBlockTop extends htmlBlock{
   constructor(shutter,cfg){
+    if (cfg instanceof windowCfgNew){
+       //debugger;
+       cfg = cfg.cfg.covers; 
+    }
+    else if (cfg instanceof coverCfgNew){
+       debugger;
+       cfg = cfg.cfg.entities;
+    }
+    else if (cfg instanceof entityCfgNew){
+       debugger;
+       cfg = [cfg]; // OK .....
+    }else{
+       cfg = cfg; // classic flat shutterCfg
+    }
     super(shutter,cfg);
   }
   defineHtml(){

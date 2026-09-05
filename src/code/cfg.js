@@ -111,7 +111,10 @@ export class cfg{
   };
 
   static {
+    
     for (const [method, key] of Object.entries(cfg.CFG_METHODS)) {
+      // create for both the method and the key a function in the prototype of cfg, 
+      // so that it can be called as cfg.method() or cfg.key()
       cfg.prototype[method] = function (value = null) {
         return this.getCfg(key, value);
       };
@@ -164,12 +167,14 @@ export class cfg{
 
     //if (key === C.CONFIG_BUTTON_OPENED_HIDE_STATES) debugger;
     if (value!== null && this.cfg[key]!=value){
+      // if value-> update cfg[key] and flatCfg[key] (if it exists)
       this.cfg[key]= value;
       if (this.getFlatCfg(key)) {
         this.setFlatCfg(key,value);
         return this.getFlatCfg(key);
       }
     }
+    // when cfg[key] is undefined, return flatCfg[key] 
     if (this.cfg[key] === undefined) {
         return this.getFlatCfg(key);
     }
@@ -216,7 +221,7 @@ export class cfg{
   }
   getCoverEntity(){
     if (!this.coverEntity) {
-      debugger;
+      // debugger;
     }
     return this.coverEntity;
   }
@@ -226,6 +231,14 @@ export class cfg{
 
      let coverState = `${haEntity.getState()}-${haEntity.getCurrentPosition()}-${haEntity.getCurrentTiltPosition()}`;
      return coverState;
+  }
+  getCoverPosition(haEntity=this.getCoverEntity()){
+    if (!haEntity) debugger;
+    return haEntity.getCurrentPosition();
+  }
+  getCoverTiltPosition(haEntity=this.getCoverEntity()){
+    if (!haEntity) debugger;
+    return haEntity.getCurrentTiltPosition();
   }
   getState(haEntity){
      const state = C.NOT_KNOWN.includes(haEntity?.getState()) ? C.UNAVAILABLE : haEntity.getState();
@@ -577,7 +590,7 @@ export class cfg{
     // see for position and state definition:
     //  https://www.home-assistant.io/integrations/cover.template/#combining-value_template-and-position_template
 
-    let state = this.getCoverEntity().getState() || C.UNAVAILABLE;
+    let state = this.getCoverEntity()?.getState() || C.UNAVAILABLE;
     let escState;
     if (state !== C.SHUTTER_STATE_OPENING && state !== C.SHUTTER_STATE_CLOSING) {
       //  shutter is not moving,

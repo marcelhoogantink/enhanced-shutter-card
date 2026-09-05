@@ -140,6 +140,7 @@ export class EnhancedShutterCardNew extends LitElement{
       // 1. Merge this raw item with its defaults and a fresh id.
       const mergedConfig = { ...configItem, [C.CONFIG_ID]: id++ };
       // const mergedConfig = { ...configItem};
+      // config = the full config for this item, with defaults, the input form the config and An id.
       const config = this.#buildConfig(baseConfig, mergedConfig);
       const fullCfg = new Class(config);
 
@@ -170,6 +171,7 @@ export class EnhancedShutterCardNew extends LitElement{
       // The only-one CardConfig in an array[0],
       const startConfig = { [C.CARD_CONFIG]: [this.config] };
 
+      // cardCfg is the full config for the card, with defaults, the input from the config and An id.
       this.cardCfg = this.#buildCfgRecursive(0, startConfig, 0)[0];
 
       this.#includeGroupMembers();
@@ -863,7 +865,8 @@ export class EnhancedShutterCardNew extends LitElement{
           const card = this.cardCfg;
           let separate=false;
           for (const window of card.cfg.windows) {
-            let cfg = window.cfg.covers[0].cfg.entities[0]; // TODO: too simple here ..I think ...
+            // let cfg = window.cfg.covers[0].cfg.entities[0]; // TODO: too simple here ..I think ...
+            let cfg = window;
             let block = {
               cfg: cfg, // TODO: too simple here .....??
               //cfg: window,
