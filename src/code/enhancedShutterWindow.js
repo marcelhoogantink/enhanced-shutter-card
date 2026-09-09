@@ -52,7 +52,7 @@ export class EnhancedShutterWindow extends LitElement
     this.actualScreenPosition=-1; // position on the computerscreen
     this.actualTiltPosition=-1; // real tilt position
     this.positionText ='';
-    this.action = '#';
+    this[C.CONFIG_ACTION] = '#';
 
     this[C.ESC_CLASS_SELECTOR]=null;
   }
@@ -154,25 +154,25 @@ export class EnhancedShutterWindow extends LitElement
       console_log(`${this.cfg.friendlyName()}: Shutter Update, Property ${propName} changed. oldValue: ${oldValue}; new: ${this[propName]}`);
     });
     */
-    this.action='cover-update';
+    this[C.CONFIG_ACTION] = 'cover-update';
   }
 
   render()
   {
     //let entityId = this.cfg.entityId();
     //let positionText;
-    //console.log('action: ',this.action);
-    if (this.action=='user-drag-picker'){
+    //console.log('action: ',this[C.CONFIG_ACTION]);
+    if (this[C.CONFIG_ACTION]=='user-drag-picker'){
       // position from screen-dragging shown
       this.actualScreenPosition = this.screenPosition;  // old
       this.actualShutterPosition = this.react_ShutterPosition;
       this.actualTiltPosition = this.cfg.currentBaseTiltPosition();
-    }else if (this.action=='user-drag-slider'){
+    }else if (this[C.CONFIG_ACTION]=='user-drag-slider'){
       // position from screen-dragging of the shown slider
       this.actualScreenPosition =  this.defScreenPositionFromCurrentPosition(this.react_ShutterPosition);
       this.actualShutterPosition = this.react_ShutterPosition;
       this.actualTiltPosition = this.cfg.currentBaseTiltPosition();
-    }else if (this.action=='user-drag-tilt'){
+    }else if (this[C.CONFIG_ACTION]=='user-drag-tilt'){
       // tilt position from slider-dragging shown
       this.actualScreenPosition =  this.defScreenPositionFromCurrentPosition(); //old
       this.actualShutterPosition = this.cfg.currentDevicePosition();
@@ -185,11 +185,11 @@ export class EnhancedShutterWindow extends LitElement
     }
     this.react_TiltPosition = this.actualTiltPosition; // TODO: logical not needed, but actual it does: check
     this.react_ShutterPosition = this.actualShutterPosition;
-    //console_log(`Render Cover ${this.cfg.friendlyName()}, action: ${this.action}, actualScreenPosition: ${this.actualScreenPosition}, actualShutterPosition: ${this.actualShutterPosition}, actualTiltPosition: ${this.actualTiltPosition}`);
+    //console_log(`Render Cover ${this.cfg.friendlyName()}, action: ${this[C.CONFIG_ACTION]}, actualScreenPosition: ${this.actualScreenPosition}, actualShutterPosition: ${this.actualShutterPosition}, actualTiltPosition: ${this.actualTiltPosition}`);
     //console_log(`${this.cfg.friendlyName()} HtmLblock for Show`);
 
 
-    const windowBlock = new HtmlBlocks.htmlBlockWindow(this,this.cfg,this.action);
+    const windowBlock = new HtmlBlocks.htmlBlockWindow(this,this.cfg,this[C.CONFIG_ACTION]);
     return windowBlock.show();
   }
   firstUpdated() {
@@ -277,7 +277,7 @@ export class EnhancedShutterWindow extends LitElement
     if (this.cfg.showOpenCloseSliderBlock()){
       if (this.openCloseSlider) this.openCloseSlider.value = this.react_ShutterPosition; // TODO !!!!! Special ..Bug ??...
     }
-    this.action='cover-updated';
+    this[C.CONFIG_ACTION]='cover-updated';
   }
 
 
@@ -650,7 +650,7 @@ export class EnhancedShutterWindow extends LitElement
   }
   doOnclick(command, position=null) {
 
-    this.action='user-pick-on-click';
+    this[C.CONFIG_ACTION]='user-pick-on-click';
     // for New cfg: multiple covers... 
     let entityId= this.cfg.entityId();
 
@@ -741,19 +741,19 @@ export class EnhancedShutterWindow extends LitElement
       //Disable default drag event
       event.preventDefault();
     }
-    this.action='user-drag-picker';
+    this[C.CONFIG_ACTION]='user-drag-picker';
     this.getBasePickPoint(event);
     this.manageEvents(C.ADD_EVENT, C.MOUSEMOVE, this, this.mouseMoveOpenClosePicker);
     this.manageEvents(C.ADD_EVENT, C.MOUSEUP, window, this.mouseUpOpenClosePicker);
     //console.log('mouseDownOpenClosePicker:',this.react_ShutterPosition,this.positionText);
   };
   mouseDownTiltSlider = () => {
-    this.action='user-drag-tilt';
+    this[C.CONFIG_ACTION]='user-drag-tilt';
     this.manageEvents(C.ADD_EVENT, C.MOUSEMOVE, this, this.mouseMoveTiltSlider);
     this.manageEvents(C.ADD_EVENT, C.MOUSEUP, window, this.mouseUpTiltSlider);
   }
   mouseDownOpenCloseSlider = () => {
-    this.action='user-drag-slider';
+    this[C.CONFIG_ACTION]='user-drag-slider';
     this.manageEvents(C.ADD_EVENT, C.MOUSEMOVE, this, this.mouseMoveOpenCloseSlider);
     this.manageEvents(C.ADD_EVENT, C.MOUSEUP, window, this.mouseUpOpenCloseSlider);
   }
@@ -763,7 +763,7 @@ export class EnhancedShutterWindow extends LitElement
   mouseMoveOpenClosePicker = (event) =>
   {
     if (event.pageY === undefined) return;
-    this.action='user-drag-picker';
+    this[C.CONFIG_ACTION]='user-drag-picker';
     this.screenPosition = this.getScreenPosFromPickPoint(event); //old
     const tiltPosition = this.cfg.currentDeviceTiltPosition();
     //console.log('mouseMoveOpenClosePicker1:',this.react_ShutterPosition,tiltPosition,this.positionText);
@@ -772,14 +772,14 @@ export class EnhancedShutterWindow extends LitElement
     //console.log('mouseMoveOpenClosePicker2:',this.react_ShutterPosition,tiltPosition,this.positionText);
   };
   mouseMoveTiltSlider = (event) => { // mouseMoveTilt
-    this.action='user-drag-tilt';
+    this[C.CONFIG_ACTION]='user-drag-tilt';
     this.react_TiltPosition = this.getTiltOnScreenPosition(event);
     const shutterPosition = this.cfg.currentDevicePosition();
     this.positionText = this.cfg.createPositionText(shutterPosition,this.react_TiltPosition);
     //console.log('mouseMoveTiltSlider:',shutterPosition,this.react_TiltPosition,this.positionText);
   }
   mouseMoveOpenCloseSlider = (event) => { // mouseMoveTilt
-    this.action='user-drag-slider';
+    this[C.CONFIG_ACTION]='user-drag-slider';
     this.react_ShutterPosition = this.getOpenCloseOnScreenPosition(event); // TODO
     const tiltPosition = this.cfg.currentDeviceTiltPosition();
     this.positionText = this.cfg.createPositionText(this.react_ShutterPosition,tiltPosition);
@@ -790,14 +790,14 @@ export class EnhancedShutterWindow extends LitElement
  */
 
   mouseUpTiltSlider = (event) => {
-    this.action='user-drag-tilt';
+    this[C.CONFIG_ACTION]='user-drag-tilt';
     this.manageEvents(C.REMOVE_EVENT, C.MOUSEMOVE, this, this.mouseMoveTiltSlider);
     this.manageEvents(C.REMOVE_EVENT, C.MOUSEUP, window, this.mouseUpTiltSlider);
     this.react_TiltPosition = this.getTiltOnScreenPosition(event)
     this.sendTilt(this.react_TiltPosition);
   }
   mouseUpOpenCloseSlider = (event) => {
-    this.action='user-drag-slider';
+    this[C.CONFIG_ACTION]='user-drag-slider';
     this.manageEvents(C.REMOVE_EVENT, C.MOUSEMOVE, this, this.mouseMoveOpenCloseSlider);
     this.manageEvents(C.REMOVE_EVENT, C.MOUSEUP, window, this.mouseUpOpenCloseSlider);
     this.react_ShutterPosition =  this.getOpenCloseOnScreenPosition(event);
@@ -805,7 +805,7 @@ export class EnhancedShutterWindow extends LitElement
   }
   mouseUpOpenClosePicker = (event) => {
     if (event.pageY === undefined) return;
-    this.action='user-drag-picker';
+    this[C.CONFIG_ACTION]='user-drag-picker';
     this.manageEvents(C.REMOVE_EVENT, C.MOUSEMOVE, this, this.mouseMoveOpenClosePicker);
     this.manageEvents(C.REMOVE_EVENT, C.MOUSEUP, window, this.mouseUpOpenClosePicker);
     //console.log('mouseUpOpenClosePicker1:',this.react_ShutterPosition,this.positionText);

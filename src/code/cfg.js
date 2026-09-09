@@ -165,16 +165,16 @@ export class cfg{
   }
   getCfg(key,value= null){
 
-    //if (key === C.CONFIG_BUTTON_OPENED_HIDE_STATES) debugger;
     if (value!== null && this.cfg[key]!=value){
-      // if value-> update cfg[key] and flatCfg[key] (if it exists)
+      // if value-> update cfg[key] 
       this.cfg[key]= value;
+      // ... and flatCfg[key] (if it exists)
       if (this.getFlatCfg(key)) {
         this.setFlatCfg(key,value);
         return this.getFlatCfg(key);
       }
     }
-    // when cfg[key] is undefined, return flatCfg[key] 
+    // when cfg[key] is undefined, return flatCfg[key] , temporary, shoulde be removed in the future.
     if (this.cfg[key] === undefined) {
         return this.getFlatCfg(key);
     }
@@ -1020,6 +1020,25 @@ export class entityCfgNew extends cfg{
     this.offset(boundary(this.invertPosition(escConfig[C.CONFIG_OFFSET_IS_CLOSED_PCT])));
 
     this.friendlyName(escConfig[C.CONFIG_NAME] || this.getCoverEntity()?.getFriendlyName() || C.UNKNOWN);
+  
+    // ??
+    // ?? this.screenPosition(this.defScreenPositionFromCurrentPosition());
+    // ??
+
+    this.tiltPosition(this.currentBaseTiltPosition());
+    this.shutterPosition(this.currentDevicePosition() ?? 0);
+  }
+  action(value = null){
+    return this.getCfg(C.CONFIG_ACTION,value);
+  }
+  screenPosition(value = null){
+    return this.getCfg(C.CONFIG_ACTUAL_SCREEN_POSITION,value);
+  }
+  tiltPosition(value = null){
+    return this.getCfg(C.CONFIG_ACTUAL_TILT_POSITION,value);
+  }
+  shutterPosition(value = null){
+    return this.getCfg(C.CONFIG_ACTUAL_SHUTTER_POSITION,value);
   }
 }
 export class shutterCfg extends cfg{

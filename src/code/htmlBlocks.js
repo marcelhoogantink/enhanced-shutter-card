@@ -67,19 +67,19 @@ export class htmlBlock
   }
   defineHtmlCard(index,flatObj,children){
     //debugger;
-    return nothing;
+    return html`${children}`;
   }
   defineHtmlWindow(index,flatObj,children){
     //debugger;
-    return nothing;
+    return html`${children}`;
   }
   defineHtmlCover(index,flatObj,children){
     //debugger;
-    return nothing;
+    return html`${children}`;
   }
   defineHtmlEntity(index,flatObj,children){
     //debugger;
-    return nothing;
+    return html`${children}`;
   }
   setHtmlString(htmlString){
     this.#htmlString = htmlString;
@@ -131,12 +131,16 @@ export class htmlBlock
     return this.cfg.partial() !=C.SHUTTER_OPEN_PCT && this.cfg.partial() != C.SHUTTER_CLOSED_PCT;
   }
   static LEVELS = [
-    { childKey: C.WINDOWS_CONFIG,     func: "defineHtmlCard"  },
-    { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow"  },
-    { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover" },
-    { childKey: "",                   func: "defineHtmlEntity"  },
+    { childKey: C.WINDOWS_CONFIG,     func: "defineHtmlCard"   ,funcSize: "defineSizeCard" },
+    { childKey: C.COVERS_CONFIG,      func: "defineHtmlWindow" ,funcSize: "defineSizeWindow" },
+    { childKey: C.ENTITIES_CONFIG,    func: "defineHtmlCover"  ,funcSize: "defineSizeCover" },
+    { childKey: "",                   func: "defineHtmlEntity" ,funcSize: "defineSizeEntity" },
   ];
 
+  buildSize(startLevel) {
+    const xy = this.buildSizeRecursive(this.cfg,0,startLevel);
+    return xy;
+  }
   buildRender(startLevel) {
     const htmlOut = html`${this.buildRenderRecursive(this.cfg,0,startLevel)}`;
     return htmlOut;
@@ -164,6 +168,20 @@ export class htmlBlock
 
     return this[func](index, config,children);
   }
+  buildSizeRecursive(config, index, depth) {
+
+    if (depth >= htmlBlock.LEVELS.length) return nothing;
+
+    const {childKey,funcSize} = htmlBlock.LEVELS[depth];
+    const cfg=config.cfg;
+
+    // only recurse when there is a childKey and it is an array, otherwise return nothing
+    const children = childKey && Array.isArray(cfg[childKey])
+      ? cfg[childKey].map((childCfg, i) => this.buildSizeRecursive(childCfg, i, depth + 1))
+      : nothing;
+
+    return this[funcSize](index, config,children);
+  }
 
   showTopOrBottomDiv(position){
     const shutter = this.shutter;
@@ -181,27 +199,35 @@ export class htmlBlock
         </div>
       `;
     }else{
-      let cfg = this.cfg;
-      const startLevel= 2; // start with covers, not card
-      htmlOut = nothing;
-      //htmlOut = this.buildRender(startLevel);
+      const startLevel= 1; // start with covers, not card
+      //htmlOut = nothing;
+      debugger;
+      htmlOut = this.buildRender(startLevel);
     }
     return htmlOut;
   }
   sizeTopBottomDiv(position){
     const shutter = this.shutter;
-    const cfg = this.cfg;
+    let  xy = new xyPair();
+    if (this.cfg instanceof shutterCfg){
+      let cfg2 = this.cfg;
+      const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg2);
+      const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg2);
+      const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg2);
 
-    const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg);
-    const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg);
-    const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg);
 
-    let xyBattery = this.cfg.getIconsActive() && this.cfg.iconsPosition() === position ? batteryIconBlock.size() : new xyPair();
-    let xyNameAndState = nameAndStateBlock.size(position);
-    let xySignal  = this.cfg.getIconsActive() && this.cfg.iconsPosition() === position ? signalIconBlock.size() : new xyPair();
+      let xyBattery = this.cfg.getIconsActive() && this.cfg.iconsPosition() === position ? batteryIconBlock.size() : new xyPair();
+      let xyNameAndState = nameAndStateBlock.size(position);
+      let xySignal  = this.cfg.getIconsActive() && this.cfg.iconsPosition() === position ? signalIconBlock.size() : new xyPair();
 
-    let xy = this.gridAddHorizontal(xyBattery,xyNameAndState);
-    xy = this.gridAddHorizontal(xy,xySignal);
+      xy = this.gridAddHorizontal(xyBattery,xyNameAndState);
+      xy = this.gridAddHorizontal(xy,xySignal);
+    }else{
+      let cfg = this.cfg;
+      const startLevel= 1; // start with covers, not card
+      debugger;
+      //xy = this.buildSize(startLevel);
+    }
     return xy;
   }
   gridAddVertical(size1,size2){ //  xyPair's
@@ -270,7 +296,7 @@ export class htmlBlockCard extends htmlBlock{
     this.setHtmlString(htmlout);
   }
   htmlOutNew(){
-    const startLevel= 0; // start with covers, not card
+    const startLevel= 0; 
     const htmlOut = html`
       ${this.buildRenderCard(startLevel)}
     `;
@@ -698,9 +724,10 @@ export class htmlBlockState extends htmlBlock{
 }
 export class htmlBlockTop extends htmlBlock{
   constructor(shutter,cfg){
+    
     if (cfg instanceof windowCfgNew){
        //debugger;
-       cfg = cfg.cfg.covers; 
+       cfg = cfg; //.cfg.covers; 
     }
     else if (cfg instanceof coverCfgNew){
        debugger;
@@ -713,6 +740,7 @@ export class htmlBlockTop extends htmlBlock{
        cfg = cfg; // classic flat shutterCfg
     }
     super(shutter,cfg);
+    this.startLevel= 2; // start with covers, not card
   }
   defineHtml(){
     this.setHtmlString(this.showTopOrBottomDiv(C.TOP));
@@ -720,6 +748,46 @@ export class htmlBlockTop extends htmlBlock{
   defineSize(){
     let xy = this.sizeTopBottomDiv(C.TOP);
     this.setXySize(xy);
+  }
+  defineHtmlEntity(index,cfg,children){
+    //debugger;
+    const position = C.TOP;
+    
+    const shutter = this.shutter;
+    let htmlOut;
+    let cfg2 = cfg;
+    const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg2);
+    const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg2);
+    const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg2);
+    htmlOut = html`
+      <div class="${C.ESC_CLASS_TOP_BOTTOM}">
+        ${position == cfg2.iconsPosition() ? batteryIconBlock.show() : nothing}
+        ${nameAndStateBlock.show(position)}
+        ${position == cfg2.iconsPosition() ? signalIconBlock.show() : nothing}
+      </div>
+    `;
+    return htmlOut;
+    return html`<div>Test</div>${children}<div>Test2</div>`;
+  }
+  defineHtmlCover2(index,cfg,children){
+    //debugger;
+    const position = C.TOP;
+    
+    const shutter = this.shutter;
+    let htmlOut;
+    let cfg2 = cfg;
+    const batteryIconBlock = new htmlBlockBatteryIcon(shutter,cfg2);
+    const nameAndStateBlock = new htmlBlockNameAndState(shutter,cfg2);
+    const signalIconBlock = new htmlBlockSignalIcon(shutter,cfg2);
+    htmlOut = html`
+      <div class="${C.ESC_CLASS_TOP_BOTTOM}">
+        ${position == cfg2.iconsPosition() ? batteryIconBlock.show() : nothing}
+        ${nameAndStateBlock.show(position)}
+        ${position == cfg2.iconsPosition() ? signalIconBlock.show() : nothing}
+      </div>
+    `;
+    return htmlOut;
+    return html`<div>Test</div>${children}<div>Test2</div>`;
   }
 }
 export class htmlBlockMiddle extends htmlBlock

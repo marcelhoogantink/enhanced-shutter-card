@@ -330,6 +330,7 @@ export const CONFIG_CLOSING_DIRECTION = 'closing_direction';
 export const CONFIG_OFFSET_IS_CLOSED_PCT = 'offset_closed_percentage'; // TODO rename
 export const CONFIG_CURRENT_POSITION = 'current_position';  // not a real config; it is a device/entity setting
 
+export const CONFIG_ACTION = 'action'; // not a real config; it is a device/entity setting
 export const CONFIG_ACTUAL_SCREEN_POSITION = 'actual_screen_position'; // not a real config; it is a device/entity setting
 export const CONFIG_ACTUAL_TILT_POSITION = 'actual_tilt_position'; // not a real config; it is a device/entity setting
 export const CONFIG_ACTUAL_SHUTTER_POSITION = 'actual_shutter_position'; // not a real config; it is a device/entity setting
@@ -486,6 +487,7 @@ export const ESC_BUTTON_STOP_HIDE_STATES = [];
 export const ESC_BUTTON_OPENED_HIDE_STATES = [];
 export const ESC_BUTTON_CLOSED_HIDE_STATES = [];
 
+export const ESC_ACTION_NONE = "#"
 export const ESC_ACTUAL_SCREEN_POSITION = -1;
 export const ESC_ACTUAL_TILT_POSITION = -1;
 export const ESC_ACTUAL_SHUTTER_POSITION = -1;
@@ -596,6 +598,7 @@ export const CONFIG_DEFAULT ={
   [CONFIG_BUTTON_OPENED_HIDE_STATES]: ESC_BUTTON_OPENED_HIDE_STATES,
   [CONFIG_BUTTON_CLOSED_HIDE_STATES]: ESC_BUTTON_CLOSED_HIDE_STATES,
   
+  [CONFIG_ACTION]: ESC_ACTION_NONE,
   [CONFIG_ACTUAL_SCREEN_POSITION]: ESC_ACTUAL_SCREEN_POSITION, // not a real config; it is a device/entity setting
   [CONFIG_ACTUAL_TILT_POSITION]: ESC_ACTUAL_TILT_POSITION, // not a real config; it is a device/entity setting
   [CONFIG_ACTUAL_SHUTTER_POSITION]: ESC_ACTUAL_SHUTTER_POSITION, // not a real config; it is a device/entity setting
@@ -716,6 +719,7 @@ export const CONFIG_DEFAULT_NEW ={
     [CONFIG_BATTERY_ENTITY_ID]: ESC_BATTERY_ENTITY_ID,  // for now: per entity, not per cover (can only search devices per entity)
     [CONFIG_SIGNAL_ENTITY_ID]: ESC_SIGNAL_ENTITY_ID,    // for now: per entity, not per cover
 
+    [CONFIG_ACTION]: ESC_ACTION_NONE,
     [CONFIG_ACTUAL_SCREEN_POSITION]: ESC_ACTUAL_SCREEN_POSITION, // not a real config; it is a device/entity setting
     [CONFIG_ACTUAL_TILT_POSITION]: ESC_ACTUAL_TILT_POSITION, // not a real config; it is a device/entity setting
     [CONFIG_ACTUAL_SHUTTER_POSITION]: ESC_ACTUAL_SHUTTER_POSITION, // not a real config; it is a device/entity setting
