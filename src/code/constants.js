@@ -900,6 +900,11 @@ export const SHUTTER_CSS =`
       display: flex;
       align-items: center;
       justify-content: center;
+      color-scheme: inherit;
+      accent-color: var(
+        --esc-slider-color,
+        var(--paper-slider-active-color, var(--primary-color, #03a9f4))
+      );
     }
 
     .${ESC_CLASS_SLIDER_CLASS} {
