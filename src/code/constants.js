@@ -906,6 +906,10 @@ export const SHUTTER_CSS =`
       writing-mode: var(--esc-slider-writing-mode);
       direction: var(--esc-slider-direction);
       zoom: var(--esc-button-scale);
+      accent-color: var(
+        --esc-slider-color,
+        var(--paper-slider-active-color, var(--primary-color, #03a9f4))
+      );
     }
 
     .${ESC_CLASS_TILT_CONTAINER} {
@@ -931,7 +935,7 @@ export const SHUTTER_CSS =`
     .${ESC_CLASS_TILT_LINE} {
       width: calc(var(--esc-button-scale)*2px);
       height: calc(var(--esc-button-scale)*${ICON_BUTTON_SIZE-ICON_SIZE/2}px);
-      background: var(--primary-color);
+      background: var(--accent-color);
       position: absolute;
       top: calc(var(--esc-button-scale)*${ -(ICON_BUTTON_SIZE-ICON_SIZE)/2 +ICON_SIZE/4}px);
       left: calc(var(--esc-button-scale)*${ICON_SIZE/2}px);
