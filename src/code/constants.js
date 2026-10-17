@@ -900,25 +900,34 @@ export const SHUTTER_CSS =`
       display: flex;
       align-items: center;
       justify-content: center;
+      color-scheme: inherit;
+      accent-color: var(
+        --esc-slider-color,
+        var(--paper-slider-active-color, var(--primary-color, #03a9f4))
+      );
     }
 
     .${ESC_CLASS_SLIDER_CLASS} {
       writing-mode: var(--esc-slider-writing-mode);
       direction: var(--esc-slider-direction);
       zoom: var(--esc-button-scale);
+      accent-color: var(
+        --esc-slider-color,
+        var(--paper-slider-active-color, var(--primary-color, #03a9f4))
+      );
     }
 
     .${ESC_CLASS_TILT_CONTAINER} {
       position: relative;
       box-sizing: border-box;
-      border: 1px solid grey;
-      border-radius: 5px;
+      border: 1px solid var(--ha-card-border-color, var(--divider-color));
+      border-radius: var(--ha-card-border-radius, 5px);
       display: flex;
       flex: none;
       flex-flow: var(--esc-buttons-flex-flow-tilt);
       align-items: center;
       justify-content: center;
-      background: #f9f9f9;
+      background: var(--ha-card-background, var(--card-background-color, var(--primary-background-color)));
     }
 
     .${ESC_CLASS_TILT_CLASS} {
@@ -931,7 +940,7 @@ export const SHUTTER_CSS =`
     .${ESC_CLASS_TILT_LINE} {
       width: calc(var(--esc-button-scale)*2px);
       height: calc(var(--esc-button-scale)*${ICON_BUTTON_SIZE-ICON_SIZE/2}px);
-      background: red;
+      background: var(--accent-color);
       position: absolute;
       top: calc(var(--esc-button-scale)*${ -(ICON_BUTTON_SIZE-ICON_SIZE)/2 +ICON_SIZE/4}px);
       left: calc(var(--esc-button-scale)*${ICON_SIZE/2}px);
