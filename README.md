@@ -321,7 +321,7 @@ entities:
     base_width_px: 160
     shutter_slat_image: esc-shutter-slat2.png
     window_image: esc-window3.png
-    disable_partial_open_buttons: true
+    show_partial_open_buttons: true
     always_percentage: true
     invert_percentage_ui: false
     invert_percentage_cover: false
@@ -331,7 +331,7 @@ entities:
     window_image: esc-window2.png
     resize_width_pct: 70
     name_position: top
-    disable_partial_open_buttons: false
+    show_partial_open_buttons: false
 ```
 
 ---
